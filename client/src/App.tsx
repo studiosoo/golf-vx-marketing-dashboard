@@ -4,29 +4,21 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
-import Programs from "./pages/Programs";
-import StrategicCampaigns from "./pages/StrategicCampaigns";
-import ROI from "./pages/ROI";
-import Channels from "./pages/Channels";
-import Members from "./pages/Members";
-import Revenue from "./pages/Revenue";
-import Tasks from "./pages/Tasks";
-import Reports from "./pages/Reports";
-import MetaAds from "./pages/MetaAds";
+
+// ─── New Hub Pages (6 sidebar items) ─────────────────────────────────────────
+import CampaignHQ from "./pages/CampaignHQ";
+import CampaignsHub from "./pages/CampaignsHub";
+import ChannelsHub from "./pages/ChannelsHub";
+import ScheduleHub from "./pages/ScheduleHub";
+import MembersPage from "./pages/MembersPage";
+import RevenueReportsHub from "./pages/RevenueReportsHub";
+
+// ─── Detail / Sub-pages (direct routes preserved) ───────────────────────────
 import MetaAdsCampaignDetail from "./pages/MetaAdsCampaignDetail";
-import BudgetManager from "./pages/BudgetManager";
 import CategoryDetail from "./pages/CategoryDetail";
-import CampaignVisuals from "./pages/CampaignVisuals";
-import InstagramViewer from "./pages/InstagramViewer";
-import WebsiteViewer from "./pages/WebsiteViewer";
-import CalendarViewer from "./pages/CalendarViewer";
-import CampaignTimeline from "./pages/CampaignTimeline";
+import CampaignDetail from "./pages/CampaignDetail";
 import MemberProfile from "./pages/MemberProfile";
 import Duplicates from "./pages/Duplicates";
-import AnnualGiveaway from "./pages/AnnualGiveaway";
-import EmailMarketing from "./pages/EmailMarketing";
-import CampaignDetail from "./pages/CampaignDetail";
 import AnnualGiveawayActions from "./pages/AnnualGiveawayActions";
 import SundayClinicDetail from "./pages/SundayClinicDetail";
 import WinterClinicDetail from "./pages/WinterClinicDetail";
@@ -37,14 +29,28 @@ import SummerCamp from "./pages/SummerCamp";
 import AnniversaryGiveaway from "./pages/AnniversaryGiveaway";
 import AnniversaryGiveawayApplication from "./pages/AnniversaryGiveawayApplication";
 import AnniversaryGiveawayThankYou from "./pages/AnniversaryGiveawayThankYou";
-import MarketingIntelligence from "./pages/MarketingIntelligence";
-import InstagramSync from "./pages/InstagramSync";
-import InstagramAnalytics from "./pages/InstagramAnalytics";
+import WebsiteViewer from "./pages/WebsiteViewer";
 
 function Router() {
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
+      {/* ─── 6 Main Hub Routes ──────────────────────────────────────────── */}
+      <Route path={"/"} component={CampaignHQ} />
+      <Route path={"/campaigns"} component={CampaignsHub} />
+      <Route path={"/channels"} component={ChannelsHub} />
+      <Route path={"/schedule"} component={ScheduleHub} />
+      <Route path={"/members"} component={MembersPage} />
+      <Route path={"/revenue-reports"} component={RevenueReportsHub} />
+
+      {/* ─── Detail & Sub-pages ─────────────────────────────────────────── */}
+      <Route path={"/meta-ads/campaign/:id"} component={MetaAdsCampaignDetail} />
+      <Route path={"/category/:id"} component={CategoryDetail} />
+      <Route path={"/campaign/:id"} component={CampaignDetail} />
+      <Route path={"/members/:id"} component={MemberProfile} />
+      <Route path={"/duplicates"} component={Duplicates} />
+      <Route path={"/annual-giveaway-actions"} component={AnnualGiveawayActions} />
+      <Route path={"/sunday-clinic"} component={SundayClinicDetail} />
+      <Route path={"/winter-clinic"} component={WinterClinicDetail} />
       <Route path={"/trial-session"} component={TrialSession} />
       <Route path={"/drive-day"} component={DriveDay} />
       <Route path={"/junior-summer-camp"} component={JuniorSummerCamp} />
@@ -52,34 +58,9 @@ function Router() {
       <Route path={"/anniversary-giveaway"} component={AnniversaryGiveaway} />
       <Route path={"/anniversary-giveaway-application"} component={AnniversaryGiveawayApplication} />
       <Route path={"/anniversary-giveaway-thank-you"} component={AnniversaryGiveawayThankYou} />
-      <Route path={"/programs"} component={Programs} />
-      <Route path={"/strategic-campaigns"} component={StrategicCampaigns} />
-      <Route path={"/roi"} component={ROI} />
-      <Route path={"/channels"} component={Channels} />
-      <Route path={"/members"} component={Members} />
-      <Route path={"/members/:id"} component={MemberProfile} />
-      <Route path={"/duplicates"} component={Duplicates} />
-      <Route path={"/revenue"} component={Revenue} />
-      <Route path={"/tasks"} component={Tasks} />
-      <Route path={"/reports"} component={Reports} />
-      <Route path={"/meta-ads"} component={MetaAds} />
-      <Route path={"/meta-ads/campaign/:id"} component={MetaAdsCampaignDetail} />
-      <Route path={"/budget"} component={BudgetManager} />
-      <Route path={"/campaign-visuals"} component={CampaignVisuals} />
-      <Route path={"/calendar"} component={CalendarViewer} />
-      <Route path={"/timeline"} component={CampaignTimeline} />
-      <Route path={"/instagram"} component={InstagramViewer} />
-      <Route path={"/instagram-sync"} component={InstagramSync} />
-      <Route path={"/instagram-analytics"} component={InstagramAnalytics} />
       <Route path={"/website"} component={WebsiteViewer} />
-      <Route path={"/annual-giveaway"} component={AnnualGiveaway} />
-      <Route path={"/sunday-clinic"} component={SundayClinicDetail} />
-      <Route path={"/winter-clinic"} component={WinterClinicDetail} />
-      <Route path={"/annual-giveaway-actions"} component={AnnualGiveawayActions} />
-      <Route path={"/email-marketing"} component={EmailMarketing} />
-      <Route path={"/marketing-intelligence"} component={MarketingIntelligence} />
-      <Route path={"/category/:id"} component={CategoryDetail} />
-      <Route path={"/campaign/:id"} component={CampaignDetail} />
+
+      {/* ─── Fallback ───────────────────────────────────────────────────── */}
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

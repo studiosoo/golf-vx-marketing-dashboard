@@ -21,29 +21,19 @@ import {
 } from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users, Target, TrendingUp, BarChart3, DollarSign, CheckSquare, FileText, Share2, Wallet, Image, Instagram, Globe, Calendar, GanttChart, UserX, Trophy, Mail, Sparkles } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Users, Megaphone, Radio, CalendarDays, DollarSign } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "Overview", path: "/" },
-  { icon: Sparkles, label: "Marketing Intelligence", path: "/marketing-intelligence" },
-  { icon: Target, label: "Programs", path: "/programs" },
-  { icon: BarChart3, label: "Strategic Campaigns", path: "/strategic-campaigns" },
-  { icon: Trophy, label: "Annual Giveaway", path: "/annual-giveaway" },
-  { icon: TrendingUp, label: "ROI Analytics", path: "/roi" },
-  { icon: Share2, label: "Meta Ads", path: "/meta-ads" },
-  { icon: Mail, label: "Email Marketing", path: "/email-marketing" },
-  { icon: Wallet, label: "Budget Manager", path: "/budget" },
-  { icon: Image, label: "Program Visuals", path: "/campaign-visuals" },
-  { icon: Calendar, label: "Calendar", path: "/calendar" },
-  { icon: GanttChart, label: "Timeline", path: "/timeline" },
-  { icon: Instagram, label: "Instagram", path: "/instagram" },
+  { icon: LayoutDashboard, label: "Campaign HQ", path: "/" },
+  { icon: Megaphone, label: "Campaigns", path: "/campaigns" },
+  { icon: Radio, label: "Channels", path: "/channels" },
+  { icon: CalendarDays, label: "Schedule", path: "/schedule" },
   { icon: Users, label: "Members", path: "/members" },
-  { icon: DollarSign, label: "Revenue", path: "/revenue" },
-  { icon: FileText, label: "Reports", path: "/reports" },
+  { icon: DollarSign, label: "Revenue & Reports", path: "/revenue-reports" },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
@@ -126,8 +116,13 @@ function DashboardLayoutContent({
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const activeMenuItem = menuItems.find(item => item.path === location);
   const isMobile = useIsMobile();
+
+  // Match active menu item - check if current path starts with the menu item path
+  const activeMenuItem = menuItems.find(item => {
+    if (item.path === "/") return location === "/";
+    return location.startsWith(item.path);
+  }) || menuItems[0];
 
   useEffect(() => {
     if (isCollapsed) {
@@ -197,25 +192,9 @@ function DashboardLayoutContent({
           <SidebarContent className="gap-0">
             <SidebarMenu className="px-2 py-1">
               {menuItems.map(item => {
-                const isActive = location === item.path;
-                const isExternal = 'external' in item && item.external;
-                
-                if (isExternal) {
-                  return (
-                    <SidebarMenuItem key={item.path}>
-                      <SidebarMenuButton
-                        asChild
-                        tooltip={item.label}
-                        className={`h-10 transition-all font-normal`}
-                      >
-                        <a href={item.path} target="_blank" rel="noopener noreferrer">
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.label}</span>
-                        </a>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                }
+                const isActive = item.path === "/"
+                  ? location === "/"
+                  : location.startsWith(item.path);
                 
                 return (
                   <SidebarMenuItem key={item.path}>

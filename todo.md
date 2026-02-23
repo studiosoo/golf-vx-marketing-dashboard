@@ -69,3 +69,19 @@
 - [x] Approve 시 실행 결과 토스트 알림
 - [x] approveAction 라우터에 후속 액션 실행 로직 추가
 - [x] Vitest 테스트 업데이트 (28 tests passing)
+
+## Navigation Restructure (15 → 6 items)
+- [x] Rename "Marketing Control Tower" to "Campaign HQ" everywhere
+- [x] DashboardLayout sidebar: 6 items (Campaign HQ, Campaigns, Channels, Schedule, Members, Revenue & Reports)
+- [x] No emoji in sidebar labels
+- [x] Campaign HQ: Overview content + AI Insights tab (MarketingIntelligence)
+- [x] Campaign HQ: Remove urgent action banner (AlertsBanner)
+- [x] Campaign HQ: Remove AI recommendation card with manual checkboxes (ActionCenter)
+- [x] Campaign HQ: Keep Sync All Data button, campaign cards, KPI progress
+- [x] Campaigns page: Tabs (Strategic | Programs | Giveaway | ROI | Budget)
+- [x] Channels page: Tabs (Meta Ads | Email | Instagram | Visuals)
+- [x] Schedule page: Tabs (Calendar | Timeline)
+- [x] Members: Keep as own full page (no merge)
+- [x] Revenue & Reports: Merge Revenue + Reports with tabs
+- [x] App.tsx routing updates for new structure
+- [x] All existing page content preserved, just reorganized

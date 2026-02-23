@@ -10,7 +10,7 @@ import AlertsBanner from "@/components/AlertsBanner";
 export default function Home() {
   const { data: categories, isLoading } = trpc.campaigns.getCategorySummary.useQuery();
   const { data: kpiData } = trpc.intelligence.getStrategicKPIs.useQuery();
-  const syncMutation = trpc.system.syncAllData.useMutation();
+  const syncMutation = trpc.autonomous.syncAllData.useMutation();
   const utils = trpc.useUtils();
 
   const handleSync = async () => {
