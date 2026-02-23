@@ -139,3 +139,22 @@
 - [x] BoomerangMembersTab.tsx — Boomerang members with summary cards, push notifications
 - [x] Members.tsx — Wired new tabs (Email Captures, Boomerang) into existing tab structure
 - [x] 20 vitest integration tests passing (emailCapture CRUD, boomerang API, communication history, schema validation)
+
+## Bug: Campaigns not showing updated data + Meta Ads tab empty
+- [ ] Investigate Meta Ads API credentials and connection status
+- [ ] Check data sync pipeline (cache, API calls, scheduler)
+- [ ] Fix root cause and verify campaigns display current data
+- [ ] Fix Meta Ads tab on Channels page showing no current data
+
+## Bug: Programs page missing from Campaigns tab
+- [x] Investigate current Campaigns tab structure and find Programs component
+- [x] Restore Programs content under Campaigns > Programs tab
+- [x] Verify all 8 marketing programs display correctly
+
+## Programs as separate sidebar nav item
+- [x] Add Programs as its own sidebar nav item below Campaigns
+- [x] Restore /programs route in App.tsx
+- [x] Verify Programs page component exists and shows all 8 programs
+- [x] Seed 8 programs into campaigns table with correct data and multi-campaign mappings
+- [x] Verify Campaign HQ shows correct program counts per strategic campaign
+- [x] Show related programs within each campaign detail view

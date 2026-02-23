@@ -7,6 +7,7 @@ import { trpc } from "@/lib/trpc";
 import { Loader2, Target, DollarSign, TrendingUp, ChevronRight, Layers } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
+import DashboardLayout from "@/components/DashboardLayout";
 
 // Strategic Campaign definitions
 const STRATEGIC_CAMPAIGNS = {
@@ -107,9 +108,11 @@ export default function Programs() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </DashboardLayout>
     );
   }
 
@@ -118,7 +121,8 @@ export default function Programs() {
     : 0;
 
   return (
-    <div className="space-y-6">
+    <DashboardLayout>
+    <div className="space-y-6 p-6">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">All Programs</h1>
@@ -313,5 +317,6 @@ export default function Programs() {
         </div>
       </div>
     </div>
+    </DashboardLayout>
   );
 }

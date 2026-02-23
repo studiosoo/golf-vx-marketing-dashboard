@@ -5,9 +5,10 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 
-// ─── New Hub Pages (6 sidebar items) ─────────────────────────────────────────
+// ─── New Hub Pages (7 sidebar items) ─────────────────────────────────────────
 import CampaignHQ from "./pages/CampaignHQ";
 import CampaignsHub from "./pages/CampaignsHub";
+import Programs from "./pages/Programs";
 import ChannelsHub from "./pages/ChannelsHub";
 import ScheduleHub from "./pages/ScheduleHub";
 import MembersPage from "./pages/MembersPage";
@@ -34,9 +35,10 @@ import WebsiteViewer from "./pages/WebsiteViewer";
 function Router() {
   return (
     <Switch>
-      {/* ─── 6 Main Hub Routes ──────────────────────────────────────────── */}
+      {/* ─── 7 Main Hub Routes ──────────────────────────────────────────── */}
       <Route path={"/"} component={CampaignHQ} />
       <Route path={"/campaigns"} component={CampaignsHub} />
+      <Route path={"/programs"} component={Programs} />
       <Route path={"/channels"} component={ChannelsHub} />
       <Route path={"/schedule"} component={ScheduleHub} />
       <Route path={"/members"} component={MembersPage} />
