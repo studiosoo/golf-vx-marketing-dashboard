@@ -4,6 +4,8 @@ import {
   determineStatus,
   analyzeWithRules,
   type CampaignMetrics,
+  type GeneratedAction,
+  type ActionExecutionResult,
 } from "./autonomous";
 
 // ─── classifyRisk ──────────────────────────────────────────────────────────────
@@ -231,5 +233,137 @@ describe("analyzeWithRules", () => {
     const actions = analyzeWithRules(campaigns);
     // Should generate both budget_decrease for low CTR and budget_decrease for high CPC
     expect(actions.length).toBeGreaterThanOrEqual(2);
+  });
+});
+
+// ─── GeneratedAction structure ────────────────────────────────────────────────
+
+describe("GeneratedAction structure", () => {
+  it("generates actions with all required fields", () => {
+    const campaigns = [
+      makeCampaign({
+        campaignId: "camp-struct",
+        campaignName: "Structure Test",
+        ctr: 0.2,
+        impressions: 5000,
+        clicks: 10,
+        spend: 50,
+        conversions: 0,
+      }),
+    ];
+
+    const actions = analyzeWithRules(campaigns);
+    expect(actions.length).toBeGreaterThan(0);
+
+    const action = actions[0];
+    expect(action).toHaveProperty("campaignId");
+    expect(action).toHaveProperty("campaignName");
+    expect(action).toHaveProperty("actionType");
+    expect(action).toHaveProperty("riskLevel");
+    expect(action).toHaveProperty("title");
+    expect(action).toHaveProperty("description");
+    expect(action).toHaveProperty("confidence");
+    expect(action).toHaveProperty("expectedImpact");
+    expect(typeof action.confidence).toBe("number");
+    expect(action.confidence).toBeGreaterThanOrEqual(0);
+    expect(action.confidence).toBeLessThanOrEqual(100);
+  });
+
+  it("includes actionParams for budget actions", () => {
+    const campaigns = [
+      makeCampaign({
+        campaignId: "camp-params",
+        campaignName: "Params Test",
+        ctr: 0.2,
+        impressions: 5000,
+        clicks: 10,
+        spend: 50,
+        conversions: 0,
+      }),
+    ];
+
+    const actions = analyzeWithRules(campaigns);
+    const budgetAction = actions.find((a) => a.actionType === "budget_decrease");
+    expect(budgetAction).toBeDefined();
+    expect(budgetAction?.actionParams).toBeDefined();
+  });
+});
+
+// ─── ActionExecutionResult type ───────────────────────────────────────────────
+
+describe("ActionExecutionResult type", () => {
+  it("validates success result structure", () => {
+    const result: ActionExecutionResult = {
+      success: true,
+      message: "Budget decreased successfully",
+      details: { previousBudget: 100, newBudget: 80 },
+    };
+    expect(result.success).toBe(true);
+    expect(result.message).toBeDefined();
+    expect(result.details).toBeDefined();
+  });
+
+  it("validates failure result structure", () => {
+    const result: ActionExecutionResult = {
+      success: false,
+      message: "Meta Ads API error",
+    };
+    expect(result.success).toBe(false);
+    expect(result.message).toBeDefined();
+  });
+});
+
+// ─── Risk-based action flow ───────────────────────────────────────────────────
+
+describe("Risk-based action flow", () => {
+  it("low-risk actions get auto_executed status", () => {
+    const campaigns = [
+      makeCampaign({
+        ctr: 0.2,
+        impressions: 5000,
+        clicks: 10,
+        spend: 50,
+        conversions: 0,
+      }),
+    ];
+    const actions = analyzeWithRules(campaigns);
+    const lowRisk = actions.filter((a) => a.riskLevel === "low");
+    lowRisk.forEach((a) => {
+      expect(determineStatus(a.riskLevel)).toBe("auto_executed");
+    });
+  });
+
+  it("high-risk actions get pending_approval status", () => {
+    const campaigns = [
+      makeCampaign({
+        ctr: 3.0,
+        conversions: 20,
+        spend: 200,
+        impressions: 10000,
+        clicks: 300,
+        roas: 5.0,
+      }),
+    ];
+    const actions = analyzeWithRules(campaigns);
+    const highRisk = actions.filter((a) => a.riskLevel === "high");
+    highRisk.forEach((a) => {
+      expect(determineStatus(a.riskLevel)).toBe("pending_approval");
+    });
+  });
+
+  it("monitor actions get monitoring status", () => {
+    const campaigns = [
+      makeCampaign({
+        spend: 5,
+        impressions: 50,
+        clicks: 2,
+        conversions: 0,
+      }),
+    ];
+    const actions = analyzeWithRules(campaigns);
+    const monitorActions = actions.filter((a) => a.riskLevel === "monitor");
+    monitorActions.forEach((a) => {
+      expect(determineStatus(a.riskLevel)).toBe("monitoring");
+    });
   });
 });

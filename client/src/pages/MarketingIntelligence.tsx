@@ -61,6 +61,7 @@ interface AutonomousAction {
   triggerData: Record<string, unknown> | null;
   confidence: number | null;
   expectedImpact: string | null;
+  executionResult: Record<string, unknown> | null;
   executedAt: number | null;
   reviewedBy: string | null;
   reviewedAt: number | null;
@@ -126,6 +127,8 @@ function getStatusBadge(status: string) {
       return <Badge className="bg-gray-500 text-white hover:bg-gray-500">Undone</Badge>;
     case "monitoring":
       return <Badge className="bg-indigo-500 text-white hover:bg-indigo-500">Monitoring</Badge>;
+    case "execution_failed":
+      return <Badge className="bg-orange-600 text-white hover:bg-orange-600">Execution Failed</Badge>;
     default:
       return <Badge variant="outline">{status}</Badge>;
   }
@@ -243,6 +246,21 @@ function AutoExecutedCard({
               <div className="mt-2 p-2 rounded bg-green-50 border border-green-100">
                 <p className="text-xs text-green-800">
                   <strong>Impact:</strong> {action.expectedImpact}
+                </p>
+              </div>
+            )}
+            {action.executionResult && (
+              <div className={`mt-2 p-2 rounded border ${
+                (action.executionResult as Record<string, unknown>).success
+                  ? "bg-blue-50 border-blue-100"
+                  : "bg-orange-50 border-orange-100"
+              }`}>
+                <p className={`text-xs ${
+                  (action.executionResult as Record<string, unknown>).success
+                    ? "text-blue-800"
+                    : "text-orange-800"
+                }`}>
+                  <strong>Execution:</strong> {String((action.executionResult as Record<string, unknown>).message || "Completed")}
                 </p>
               </div>
             )}
@@ -523,10 +541,21 @@ export default function MarketingIntelligence() {
   });
 
   const approveMutation = trpc.autonomous.approveAction.useMutation({
-    onSuccess: () => {
-      toast.success("Action Approved", {
-        description: "The action has been approved and will be executed.",
-      });
+    onSuccess: (data) => {
+      const result = data as { success: boolean; executionResult?: { success: boolean; message: string; details?: Record<string, unknown> } };
+      if (result.success && result.executionResult?.success) {
+        toast.success("Action Approved & Executed", {
+          description: result.executionResult.message || "The action has been executed successfully.",
+        });
+      } else if (result.executionResult && !result.executionResult.success) {
+        toast.warning("Action Approved but Execution Failed", {
+          description: result.executionResult.message || "The action was approved but could not be executed.",
+        });
+      } else {
+        toast.success("Action Approved", {
+          description: "The action has been approved.",
+        });
+      }
       setApprovingId(null);
       utils.autonomous.getApprovalCards.invalidate();
       utils.autonomous.getAutoExecuted.invalidate();
@@ -613,9 +642,9 @@ export default function MarketingIntelligence() {
   };
 
   // ─── Data ──────────────────────────────────────────────────────────────────
-  const autoExecuted = (autoExecutedQuery.data ?? []) as AutonomousAction[];
-  const pending = (approvalQuery.data ?? []) as AutonomousAction[];
-  const monitoring = (monitoringQuery.data ?? []) as AutonomousAction[];
+  const autoExecuted = (autoExecutedQuery.data ?? []) as unknown as AutonomousAction[];
+  const pending = (approvalQuery.data ?? []) as unknown as AutonomousAction[];
+  const monitoring = (monitoringQuery.data ?? []) as unknown as AutonomousAction[];
   const syncData = (syncStatusQuery.data ?? []) as SyncStatus[];
 
   const isLoading =

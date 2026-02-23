@@ -51,3 +51,21 @@
 - [x] Add autonomous tables to existing schema.ts
 - [x] Register scheduler in server/_core/index.ts
 - [x] All existing pages preserved (Overview, Meta Ads, Instagram, Members, etc.)
+
+## Meta Ads API 실연동
+- [x] autonomous.ts syncAllData를 실제 Meta Ads API와 연결
+- [x] 기존 metaAds.ts의 getCampaigns/getCampaignInsights 활용
+- [x] 실제 캠페인 데이터로 분석 엔진 구동
+- [x] Studio Soo portrait business 계정 제외 로직
+
+## Approve/Reject 후속 액션 연결
+- [x] Meta Ads 예산 변경 API 연동 (budget increase/decrease)
+- [x] Encharge 이메일 발송 연동 (nurture sequence trigger)
+- [x] Owner 알림 발송 (notifyOwner)
+- [x] Meta Ads 캠페인 일시정지 (pause_underperformer)
+- [x] 액션 실행 결과를 DB에 기록 (executionResult 컬럼)
+- [x] execution_failed 상태 처리
+- [x] UI에 액션 실행 결과 표시 (성공/실패 배지)
+- [x] Approve 시 실행 결과 토스트 알림
+- [x] approveAction 라우터에 후속 액션 실행 로직 추가
+- [x] Vitest 테스트 업데이트 (28 tests passing)

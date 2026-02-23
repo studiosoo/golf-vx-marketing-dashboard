@@ -1170,15 +1170,16 @@ export const autonomousActions = mysqlTable("autonomous_actions", {
   id: int("id").autoincrement().primaryKey(),
   campaignId: varchar("campaignId", { length: 100 }).notNull(),
   campaignName: varchar("campaignName", { length: 255 }).notNull(),
-  actionType: varchar("actionType", { length: 50 }).notNull(), // budget_increase, budget_decrease, send_email, change_targeting, etc.
+  actionType: varchar("actionType", { length: 64 }).notNull(), // budget_increase, budget_decrease, send_email, change_targeting, etc.
   riskLevel: mysqlEnum("riskLevel", ["low", "medium", "high", "monitor"]).notNull(),
-  status: mysqlEnum("status", ["auto_executed", "pending_approval", "approved", "rejected", "undone", "monitoring"]).notNull(),
+  status: mysqlEnum("status", ["auto_executed", "pending_approval", "approved", "rejected", "undone", "monitoring", "execution_failed"]).notNull(),
   title: varchar("title", { length: 500 }).notNull(),
   description: text("description").notNull(),
   actionParams: json("actionParams").$type<Record<string, unknown>>(),
   triggerData: json("triggerData").$type<Record<string, unknown>>(), // campaign metrics that triggered this action
   confidence: int("confidence"), // 0-100
   expectedImpact: text("expectedImpact"),
+  executionResult: json("executionResult").$type<Record<string, unknown> | null>(),
   executedAt: bigint("executedAt", { mode: "number" }), // UTC timestamp ms
   reviewedBy: varchar("reviewedBy", { length: 255 }),
   reviewedAt: bigint("reviewedAt", { mode: "number" }), // UTC timestamp ms
