@@ -98,3 +98,9 @@
 - [x] Fix Encharge API JWT token error on Channels > Meta Ads page
 - [x] Add graceful error handling to Encharge module (no crash on invalid/missing API key)
 - [x] Fix Meta Ads tab showing empty/blank content on Channels page (data empty due to Meta API token - page renders correctly)
+
+## Encharge API Key Setup
+- [x] Set ENCHARGE_API_KEY environment variable (JWT token)
+- [x] Set ENCHARGE_WRITE_KEY environment variable
+- [x] Verify Encharge API connection test passes (5/5 tests pass, real data confirmed)
+- [x] Confirm Encharge data displays correctly in dashboard
