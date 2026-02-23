@@ -1062,7 +1062,16 @@ export const appRouter = router({
     }),
     
     getCampaigns: protectedProcedure.query(async () => {
-      return await metaAds.getCampaigns();
+      try {
+        return await metaAds.getCampaigns();
+      } catch (error) {
+        // Fallback to cache if direct API fails
+        const cachedCampaigns = metaAdsCache.getCampaignsFromCache();
+        if (cachedCampaigns && cachedCampaigns.length > 0) {
+          return cachedCampaigns;
+        }
+        return [];
+      }
     }),
     
     getAccountInsights: protectedProcedure

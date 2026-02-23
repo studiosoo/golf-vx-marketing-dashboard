@@ -1,0 +1,82 @@
+{
+  "query": "SELECT id, name, category, metaAdsCampaignId, metaAdsSpend, actualSpend, budget FROM campaigns ORDER BY id",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2R3ugynrRDzjYQU.e9d0c4c091a8 --database A5GjFitCrpqWQ2wnoTJiWm --execute SELECT id, name, category, metaAdsCampaignId, metaAdsSpend, actualSpend, budget FROM campaigns ORDER BY id",
+  "rows": [
+    {
+      "id": "1",
+      "name": "PBGA Junior Summer Camp",
+      "category": "trial_conversion",
+      "metaAdsCampaignId": "test_meta_campaign_123",
+      "metaAdsSpend": "0.00",
+      "actualSpend": "0.00",
+      "budget": "100.00"
+    },
+    {
+      "id": "2",
+      "name": "Sunday Clinic",
+      "category": "trial_conversion",
+      "metaAdsCampaignId": "NULL",
+      "metaAdsSpend": "0.00",
+      "actualSpend": "120.00",
+      "budget": "500.00"
+    },
+    {
+      "id": "3",
+      "name": "PBGA Winter Clinic",
+      "category": "trial_conversion",
+      "metaAdsCampaignId": "NULL",
+      "metaAdsSpend": "0.00",
+      "actualSpend": "266.00",
+      "budget": "300.00"
+    },
+    {
+      "id": "4",
+      "name": "$25 1-Hour Trial Session",
+      "category": "trial_conversion",
+      "metaAdsCampaignId": "NULL",
+      "metaAdsSpend": "0.00",
+      "actualSpend": "55.20",
+      "budget": "200.00"
+    },
+    {
+      "id": "5",
+      "name": "Annual Membership Giveaway",
+      "category": "membership_acquisition",
+      "metaAdsCampaignId": "test_meta_campaign_123",
+      "metaAdsSpend": "0.00",
+      "actualSpend": "0.00",
+      "budget": "3000.00"
+    },
+    {
+      "id": "6",
+      "name": "Drive Day Competition",
+      "category": "member_retention",
+      "metaAdsCampaignId": "NULL",
+      "metaAdsSpend": "0.00",
+      "actualSpend": "0.00",
+      "budget": "100.00"
+    },
+    {
+      "id": "7",
+      "name": "Instagram Follower Growth",
+      "category": "membership_acquisition",
+      "metaAdsCampaignId": "test_meta_campaign_123",
+      "metaAdsSpend": "0.00",
+      "actualSpend": "0.00",
+      "budget": "200.00"
+    },
+    {
+      "id": "8",
+      "name": "Corporate Events B2B",
+      "category": "corporate_events",
+      "metaAdsCampaignId": "NULL",
+      "metaAdsSpend": "0.00",
+      "actualSpend": "0.00",
+      "budget": "500.00"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tcategory\tmetaAdsCampaignId\tmetaAdsSpend\tactualSpend\tbudget\n1\tPBGA Junior Summer Camp\ttrial_conversion\ttest_meta_campaign_123\t0.00\t0.00\t100.00\n2\tSunday Clinic\ttrial_conversion\tNULL\t0.00\t120.00\t500.00\n3\tPBGA Winter Clinic\ttrial_conversion\tNULL\t0.00\t266.00\t300.00\n4\t$25 1-Hour Trial Session\ttrial_conversion\tNULL\t0.00\t55.20\t200.00\n5\tAnnual Membership Giveaway\tmembership_acquisition\ttest_meta_campaign_123\t0.00\t0.00\t3000.00\n6\tDrive Day Competition\tmember_retention\tNULL\t0.00\t0.00\t100.00\n7\tInstagram Follower Growth\tmembership_acquisition\ttest_meta_campaign_123\t0.00\t0.00\t200.00\n8\tCorporate Events B2B\tcorporate_events\tNULL\t0.00\t0.00\t500.00\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

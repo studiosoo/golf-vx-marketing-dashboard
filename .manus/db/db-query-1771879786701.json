@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO campaigns (name, category, type, status, description, startDate, endDate, budget, actualSpend, metaAdsCampaignId, metaAdsSpend, targetRevenue, targetConversions) VALUES ('Superbowl Watch Party', 'member_retention', 'event_specific', 'active', 'Superbowl watch party event for member engagement and community building', '2026-02-01', '2026-02-10', '100', '75.43', '120238976291690217', '75.43', '500', 30)",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2R3ugynrRDzjYQU.e9d0c4c091a8 --database A5GjFitCrpqWQ2wnoTJiWm --execute INSERT INTO campaigns (name, category, type, status, description, startDate, endDate, budget, actualSpend, metaAdsCampaignId, metaAdsSpend, targetRevenue, targetConversions) VALUES ('Superbowl Watch Party', 'member_retention', 'event_specific', 'active', 'Superbowl watch party event for member engagement and community building', '2026-02-01', '2026-02-10', '100', '75.43', '120238976291690217', '75.43', '500', 30)",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 65
+}

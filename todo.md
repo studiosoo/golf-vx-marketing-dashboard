@@ -141,10 +141,10 @@
 - [x] 20 vitest integration tests passing (emailCapture CRUD, boomerang API, communication history, schema validation)
 
 ## Bug: Campaigns not showing updated data + Meta Ads tab empty
-- [ ] Investigate Meta Ads API credentials and connection status
-- [ ] Check data sync pipeline (cache, API calls, scheduler)
-- [ ] Fix root cause and verify campaigns display current data
-- [ ] Fix Meta Ads tab on Channels page showing no current data
+- [x] Investigate Meta Ads API credentials and connection status
+- [x] Check data sync pipeline (cache, API calls, scheduler)
+- [x] Fix root cause and verify campaigns display current data
+- [x] Fix Meta Ads tab on Channels page showing no current data
 
 ## Bug: Programs page missing from Campaigns tab
 - [x] Investigate current Campaigns tab structure and find Programs component
@@ -158,3 +158,21 @@
 - [x] Seed 8 programs into campaigns table with correct data and multi-campaign mappings
 - [x] Verify Campaign HQ shows correct program counts per strategic campaign
 - [x] Show related programs within each campaign detail view
+
+## Meta Ads API Credential Setup
+- [x] Verify Meta Ads token via MCP server (5 campaigns, $821.59 spend)
+- [x] Set META_ADS_ACCESS_TOKEN, META_ADS_ACCOUNT_ID, META_ADS_SYSTEM_USER_ID env vars
+- [x] Verify live campaign data pulls through dashboard
+- [x] Confirm Campaign HQ and Meta Ads tab show real data
+
+## MCP-Based Meta Ads Data Pipeline (Option A)
+- [x] Fetch campaign data via MCP server and write to .meta-ads-cache/insights.json
+- [x] Add getCampaignsFromCache() to metaAdsCache.ts
+- [x] Add cache fallback to getCampaigns router endpoint
+- [x] Rewrite refreshMetaAdsCache.ts to try direct API then fall back to cache
+- [x] Sync Meta Ads spend from cache to campaigns DB table (sync-meta-ads-from-cache.mjs)
+- [x] Auto-link Meta Ads campaigns to programs by name matching
+- [x] Add Superbowl Watch Party as new program (9 total)
+- [x] Verify Campaign HQ shows live Meta Ads spend ($282 Trial, $464 Membership, $75 Retention)
+- [x] Verify Meta Ads tab shows all 5 campaigns ($821.59 total spend, 117K impressions)
+- [x] Verify Programs page shows 9 programs with $1,262.79 total spend

@@ -176,6 +176,44 @@ export function getAccountInsightsFromCache() {
 }
 
 /**
+ * Get campaign list from cache (campaigns.json)
+ */
+export function getCampaignsFromCache() {
+  const campaignsCachePath = path.join(process.cwd(), '.meta-ads-cache', 'campaigns.json');
+  try {
+    if (!fs.existsSync(campaignsCachePath)) {
+      // Fallback: derive campaign list from insights cache
+      const insights = readMetaAdsCache();
+      return insights.map(i => ({
+        id: i.campaign_id || '',
+        name: i.campaign_name || '',
+        status: 'ACTIVE',
+        objective: '',
+        created_time: '',
+        updated_time: '',
+      }));
+    }
+    
+    const content = fs.readFileSync(campaignsCachePath, 'utf-8');
+    const data = JSON.parse(content);
+    
+    // Handle MCP result format
+    const campaigns = data?.result?.campaigns || data?.campaigns || (Array.isArray(data) ? data : []);
+    return campaigns.map((c: any) => ({
+      id: c.id || '',
+      name: c.name || '',
+      status: c.effective_status || c.status || 'UNKNOWN',
+      objective: c.objective || '',
+      created_time: c.created_time || '',
+      updated_time: c.updated_time || '',
+    }));
+  } catch (error) {
+    console.error('Error reading campaigns cache:', error);
+    return [];
+  }
+}
+
+/**
  * Check if cache file exists and is recent (less than 1 hour old)
  */
 export function isCacheValid(): boolean {
