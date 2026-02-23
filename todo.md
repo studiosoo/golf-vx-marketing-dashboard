@@ -120,5 +120,7 @@
 ## Pending
 - [ ] Add Twilio/SendGrid credentials for SMS/Email communication
 - [ ] Fix Encharge API token (returning "Token without payload" errors)
-- [ ] Set up Acuity Scheduling credentials
+- [x] Set up Acuity Scheduling credentials
+- [x] Verify Acuity API connectivity with real booking data
+- [x] Run Acuity tests and confirm integration works
 - [ ] Configure second Meta Ads account (624963382940798) for older campaigns
