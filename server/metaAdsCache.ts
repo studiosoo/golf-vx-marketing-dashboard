@@ -48,9 +48,11 @@ export function readMetaAdsCache(): CachedInsight[] {
     const cacheContent = fs.readFileSync(CACHE_FILE_PATH, 'utf-8');
     const cacheData = JSON.parse(cacheContent);
     
-    // Handle both array format and object with data array
+    // Handle multiple cache formats
     if (Array.isArray(cacheData)) {
       return cacheData;
+    } else if (cacheData.campaigns && Array.isArray(cacheData.campaigns)) {
+      return cacheData.campaigns;
     } else if (cacheData.data && Array.isArray(cacheData.data)) {
       return cacheData.data;
     }
@@ -173,44 +175,6 @@ export function getAccountInsightsFromCache() {
     date_start: cacheData[0]?.date_start || '',
     date_stop: cacheData[0]?.date_stop || ''
   };
-}
-
-/**
- * Get campaign list from cache (campaigns.json)
- */
-export function getCampaignsFromCache() {
-  const campaignsCachePath = path.join(process.cwd(), '.meta-ads-cache', 'campaigns.json');
-  try {
-    if (!fs.existsSync(campaignsCachePath)) {
-      // Fallback: derive campaign list from insights cache
-      const insights = readMetaAdsCache();
-      return insights.map(i => ({
-        id: i.campaign_id || '',
-        name: i.campaign_name || '',
-        status: 'ACTIVE',
-        objective: '',
-        created_time: '',
-        updated_time: '',
-      }));
-    }
-    
-    const content = fs.readFileSync(campaignsCachePath, 'utf-8');
-    const data = JSON.parse(content);
-    
-    // Handle MCP result format
-    const campaigns = data?.result?.campaigns || data?.campaigns || (Array.isArray(data) ? data : []);
-    return campaigns.map((c: any) => ({
-      id: c.id || '',
-      name: c.name || '',
-      status: c.effective_status || c.status || 'UNKNOWN',
-      objective: c.objective || '',
-      created_time: c.created_time || '',
-      updated_time: c.updated_time || '',
-    }));
-  } catch (error) {
-    console.error('Error reading campaigns cache:', error);
-    return [];
-  }
 }
 
 /**

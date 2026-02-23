@@ -1,29 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { isAcuityConfigured, testAcuityConnection, getAppointmentTypes, getAppointments } from "./acuity";
+import { testAcuityConnection, getAppointmentTypes, getAppointments } from "./acuity";
 
 describe("AcuityScheduling API Integration", () => {
-  it("should have isAcuityConfigured function that never throws", () => {
-    const result = isAcuityConfigured();
-    expect(typeof result).toBe("boolean");
-  });
-
-  it("should handle testAcuityConnection gracefully when not configured", async () => {
-    // Should never throw, returns false if not configured
+  it("should successfully connect to AcuityScheduling API with provided credentials", async () => {
     const isConnected = await testAcuityConnection();
-    expect(typeof isConnected).toBe("boolean");
-    // If not configured, should return false
-    if (!isAcuityConfigured()) {
-      expect(isConnected).toBe(false);
-    }
-  }, 10000);
+    expect(isConnected).toBe(true);
+  }, 10000); // 10 second timeout for API call
 
-  it("should handle getAppointmentTypes gracefully", async () => {
-    // Should never throw, returns empty array if not configured
+  it("should retrieve appointment types", async () => {
     const appointmentTypes = await getAppointmentTypes();
     expect(appointmentTypes).toBeDefined();
     expect(Array.isArray(appointmentTypes)).toBe(true);
+    expect(appointmentTypes.length).toBeGreaterThan(0);
     
-    // If configured and has data, verify structure
+    // Verify structure of appointment types
     if (appointmentTypes.length > 0) {
       const firstType = appointmentTypes[0];
       expect(firstType).toHaveProperty("id");
@@ -32,8 +22,7 @@ describe("AcuityScheduling API Integration", () => {
     }
   }, 10000);
 
-  it("should handle getAppointments gracefully", async () => {
-    // Should never throw, returns empty array if not configured
+  it("should retrieve appointments", async () => {
     const appointments = await getAppointments({
       minDate: "2025-01-01",
       maxDate: "2026-12-31",
@@ -41,7 +30,7 @@ describe("AcuityScheduling API Integration", () => {
     expect(appointments).toBeDefined();
     expect(Array.isArray(appointments)).toBe(true);
     
-    // If configured and has data, verify structure
+    // Verify structure if appointments exist
     if (appointments.length > 0) {
       const firstAppt = appointments[0];
       expect(firstAppt).toHaveProperty("id");

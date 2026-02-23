@@ -1,9 +1,0 @@
-{
-  "query": "SHOW TABLES LIKE 'email_captures'; SHOW TABLES LIKE 'communication_logs';",
-  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2R3ugynrRDzjYQU.e9d0c4c091a8 --database A5GjFitCrpqWQ2wnoTJiWm --execute SHOW TABLES LIKE 'email_captures'; SHOW TABLES LIKE 'communication_logs';",
-  "rows": [],
-  "messages": [],
-  "stdout": "",
-  "stderr": "",
-  "execution_time_ms": 64
-}

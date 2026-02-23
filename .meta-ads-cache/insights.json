@@ -1,711 +1,715 @@
-[
-  {
-    "account_id": "823266657015117",
-    "campaign_id": "120238971719500217",
-    "campaign_name": "IG_$100 Giveaway_Feb2026",
-    "date_start": "2026-01-24",
-    "date_stop": "2026-02-22",
-    "impressions": "15528",
-    "reach": "14691",
-    "frequency": "1.056974",
-    "clicks": "47",
-    "inline_link_clicks": "0",
-    "ctr": "0.302679",
-    "spend": "43.24",
-    "cpc": "0.92",
-    "cpm": "2.784647",
-    "cost_per_result": [
-      {
-        "indicator": "actions:post_engagement",
-        "values": [
-          {
-            "value": "0.00488367",
-            "attribution_windows": [
-              "default"
-            ]
-          }
-        ]
-      }
-    ],
-    "quality_ranking": "UNKNOWN",
-    "engagement_rate_ranking": "UNKNOWN",
-    "conversion_rate_ranking": "UNKNOWN",
-    "actions": [
-      {
-        "action_type": "page_engagement",
-        "value": "8854"
-      },
-      {
-        "action_type": "onsite_conversion.post_unlike",
-        "value": "2"
-      },
-      {
-        "action_type": "post_engagement",
-        "value": "8854"
-      },
-      {
-        "action_type": "comment",
-        "value": "1"
-      },
-      {
-        "action_type": "post_interaction_gross",
-        "value": "8"
-      },
-      {
-        "action_type": "onsite_conversion.post_net_like",
-        "value": "5"
-      },
-      {
-        "action_type": "video_view",
-        "value": "8846"
-      },
-      {
-        "action_type": "post_reaction",
-        "value": "7"
-      }
-    ],
-    "cost_per_action_type": [
-      {
-        "action_type": "video_view",
-        "value": "0.004888"
-      },
-      {
-        "action_type": "post_interaction_gross",
-        "value": "5.405"
-      },
-      {
-        "action_type": "post_engagement",
-        "value": "0.004884"
-      },
-      {
-        "action_type": "page_engagement",
-        "value": "0.004884"
-      }
-    ]
-  },
-  {
-    "account_id": "823266657015117",
-    "campaign_id": "120238976291690217",
-    "campaign_name": "Superbowl Watch Party_Feb2026",
-    "date_start": "2026-01-24",
-    "date_stop": "2026-02-22",
-    "impressions": "4167",
-    "reach": "1837",
-    "frequency": "2.268372",
-    "clicks": "57",
-    "inline_link_clicks": "35",
-    "ctr": "1.367891",
-    "spend": "75.43",
-    "cpc": "1.323333",
-    "cpm": "18.101752",
-    "cost_per_result": [
-      {
-        "indicator": "total_profile_visits",
-        "values": [
-          {
-            "value": "1.5086"
-          }
-        ]
-      }
-    ],
-    "quality_ranking": "UNKNOWN",
-    "engagement_rate_ranking": "UNKNOWN",
-    "conversion_rate_ranking": "UNKNOWN",
-    "actions": [
-      {
-        "action_type": "link_click",
-        "value": "35"
-      },
-      {
-        "action_type": "page_engagement",
-        "value": "47"
-      },
-      {
-        "action_type": "post_engagement",
-        "value": "39"
-      },
-      {
-        "action_type": "like",
-        "value": "8"
-      },
-      {
-        "action_type": "post_interaction_gross",
-        "value": "4"
-      },
-      {
-        "action_type": "post",
-        "value": "2"
-      },
-      {
-        "action_type": "onsite_conversion.post_net_like",
-        "value": "2"
-      },
-      {
-        "action_type": "post_reaction",
-        "value": "2"
-      }
-    ],
-    "cost_per_action_type": [
-      {
-        "action_type": "link_click",
-        "value": "2.155143"
-      },
-      {
-        "action_type": "like",
-        "value": "9.42875"
-      },
-      {
-        "action_type": "post_interaction_gross",
-        "value": "18.8575"
-      },
-      {
-        "action_type": "post_engagement",
-        "value": "1.934103"
-      },
-      {
-        "action_type": "page_engagement",
-        "value": "1.604894"
-      }
-    ]
-  },
-  {
-    "account_id": "823266657015117",
-    "campaign_id": "120239269191520217",
-    "campaign_name": "JUNIOR GOLF SUMMER CAMP 2026",
-    "date_start": "2026-01-24",
-    "date_stop": "2026-02-22",
-    "impressions": "55490",
-    "reach": "32167",
-    "frequency": "1.72506",
-    "clicks": "1074",
-    "inline_link_clicks": "821",
-    "ctr": "1.935484",
-    "spend": "281.69",
-    "cpc": "0.262281",
-    "cpm": "5.07641",
-    "cost_per_result": [
-      {
-        "indicator": "actions:omni_landing_page_view",
-        "values": [
-          {
-            "value": "0.37211361",
-            "attribution_windows": [
-              "default"
-            ]
-          }
-        ]
-      }
-    ],
-    "quality_ranking": "UNKNOWN",
-    "engagement_rate_ranking": "UNKNOWN",
-    "conversion_rate_ranking": "UNKNOWN",
-    "actions": [
-      {
-        "action_type": "onsite_conversion.total_messaging_connection",
-        "value": "1"
-      },
-      {
-        "action_type": "link_click",
-        "value": "821"
-      },
-      {
-        "action_type": "omni_initiated_checkout",
-        "value": "1"
-      },
-      {
-        "action_type": "page_engagement",
-        "value": "877"
-      },
-      {
-        "action_type": "landing_page_view",
-        "value": "757"
-      },
-      {
-        "action_type": "omni_landing_page_view",
-        "value": "757"
-      },
-      {
-        "action_type": "onsite_conversion.post_unlike",
-        "value": "5"
-      },
-      {
-        "action_type": "post_engagement",
-        "value": "874"
-      },
-      {
-        "action_type": "comment",
-        "value": "1"
-      },
-      {
-        "action_type": "like",
-        "value": "3"
-      },
-      {
-        "action_type": "post_interaction_gross",
-        "value": "53"
-      },
-      {
-        "action_type": "post",
-        "value": "20"
-      },
-      {
-        "action_type": "onsite_conversion.post_save",
-        "value": "8"
-      },
-      {
-        "action_type": "onsite_conversion.post_net_like",
-        "value": "19"
-      },
-      {
-        "action_type": "onsite_web_initiate_checkout",
-        "value": "1"
-      },
-      {
-        "action_type": "onsite_conversion.post_net_save",
-        "value": "8"
-      },
-      {
-        "action_type": "onsite_conversion.messaging_first_reply",
-        "value": "1"
-      },
-      {
-        "action_type": "onsite_conversion.messaging_conversation_started_7d",
-        "value": "1"
-      },
-      {
-        "action_type": "post_reaction",
-        "value": "24"
-      },
-      {
-        "action_type": "offsite_conversion.fb_pixel_initiate_checkout",
-        "value": "1"
-      },
-      {
-        "action_type": "initiate_checkout",
-        "value": "1"
-      }
-    ],
-    "cost_per_action_type": [
-      {
-        "action_type": "onsite_conversion.total_messaging_connection",
-        "value": "281.69"
-      },
-      {
-        "action_type": "initiate_checkout",
-        "value": "281.69"
-      },
-      {
-        "action_type": "link_click",
-        "value": "0.343106"
-      },
-      {
-        "action_type": "like",
-        "value": "93.896667"
-      },
-      {
-        "action_type": "post_interaction_gross",
-        "value": "5.314906"
-      },
-      {
-        "action_type": "onsite_web_initiate_checkout",
-        "value": "281.69"
-      },
-      {
-        "action_type": "post_engagement",
-        "value": "0.3223"
-      },
-      {
-        "action_type": "landing_page_view",
-        "value": "0.372114"
-      },
-      {
-        "action_type": "page_engagement",
-        "value": "0.321197"
-      },
-      {
-        "action_type": "onsite_conversion.messaging_first_reply",
-        "value": "281.69"
-      },
-      {
-        "action_type": "omni_landing_page_view",
-        "value": "0.372114"
-      },
-      {
-        "action_type": "omni_initiated_checkout",
-        "value": "281.69"
-      },
-      {
-        "action_type": "onsite_conversion.messaging_conversation_started_7d",
-        "value": "281.69"
-      }
-    ]
-  },
-  {
-    "account_id": "823266657015117",
-    "campaign_id": "120239570172470217",
-    "campaign_name": "Golf VX Annual Giveaway - A1 Local Awareness",
-    "date_start": "2026-01-24",
-    "date_stop": "2026-02-22",
-    "impressions": "34715",
-    "reach": "13239",
-    "frequency": "2.622177",
-    "clicks": "433",
-    "inline_link_clicks": "203",
-    "ctr": "1.247299",
-    "spend": "310.81",
-    "cpc": "0.717806",
-    "cpm": "8.95319",
-    "cost_per_result": [
-      {
-        "indicator": "actions:offsite_conversion.fb_pixel_view_content"
-      }
-    ],
-    "quality_ranking": "UNKNOWN",
-    "engagement_rate_ranking": "UNKNOWN",
-    "conversion_rate_ranking": "UNKNOWN",
-    "actions": [
-      {
-        "action_type": "onsite_conversion.total_messaging_connection",
-        "value": "1"
-      },
-      {
-        "action_type": "web_in_store_purchase",
-        "value": "1"
-      },
-      {
-        "action_type": "omni_purchase",
-        "value": "1"
-      },
-      {
-        "action_type": "link_click",
-        "value": "203"
-      },
-      {
-        "action_type": "omni_initiated_checkout",
-        "value": "2"
-      },
-      {
-        "action_type": "page_engagement",
-        "value": "222"
-      },
-      {
-        "action_type": "purchase",
-        "value": "1"
-      },
-      {
-        "action_type": "landing_page_view",
-        "value": "172"
-      },
-      {
-        "action_type": "omni_landing_page_view",
-        "value": "172"
-      },
-      {
-        "action_type": "onsite_conversion.post_unlike",
-        "value": "4"
-      },
-      {
-        "action_type": "post_engagement",
-        "value": "221"
-      },
-      {
-        "action_type": "onsite_web_app_purchase",
-        "value": "1"
-      },
-      {
-        "action_type": "like",
-        "value": "1"
-      },
-      {
-        "action_type": "post_interaction_gross",
-        "value": "18"
-      },
-      {
-        "action_type": "web_app_in_store_purchase",
-        "value": "1"
-      },
-      {
-        "action_type": "post",
-        "value": "4"
-      },
-      {
-        "action_type": "onsite_conversion.post_net_like",
-        "value": "10"
-      },
-      {
-        "action_type": "onsite_web_initiate_checkout",
-        "value": "2"
-      },
-      {
-        "action_type": "onsite_web_lead",
-        "value": "28"
-      },
-      {
-        "action_type": "onsite_conversion.messaging_first_reply",
-        "value": "2"
-      },
-      {
-        "action_type": "lead",
-        "value": "28"
-      },
-      {
-        "action_type": "onsite_web_purchase",
-        "value": "1"
-      },
-      {
-        "action_type": "onsite_conversion.messaging_conversation_started_7d",
-        "value": "1"
-      },
-      {
-        "action_type": "offsite_conversion.fb_pixel_lead",
-        "value": "28"
-      },
-      {
-        "action_type": "post_reaction",
-        "value": "14"
-      },
-      {
-        "action_type": "offsite_conversion.fb_pixel_custom",
-        "value": "1"
-      },
-      {
-        "action_type": "offsite_conversion.fb_pixel_initiate_checkout",
-        "value": "2"
-      },
-      {
-        "action_type": "offsite_conversion.fb_pixel_purchase",
-        "value": "1"
-      },
-      {
-        "action_type": "initiate_checkout",
-        "value": "2"
-      }
-    ],
-    "cost_per_action_type": [
-      {
-        "action_type": "onsite_conversion.total_messaging_connection",
-        "value": "310.81"
-      },
-      {
-        "action_type": "web_in_store_purchase",
-        "value": "310.81"
-      },
-      {
-        "action_type": "omni_purchase",
-        "value": "310.81"
-      },
-      {
-        "action_type": "initiate_checkout",
-        "value": "155.405"
-      },
-      {
-        "action_type": "offsite_conversion.fb_pixel_custom",
-        "value": "310.81"
-      },
-      {
-        "action_type": "link_click",
-        "value": "1.531084"
-      },
-      {
-        "action_type": "like",
-        "value": "310.81"
-      },
-      {
-        "action_type": "post_interaction_gross",
-        "value": "17.267222"
-      },
-      {
-        "action_type": "onsite_web_lead",
-        "value": "11.100357"
-      },
-      {
-        "action_type": "onsite_web_initiate_checkout",
-        "value": "155.405"
-      },
-      {
-        "action_type": "onsite_web_purchase",
-        "value": "310.81"
-      },
-      {
-        "action_type": "lead",
-        "value": "11.100357"
-      },
-      {
-        "action_type": "post_engagement",
-        "value": "1.40638"
-      },
-      {
-        "action_type": "landing_page_view",
-        "value": "1.807035"
-      },
-      {
-        "action_type": "purchase",
-        "value": "310.81"
-      },
-      {
-        "action_type": "page_engagement",
-        "value": "1.400045"
-      },
-      {
-        "action_type": "onsite_conversion.messaging_first_reply",
-        "value": "155.405"
-      },
-      {
-        "action_type": "omni_landing_page_view",
-        "value": "1.807035"
-      },
-      {
-        "action_type": "omni_initiated_checkout",
-        "value": "155.405"
-      },
-      {
-        "action_type": "onsite_conversion.messaging_conversation_started_7d",
-        "value": "310.81"
-      }
-    ]
-  },
-  {
-    "account_id": "823266657015117",
-    "campaign_id": "120239627905950217",
-    "campaign_name": "Golf VX Annual Giveaway - A2 Social/Family",
-    "date_start": "2026-01-24",
-    "date_stop": "2026-02-22",
-    "impressions": "7802",
-    "reach": "4358",
-    "frequency": "1.790271",
-    "clicks": "249",
-    "inline_link_clicks": "95",
-    "ctr": "3.191489",
-    "spend": "110.42",
-    "cpc": "0.443454",
-    "cpm": "14.152781",
-    "cost_per_result": [
-      {
-        "indicator": "actions:offsite_conversion.fb_pixel_lead",
-        "values": [
-          {
-            "value": "12.26888889",
-            "attribution_windows": [
-              "default"
-            ]
-          }
-        ]
-      }
-    ],
-    "quality_ranking": "UNKNOWN",
-    "engagement_rate_ranking": "UNKNOWN",
-    "conversion_rate_ranking": "UNKNOWN",
-    "actions": [
-      {
-        "action_type": "link_click",
-        "value": "95"
-      },
-      {
-        "action_type": "page_engagement",
-        "value": "2513"
-      },
-      {
-        "action_type": "landing_page_view",
-        "value": "84"
-      },
-      {
-        "action_type": "omni_landing_page_view",
-        "value": "84"
-      },
-      {
-        "action_type": "post_engagement",
-        "value": "2512"
-      },
-      {
-        "action_type": "comment",
-        "value": "1"
-      },
-      {
-        "action_type": "like",
-        "value": "1"
-      },
-      {
-        "action_type": "post_interaction_gross",
-        "value": "20"
-      },
-      {
-        "action_type": "post",
-        "value": "2"
-      },
-      {
-        "action_type": "onsite_conversion.post_save",
-        "value": "3"
-      },
-      {
-        "action_type": "onsite_conversion.post_net_like",
-        "value": "14"
-      },
-      {
-        "action_type": "onsite_conversion.post_net_save",
-        "value": "3"
-      },
-      {
-        "action_type": "onsite_web_lead",
-        "value": "9"
-      },
-      {
-        "action_type": "lead",
-        "value": "9"
-      },
-      {
-        "action_type": "offsite_conversion.fb_pixel_lead",
-        "value": "9"
-      },
-      {
-        "action_type": "video_view",
-        "value": "2397"
-      },
-      {
-        "action_type": "post_reaction",
-        "value": "14"
-      }
-    ],
-    "cost_per_action_type": [
-      {
-        "action_type": "video_view",
-        "value": "0.046066"
-      },
-      {
-        "action_type": "link_click",
-        "value": "1.162316"
-      },
-      {
-        "action_type": "like",
-        "value": "110.42"
-      },
-      {
-        "action_type": "post_interaction_gross",
-        "value": "5.521"
-      },
-      {
-        "action_type": "onsite_web_lead",
-        "value": "12.268889"
-      },
-      {
-        "action_type": "lead",
-        "value": "12.268889"
-      },
-      {
-        "action_type": "post_engagement",
-        "value": "0.043957"
-      },
-      {
-        "action_type": "landing_page_view",
-        "value": "1.314524"
-      },
-      {
-        "action_type": "page_engagement",
-        "value": "0.04394"
-      },
-      {
-        "action_type": "omni_landing_page_view",
-        "value": "1.314524"
-      }
-    ]
-  }
-]
+{
+  "lastUpdated": "2026-02-23T21:30:00Z",
+  "accountId": "823266657015117",
+  "campaigns": [
+    {
+      "account_id": "823266657015117",
+      "campaign_id": "120238971719500217",
+      "campaign_name": "IG_$100 Giveaway_Feb2026",
+      "date_start": "2025-01-01",
+      "date_stop": "2026-02-23",
+      "impressions": "15528",
+      "reach": "14788",
+      "frequency": "1.050041",
+      "clicks": "47",
+      "inline_link_clicks": "0",
+      "ctr": "0.302679",
+      "spend": "43.24",
+      "cpc": "0.92",
+      "cpm": "2.784647",
+      "cost_per_result": [
+        {
+          "indicator": "actions:post_engagement",
+          "values": [
+            {
+              "value": "0.00488367",
+              "attribution_windows": [
+                "default"
+              ]
+            }
+          ]
+        }
+      ],
+      "quality_ranking": "UNKNOWN",
+      "engagement_rate_ranking": "UNKNOWN",
+      "conversion_rate_ranking": "UNKNOWN",
+      "actions": [
+        {
+          "action_type": "page_engagement",
+          "value": "8854"
+        },
+        {
+          "action_type": "onsite_conversion.post_unlike",
+          "value": "2"
+        },
+        {
+          "action_type": "post_engagement",
+          "value": "8854"
+        },
+        {
+          "action_type": "comment",
+          "value": "1"
+        },
+        {
+          "action_type": "post_interaction_gross",
+          "value": "8"
+        },
+        {
+          "action_type": "onsite_conversion.post_net_like",
+          "value": "5"
+        },
+        {
+          "action_type": "video_view",
+          "value": "8846"
+        },
+        {
+          "action_type": "post_reaction",
+          "value": "7"
+        }
+      ],
+      "cost_per_action_type": [
+        {
+          "action_type": "video_view",
+          "value": "0.004888"
+        },
+        {
+          "action_type": "post_interaction_gross",
+          "value": "5.405"
+        },
+        {
+          "action_type": "post_engagement",
+          "value": "0.004884"
+        },
+        {
+          "action_type": "page_engagement",
+          "value": "0.004884"
+        }
+      ]
+    },
+    {
+      "account_id": "823266657015117",
+      "campaign_id": "120238976291690217",
+      "campaign_name": "Superbowl Watch Party_Feb2026",
+      "date_start": "2025-01-01",
+      "date_stop": "2026-02-23",
+      "impressions": "4167",
+      "reach": "1847",
+      "frequency": "2.256091",
+      "clicks": "57",
+      "inline_link_clicks": "35",
+      "ctr": "1.367891",
+      "spend": "75.43",
+      "cpc": "1.323333",
+      "cpm": "18.101752",
+      "cost_per_result": [
+        {
+          "indicator": "total_profile_visits",
+          "values": [
+            {
+              "value": "1.5086"
+            }
+          ]
+        }
+      ],
+      "quality_ranking": "UNKNOWN",
+      "engagement_rate_ranking": "UNKNOWN",
+      "conversion_rate_ranking": "UNKNOWN",
+      "actions": [
+        {
+          "action_type": "link_click",
+          "value": "35"
+        },
+        {
+          "action_type": "page_engagement",
+          "value": "47"
+        },
+        {
+          "action_type": "post_engagement",
+          "value": "39"
+        },
+        {
+          "action_type": "like",
+          "value": "8"
+        },
+        {
+          "action_type": "post_interaction_gross",
+          "value": "4"
+        },
+        {
+          "action_type": "post",
+          "value": "2"
+        },
+        {
+          "action_type": "onsite_conversion.post_net_like",
+          "value": "2"
+        },
+        {
+          "action_type": "post_reaction",
+          "value": "2"
+        }
+      ],
+      "cost_per_action_type": [
+        {
+          "action_type": "link_click",
+          "value": "2.155143"
+        },
+        {
+          "action_type": "like",
+          "value": "9.42875"
+        },
+        {
+          "action_type": "post_interaction_gross",
+          "value": "18.8575"
+        },
+        {
+          "action_type": "post_engagement",
+          "value": "1.934103"
+        },
+        {
+          "action_type": "page_engagement",
+          "value": "1.604894"
+        }
+      ]
+    },
+    {
+      "account_id": "823266657015117",
+      "campaign_id": "120239269191520217",
+      "campaign_name": "JUNIOR GOLF SUMMER CAMP 2026",
+      "date_start": "2025-01-01",
+      "date_stop": "2026-02-23",
+      "impressions": "56977",
+      "reach": "33824",
+      "frequency": "1.684514",
+      "clicks": "1096",
+      "inline_link_clicks": "842",
+      "ctr": "1.923583",
+      "spend": "290.16",
+      "cpc": "0.264745",
+      "cpm": "5.092581",
+      "cost_per_result": [
+        {
+          "indicator": "actions:omni_landing_page_view",
+          "values": [
+            {
+              "value": "0.37343629",
+              "attribution_windows": [
+                "default"
+              ]
+            }
+          ]
+        }
+      ],
+      "quality_ranking": "UNKNOWN",
+      "engagement_rate_ranking": "UNKNOWN",
+      "conversion_rate_ranking": "UNKNOWN",
+      "actions": [
+        {
+          "action_type": "onsite_conversion.total_messaging_connection",
+          "value": "1"
+        },
+        {
+          "action_type": "link_click",
+          "value": "842"
+        },
+        {
+          "action_type": "omni_initiated_checkout",
+          "value": "1"
+        },
+        {
+          "action_type": "page_engagement",
+          "value": "899"
+        },
+        {
+          "action_type": "landing_page_view",
+          "value": "777"
+        },
+        {
+          "action_type": "omni_landing_page_view",
+          "value": "777"
+        },
+        {
+          "action_type": "onsite_conversion.post_unlike",
+          "value": "5"
+        },
+        {
+          "action_type": "post_engagement",
+          "value": "896"
+        },
+        {
+          "action_type": "comment",
+          "value": "1"
+        },
+        {
+          "action_type": "like",
+          "value": "3"
+        },
+        {
+          "action_type": "post_interaction_gross",
+          "value": "54"
+        },
+        {
+          "action_type": "post",
+          "value": "20"
+        },
+        {
+          "action_type": "onsite_conversion.post_save",
+          "value": "9"
+        },
+        {
+          "action_type": "onsite_conversion.post_net_like",
+          "value": "19"
+        },
+        {
+          "action_type": "onsite_web_initiate_checkout",
+          "value": "1"
+        },
+        {
+          "action_type": "onsite_conversion.post_net_save",
+          "value": "9"
+        },
+        {
+          "action_type": "onsite_conversion.messaging_first_reply",
+          "value": "1"
+        },
+        {
+          "action_type": "onsite_conversion.messaging_conversation_started_7d",
+          "value": "1"
+        },
+        {
+          "action_type": "post_reaction",
+          "value": "24"
+        },
+        {
+          "action_type": "offsite_conversion.fb_pixel_initiate_checkout",
+          "value": "1"
+        },
+        {
+          "action_type": "initiate_checkout",
+          "value": "1"
+        }
+      ],
+      "cost_per_action_type": [
+        {
+          "action_type": "onsite_conversion.total_messaging_connection",
+          "value": "290.16"
+        },
+        {
+          "action_type": "initiate_checkout",
+          "value": "290.16"
+        },
+        {
+          "action_type": "link_click",
+          "value": "0.344608"
+        },
+        {
+          "action_type": "like",
+          "value": "96.72"
+        },
+        {
+          "action_type": "post_interaction_gross",
+          "value": "5.373333"
+        },
+        {
+          "action_type": "onsite_web_initiate_checkout",
+          "value": "290.16"
+        },
+        {
+          "action_type": "post_engagement",
+          "value": "0.323839"
+        },
+        {
+          "action_type": "landing_page_view",
+          "value": "0.373436"
+        },
+        {
+          "action_type": "page_engagement",
+          "value": "0.322759"
+        },
+        {
+          "action_type": "onsite_conversion.messaging_first_reply",
+          "value": "290.16"
+        },
+        {
+          "action_type": "omni_landing_page_view",
+          "value": "0.373436"
+        },
+        {
+          "action_type": "omni_initiated_checkout",
+          "value": "290.16"
+        },
+        {
+          "action_type": "onsite_conversion.messaging_conversation_started_7d",
+          "value": "290.16"
+        }
+      ]
+    },
+    {
+      "account_id": "823266657015117",
+      "campaign_id": "120239570172470217",
+      "campaign_name": "Golf VX Annual Giveaway - A1 Local Awareness",
+      "date_start": "2025-01-01",
+      "date_stop": "2026-02-23",
+      "impressions": "38480",
+      "reach": "13837",
+      "frequency": "2.78095",
+      "clicks": "448",
+      "inline_link_clicks": "217",
+      "ctr": "1.164241",
+      "spend": "341.29",
+      "cpc": "0.761808",
+      "cpm": "8.869283",
+      "cost_per_result": [
+        {
+          "indicator": "actions:offsite_conversion.fb_pixel_view_content"
+        }
+      ],
+      "quality_ranking": "UNKNOWN",
+      "engagement_rate_ranking": "UNKNOWN",
+      "conversion_rate_ranking": "UNKNOWN",
+      "actions": [
+        {
+          "action_type": "onsite_conversion.total_messaging_connection",
+          "value": "1"
+        },
+        {
+          "action_type": "web_in_store_purchase",
+          "value": "1"
+        },
+        {
+          "action_type": "omni_purchase",
+          "value": "1"
+        },
+        {
+          "action_type": "link_click",
+          "value": "217"
+        },
+        {
+          "action_type": "omni_initiated_checkout",
+          "value": "2"
+        },
+        {
+          "action_type": "page_engagement",
+          "value": "236"
+        },
+        {
+          "action_type": "purchase",
+          "value": "1"
+        },
+        {
+          "action_type": "landing_page_view",
+          "value": "184"
+        },
+        {
+          "action_type": "omni_landing_page_view",
+          "value": "184"
+        },
+        {
+          "action_type": "onsite_conversion.post_unlike",
+          "value": "4"
+        },
+        {
+          "action_type": "post_engagement",
+          "value": "235"
+        },
+        {
+          "action_type": "onsite_web_app_purchase",
+          "value": "1"
+        },
+        {
+          "action_type": "like",
+          "value": "1"
+        },
+        {
+          "action_type": "post_interaction_gross",
+          "value": "18"
+        },
+        {
+          "action_type": "web_app_in_store_purchase",
+          "value": "1"
+        },
+        {
+          "action_type": "post",
+          "value": "4"
+        },
+        {
+          "action_type": "onsite_conversion.post_net_like",
+          "value": "10"
+        },
+        {
+          "action_type": "onsite_web_initiate_checkout",
+          "value": "2"
+        },
+        {
+          "action_type": "onsite_web_lead",
+          "value": "28"
+        },
+        {
+          "action_type": "onsite_conversion.messaging_first_reply",
+          "value": "2"
+        },
+        {
+          "action_type": "lead",
+          "value": "28"
+        },
+        {
+          "action_type": "onsite_web_purchase",
+          "value": "1"
+        },
+        {
+          "action_type": "onsite_conversion.messaging_conversation_started_7d",
+          "value": "1"
+        },
+        {
+          "action_type": "offsite_conversion.fb_pixel_lead",
+          "value": "28"
+        },
+        {
+          "action_type": "post_reaction",
+          "value": "14"
+        },
+        {
+          "action_type": "offsite_conversion.fb_pixel_custom",
+          "value": "1"
+        },
+        {
+          "action_type": "offsite_conversion.fb_pixel_initiate_checkout",
+          "value": "2"
+        },
+        {
+          "action_type": "offsite_conversion.fb_pixel_purchase",
+          "value": "1"
+        },
+        {
+          "action_type": "initiate_checkout",
+          "value": "2"
+        }
+      ],
+      "cost_per_action_type": [
+        {
+          "action_type": "onsite_conversion.total_messaging_connection",
+          "value": "341.29"
+        },
+        {
+          "action_type": "web_in_store_purchase",
+          "value": "341.29"
+        },
+        {
+          "action_type": "omni_purchase",
+          "value": "341.29"
+        },
+        {
+          "action_type": "initiate_checkout",
+          "value": "170.645"
+        },
+        {
+          "action_type": "offsite_conversion.fb_pixel_custom",
+          "value": "341.29"
+        },
+        {
+          "action_type": "link_click",
+          "value": "1.572765"
+        },
+        {
+          "action_type": "like",
+          "value": "341.29"
+        },
+        {
+          "action_type": "post_interaction_gross",
+          "value": "18.960556"
+        },
+        {
+          "action_type": "onsite_web_lead",
+          "value": "12.188929"
+        },
+        {
+          "action_type": "onsite_web_initiate_checkout",
+          "value": "170.645"
+        },
+        {
+          "action_type": "onsite_web_purchase",
+          "value": "341.29"
+        },
+        {
+          "action_type": "lead",
+          "value": "12.188929"
+        },
+        {
+          "action_type": "post_engagement",
+          "value": "1.452298"
+        },
+        {
+          "action_type": "landing_page_view",
+          "value": "1.854837"
+        },
+        {
+          "action_type": "purchase",
+          "value": "341.29"
+        },
+        {
+          "action_type": "page_engagement",
+          "value": "1.446144"
+        },
+        {
+          "action_type": "onsite_conversion.messaging_first_reply",
+          "value": "170.645"
+        },
+        {
+          "action_type": "omni_landing_page_view",
+          "value": "1.854837"
+        },
+        {
+          "action_type": "omni_initiated_checkout",
+          "value": "170.645"
+        },
+        {
+          "action_type": "onsite_conversion.messaging_conversation_started_7d",
+          "value": "341.29"
+        }
+      ]
+    },
+    {
+      "account_id": "823266657015117",
+      "campaign_id": "120239627905950217",
+      "campaign_name": "Golf VX Annual Giveaway - A2 Social/Family",
+      "date_start": "2025-01-01",
+      "date_stop": "2026-02-23",
+      "impressions": "8593",
+      "reach": "4401",
+      "frequency": "1.952511",
+      "clicks": "276",
+      "inline_link_clicks": "107",
+      "ctr": "3.211917",
+      "spend": "120.89",
+      "cpc": "0.438007",
+      "cpm": "14.068428",
+      "cost_per_result": [
+        {
+          "indicator": "actions:offsite_conversion.fb_pixel_lead",
+          "values": [
+            {
+              "value": "12.089",
+              "attribution_windows": [
+                "default"
+              ]
+            }
+          ]
+        }
+      ],
+      "quality_ranking": "UNKNOWN",
+      "engagement_rate_ranking": "UNKNOWN",
+      "conversion_rate_ranking": "UNKNOWN",
+      "actions": [
+        {
+          "action_type": "link_click",
+          "value": "107"
+        },
+        {
+          "action_type": "page_engagement",
+          "value": "2740"
+        },
+        {
+          "action_type": "landing_page_view",
+          "value": "93"
+        },
+        {
+          "action_type": "omni_landing_page_view",
+          "value": "93"
+        },
+        {
+          "action_type": "post_engagement",
+          "value": "2739"
+        },
+        {
+          "action_type": "comment",
+          "value": "2"
+        },
+        {
+          "action_type": "like",
+          "value": "1"
+        },
+        {
+          "action_type": "post_interaction_gross",
+          "value": "26"
+        },
+        {
+          "action_type": "post",
+          "value": "3"
+        },
+        {
+          "action_type": "onsite_conversion.post_save",
+          "value": "3"
+        },
+        {
+          "action_type": "onsite_conversion.post_net_like",
+          "value": "18"
+        },
+        {
+          "action_type": "onsite_conversion.post_net_save",
+          "value": "3"
+        },
+        {
+          "action_type": "onsite_web_lead",
+          "value": "10"
+        },
+        {
+          "action_type": "lead",
+          "value": "10"
+        },
+        {
+          "action_type": "offsite_conversion.fb_pixel_lead",
+          "value": "10"
+        },
+        {
+          "action_type": "video_view",
+          "value": "2606"
+        },
+        {
+          "action_type": "post_reaction",
+          "value": "18"
+        }
+      ],
+      "cost_per_action_type": [
+        {
+          "action_type": "video_view",
+          "value": "0.046389"
+        },
+        {
+          "action_type": "link_click",
+          "value": "1.129813"
+        },
+        {
+          "action_type": "like",
+          "value": "120.89"
+        },
+        {
+          "action_type": "post_interaction_gross",
+          "value": "4.649615"
+        },
+        {
+          "action_type": "onsite_web_lead",
+          "value": "12.089"
+        },
+        {
+          "action_type": "lead",
+          "value": "12.089"
+        },
+        {
+          "action_type": "post_engagement",
+          "value": "0.044137"
+        },
+        {
+          "action_type": "landing_page_view",
+          "value": "1.299892"
+        },
+        {
+          "action_type": "page_engagement",
+          "value": "0.04412"
+        },
+        {
+          "action_type": "omni_landing_page_view",
+          "value": "1.299892"
+        }
+      ]
+    }
+  ]
+}

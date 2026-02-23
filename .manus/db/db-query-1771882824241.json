@@ -1,6 +1,6 @@
 {
-  "query": "DESCRIBE campaigns;",
-  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2R3ugynrRDzjYQU.e9d0c4c091a8 --database A5GjFitCrpqWQ2wnoTJiWm --execute DESCRIBE campaigns;",
+  "query": "DESCRIBE campaigns",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2R3ugynrRDzjYQU.e9d0c4c091a8 --database A5GjFitCrpqWQ2wnoTJiWm --execute DESCRIBE campaigns",
   "rows": [
     {
       "Field": "id",
@@ -302,5 +302,5 @@
   "messages": [],
   "stdout": "Field\tType\tNull\tKey\tDefault\tExtra\nid\tint\tNO\tPRI\tNULL\tauto_increment\nname\tvarchar(255)\tNO\t\tNULL\t\ncategory\tenum('trial_conversion','membership_acquisition','member_retention','corporate_events')\tNO\t\tNULL\t\ntype\tenum('trial_conversion','membership_acquisition','corporate_events','member_retention','pbga_programs','event_specific')\tNO\tMUL\tNULL\t\nstatus\tenum('planned','active','completed','paused')\tNO\tMUL\tplanned\t\ndescription\ttext\tYES\t\tNULL\t\nstartDate\ttimestamp\tNO\tMUL\tNULL\t\nendDate\ttimestamp\tNO\t\tNULL\t\nbudget\tdecimal(10,2)\tNO\t\tNULL\t\nactualSpend\tdecimal(10,2)\tNO\t\t0\t\ntargetRevenue\tdecimal(10,2)\tYES\t\tNULL\t\nactualRevenue\tdecimal(10,2)\tNO\t\t0\t\ntargetApplications\tint\tYES\t\tNULL\t\nactualApplications\tint\tNO\t\t0\t\ntargetConversions\tint\tYES\t\tNULL\t\nactualConversions\tint\tNO\t\t0\t\nmetaAdsCampaignId\tvarchar(64)\tYES\t\tNULL\t\nmetaAdsBudget\tdecimal(10,2)\tYES\t\tNULL\t\nmetaAdsSpend\tdecimal(10,2)\tYES\t\t0\t\nasanaProjectId\tvarchar(64)\tYES\t\tNULL\t\nasanaTaskId\tvarchar(64)\tYES\t\tNULL\t\nasanaSectionId\tvarchar(64)\tYES\t\tNULL\t\nlandingPageUrl\ttext\tYES\t\tNULL\t\nposterImageUrl\ttext\tYES\t\tNULL\t\nreelThumbnailUrl\ttext\tYES\t\tNULL\t\nadditionalVisuals\tjson\tYES\t\tNULL\t\ngoalType\tenum('revenue','followers','leads','attendance','retention')\tYES\t\tNULL\t\ngoalTarget\tdecimal(12,2)\tYES\t\tNULL\t\ngoalActual\tdecimal(12,2)\tYES\t\t0\t\ngoalUnit\tvarchar(50)\tYES\t\tNULL\t\nprimaryKpi\tvarchar(100)\tYES\t\tNULL\t\nkpiTarget\tdecimal(12,4)\tYES\t\tNULL\t\nkpiActual\tdecimal(12,4)\tYES\t\tNULL\t\nkpiUnit\tvarchar(50)\tYES\t\tNULL\t\nperformanceScore\tint\tYES\t\tNULL\t\ncreatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t\nupdatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\n",
   "stderr": "",
-  "execution_time_ms": 53
+  "execution_time_ms": 115
 }

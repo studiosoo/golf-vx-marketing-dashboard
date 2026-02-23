@@ -26,9 +26,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Mail, Phone, Calendar, Upload, Users, AtSign, CreditCard } from "lucide-react";
-import { EmailCapturesTab } from "./EmailCapturesTab";
-import { BoomerangMembersTab } from "./BoomerangMembersTab";
+import { Plus, Search, Mail, Phone, Calendar, Upload, Users } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Link } from "wouter";
@@ -130,14 +128,6 @@ export default function Members() {
           <TabsTrigger value="duplicates">
             <Users className="mr-2 h-4 w-4" />
             Duplicates
-          </TabsTrigger>
-          <TabsTrigger value="email-captures">
-            <AtSign className="mr-2 h-4 w-4" />
-            Email Captures
-          </TabsTrigger>
-          <TabsTrigger value="boomerang">
-            <CreditCard className="mr-2 h-4 w-4" />
-            Boomerang
           </TabsTrigger>
         </TabsList>
 
@@ -367,14 +357,6 @@ export default function Members() {
 
         <TabsContent value="duplicates">
           <DuplicatesTab />
-        </TabsContent>
-
-        <TabsContent value="email-captures">
-          <EmailCapturesTab />
-        </TabsContent>
-
-        <TabsContent value="boomerang">
-          <BoomerangMembersTab />
         </TabsContent>
       </Tabs>
     </div>

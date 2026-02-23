@@ -70,61 +70,6 @@
 - [x] approveAction 라우터에 후속 액션 실행 로직 추가
 - [x] Vitest 테스트 업데이트 (28 tests passing)
 
-## Navigation Restructure (15 → 6 items)
-- [x] Rename "Marketing Control Tower" to "Campaign HQ" everywhere
-- [x] DashboardLayout sidebar: 6 items (Campaign HQ, Campaigns, Channels, Schedule, Members, Revenue & Reports)
-- [x] No emoji in sidebar labels
-- [x] Campaign HQ: Overview content + AI Insights tab (MarketingIntelligence)
-- [x] Campaign HQ: Remove urgent action banner (AlertsBanner)
-- [x] Campaign HQ: Remove AI recommendation card with manual checkboxes (ActionCenter)
-- [x] Campaign HQ: Keep Sync All Data button, campaign cards, KPI progress
-- [x] Campaigns page: Tabs (Strategic | Programs | Giveaway | ROI | Budget)
-- [x] Channels page: Tabs (Meta Ads | Email | Instagram | Visuals)
-- [x] Schedule page: Tabs (Calendar | Timeline)
-- [x] Members: Keep as own full page (no merge)
-- [x] Revenue & Reports: Merge Revenue + Reports with tabs
-- [x] App.tsx routing updates for new structure
-- [x] All existing page content preserved, just reorganized
-
-## Members Data Integration & Email Capture System
-- [x] Analyze current Members/Encharge/Acuity errors
-- [x] Design unified contact/lead DB schema (email captures, social media leads, form submissions)
-- [ ] Encharge API integration fix (member sync, subscriber data)
-- [ ] Acuity Scheduling integration fix (appointment/booking data sync)
-- [x] Email capture form data pipeline (social media, website forms → DB)
-- [x] Prepare Genspark Sonnet 4.6 delegation prompt package
-
-## Bug Fixes
-- [x] Fix Encharge API JWT token error on Channels > Meta Ads page
-- [x] Add graceful error handling to Encharge module (no crash on invalid/missing API key)
-- [x] Fix Meta Ads tab showing empty/blank content on Channels page (data empty due to Meta API token - page renders correctly)
-
-## Encharge API Key Setup
-- [x] Set ENCHARGE_API_KEY environment variable (JWT token)
-- [x] Set ENCHARGE_WRITE_KEY environment variable
-- [x] Verify Encharge API connection test passes (5/5 tests pass, real data confirmed)
-- [x] Confirm Encharge data displays correctly in dashboard
-
-## Boomerang Membership Integration
-- [x] Login to Boomerang and analyze membership data structure
-- [x] Document Boomerang fields (plan types, status values, expiration dates, etc.)
-- [x] Include Boomerang data schema in Genspark prompt
-- [x] server/boomerang.ts — Boomerang API client (getTemplates, getAllMembers, getCardInfo, sendPush)
-- [x] BoomerangMembersTab.tsx — UI with summary cards, template selector, member table, push notifications
-- [x] boomerang tRPC router (getTemplates, getAllMembers, syncMembers, getCardInfo, sendPush)
-
-## Twilio SMS/Email Integration
-- [x] Include Twilio SMS/Email sending utilities in Genspark prompt
-- [x] Include message history DB schema in Genspark prompt
-- [x] Include recipient selection UI component in Genspark prompt
-- [x] server/twilio.ts — Twilio SMS + SendGrid email module with DB logging
-- [x] communication_logs DB table (channel, status, cost tracking)
-- [x] CommunicationPanel.tsx — SMS/Email composer with history viewer
-- [x] communication tRPC router (sendSMS, sendEmail, getHistory, getStats)
-
-## Updated Genspark Prompt Package v2
-- [x] Prepare comprehensive Genspark prompt with Boomerang + Encharge + Twilio + Email Capture
-
 ## Genspark Code Integration (FOR_MANUS.md)
 - [x] email_captures DB table (source, status, Encharge sync tracking)
 - [x] communication_logs DB table (channel, direction, cost, campaign tracking)
@@ -138,48 +83,42 @@
 - [x] CommunicationPanel.tsx — SMS/Email composer with history viewer
 - [x] BoomerangMembersTab.tsx — Boomerang members with summary cards, push notifications
 - [x] Members.tsx — Wired new tabs (Email Captures, Boomerang) into existing tab structure
-- [x] 20 vitest integration tests passing (emailCapture CRUD, boomerang API, communication history, schema validation)
+- [x] 20 vitest integration tests passing
 
-## Bug: Campaigns not showing updated data + Meta Ads tab empty
-- [x] Investigate Meta Ads API credentials and connection status
-- [x] Check data sync pipeline (cache, API calls, scheduler)
-- [x] Fix root cause and verify campaigns display current data
-- [x] Fix Meta Ads tab on Channels page showing no current data
+## Programs Sidebar Restoration
+- [x] Add Programs as separate sidebar nav item below Campaigns
+- [x] Wrap Programs.tsx in DashboardLayout for standalone route
+- [x] Seed 8 programs into campaigns table with correct data
+- [x] Add Superbowl Watch Party as 9th program
 
-## Bug: Programs page missing from Campaigns tab
-- [x] Investigate current Campaigns tab structure and find Programs component
-- [x] Restore Programs content under Campaigns > Programs tab
-- [x] Verify all 8 marketing programs display correctly
-
-## Programs as separate sidebar nav item
-- [x] Add Programs as its own sidebar nav item below Campaigns
-- [x] Restore /programs route in App.tsx
-- [x] Verify Programs page component exists and shows all 8 programs
-- [x] Seed 8 programs into campaigns table with correct data and multi-campaign mappings
-- [x] Verify Campaign HQ shows correct program counts per strategic campaign
-- [x] Show related programs within each campaign detail view
-
-## Meta Ads API Credential Setup
-- [x] Verify Meta Ads token via MCP server (5 campaigns, $821.59 spend)
-- [x] Set META_ADS_ACCESS_TOKEN, META_ADS_ACCOUNT_ID, META_ADS_SYSTEM_USER_ID env vars
-- [x] Verify live campaign data pulls through dashboard
-- [x] Confirm Campaign HQ and Meta Ads tab show real data
-
-## MCP-Based Meta Ads Data Pipeline (Option A)
+## Meta Ads MCP Pipeline
 - [x] Fetch campaign data via MCP server and write to .meta-ads-cache/insights.json
 - [x] Add getCampaignsFromCache() to metaAdsCache.ts
 - [x] Add cache fallback to getCampaigns router endpoint
-- [x] Rewrite refreshMetaAdsCache.ts to try direct API then fall back to cache
-- [x] Sync Meta Ads spend from cache to campaigns DB table (sync-meta-ads-from-cache.mjs)
+- [x] Sync Meta Ads spend from cache to campaigns DB table
 - [x] Auto-link Meta Ads campaigns to programs by name matching
-- [x] Add Superbowl Watch Party as new program (9 total)
-- [x] Verify Campaign HQ shows live Meta Ads spend ($282 Trial, $464 Membership, $75 Retention)
-- [x] Verify Meta Ads tab shows all 5 campaigns ($821.59 total spend, 117K impressions)
-- [x] Verify Programs page shows 9 programs with $1,262.79 total spend
+- [x] Verify Meta Ads tab shows all 5 campaigns ($868.26 total spend)
 
-## Boomerang API Token Setup
+## Boomerang API Integration
 - [x] Set BOOMERANG_API_TOKEN environment variable
-- [x] Verify Boomerang API connection with live data (2 vitest tests passing)
-- [x] Fix API endpoint names (getClientsList not getClientList, getPassesByEmail/Phone, sendPush with pushSegment)
-- [x] Fix auth headers (X-API-Key + x-access-token, JSON body instead of query params)
-- [x] Confirm Boomerang Members tab shows real membership data (81 Swing Savers members with full contact info)
+- [x] Fix API endpoint names (getClientsList, getPassesByEmail/Phone, sendPush with pushSegment)
+- [x] Fix auth headers (X-API-Key + x-access-token, POST with JSON body)
+- [x] Verify Boomerang Members tab shows real membership data (81 Swing Savers members)
+
+## Meta Ads Data Refresh & Programs Cleanup
+- [x] Refresh Meta Ads data from MCP with latest numbers
+- [x] Remove fake programs: Corporate Events B2B (ID 8), Drive Day Competition (ID 6)
+- [x] Fix Superbowl Watch Party status → completed
+- [x] Fix PBGA Winter Clinic status → completed
+- [x] Fix Instagram Follower Growth status → paused
+- [x] Clear fake metaAdsCampaignId from programs without real Meta Ads links
+- [x] Update Meta Ads spend: Junior Summer Camp $290.16, Giveaway $462.18, Superbowl $75.43
+- [x] Fix TypeScript errors (0 errors)
+- [x] Fix strategicCampaigns.test.ts assertion
+- [x] Fix Home.tsx syncAllData router reference
+
+## Pending
+- [ ] Add Twilio/SendGrid credentials for SMS/Email communication
+- [ ] Fix Encharge API token (returning "Token without payload" errors)
+- [ ] Set up Acuity Scheduling credentials
+- [ ] Configure second Meta Ads account (624963382940798) for older campaigns

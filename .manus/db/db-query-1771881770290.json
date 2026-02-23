@@ -1,0 +1,109 @@
+{
+  "query": "SELECT id, name, status, category, description, CAST(budget AS CHAR) as budget, CAST(actualSpend AS CHAR) as spend, CAST(metaAdsSpend AS CHAR) as meta_spend, metaAdsCampaignId as meta_id FROM campaigns ORDER BY id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2R3ugynrRDzjYQU.e9d0c4c091a8 --database A5GjFitCrpqWQ2wnoTJiWm --execute SELECT id, name, status, category, description, CAST(budget AS CHAR) as budget, CAST(actualSpend AS CHAR) as spend, CAST(metaAdsSpend AS CHAR) as meta_spend, metaAdsCampaignId as meta_id FROM campaigns ORDER BY id;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "PBGA Junior Summer Camp",
+      "status": "active",
+      "category": "trial_conversion",
+      "description": "Summer golf camp program for juniors aged 7-17. Weekly sessions with PGA coaching, swing analysis, and on-course play.",
+      "budget": "100.00",
+      "spend": "281.69",
+      "meta_spend": "281.69",
+      "meta_id": "120239269191520217"
+    },
+    {
+      "id": "2",
+      "name": "Sunday Clinic",
+      "status": "active",
+      "category": "trial_conversion",
+      "description": "Weekly PGA coaching clinic every Sunday. Open to all skill levels. $20 per session (normally $200).",
+      "budget": "500.00",
+      "spend": "120.00",
+      "meta_spend": "0.00",
+      "meta_id": "test_meta_campaign_123"
+    },
+    {
+      "id": "3",
+      "name": "PBGA Winter Clinic",
+      "status": "active",
+      "category": "trial_conversion",
+      "description": "Winter indoor golf clinic series. 4-week program with PGA instruction, video analysis, and practice drills.",
+      "budget": "300.00",
+      "spend": "266.00",
+      "meta_spend": "0.00",
+      "meta_id": "test_meta_campaign_123"
+    },
+    {
+      "id": "4",
+      "name": "$25 1-Hour Trial Session",
+      "status": "active",
+      "category": "trial_conversion",
+      "description": "Introductory trial session for new customers. 1 hour on any simulator with full access to 200+ courses.",
+      "budget": "200.00",
+      "spend": "55.20",
+      "meta_spend": "0.00",
+      "meta_id": "test_meta_campaign_123"
+    },
+    {
+      "id": "5",
+      "name": "Annual Membership Giveaway",
+      "status": "active",
+      "category": "membership_acquisition",
+      "description": "1st Anniversary $7,500 giveaway campaign. Collect applications, convert to memberships. Feb 16 - Mar 31, 2026.",
+      "budget": "3000.00",
+      "spend": "464.47",
+      "meta_spend": "464.47",
+      "meta_id": "120239627905950217"
+    },
+    {
+      "id": "6",
+      "name": "Drive Day Competition",
+      "status": "active",
+      "category": "member_retention",
+      "description": "Monthly longest drive competition. Open to all skill levels. Free with bay rental. Public leaderboard.",
+      "budget": "100.00",
+      "spend": "0.00",
+      "meta_spend": "0.00",
+      "meta_id": "NULL"
+    },
+    {
+      "id": "7",
+      "name": "Instagram Follower Growth",
+      "status": "active",
+      "category": "membership_acquisition",
+      "description": "Organic and paid Instagram growth campaign. Target 500-800 new followers through content and ads.",
+      "budget": "200.00",
+      "spend": "0.00",
+      "meta_spend": "0.00",
+      "meta_id": "test_meta_campaign_123"
+    },
+    {
+      "id": "8",
+      "name": "Corporate Events B2B",
+      "status": "active",
+      "category": "corporate_events",
+      "description": "Corporate team building events, holiday parties, and B2B sales outreach. Target local businesses.",
+      "budget": "500.00",
+      "spend": "0.00",
+      "meta_spend": "0.00",
+      "meta_id": "NULL"
+    },
+    {
+      "id": "30001",
+      "name": "Superbowl Watch Party",
+      "status": "active",
+      "category": "member_retention",
+      "description": "Superbowl watch party event for member engagement and community building",
+      "budget": "100.00",
+      "spend": "75.43",
+      "meta_spend": "75.43",
+      "meta_id": "120238976291690217"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tstatus\tcategory\tdescription\tbudget\tspend\tmeta_spend\tmeta_id\n1\tPBGA Junior Summer Camp\tactive\ttrial_conversion\tSummer golf camp program for juniors aged 7-17. Weekly sessions with PGA coaching, swing analysis, and on-course play.\t100.00\t281.69\t281.69\t120239269191520217\n2\tSunday Clinic\tactive\ttrial_conversion\tWeekly PGA coaching clinic every Sunday. Open to all skill levels. $20 per session (normally $200).\t500.00\t120.00\t0.00\ttest_meta_campaign_123\n3\tPBGA Winter Clinic\tactive\ttrial_conversion\tWinter indoor golf clinic series. 4-week program with PGA instruction, video analysis, and practice drills.\t300.00\t266.00\t0.00\ttest_meta_campaign_123\n4\t$25 1-Hour Trial Session\tactive\ttrial_conversion\tIntroductory trial session for new customers. 1 hour on any simulator with full access to 200+ courses.\t200.00\t55.20\t0.00\ttest_meta_campaign_123\n5\tAnnual Membership Giveaway\tactive\tmembership_acquisition\t1st Anniversary $7,500 giveaway campaign. Collect applications, convert to memberships. Feb 16 - Mar 31, 2026.\t3000.00\t464.47\t464.47\t120239627905950217\n6\tDrive Day Competition\tactive\tmember_retention\tMonthly longest drive competition. Open to all skill levels. Free with bay rental. Public leaderboard.\t100.00\t0.00\t0.00\tNULL\n7\tInstagram Follower Growth\tactive\tmembership_acquisition\tOrganic and paid Instagram growth campaign. Target 500-800 new followers through content and ads.\t200.00\t0.00\t0.00\ttest_meta_campaign_123\n8\tCorporate Events B2B\tactive\tcorporate_events\tCorporate team building events, holiday parties, and B2B sales outreach. Target local businesses.\t500.00\t0.00\t0.00\tNULL\n30001\tSuperbowl Watch Party\tactive\tmember_retention\tSuperbowl watch party event for member engagement and community building\t100.00\t75.43\t75.43\t120238976291690217\n",
+  "stderr": "",
+  "execution_time_ms": 54
+}
