@@ -124,3 +124,6 @@
 - [x] Verify Acuity API connectivity with real booking data
 - [x] Run Acuity tests and confirm integration works
 - [ ] Configure second Meta Ads account (624963382940798) for older campaigns
+
+## Bug Fixes
+- [x] Fix Annual Giveaway page error: rclone Google Drive sync fails in deployed environment
