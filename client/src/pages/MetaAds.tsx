@@ -229,7 +229,7 @@ export default function MetaAds() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {campaignsData.map((campaign) => (
+                    {campaignsData.map((campaign: any) => (
                       <TableRow key={campaign.id} className="cursor-pointer hover:bg-muted/50">
                         <TableCell className="font-medium">
                           <Link href={`/meta-ads/campaign/${campaign.id}`} className="flex items-center gap-2 hover:text-primary">
@@ -277,7 +277,7 @@ export default function MetaAds() {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={campaignsData.filter(c => c.insights)}>
+                  <BarChart data={campaignsData.filter((c: any) => c.insights)}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                     <XAxis 
                       dataKey="name" 
@@ -312,7 +312,7 @@ export default function MetaAds() {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={campaignsData.filter(c => c.insights)}>
+                  <BarChart data={campaignsData.filter((c: any) => c.insights)}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                     <XAxis 
                       dataKey="name" 

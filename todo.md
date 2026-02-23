@@ -85,3 +85,16 @@
 - [x] Revenue & Reports: Merge Revenue + Reports with tabs
 - [x] App.tsx routing updates for new structure
 - [x] All existing page content preserved, just reorganized
+
+## Members Data Integration & Email Capture System
+- [ ] Analyze current Members/Encharge/Acuity errors
+- [ ] Design unified contact/lead DB schema (email captures, social media leads, form submissions)
+- [ ] Encharge API integration fix (member sync, subscriber data)
+- [ ] Acuity Scheduling integration fix (appointment/booking data sync)
+- [ ] Email capture form data pipeline (social media, website forms → DB)
+- [ ] Prepare Genspark Sonnet 4.6 delegation prompt package
+
+## Bug Fixes
+- [x] Fix Encharge API JWT token error on Channels > Meta Ads page
+- [x] Add graceful error handling to Encharge module (no crash on invalid/missing API key)
+- [x] Fix Meta Ads tab showing empty/blank content on Channels page (data empty due to Meta API token - page renders correctly)

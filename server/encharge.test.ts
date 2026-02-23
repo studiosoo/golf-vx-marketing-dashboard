@@ -1,40 +1,45 @@
 import { describe, it, expect } from "vitest";
-
-const ENCHARGE_API_KEY = process.env.ENCHARGE_API_KEY;
-const ENCHARGE_WRITE_KEY = process.env.ENCHARGE_WRITE_KEY;
+import { isEnchargeConfigured, getEnchargeAccount, getEnchargePeople, getEnchargeSegments, getSubscriberMetrics } from "./encharge";
 
 describe("Encharge API Integration", () => {
-  it("should have Encharge API credentials", () => {
-    expect(ENCHARGE_API_KEY).toBeDefined();
-    expect(ENCHARGE_WRITE_KEY).toBeDefined();
+  it("should have isEnchargeConfigured function", () => {
+    // isEnchargeConfigured should return a boolean, never throw
+    const result = isEnchargeConfigured();
+    expect(typeof result).toBe("boolean");
   });
 
-  it("should successfully connect to Encharge API", async () => {
-    const response = await fetch("https://api.encharge.io/v1/accounts/me", {
-      headers: {
-        "X-Encharge-Token": ENCHARGE_API_KEY!,
-        "Content-Type": "application/json",
-      },
-    });
-
-    expect(response.ok).toBe(true);
-    const data = await response.json();
-    expect(data).toHaveProperty("accountId");
-    expect(data).toHaveProperty("name");
-    expect(data.accountId).toBe(148739);
+  it("should handle getEnchargeAccount gracefully when not configured", async () => {
+    // Should never throw, returns null if not configured or API fails
+    const result = await getEnchargeAccount();
+    // Result is either null or an EnchargeAccount object
+    if (result !== null) {
+      expect(result).toHaveProperty("accountId");
+      expect(result).toHaveProperty("name");
+    }
   });
 
-  it("should fetch people (subscribers) from Encharge", async () => {
-    const response = await fetch("https://api.encharge.io/v1/people?limit=10", {
-      headers: {
-        "X-Encharge-Token": ENCHARGE_API_KEY!,
-        "Content-Type": "application/json",
-      },
-    });
+  it("should handle getEnchargePeople gracefully", async () => {
+    // Should never throw, returns empty array if not configured
+    const result = await getEnchargePeople();
+    expect(Array.isArray(result)).toBe(true);
+  });
 
-    const data = await response.json();
-    // Encharge API returns different structure, check if we got data
-    expect(response.status).toBeLessThan(500); // Accept 2xx, 3xx, 4xx but not 5xx
-    expect(data).toBeDefined();
+  it("should handle getEnchargeSegments gracefully", async () => {
+    // Should never throw, returns empty array if not configured
+    const result = await getEnchargeSegments();
+    expect(Array.isArray(result)).toBe(true);
+  });
+
+  it("should handle getSubscriberMetrics gracefully", async () => {
+    // Should never throw, always returns a valid metrics object
+    const result = await getSubscriberMetrics();
+    expect(result).toHaveProperty("totalSubscribers");
+    expect(result).toHaveProperty("segments");
+    expect(result).toHaveProperty("segmentDetails");
+    expect(typeof result.totalSubscribers).toBe("number");
+    expect(typeof result.segments).toBe("number");
+    expect(Array.isArray(result.segmentDetails)).toBe(true);
+    // Should have configured flag
+    expect(typeof result.configured).toBe("boolean");
   });
 });

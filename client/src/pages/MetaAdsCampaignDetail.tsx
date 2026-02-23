@@ -69,7 +69,7 @@ export default function MetaAdsCampaignDetail() {
     ctr: parseFloat(day.ctr || "0"),
   })) || [];
 
-  const campaignName = dailyInsights?.[0]?.campaign_name || "Campaign";
+  const campaignName = (dailyInsights?.[0] as any)?.campaign_name || "Campaign";
 
   return (
     <DashboardLayout>

@@ -69,14 +69,24 @@ interface AcuityPayment {
 }
 
 /**
- * Get AcuityScheduling API credentials from environment
+ * Check if Acuity credentials are configured
  */
-function getAcuityCredentials() {
+export function isAcuityConfigured(): boolean {
+  const userId = process.env.ACUITY_USER_ID;
+  const apiKey = process.env.ACUITY_API_KEY;
+  return !!userId && !!apiKey;
+}
+
+/**
+ * Get AcuityScheduling API credentials from environment
+ * Returns null instead of throwing when not configured
+ */
+function getAcuityCredentials(): { userId: string; apiKey: string } | null {
   const userId = process.env.ACUITY_USER_ID;
   const apiKey = process.env.ACUITY_API_KEY;
   
   if (!userId || !apiKey) {
-    throw new Error("AcuityScheduling credentials not configured");
+    return null;
   }
   
   return { userId, apiKey };
@@ -84,15 +94,19 @@ function getAcuityCredentials() {
 
 /**
  * Create axios instance with AcuityScheduling authentication
+ * Returns null if credentials are not configured
  */
 function createAcuityClient() {
-  const { userId, apiKey } = getAcuityCredentials();
+  const credentials = getAcuityCredentials();
+  if (!credentials) {
+    return null;
+  }
   
   return axios.create({
     baseURL: ACUITY_API_BASE,
     auth: {
-      username: userId,
-      password: apiKey,
+      username: credentials.userId,
+      password: credentials.apiKey,
     },
     headers: {
       "Content-Type": "application/json",
@@ -106,25 +120,37 @@ function createAcuityClient() {
 export async function testAcuityConnection(): Promise<boolean> {
   try {
     const client = createAcuityClient();
+    if (!client) return false;
     const response = await client.get("/me");
     return response.status === 200;
   } catch (error) {
-    console.error("AcuityScheduling connection test failed:", error);
+    console.error("[Acuity] Connection test failed:", error instanceof Error ? error.message : error);
     return false;
   }
 }
 
 /**
  * Get all appointment types from AcuityScheduling
+ * Returns empty array if not configured
  */
 export async function getAppointmentTypes(): Promise<AcuityAppointmentType[]> {
   const client = createAcuityClient();
-  const response = await client.get<AcuityAppointmentType[]>("/appointment-types");
-  return response.data;
+  if (!client) {
+    console.warn("[Acuity] Not configured. Returning empty appointment types.");
+    return [];
+  }
+  try {
+    const response = await client.get<AcuityAppointmentType[]>("/appointment-types");
+    return response.data;
+  } catch (error) {
+    console.error("[Acuity] Failed to fetch appointment types:", error instanceof Error ? error.message : error);
+    return [];
+  }
 }
 
 /**
  * Get appointments with optional filters
+ * Returns empty array if not configured
  */
 export async function getAppointments(params?: {
   minDate?: string;
@@ -134,8 +160,17 @@ export async function getAppointments(params?: {
   canceled?: boolean;
 }): Promise<AcuityAppointment[]> {
   const client = createAcuityClient();
-  const response = await client.get<AcuityAppointment[]>("/appointments", { params });
-  return response.data;
+  if (!client) {
+    console.warn("[Acuity] Not configured. Returning empty appointments.");
+    return [];
+  }
+  try {
+    const response = await client.get<AcuityAppointment[]>("/appointments", { params });
+    return response.data;
+  } catch (error) {
+    console.error("[Acuity] Failed to fetch appointments:", error instanceof Error ? error.message : error);
+    return [];
+  }
 }
 
 /**
@@ -143,8 +178,14 @@ export async function getAppointments(params?: {
  */
 export async function getAppointmentPayments(appointmentId: number): Promise<AcuityPayment[]> {
   const client = createAcuityClient();
-  const response = await client.get<AcuityPayment[]>(`/appointments/${appointmentId}/payments`);
-  return response.data;
+  if (!client) return [];
+  try {
+    const response = await client.get<AcuityPayment[]>(`/appointments/${appointmentId}/payments`);
+    return response.data;
+  } catch (error) {
+    console.error("[Acuity] Failed to fetch payments:", error instanceof Error ? error.message : error);
+    return [];
+  }
 }
 
 /**
@@ -179,6 +220,8 @@ export async function getAppointmentTypeRevenue(
  */
 export async function getAllRevenueByType(minDate?: string, maxDate?: string) {
   const appointmentTypes = await getAppointmentTypes();
+  if (appointmentTypes.length === 0) return [];
+  
   const revenueData = await Promise.all(
     appointmentTypes.map(async (type) => {
       const revenue = await getAppointmentTypeRevenue(type.id, minDate, maxDate);
@@ -198,7 +241,6 @@ export async function getAllRevenueByType(minDate?: string, maxDate?: string) {
  * Extract acquisition source from appointment forms
  */
 function extractAcquisitionSource(appointment: AcuityAppointment): string {
-  // Check forms array for "How did you hear about us?" field
   if (appointment.forms && Array.isArray(appointment.forms)) {
     for (const form of appointment.forms) {
       if (form.values) {
@@ -211,7 +253,6 @@ function extractAcquisitionSource(appointment: AcuityAppointment): string {
     }
   }
   
-  // Fallback: check formsText for common patterns
   if (appointment.formsText) {
     const text = appointment.formsText.toLowerCase();
     if (text.includes('social media')) return 'Social Media';
@@ -231,22 +272,18 @@ export async function getSundayClinicData(params?: {
   minDate?: string;
   maxDate?: string;
 }) {
-  // Get all appointments for the date range
   const appointments = await getAppointments({
     minDate: params?.minDate,
     maxDate: params?.maxDate,
     canceled: false,
   });
 
-  // Filter for Sunday Clinic / Drive Day appointments
-  // These typically have "Drive Day" or "Sunday Clinic" in the type name
   const clinicAppointments = appointments.filter(apt => 
     apt.type.toLowerCase().includes('drive day') || 
     apt.type.toLowerCase().includes('sunday clinic') ||
     apt.type.toLowerCase().includes('public drive')
   );
 
-  // Group appointments by date (event) and track sources
   const eventsByDate = clinicAppointments.reduce((acc, apt) => {
     const eventDate = apt.date;
     if (!acc[eventDate]) {
@@ -256,20 +293,17 @@ export async function getSundayClinicData(params?: {
     return acc;
   }, {} as Record<string, AcuityAppointment[]>);
   
-  // Calculate source breakdown across all events
   const sourceBreakdown: Record<string, number> = {};
   clinicAppointments.forEach(apt => {
     const source = extractAcquisitionSource(apt);
     sourceBreakdown[source] = (sourceBreakdown[source] || 0) + 1;
   });
 
-  // Calculate metrics for each event
   const events = Object.entries(eventsByDate).map(([date, appts]) => {
     const totalAttendees = appts.length;
     const uniqueEmails = new Set(appts.map(a => a.email.toLowerCase()));
     const uniqueAttendees = uniqueEmails.size;
     
-    // Calculate source breakdown for this event
     const eventSourceBreakdown: Record<string, number> = {};
     appts.forEach(apt => {
       const source = extractAcquisitionSource(apt);
@@ -285,7 +319,6 @@ export async function getSundayClinicData(params?: {
     };
   });
 
-  // Calculate overall metrics
   const allEmails = new Set(clinicAppointments.map(a => a.email.toLowerCase()));
   const repeatAttendees = clinicAppointments.length - allEmails.size;
 
@@ -302,17 +335,15 @@ export async function getSundayClinicData(params?: {
 
 /**
  * Calculate Sunday Clinic goal metrics
- * Tracks both member retention and non-member acquisition
  */
 export async function getSundayClinicGoalMetrics(params?: {
   minDate?: string;
   maxDate?: string;
-  memberEmails?: string[]; // List of known member emails for tracking
+  memberEmails?: string[];
 }) {
   const data = await getSundayClinicData(params);
   const memberEmailSet = new Set((params?.memberEmails || []).map(e => e.toLowerCase()));
 
-  // Categorize attendees as members vs non-members
   let memberAttendees = 0;
   let nonMemberAttendees = 0;
   const memberEmailsAttended = new Set<string>();
@@ -331,30 +362,23 @@ export async function getSundayClinicGoalMetrics(params?: {
     });
   });
 
-  // Calculate member retention metrics
   const memberAttendanceRate = memberEmailSet.size > 0 
     ? (memberEmailsAttended.size / memberEmailSet.size) * 100 
     : 0;
 
-  // Calculate repeat attendance for members
   const memberRepeatRate = memberEmailsAttended.size > 0
     ? ((memberAttendees - memberEmailsAttended.size) / memberEmailsAttended.size) * 100
     : 0;
 
   return {
     ...data,
-    // Member retention metrics
     totalMembers: memberEmailSet.size,
     memberAttendees: memberEmailsAttended.size,
     memberAttendanceRate,
     memberRepeatRate,
     memberTotalBookings: memberAttendees,
-    
-    // Non-member acquisition metrics
     nonMemberAttendees: nonMemberEmailsAttended.size,
     nonMemberTotalBookings: nonMemberAttendees,
-    
-    // Conversion potential
     conversionOpportunities: nonMemberEmailsAttended.size,
   };
 }
@@ -376,7 +400,6 @@ function extractFormField(appointment: AcuityAppointment, fieldNamePart: string)
     }
   }
   
-  // Fallback: check formsText
   if (appointment.formsText) {
     const regex = new RegExp(`${fieldNamePart}[^:]*:\\s*(.+?)(?:\\n|$)`, 'i');
     const match = appointment.formsText.match(regex);
@@ -388,16 +411,13 @@ function extractFormField(appointment: AcuityAppointment, fieldNamePart: string)
 
 /**
  * Extract acquisition source specifically for Winter Clinic
- * Uses "How did find us?" or "How did you hear" fields
  */
 function extractWinterClinicSource(appointment: AcuityAppointment): string {
-  // Try specific field names used in Kids Clinic Form
   const source = extractFormField(appointment, 'how did') || 
                  extractFormField(appointment, 'how did you hear') ||
                  extractFormField(appointment, 'how did find');
   
   if (source) {
-    // Normalize common values
     const normalized = source.toLowerCase().trim();
     if (normalized.includes('pbga') || normalized.includes('links & tees') || normalized.includes('links and tees')) return 'PBGA Links & Tees';
     if (normalized.includes('social media') || normalized.includes('instagram') || normalized.includes('facebook')) return 'Social Media';
@@ -405,7 +425,7 @@ function extractWinterClinicSource(appointment: AcuityAppointment): string {
     if (normalized.includes('google') || normalized.includes('search')) return 'Google Search';
     if (normalized.includes('friend') || normalized.includes('family') || normalized.includes('referral') || normalized.includes('word of mouth')) return 'Friend / Family';
     if (normalized.includes('flyer') || normalized.includes('poster') || normalized.includes('sign')) return 'Flyer / Signage';
-    return source; // Return as-is if no match
+    return source;
   }
   
   return 'Unknown';
@@ -465,21 +485,18 @@ export async function getWinterClinicData(params?: {
   minDate?: string;
   maxDate?: string;
 }) {
-  // Get all appointments for the date range
   const appointments = await getAppointments({
     minDate: params?.minDate || '2026-01-01',
     maxDate: params?.maxDate || '2026-03-31',
     canceled: false,
   });
 
-  // Filter for Winter Clinic appointments (PBGA Winter Clinics category)
   const clinicAppointments = appointments.filter(apt => {
     const name = apt.type.toLowerCase();
     return name.includes('clinic') && (
       name.includes('tots') ||
       name.includes('bogey') ||
       name.includes('par shooter') ||
-      name.includes('h.s.') ||
       name.includes('player/prep') ||
       name.includes('ladies') ||
       name.includes('co-ed') ||
@@ -489,7 +506,6 @@ export async function getWinterClinicData(params?: {
     );
   });
 
-  // Group by clinic type
   const clinicTypeMap: Record<string, {
     typeName: string;
     category: 'kids' | 'adults' | 'family';
@@ -522,17 +538,14 @@ export async function getWinterClinicData(params?: {
     clinicTypeMap[key].appointments.push(apt);
     clinicTypeMap[key].totalRevenue += parseFloat(apt.amountPaid || apt.priceSold || apt.price || '0');
     
-    // Track acquisition source
     const source = extractWinterClinicSource(apt);
     clinicTypeMap[key].sourceBreakdown[source] = (clinicTypeMap[key].sourceBreakdown[source] || 0) + 1;
     
-    // Track experience level
     const experience = extractFormField(apt, 'experience');
     if (experience) {
       clinicTypeMap[key].experienceLevels[experience] = (clinicTypeMap[key].experienceLevels[experience] || 0) + 1;
     }
     
-    // Track student age
     const ageStr = extractFormField(apt, 'age of student');
     if (ageStr) {
       const age = parseInt(ageStr);
@@ -540,7 +553,6 @@ export async function getWinterClinicData(params?: {
     }
   });
 
-  // Build clinic summaries
   const clinics = Object.values(clinicTypeMap).map(clinic => ({
     shortName: clinic.shortName,
     typeName: clinic.typeName,
@@ -556,14 +568,12 @@ export async function getWinterClinicData(params?: {
     avgStudentAge: clinic.studentAges.length > 0 ? clinic.studentAges.reduce((a, b) => a + b, 0) / clinic.studentAges.length : null,
   }));
 
-  // Overall source breakdown
   const overallSourceBreakdown: Record<string, number> = {};
   clinicAppointments.forEach(apt => {
     const source = extractWinterClinicSource(apt);
     overallSourceBreakdown[source] = (overallSourceBreakdown[source] || 0) + 1;
   });
 
-  // Overall experience level breakdown
   const overallExperienceLevels: Record<string, number> = {};
   clinicAppointments.forEach(apt => {
     const experience = extractFormField(apt, 'experience');
@@ -572,7 +582,6 @@ export async function getWinterClinicData(params?: {
     }
   });
 
-  // Category summary
   const categorySummary = {
     kids: clinics.filter(c => c.category === 'kids'),
     adults: clinics.filter(c => c.category === 'adults'),

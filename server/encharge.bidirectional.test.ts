@@ -1,20 +1,46 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { upsertEnchargePerson, updateEnchargePersonByEmail } from "./encharge";
 
-// Mock fetch globally
-global.fetch = vi.fn();
+// Save original fetch
+const originalFetch = global.fetch;
 
 describe("Encharge Bidirectional Sync", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("should successfully upsert a person to Encharge", async () => {
+  afterEach(() => {
+    // Restore original fetch after each test
+    global.fetch = originalFetch;
+  });
+
+  it("should return error when Write Key is not configured", async () => {
+    // Without ENCHARGE_WRITE_KEY set, upsert should return error, not throw
+    const originalKey = process.env.ENCHARGE_WRITE_KEY;
+    delete process.env.ENCHARGE_WRITE_KEY;
+
+    const result = await upsertEnchargePerson({
+      email: "test@example.com",
+      firstName: "John",
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("not configured");
+
+    // Restore
+    if (originalKey) process.env.ENCHARGE_WRITE_KEY = originalKey;
+  });
+
+  it("should successfully upsert a person when configured", async () => {
+    // Set a mock write key
+    const originalKey = process.env.ENCHARGE_WRITE_KEY;
+    process.env.ENCHARGE_WRITE_KEY = "test-write-key-12345";
+
     // Mock successful API response
-    (global.fetch as any).mockResolvedValueOnce({
+    global.fetch = vi.fn().mockResolvedValueOnce({
       ok: true,
       json: async () => ({ id: "encharge_person_123" }),
-    });
+    }) as any;
 
     const result = await upsertEnchargePerson({
       email: "test@example.com",
@@ -39,15 +65,24 @@ describe("Encharge Bidirectional Sync", () => {
         }),
       })
     );
+
+    // Restore
+    if (originalKey) {
+      process.env.ENCHARGE_WRITE_KEY = originalKey;
+    } else {
+      delete process.env.ENCHARGE_WRITE_KEY;
+    }
   });
 
   it("should handle Encharge API errors gracefully", async () => {
-    // Mock failed API response
-    (global.fetch as any).mockResolvedValueOnce({
+    const originalKey = process.env.ENCHARGE_WRITE_KEY;
+    process.env.ENCHARGE_WRITE_KEY = "test-write-key-12345";
+
+    global.fetch = vi.fn().mockResolvedValueOnce({
       ok: false,
       statusText: "Bad Request",
       json: async () => ({ message: "Invalid email format" }),
-    });
+    }) as any;
 
     const result = await upsertEnchargePerson({
       email: "invalid-email",
@@ -56,14 +91,22 @@ describe("Encharge Bidirectional Sync", () => {
 
     expect(result.success).toBe(false);
     expect(result.error).toBeDefined();
+
+    if (originalKey) {
+      process.env.ENCHARGE_WRITE_KEY = originalKey;
+    } else {
+      delete process.env.ENCHARGE_WRITE_KEY;
+    }
   });
 
-  it("should update person by email", async () => {
-    // Mock successful API response
-    (global.fetch as any).mockResolvedValueOnce({
+  it("should update person by email when configured", async () => {
+    const originalKey = process.env.ENCHARGE_WRITE_KEY;
+    process.env.ENCHARGE_WRITE_KEY = "test-write-key-12345";
+
+    global.fetch = vi.fn().mockResolvedValueOnce({
       ok: true,
       json: async () => ({ id: "encharge_person_456" }),
-    });
+    }) as any;
 
     const result = await updateEnchargePersonByEmail("existing@example.com", {
       firstName: "Jane",
@@ -79,11 +122,19 @@ describe("Encharge Bidirectional Sync", () => {
         method: "POST",
       })
     );
+
+    if (originalKey) {
+      process.env.ENCHARGE_WRITE_KEY = originalKey;
+    } else {
+      delete process.env.ENCHARGE_WRITE_KEY;
+    }
   });
 
   it("should handle network errors", async () => {
-    // Mock network error
-    (global.fetch as any).mockRejectedValueOnce(new Error("Network error"));
+    const originalKey = process.env.ENCHARGE_WRITE_KEY;
+    process.env.ENCHARGE_WRITE_KEY = "test-write-key-12345";
+
+    global.fetch = vi.fn().mockRejectedValueOnce(new Error("Network error")) as any;
 
     const result = await upsertEnchargePerson({
       email: "test@example.com",
@@ -92,13 +143,22 @@ describe("Encharge Bidirectional Sync", () => {
 
     expect(result.success).toBe(false);
     expect(result.error).toBe("Network error");
+
+    if (originalKey) {
+      process.env.ENCHARGE_WRITE_KEY = originalKey;
+    } else {
+      delete process.env.ENCHARGE_WRITE_KEY;
+    }
   });
 
   it("should include custom fields in the request", async () => {
-    (global.fetch as any).mockResolvedValueOnce({
+    const originalKey = process.env.ENCHARGE_WRITE_KEY;
+    process.env.ENCHARGE_WRITE_KEY = "test-write-key-12345";
+
+    global.fetch = vi.fn().mockResolvedValueOnce({
       ok: true,
       json: async () => ({ id: "encharge_person_789" }),
-    });
+    }) as any;
 
     await upsertEnchargePerson({
       email: "member@example.com",
@@ -120,5 +180,11 @@ describe("Encharge Bidirectional Sync", () => {
     expect(requestBody.membershipTier).toBe("annual");
     expect(requestBody.lifetimeValue).toBe(1200);
     expect(requestBody.acquisitionSource).toBe("meta_ads");
+
+    if (originalKey) {
+      process.env.ENCHARGE_WRITE_KEY = originalKey;
+    } else {
+      delete process.env.ENCHARGE_WRITE_KEY;
+    }
   });
 });
