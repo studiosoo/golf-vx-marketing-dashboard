@@ -1,0 +1,542 @@
+import { useState } from "react";
+import { trpc } from "@/lib/trpc";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Search, Mail, Phone, Calendar, Upload, Users } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { Link } from "wouter";
+import { format } from "date-fns";
+
+export default function Members() {
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [tierFilter, setTierFilter] = useState<string>("all");
+  const [emailFilter, setEmailFilter] = useState<string>("all");
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const utils = trpc.useUtils();
+  const importCSV = trpc.members.importFromCSV.useMutation({
+    onSuccess: (result) => {
+      toast.success(`Import complete! Matched: ${result.matched}, Created: ${result.created}, Skipped: ${result.skipped}`);
+      if (result.errors.length > 0) {
+        toast.error(`Errors: ${result.errors.slice(0, 3).join(', ')}`);
+      }
+      utils.members.list.invalidate();
+      utils.members.getStats.invalidate();
+      setImportDialogOpen(false);
+      setImporting(false);
+    },
+    onError: (error) => {
+      toast.error(`Import failed: ${error.message}`);
+      setImporting(false);
+    },
+  });
+
+  const syncAcuity = trpc.conversion.syncMemberAppointments.useMutation({
+    onSuccess: (result) => {
+      toast.success(`Appointment sync complete! ${result.newMembers} new members, ${result.newAppointments} new appointments, ${result.updatedAppointments} updated`);
+      utils.members.list.invalidate();
+      utils.members.getStats.invalidate();
+    },
+    onError: (error) => {
+      toast.error(`Appointment sync failed: ${error.message}`);
+    },
+  });
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImporting(true);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const csvData = event.target?.result as string;
+      importCSV.mutate({ csvData });
+    };
+    reader.onerror = () => {
+      toast.error('Failed to read file');
+      setImporting(false);
+    };
+    reader.readAsText(file);
+  };
+
+  const { data: members, isLoading } = trpc.members.list.useQuery({
+    search: search || undefined,
+    status: statusFilter !== "all" ? (statusFilter as any) : undefined,
+    membershipTier: tierFilter !== "all" ? (tierFilter as any) : undefined,
+  });
+
+  const { data: stats } = trpc.members.getStats.useQuery();
+
+  const getStatusBadge = (status: string) => {
+    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+      active: "default",
+      trial: "secondary",
+      inactive: "outline",
+      cancelled: "destructive",
+    };
+    return <Badge variant={variants[status] || "default"}>{status}</Badge>;
+  };
+
+  const getTierLabel = (tier: string) => {
+    const labels: Record<string, string> = {
+      trial: "Trial",
+      monthly: "Monthly",
+      annual: "Annual",
+      corporate: "Corporate",
+      none: "None",
+      all_access_aces: "All Access Aces",
+      swing_savers: "Swing Savers",
+      golf_vx_pro: "Golf VX Pro",
+    };
+    return labels[tier] || tier;
+  };
+
+  return (
+    <div className="container py-8">
+      <Tabs defaultValue="members" className="w-full">
+        <TabsList className="mb-8">
+          <TabsTrigger value="members">
+            <Users className="mr-2 h-4 w-4" />
+            Members
+          </TabsTrigger>
+          <TabsTrigger value="duplicates">
+            <Users className="mr-2 h-4 w-4" />
+            Duplicates
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="members">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-4xl font-bold">Members</h1>
+          <p className="text-muted-foreground mt-2">
+            Manage your Golf VX members and their information
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline"
+            onClick={() => syncAcuity.mutate()}
+            disabled={syncAcuity.isPending}
+          >
+            <Calendar className="mr-2 h-4 w-4" />
+            {syncAcuity.isPending ? "Syncing..." : "Sync from Acuity"}
+          </Button>
+          <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Upload className="mr-2 h-4 w-4" />
+                Import from CSV
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Import Members from Boomerangme</DialogTitle>
+                <DialogDescription>
+                  Upload a CSV file with customer data from Boomerangme. The system will automatically match existing members and create new ones.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="csv-upload" className="block text-sm font-medium mb-2">
+                    CSV File
+                  </label>
+                  <Input
+                    id="csv-upload"
+                    type="file"
+                    accept=".csv"
+                    onChange={handleFileUpload}
+                    disabled={importing}
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Expected columns: name, email, phone, membership_tier, ltv, total_visits, card_status, rfm_segment
+                  </p>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Member
+          </Button>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      {stats && (
+        <div className="grid gap-4 md:grid-cols-4 mb-8">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardDescription>Total Members</CardDescription>
+              <CardTitle className="text-3xl">{stats.totalMembers}</CardTitle>
+            </CardHeader>
+          </Card>
+          <Card>
+            <CardHeader className="pb-3">
+              <CardDescription>Active Members</CardDescription>
+              <CardTitle className="text-3xl">{stats.activeMembers}</CardTitle>
+            </CardHeader>
+          </Card>
+          <Card>
+            <CardHeader className="pb-3">
+              <CardDescription>Lifetime Value</CardDescription>
+              <CardTitle className="text-3xl">
+                ${parseFloat(stats.totalLifetimeValue || "0").toLocaleString()}
+              </CardTitle>
+            </CardHeader>
+          </Card>
+          <Card>
+            <CardHeader className="pb-3">
+              <CardDescription>Avg. LTV</CardDescription>
+              <CardTitle className="text-3xl">
+                ${stats.totalMembers > 0
+                  ? (parseFloat(stats.totalLifetimeValue || "0") / stats.totalMembers).toFixed(0)
+                  : "0"}
+              </CardTitle>
+            </CardHeader>
+          </Card>
+        </div>
+      )}
+
+      {/* Filters */}
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by name or email..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full md:w-[180px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="trial">Trial</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={tierFilter} onValueChange={setTierFilter}>
+              <SelectTrigger className="w-full md:w-[200px]">
+                <SelectValue placeholder="Membership Tier" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Tiers</SelectItem>
+                <SelectItem value="trial">Trial</SelectItem>
+                <SelectItem value="monthly">Monthly</SelectItem>
+                <SelectItem value="annual">Annual</SelectItem>
+                <SelectItem value="corporate">Corporate</SelectItem>
+                <SelectItem value="all_access_aces">All Access Aces</SelectItem>
+                <SelectItem value="swing_savers">Swing Savers</SelectItem>
+                <SelectItem value="golf_vx_pro">Golf VX Pro</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={emailFilter} onValueChange={setEmailFilter}>
+              <SelectTrigger className="w-full md:w-[180px]">
+                <SelectValue placeholder="Email Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Email Status</SelectItem>
+                <SelectItem value="subscribed">Subscribed</SelectItem>
+                <SelectItem value="unsubscribed">Unsubscribed</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Members Table */}
+      <Card>
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="p-8 text-center text-muted-foreground">
+              Loading members...
+            </div>
+          ) : !members || members.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground">
+              No members found
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Contact</TableHead>
+                  <TableHead>Membership</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Join Date</TableHead>
+                  <TableHead>LTV</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {members.map((member) => (
+                  <TableRow key={member.id}>
+                    <TableCell className="font-medium">
+                      <Link href={`/members/${member.id}`}>
+                        <span className="hover:underline cursor-pointer">
+                          {member.name}
+                        </span>
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1 text-sm">
+                        {member.email && (
+                          <div className="flex items-center gap-1 text-muted-foreground">
+                            <Mail className="h-3 w-3" />
+                            {member.email}
+                          </div>
+                        )}
+                        {member.phone && (
+                          <div className="flex items-center gap-1 text-muted-foreground">
+                            <Phone className="h-3 w-3" />
+                            {member.phone}
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>{getTierLabel(member.membershipTier)}</TableCell>
+                    <TableCell>{getStatusBadge(member.status)}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1 text-sm">
+                        <Calendar className="h-3 w-3 text-muted-foreground" />
+                        {format(new Date(member.joinDate), "MMM d, yyyy")}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      ${parseFloat(member.lifetimeValue).toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Link href={`/members/${member.id}`}>
+                        <Button variant="ghost" size="sm">
+                          View
+                        </Button>
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+        </TabsContent>
+
+        <TabsContent value="duplicates">
+          <DuplicatesTab />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
+// Duplicates Tab Component
+function DuplicatesTab() {
+  const [selectedGroup, setSelectedGroup] = useState<any>(null);
+  const [primaryId, setPrimaryId] = useState<number | null>(null);
+  const [mergeDialogOpen, setMergeDialogOpen] = useState(false);
+
+  const { data: duplicateGroups, isLoading, refetch } = trpc.members.findDuplicates.useQuery();
+  const mergeMutation = trpc.members.mergeMembers.useMutation({
+    onSuccess: () => {
+      toast.success('Members merged successfully');
+      setMergeDialogOpen(false);
+      setSelectedGroup(null);
+      setPrimaryId(null);
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`Merge failed: ${error.message}`);
+    },
+  });
+
+  const handleMergeClick = (group: any[]) => {
+    setSelectedGroup(group);
+    setPrimaryId(group[0].id);
+    setMergeDialogOpen(true);
+  };
+
+  const handleConfirmMerge = () => {
+    if (!primaryId || !selectedGroup) return;
+    const duplicateIds = selectedGroup.filter((m: any) => m.id !== primaryId).map((m: any) => m.id);
+    mergeMutation.mutate({ primaryId, duplicateIds });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  const totalDuplicates = duplicateGroups?.reduce((sum, group) => sum + group.length - 1, 0) || 0;
+
+  return (
+    <div className="space-y-6">
+      {/* Summary Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Duplicate Detection Summary
+          </CardTitle>
+          <CardDescription>
+            Members with matching names or phone numbers
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <div className="text-2xl font-bold">{duplicateGroups?.length || 0}</div>
+              <div className="text-sm text-muted-foreground">Duplicate Groups</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold">{totalDuplicates}</div>
+              <div className="text-sm text-muted-foreground">Duplicate Records</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold">
+                {duplicateGroups ? duplicateGroups.reduce((sum, g) => sum + g.length, 0) : 0}
+              </div>
+              <div className="text-sm text-muted-foreground">Total Affected Members</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Duplicate Groups */}
+      {duplicateGroups && duplicateGroups.length > 0 ? (
+        <div className="space-y-4">
+          {duplicateGroups.map((group, idx) => (
+            <Card key={idx}>
+              <CardHeader>
+                <CardTitle className="text-lg">Duplicate Group {idx + 1}</CardTitle>
+                <CardDescription>
+                  {group.length} members with similar information
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Phone</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Tier</TableHead>
+                      <TableHead>Created</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {group.map((member: any) => (
+                      <TableRow key={member.id}>
+                        <TableCell className="font-medium">{member.name}</TableCell>
+                        <TableCell>{member.email || '-'}</TableCell>
+                        <TableCell>{member.phone || '-'}</TableCell>
+                        <TableCell>
+                          <Badge variant={member.status === 'active' ? 'default' : 'secondary'}>
+                            {member.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{member.membershipTier || '-'}</TableCell>
+                        <TableCell>{format(new Date(member.createdAt), 'MMM d, yyyy')}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                <div className="mt-4">
+                  <Button onClick={() => handleMergeClick(group)} variant="default">
+                    Merge These Members
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Users className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No Duplicates Found</h3>
+            <p className="text-muted-foreground text-center">
+              All member records appear to be unique
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Merge Confirmation Dialog */}
+      <Dialog open={mergeDialogOpen} onOpenChange={setMergeDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Merge Duplicate Members</DialogTitle>
+            <DialogDescription>
+              Select which member record to keep as the primary. Other records will be merged into this one.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {selectedGroup?.map((member: any) => (
+              <div key={member.id} className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="primary"
+                  checked={primaryId === member.id}
+                  onChange={() => setPrimaryId(member.id)}
+                  className="h-4 w-4"
+                />
+                <div className="flex-1">
+                  <div className="font-medium">{member.name}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {member.email || 'No email'} • {member.phone || 'No phone'}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={() => setMergeDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmMerge} disabled={!primaryId || mergeMutation.isPending}>
+              {mergeMutation.isPending ? 'Merging...' : 'Confirm Merge'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

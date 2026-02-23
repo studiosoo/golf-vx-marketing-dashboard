@@ -21,15 +21,29 @@ import {
 } from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Users, Target, TrendingUp, BarChart3, DollarSign, CheckSquare, FileText, Share2, Wallet, Image, Instagram, Globe, Calendar, GanttChart, UserX, Trophy, Mail, Sparkles } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "Page 1", path: "/" },
-  { icon: Users, label: "Page 2", path: "/some-path" },
+  { icon: LayoutDashboard, label: "Overview", path: "/" },
+  { icon: Sparkles, label: "Marketing Intelligence", path: "/marketing-intelligence" },
+  { icon: Target, label: "Programs", path: "/programs" },
+  { icon: BarChart3, label: "Strategic Campaigns", path: "/strategic-campaigns" },
+  { icon: Trophy, label: "Annual Giveaway", path: "/annual-giveaway" },
+  { icon: TrendingUp, label: "ROI Analytics", path: "/roi" },
+  { icon: Share2, label: "Meta Ads", path: "/meta-ads" },
+  { icon: Mail, label: "Email Marketing", path: "/email-marketing" },
+  { icon: Wallet, label: "Budget Manager", path: "/budget" },
+  { icon: Image, label: "Program Visuals", path: "/campaign-visuals" },
+  { icon: Calendar, label: "Calendar", path: "/calendar" },
+  { icon: GanttChart, label: "Timeline", path: "/timeline" },
+  { icon: Instagram, label: "Instagram", path: "/instagram" },
+  { icon: Users, label: "Members", path: "/members" },
+  { icon: DollarSign, label: "Revenue", path: "/revenue" },
+  { icon: FileText, label: "Reports", path: "/reports" },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
@@ -170,9 +184,11 @@ function DashboardLayoutContent({
               </button>
               {!isCollapsed ? (
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="font-semibold tracking-tight truncate">
-                    Navigation
-                  </span>
+                  <img 
+                    src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663329642625/LwjZZbOogTHBMDfo.png" 
+                    alt="Golf VX Arlington Heights" 
+                    className="h-10 w-auto object-contain"
+                  />
                 </div>
               ) : null}
             </div>
@@ -182,6 +198,25 @@ function DashboardLayoutContent({
             <SidebarMenu className="px-2 py-1">
               {menuItems.map(item => {
                 const isActive = location === item.path;
+                const isExternal = 'external' in item && item.external;
+                
+                if (isExternal) {
+                  return (
+                    <SidebarMenuItem key={item.path}>
+                      <SidebarMenuButton
+                        asChild
+                        tooltip={item.label}
+                        className={`h-10 transition-all font-normal`}
+                      >
+                        <a href={item.path} target="_blank" rel="noopener noreferrer">
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.label}</span>
+                        </a>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                }
+                
                 return (
                   <SidebarMenuItem key={item.path}>
                     <SidebarMenuButton

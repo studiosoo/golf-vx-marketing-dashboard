@@ -1,0 +1,28 @@
+{
+  "query": "SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() ORDER BY TABLE_NAME",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2R3ugynrRDzjYQU.e9d0c4c091a8 --database A5GjFitCrpqWQ2wnoTJiWm --execute SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() ORDER BY TABLE_NAME",
+  "rows": [
+    {
+      "TABLE_NAME": "__drizzle_migrations"
+    },
+    {
+      "TABLE_NAME": "aiRecommendations"
+    },
+    {
+      "TABLE_NAME": "anniversary_giveaway_entries"
+    },
+    {
+      "TABLE_NAME": "autonomous_actions"
+    },
+    {
+      "TABLE_NAME": "autonomous_sync_status"
+    },
+    {
+      "TABLE_NAME": "users"
+    }
+  ],
+  "messages": [],
+  "stdout": "TABLE_NAME\n__drizzle_migrations\naiRecommendations\nanniversary_giveaway_entries\nautonomous_actions\nautonomous_sync_status\nusers\n",
+  "stderr": "",
+  "execution_time_ms": 50
+}

@@ -1,11 +1,47 @@
-import { eq } from "drizzle-orm";
+import { eq, and, or, gte, lte, desc, sql, between, like } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
-import { ENV } from './_core/env';
+import {
+  InsertUser,
+  users,
+  campaigns,
+  InsertCampaign,
+  Campaign,
+  channels,
+  InsertChannel,
+  Channel,
+  channelMetrics,
+  InsertChannelMetric,
+  ChannelMetric,
+  members,
+  InsertMember,
+  Member,
+  revenue,
+  InsertRevenue,
+  Revenue,
+  tasks,
+  InsertTask,
+  Task,
+  reports,
+  InsertReport,
+  Report,
+  campaignExpenses,
+  InsertCampaignExpense,
+  CampaignExpense,
+  programCampaigns,
+  InsertProgramCampaign,
+  ProgramCampaign,
+  landingPages,
+  InsertLandingPage,
+  LandingPage,
+  pageAnalytics,
+  InsertPageAnalytics,
+  PageAnalytics,
+  anniversaryGiveawayEntries,
+} from "../drizzle/schema";
+import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
-// Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
@@ -17,6 +53,8 @@ export async function getDb() {
   }
   return _db;
 }
+
+// ============= User Functions =============
 
 export async function upsertUser(user: InsertUser): Promise<void> {
   if (!user.openId) {
@@ -56,8 +94,8 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       values.role = user.role;
       updateSet.role = user.role;
     } else if (user.openId === ENV.ownerOpenId) {
-      values.role = 'admin';
-      updateSet.role = 'admin';
+      values.role = "admin";
+      updateSet.role = "admin";
     }
 
     if (!values.lastSignedIn) {
@@ -89,4 +127,874 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// ============= Campaign Functions =============
+
+export async function getAllCampaigns() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Sort by status priority (active first, then planned, paused, completed last)
+  // Then by start date descending within each status group
+  const allCampaigns = await db.select().from(campaigns);
+  
+  // Sort in JavaScript to avoid SQL syntax issues
+  const statusPriority: Record<string, number> = {
+    'active': 1,
+    'planned': 2,
+    'paused': 3,
+    'completed': 4
+  };
+  
+  return allCampaigns.sort((a, b) => {
+    const priorityA = statusPriority[a.status] || 5;
+    const priorityB = statusPriority[b.status] || 5;
+    
+    if (priorityA !== priorityB) {
+      return priorityA - priorityB;
+    }
+    
+    // Within same status, sort by start date descending
+    const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
+    const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
+    return dateB - dateA;
+  });
+}
+
+export async function getCampaignById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(campaigns).where(eq(campaigns.id, id)).limit(1);
+  return result[0];
+}
+
+export async function getCampaignsByStatus(status: Campaign["status"]) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(campaigns).where(eq(campaigns.status, status)).orderBy(desc(campaigns.startDate));
+}
+
+export async function getCampaignsByDateRange(startDate: Date, endDate: Date) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db
+    .select()
+    .from(campaigns)
+    .where(
+      and(
+        gte(campaigns.startDate, startDate),
+        lte(campaigns.endDate, endDate)
+      )
+    )
+    .orderBy(desc(campaigns.startDate));
+}
+
+export async function createCampaign(campaign: InsertCampaign) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(campaigns).values(campaign);
+  return Number(result[0].insertId);
+}
+
+export async function updateCampaign(id: number, updates: Partial<InsertCampaign>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(campaigns).set(updates).where(eq(campaigns.id, id));
+}
+
+export async function updateCampaignVisuals(
+  id: number,
+  visuals: {
+    landingPageUrl?: string;
+    posterImageUrl?: string;
+    reelThumbnailUrl?: string;
+    additionalVisuals?: string[];
+  }
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(campaigns).set(visuals).where(eq(campaigns.id, id));
+}
+
+export async function getCampaignsByCategory(category: Campaign["category"]) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(campaigns).where(eq(campaigns.category, category)).orderBy(desc(campaigns.startDate));
+}
+
+export async function getCategorySummary() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Get all campaigns grouped by category with aggregated metrics
+  const allCampaigns = await db.select().from(campaigns);
+  
+  const categories = [
+    { id: "trial_conversion", name: "Trial Conversion Campaign", description: "Converting prospects to members" },
+    { id: "membership_acquisition", name: "Membership Acquisition Campaign", description: "Annual and monthly membership giveaways" },
+    { id: "member_retention", name: "Member Retention + Community Flywheel", description: "Drive days, tournaments, and member engagement" },
+    { id: "corporate_events", name: "Corporate Events & B2B Sales Campaign", description: "Corporate bookings and B2B partnerships" }
+  ];
+  
+  return categories.map(cat => {
+    const categoryCampaigns = allCampaigns.filter(c => c.category === cat.id);
+    
+    const totalBudget = categoryCampaigns.reduce((sum, c) => sum + Number(c.budget || 0), 0);
+    const totalSpend = categoryCampaigns.reduce((sum, c) => sum + Number(c.actualSpend || 0), 0);
+    const totalRevenue = categoryCampaigns.reduce((sum, c) => sum + Number(c.actualRevenue || 0), 0);
+    const totalMetaAdsSpend = categoryCampaigns.reduce((sum, c) => sum + Number(c.metaAdsSpend || 0), 0);
+    
+    const activeCampaigns = categoryCampaigns.filter(c => c.status === "active").length;
+    const completedCampaigns = categoryCampaigns.filter(c => c.status === "completed").length;
+    
+    const roi = totalSpend > 0 ? ((totalRevenue - totalSpend) / totalSpend) * 100 : 0;
+    
+    // Get visual assets from campaigns (up to 3 recent campaigns with visuals)
+    const campaignsWithVisuals = categoryCampaigns
+      .filter(c => c.landingPageUrl || c.posterImageUrl || c.reelThumbnailUrl)
+      .slice(0, 3);
+    
+    const visualPreviews = campaignsWithVisuals.map(c => ({
+      landingPageUrl: c.landingPageUrl,
+      posterImageUrl: c.posterImageUrl,
+      reelThumbnailUrl: c.reelThumbnailUrl,
+      campaignName: c.name
+    }));
+    
+    return {
+      ...cat,
+      totalBudget,
+      totalSpend,
+      totalRevenue,
+      totalMetaAdsSpend,
+      activeCampaigns,
+      completedCampaigns,
+      totalCampaigns: categoryCampaigns.length,
+      roi,
+      visualPreviews
+    };
+  });
+}
+
+// ============= Channel Functions =============
+
+export async function getAllChannels() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(channels).where(eq(channels.isActive, true));
+}
+
+export async function getChannelById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(channels).where(eq(channels.id, id)).limit(1);
+  return result[0];
+}
+
+export async function createChannel(channel: InsertChannel) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(channels).values(channel);
+  return Number(result[0].insertId);
+}
+
+// ============= Channel Metrics Functions =============
+
+export async function getChannelMetricsByDateRange(channelId: number, startDate: Date, endDate: Date) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db
+    .select()
+    .from(channelMetrics)
+    .where(
+      and(
+        eq(channelMetrics.channelId, channelId),
+        gte(channelMetrics.date, startDate),
+        lte(channelMetrics.date, endDate)
+      )
+    )
+    .orderBy(channelMetrics.date);
+}
+
+export async function getChannelMetricsByCampaign(campaignId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db
+    .select()
+    .from(channelMetrics)
+    .where(eq(channelMetrics.campaignId, campaignId))
+    .orderBy(channelMetrics.date);
+}
+
+export async function createChannelMetric(metric: InsertChannelMetric) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(channelMetrics).values(metric);
+  return Number(result[0].insertId);
+}
+
+export async function getChannelPerformanceSummary(startDate: Date, endDate: Date) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db
+    .select({
+      channelId: channelMetrics.channelId,
+      channelName: channels.name,
+      channelType: channels.type,
+      totalImpressions: sql<number>`SUM(${channelMetrics.impressions})`,
+      totalClicks: sql<number>`SUM(${channelMetrics.clicks})`,
+      totalConversions: sql<number>`SUM(${channelMetrics.conversions})`,
+      totalSpend: sql<string>`SUM(${channelMetrics.spend})`,
+      totalRevenue: sql<string>`SUM(${channelMetrics.revenue})`,
+    })
+    .from(channelMetrics)
+    .innerJoin(channels, eq(channelMetrics.channelId, channels.id))
+    .where(
+      and(
+        gte(channelMetrics.date, startDate),
+        lte(channelMetrics.date, endDate)
+      )
+    )
+    .groupBy(channelMetrics.channelId, channels.name, channels.type);
+}
+
+// ============= Member Functions =============
+
+export async function getAllMembers(filters?: { search?: string; status?: Member["status"]; membershipTier?: Member["membershipTier"]; }) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  let query = db.select().from(members);
+  
+  const conditions = [];
+  if (filters?.search) {
+    conditions.push(
+      or(
+        like(members.name, `%${filters.search}%`),
+        like(members.email, `%${filters.search}%`)
+      )
+    );
+  }
+  if (filters?.status) {
+    conditions.push(eq(members.status, filters.status));
+  }
+  if (filters?.membershipTier) {
+    conditions.push(eq(members.membershipTier, filters.membershipTier));
+  }
+  
+  if (conditions.length > 0) {
+    query = query.where(and(...conditions)) as any;
+  }
+  
+  return await query.orderBy(desc(members.joinDate));
+}
+
+export async function getMemberById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(members).where(eq(members.id, id)).limit(1);
+  return result[0];
+}
+
+export async function getMembersByStatus(status: Member["status"]) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(members).where(eq(members.status, status)).orderBy(desc(members.joinDate));
+}
+
+export async function getMembersByTier(tier: Member["membershipTier"]) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(members).where(eq(members.membershipTier, tier)).orderBy(desc(members.joinDate));
+}
+
+export async function createMember(member: InsertMember) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(members).values(member);
+  return Number(result[0].insertId);
+}
+
+export async function updateMember(id: number, updates: Partial<InsertMember>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(members).set(updates).where(eq(members.id, id));
+}
+
+export async function getMemberStats() {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const stats = await db
+    .select({
+      totalMembers: sql<number>`COUNT(*)`,
+      activeMembers: sql<number>`SUM(CASE WHEN ${members.status} = 'active' THEN 1 ELSE 0 END)`,
+      allAccessCount: sql<number>`SUM(CASE WHEN ${members.membershipTier} = 'all_access_aces' THEN 1 ELSE 0 END)`,
+      swingSaversCount: sql<number>`SUM(CASE WHEN ${members.membershipTier} = 'swing_savers' THEN 1 ELSE 0 END)`,
+      golfVxProCount: sql<number>`SUM(CASE WHEN ${members.membershipTier} = 'golf_vx_pro' THEN 1 ELSE 0 END)`,
+      totalLifetimeValue: sql<string>`SUM(${members.lifetimeValue})`,
+    })
+    .from(members);
+  
+  return stats[0];
+}
+
+// ============= Revenue Functions =============
+
+export async function getRevenueByDateRange(startDate: Date, endDate: Date) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db
+    .select()
+    .from(revenue)
+    .where(
+      and(
+        gte(revenue.date, startDate),
+        lte(revenue.date, endDate)
+      )
+    )
+    .orderBy(revenue.date);
+}
+
+export async function getRevenueBySource(source: Revenue["source"], startDate: Date, endDate: Date) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db
+    .select()
+    .from(revenue)
+    .where(
+      and(
+        eq(revenue.source, source),
+        gte(revenue.date, startDate),
+        lte(revenue.date, endDate)
+      )
+    )
+    .orderBy(revenue.date);
+}
+
+export async function createRevenue(revenueData: InsertRevenue) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(revenue).values(revenueData);
+  return Number(result[0].insertId);
+}
+
+export async function getRevenueSummary(startDate: Date, endDate: Date) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const summary = await db
+    .select({
+      source: revenue.source,
+      totalRevenue: sql<string>`SUM(${revenue.amount})`,
+      transactionCount: sql<number>`COUNT(*)`,
+    })
+    .from(revenue)
+    .where(
+      and(
+        gte(revenue.date, startDate),
+        lte(revenue.date, endDate)
+      )
+    )
+    .groupBy(revenue.source);
+  
+  return summary;
+}
+
+export async function getTotalRevenue(startDate: Date, endDate: Date) {
+  const db = await getDb();
+  if (!db) return "0";
+  
+  const result = await db
+    .select({
+      total: sql<string>`SUM(${revenue.amount})`,
+    })
+    .from(revenue)
+    .where(
+      and(
+        gte(revenue.date, startDate),
+        lte(revenue.date, endDate)
+      )
+    );
+  
+  return result[0]?.total || "0";
+}
+
+// ============= Task Functions =============
+
+export async function getAllTasks() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(tasks).orderBy(desc(tasks.dueDate));
+}
+
+export async function getTasksByCampaign(campaignId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(tasks).where(eq(tasks.campaignId, campaignId)).orderBy(tasks.dueDate);
+}
+
+export async function getTasksByStatus(completed: boolean) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(tasks).where(eq(tasks.completed, completed)).orderBy(tasks.dueDate);
+}
+
+export async function upsertTask(task: InsertTask) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const existing = await db.select().from(tasks).where(eq(tasks.asanaId, task.asanaId)).limit(1);
+  
+  if (existing.length > 0) {
+    await db.update(tasks).set(task).where(eq(tasks.asanaId, task.asanaId));
+    return existing[0].id;
+  } else {
+    const result = await db.insert(tasks).values(task);
+    return Number(result[0].insertId);
+  }
+}
+
+// ============= Report Functions =============
+
+export async function getAllReports() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(reports).orderBy(desc(reports.createdAt));
+}
+
+export async function getReportById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(reports).where(eq(reports.id, id)).limit(1);
+  return result[0];
+}
+
+export async function createReport(report: InsertReport) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(reports).values(report);
+  return Number(result[0].insertId);
+}
+
+// ============= Campaign Expense Functions =============
+
+export async function getCampaignExpenses(campaignId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(campaignExpenses)
+    .where(eq(campaignExpenses.campaignId, campaignId))
+    .orderBy(desc(campaignExpenses.date));
+}
+
+export async function createCampaignExpense(expense: InsertCampaignExpense) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(campaignExpenses).values(expense);
+  return Number(result[0].insertId);
+}
+
+export async function updateCampaignExpense(id: number, expense: Partial<InsertCampaignExpense>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(campaignExpenses).set(expense).where(eq(campaignExpenses.id, id));
+}
+
+export async function deleteCampaignExpense(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.delete(campaignExpenses).where(eq(campaignExpenses.id, id));
+}
+
+export async function getTotalCampaignExpenses(campaignId: number) {
+  const db = await getDb();
+  if (!db) return "0";
+  
+  const result = await db.select({
+    total: sql<string>`COALESCE(SUM(${campaignExpenses.amount}), 0)`
+  })
+    .from(campaignExpenses)
+    .where(eq(campaignExpenses.campaignId, campaignId));
+  
+  return result[0]?.total || "0";
+}
+
+// ============= Campaign Budget Functions =============
+
+export async function updateCampaignBudget(
+  campaignId: number,
+  budget: string,
+  metaAdsBudget?: string
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const updateData: any = { budget };
+  if (metaAdsBudget !== undefined) {
+    updateData.metaAdsBudget = metaAdsBudget;
+  }
+  
+  await db.update(campaigns).set(updateData).where(eq(campaigns.id, campaignId));
+}
+
+export async function syncMetaAdsSpend(campaignId: number, metaAdsSpend: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Get manual expenses total
+  const manualExpenses = await getTotalCampaignExpenses(campaignId);
+  
+  // Calculate total actual spend (Meta Ads + manual expenses)
+  const totalSpend = (parseFloat(metaAdsSpend) + parseFloat(manualExpenses)).toFixed(2);
+  
+  await db.update(campaigns).set({
+    metaAdsSpend,
+    actualSpend: totalSpend
+  }).where(eq(campaigns.id, campaignId));
+}
+
+export async function linkMetaAdsCampaign(campaignId: number, metaAdsCampaignId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(campaigns).set({
+    metaAdsCampaignId
+  }).where(eq(campaigns.id, campaignId));
+}
+
+export async function deleteMember(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.delete(members).where(eq(members.id, id));
+}
+
+export async function getMemberSegments() {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const stats = await db
+    .select({
+      status: members.status,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(members)
+    .groupBy(members.status);
+  
+  return {
+    byStatus: stats,
+    highValue: await db.select().from(members).where(gte(members.lifetimeValue, "1000")).orderBy(desc(members.lifetimeValue)).limit(10),
+    atRisk: await db.select().from(members).where(and(eq(members.status, "active"), lte(members.lastVisitDate, sql`DATE_SUB(NOW(), INTERVAL 30 DAY)`))).limit(10),
+  };
+}
+
+// ============= Strategic Campaigns Functions =============
+
+export async function getStrategicCampaignsOverview() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Get all programs with their strategic campaign mappings
+  const programsWithCampaigns = await db
+    .select({
+      programId: campaigns.id,
+      programName: campaigns.name,
+      programStatus: campaigns.status,
+      programBudget: campaigns.budget,
+      programSpend: campaigns.actualSpend,
+      programRevenue: campaigns.actualRevenue,
+      strategicCampaign: programCampaigns.strategicCampaign,
+    })
+    .from(campaigns)
+    .leftJoin(programCampaigns, eq(campaigns.id, programCampaigns.programId));
+  
+  // Define strategic campaigns
+  const strategicCampaigns = [
+    { 
+      id: "trial_conversion", 
+      name: "Trial Conversion", 
+      description: "Converting prospects into paying members through trial sessions and clinics",
+      color: "emerald"
+    },
+    { 
+      id: "membership_acquisition", 
+      name: "Membership Acquisition", 
+      description: "Annual and monthly membership promotions and giveaways",
+      color: "pink"
+    },
+    { 
+      id: "member_retention", 
+      name: "Member Retention", 
+      description: "Drive days, tournaments, and community engagement events",
+      color: "blue"
+    },
+    { 
+      id: "corporate_events", 
+      name: "B2B Sales", 
+      description: "Corporate bookings and business-to-business partnerships",
+      color: "amber"
+    }
+  ];
+  
+  return Promise.all(strategicCampaigns.map(async (campaign) => {
+    // Filter programs that support this strategic campaign
+    const supportingPrograms = programsWithCampaigns.filter(
+      p => p.strategicCampaign === campaign.id
+    );
+    
+    // Aggregate metrics (avoid double-counting programs with multiple campaign associations)
+    const uniquePrograms = new Map();
+    supportingPrograms.forEach(p => {
+      if (!uniquePrograms.has(p.programId)) {
+        uniquePrograms.set(p.programId, p);
+      }
+    });
+    
+    const programs = Array.from(uniquePrograms.values());
+    
+    const totalBudget = programs.reduce((sum, p) => sum + Number(p.programBudget || 0), 0);
+    const totalSpend = programs.reduce((sum, p) => sum + Number(p.programSpend || 0), 0);
+    const totalRevenue = programs.reduce((sum, p) => sum + Number(p.programRevenue || 0), 0);
+    
+    const activePrograms = programs.filter(p => p.programStatus === "active").length;
+    const completedPrograms = programs.filter(p => p.programStatus === "completed").length;
+    
+    const roi = totalSpend > 0 ? ((totalRevenue - totalSpend) / totalSpend) * 100 : 0;
+    
+    // Get landing page URL from the first supporting program (if any)
+    const landingPageUrl = programs.length > 0 && programs[0].programId
+      ? (await db.select({ landingPageUrl: campaigns.landingPageUrl })
+          .from(campaigns)
+          .where(eq(campaigns.id, programs[0].programId))
+          .limit(1))[0]?.landingPageUrl
+      : null;
+
+    return {
+      id: campaign.id,
+      name: campaign.name,
+      description: campaign.description,
+      color: campaign.color,
+      totalPrograms: programs.length,
+      activePrograms,
+      completedPrograms,
+      totalBudget,
+      totalSpend,
+      totalRevenue,
+      roi,
+      landingPageUrl: landingPageUrl || null,
+      programs: programs.map(p => ({
+        id: p.programId,
+        name: p.programName,
+        status: p.programStatus,
+        budget: Number(p.programBudget || 0),
+        spend: Number(p.programSpend || 0),
+        revenue: Number(p.programRevenue || 0),
+      })),
+    };
+  }));
+}
+
+export async function getProgramCampaigns(programId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db
+    .select()
+    .from(programCampaigns)
+    .where(eq(programCampaigns.programId, programId));
+}
+
+export async function setProgramCampaigns(programId: number, strategicCampaigns: string[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Delete existing mappings
+  await db.delete(programCampaigns).where(eq(programCampaigns.programId, programId));
+  
+  // Insert new mappings
+  if (strategicCampaigns.length > 0) {
+    await db.insert(programCampaigns).values(
+      strategicCampaigns.map(sc => ({
+        programId,
+        strategicCampaign: sc as ProgramCampaign["strategicCampaign"],
+      }))
+    );
+  }
+}
+
+// ============= Landing Pages Functions =============
+
+export async function getLandingPageBySlug(slug: string) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const pages = await db
+    .select()
+    .from(landingPages)
+    .where(eq(landingPages.slug, slug))
+    .limit(1);
+  
+  return pages[0] || null;
+}
+
+export async function trackPageEvent(event: {
+  pageId: number;
+  sessionId: string;
+  eventType: string;
+  eventData?: any;
+  referrer?: string;
+  userAgent?: string;
+  ipAddress?: string;
+}) {
+  const db = await getDb();
+  if (!db) return;
+  
+  const { landingPages, pageAnalytics } = await import("../drizzle/schema");
+  
+  await db.insert(pageAnalytics).values({
+    pageId: event.pageId,
+    sessionId: event.sessionId,
+    visitorId: event.sessionId, // Use session ID as visitor ID for now
+    eventType: event.eventType as any,
+    eventData: event.eventData,
+    referrer: event.referrer,
+    userAgent: event.userAgent,
+    ipAddress: event.ipAddress,
+  });
+}
+
+export async function getPageAnalytics(pageId: number, startDate?: Date, endDate?: Date) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  let query = db
+    .select()
+    .from(pageAnalytics)
+    .where(eq(pageAnalytics.pageId, pageId));
+  
+  // Add date filters if provided
+  // TODO: Add date range filtering
+  
+  return await query;
+}
+
+// ============= Anniversary Giveaway Entry Functions =============
+
+export async function createGiveawayEntry(data: {
+  firstName?: string;
+  email: string;
+  ipAddress?: string;
+  userAgent?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(anniversaryGiveawayEntries).values(data);
+  return { id: Number(result[0].insertId) };
+}
+
+export async function updateGiveawayEntry(data: {
+  email: string;
+  fullName?: string;
+  ageRange?: string;
+  gender?: string;
+  city?: string;
+  isIllinoisResident?: boolean;
+  golfExperience?: string;
+  hasVisitedBefore?: string;
+  firstVisitMethod?: string;
+  firstVisitTime?: string;
+  visitFrequency?: string;
+  whatStoodOut?: string;
+  simulatorFamiliarity?: string;
+  interests?: string;
+  visitPurpose?: string;
+  passionStory?: string;
+  communityGrowth?: string;
+  stayConnected?: string;
+  socialMediaHandle?: string;
+  communityGroups?: string;
+  phoneNumber?: string;
+  bestTimeToCall?: string;
+  hearAbout?: string;
+  hearAboutOther?: string;
+  consentToContact?: boolean;
+  ipAddress?: string;
+  userAgent?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  // Find existing entry by email
+  const [existing] = await db
+    .select()
+    .from(anniversaryGiveawayEntries)
+    .where(eq(anniversaryGiveawayEntries.email, data.email))
+    .limit(1);
+
+  if (existing) {
+    // Update existing entry
+    await db
+      .update(anniversaryGiveawayEntries)
+      .set(data)
+      .where(eq(anniversaryGiveawayEntries.id, existing.id));
+    return { ...existing, ...data };
+  } else {
+    // Create new entry
+    const result = await db.insert(anniversaryGiveawayEntries).values(data);
+    return { id: Number(result[0].insertId), ...data };
+  }
+}
+
+export async function getAllGiveawayEntries() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db
+    .select()
+    .from(anniversaryGiveawayEntries)
+    .orderBy(desc(anniversaryGiveawayEntries.submittedAt));
+}
+
+export async function getGiveawayEntryByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const [entry] = await db
+    .select()
+    .from(anniversaryGiveawayEntries)
+    .where(eq(anniversaryGiveawayEntries.email, email))
+    .limit(1);
+  return entry;
+}
