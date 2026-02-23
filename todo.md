@@ -127,3 +127,4 @@
 
 ## Bug Fixes
 - [x] Fix Annual Giveaway page error: rclone Google Drive sync fails in deployed environment
+- [x] Import giveaway application data from Google Sheet into database (43 entries: 37 real, 6 test)
