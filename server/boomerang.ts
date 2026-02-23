@@ -90,19 +90,18 @@ async function boomerangRequest(
     return null;
   }
 
-  const url = new URL(`${BASE_URL}/${method}`);
-  url.searchParams.set("token", apiToken);
-
-  for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined && value !== null) {
-      url.searchParams.set(key, String(value));
-    }
-  }
+  const url = `${BASE_URL}/${method}`;
 
   try {
-    const response = await fetch(url.toString(), {
-      method: "GET",
-      headers: { Accept: "application/json" },
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "X-API-Key": apiToken,
+        "x-access-token": apiToken,
+      },
+      body: Object.keys(params).length > 0 ? JSON.stringify(params) : undefined,
     });
 
     if (!response.ok) {
@@ -154,12 +153,12 @@ export async function getClientList(
   page = 1
 ): Promise<BoomerangClient[]> {
   try {
-    const data = await boomerangRequest("getClientList", {
+    const data = await boomerangRequest("getClientsList", {
       idTemplate,
       page,
     });
-    if (!data || !Array.isArray(data.clients)) return [];
-    return data.clients as BoomerangClient[];
+    if (!data || !Array.isArray(data.rows)) return [];
+    return data.rows as BoomerangClient[];
   } catch (err) {
     console.error("[Boomerang] getClientList error:", err);
     return [];
@@ -202,11 +201,11 @@ export async function searchClient(
     });
     if (!data) return null;
 
-    if (Array.isArray(data.clients) && data.clients.length > 0) {
-      return data.clients[0] as BoomerangClient;
+    if (data.userID) {
+      return { id: data.userID, fName: '', sName: '', phone: '', email: '' } as BoomerangClient;
     }
-    if (data.client) {
-      return data.client as BoomerangClient;
+    if (data.result === 1 && data.userID) {
+      return { id: data.userID } as BoomerangClient;
     }
     return null;
   } catch (err) {
@@ -270,8 +269,8 @@ export async function getCardInfo(
 ): Promise<BoomerangCard | null> {
   try {
     const data = await boomerangRequest("getCardInfo", { passSerialNumber });
-    if (!data || !data.card) return null;
-    return data.card as BoomerangCard;
+    if (!data || data.error) return null;
+    return data as BoomerangCard;
   } catch (err) {
     console.error("[Boomerang] getCardInfo error:", err);
     return null;
@@ -280,9 +279,9 @@ export async function getCardInfo(
 
 export async function getCardsByEmail(email: string): Promise<BoomerangCard[]> {
   try {
-    const data = await boomerangRequest("getCardsByEmail", { email });
-    if (!data || !Array.isArray(data.cards)) return [];
-    return data.cards as BoomerangCard[];
+    const data = await boomerangRequest("getPassesByEmail", { email });
+    if (!data || !Array.isArray(data.passes)) return [];
+    return data.passes as BoomerangCard[];
   } catch (err) {
     console.error("[Boomerang] getCardsByEmail error:", err);
     return [];
@@ -291,9 +290,9 @@ export async function getCardsByEmail(email: string): Promise<BoomerangCard[]> {
 
 export async function getCardsByPhone(phone: string): Promise<BoomerangCard[]> {
   try {
-    const data = await boomerangRequest("getCardsByPhone", { phone });
-    if (!data || !Array.isArray(data.cards)) return [];
-    return data.cards as BoomerangCard[];
+    const data = await boomerangRequest("getPassesByPhone", { phone });
+    if (!data || !Array.isArray(data.passes)) return [];
+    return data.passes as BoomerangCard[];
   } catch (err) {
     console.error("[Boomerang] getCardsByPhone error:", err);
     return [];
@@ -305,8 +304,8 @@ export async function getCardOperations(
 ): Promise<any[]> {
   try {
     const data = await boomerangRequest("getCardOperations", { passSerialNumber });
-    if (!data || !Array.isArray(data.operations)) return [];
-    return data.operations;
+    if (!data || !Array.isArray(data.rows)) return [];
+    return data.rows;
   } catch (err) {
     console.error("[Boomerang] getCardOperations error:", err);
     return [];
@@ -320,9 +319,9 @@ export async function getTemplateCardStatus(
     const data = await boomerangRequest("getTemplateCardStatus", { idTemplate });
     if (!data) return { installed: 0, notInstalled: 0, deleted: 0 };
     return {
-      installed: data.installed ?? 0,
-      notInstalled: data.notInstalled ?? 0,
-      deleted: data.deleted ?? 0,
+      installed: data.installed ?? data.Installed ?? 0,
+      notInstalled: data.notInstalled ?? data.NotInstalled ?? data["not installed"] ?? 0,
+      deleted: data.deleted ?? data.Deleted ?? 0,
     };
   } catch (err) {
     console.error("[Boomerang] getTemplateCardStatus error:", err);
@@ -340,10 +339,11 @@ export async function sendPushToClient(
 ): Promise<boolean> {
   try {
     const data = await boomerangRequest("sendPush", {
+      pushSegment: "oneClient",
       passSerialNumber,
-      message,
+      messageText: message,
     });
-    return data?.error === 0 || data?.success === true;
+    return data?.result === 1;
   } catch (err) {
     console.error("[Boomerang] sendPushToClient error:", err);
     return false;
@@ -355,12 +355,24 @@ export async function sendPushToAll(
   message: string
 ): Promise<number> {
   try {
-    const data = await boomerangRequest("sendPushToAll", {
-      idTemplate,
-      message,
-    });
-    if (!data) return 0;
-    return data.count ?? data.sent ?? 0;
+    // sendPush with allClients segment, paginated (10 per call)
+    let totalSent = 0;
+    let page = 1;
+    while (true) {
+      const data = await boomerangRequest("sendPush", {
+        pushSegment: "allClients",
+        idTemplate,
+        messageText: message,
+        page,
+      });
+      if (!data) break;
+      const sent = data.numberOfRowsSelected ?? 0;
+      totalSent += sent;
+      if (sent < 10) break;
+      page++;
+      if (page > 1000) break; // safety limit
+    }
+    return totalSent;
   } catch (err) {
     console.error("[Boomerang] sendPushToAll error:", err);
     return 0;

@@ -176,3 +176,10 @@
 - [x] Verify Campaign HQ shows live Meta Ads spend ($282 Trial, $464 Membership, $75 Retention)
 - [x] Verify Meta Ads tab shows all 5 campaigns ($821.59 total spend, 117K impressions)
 - [x] Verify Programs page shows 9 programs with $1,262.79 total spend
+
+## Boomerang API Token Setup
+- [x] Set BOOMERANG_API_TOKEN environment variable
+- [x] Verify Boomerang API connection with live data (2 vitest tests passing)
+- [x] Fix API endpoint names (getClientsList not getClientList, getPassesByEmail/Phone, sendPush with pushSegment)
+- [x] Fix auth headers (X-API-Key + x-access-token, JSON body instead of query params)
+- [x] Confirm Boomerang Members tab shows real membership data (81 Swing Savers members with full contact info)
