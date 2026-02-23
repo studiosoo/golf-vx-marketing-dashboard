@@ -87,12 +87,12 @@
 - [x] All existing page content preserved, just reorganized
 
 ## Members Data Integration & Email Capture System
-- [ ] Analyze current Members/Encharge/Acuity errors
-- [ ] Design unified contact/lead DB schema (email captures, social media leads, form submissions)
+- [x] Analyze current Members/Encharge/Acuity errors
+- [x] Design unified contact/lead DB schema (email captures, social media leads, form submissions)
 - [ ] Encharge API integration fix (member sync, subscriber data)
 - [ ] Acuity Scheduling integration fix (appointment/booking data sync)
-- [ ] Email capture form data pipeline (social media, website forms → DB)
-- [ ] Prepare Genspark Sonnet 4.6 delegation prompt package
+- [x] Email capture form data pipeline (social media, website forms → DB)
+- [x] Prepare Genspark Sonnet 4.6 delegation prompt package
 
 ## Bug Fixes
 - [x] Fix Encharge API JWT token error on Channels > Meta Ads page
@@ -104,3 +104,38 @@
 - [x] Set ENCHARGE_WRITE_KEY environment variable
 - [x] Verify Encharge API connection test passes (5/5 tests pass, real data confirmed)
 - [x] Confirm Encharge data displays correctly in dashboard
+
+## Boomerang Membership Integration
+- [x] Login to Boomerang and analyze membership data structure
+- [x] Document Boomerang fields (plan types, status values, expiration dates, etc.)
+- [x] Include Boomerang data schema in Genspark prompt
+- [x] server/boomerang.ts — Boomerang API client (getTemplates, getAllMembers, getCardInfo, sendPush)
+- [x] BoomerangMembersTab.tsx — UI with summary cards, template selector, member table, push notifications
+- [x] boomerang tRPC router (getTemplates, getAllMembers, syncMembers, getCardInfo, sendPush)
+
+## Twilio SMS/Email Integration
+- [x] Include Twilio SMS/Email sending utilities in Genspark prompt
+- [x] Include message history DB schema in Genspark prompt
+- [x] Include recipient selection UI component in Genspark prompt
+- [x] server/twilio.ts — Twilio SMS + SendGrid email module with DB logging
+- [x] communication_logs DB table (channel, status, cost tracking)
+- [x] CommunicationPanel.tsx — SMS/Email composer with history viewer
+- [x] communication tRPC router (sendSMS, sendEmail, getHistory, getStats)
+
+## Updated Genspark Prompt Package v2
+- [x] Prepare comprehensive Genspark prompt with Boomerang + Encharge + Twilio + Email Capture
+
+## Genspark Code Integration (FOR_MANUS.md)
+- [x] email_captures DB table (source, status, Encharge sync tracking)
+- [x] communication_logs DB table (channel, direction, cost, campaign tracking)
+- [x] server/boomerang.ts — Boomerang API client module
+- [x] server/enchargeSync.ts — Encharge bidirectional sync module
+- [x] server/twilio.ts — Twilio SMS + SendGrid email module
+- [x] emailCapture tRPC router (list, getById, create, update, updateStatus, delete, bulkImport, syncToEncharge, pullFromEncharge)
+- [x] boomerang tRPC router (getTemplates, getAllMembers, syncMembers, getCardInfo, sendPush)
+- [x] communication tRPC router (sendSMS, sendEmail, getHistory, getStats)
+- [x] EmailCapturesTab.tsx — Leads management with filters, CSV import, Encharge sync
+- [x] CommunicationPanel.tsx — SMS/Email composer with history viewer
+- [x] BoomerangMembersTab.tsx — Boomerang members with summary cards, push notifications
+- [x] Members.tsx — Wired new tabs (Email Captures, Boomerang) into existing tab structure
+- [x] 20 vitest integration tests passing (emailCapture CRUD, boomerang API, communication history, schema validation)
