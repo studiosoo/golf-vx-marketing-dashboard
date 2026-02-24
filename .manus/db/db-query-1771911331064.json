@@ -1,0 +1,80 @@
+{
+  "query": "SELECT id, name, status, metaAdsCampaignId, budget, actualSpend, category, type FROM campaigns ORDER BY id",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2R3ugynrRDzjYQU.e9d0c4c091a8 --database A5GjFitCrpqWQ2wnoTJiWm --execute SELECT id, name, status, metaAdsCampaignId, budget, actualSpend, category, type FROM campaigns ORDER BY id",
+  "rows": [
+    {
+      "id": "1",
+      "name": "PBGA Junior Summer Camp",
+      "status": "active",
+      "metaAdsCampaignId": "120239269191520217",
+      "budget": "100.00",
+      "actualSpend": "293.16",
+      "category": "trial_conversion",
+      "type": "pbga_programs"
+    },
+    {
+      "id": "2",
+      "name": "Sunday Clinic",
+      "status": "active",
+      "metaAdsCampaignId": "NULL",
+      "budget": "500.00",
+      "actualSpend": "120.00",
+      "category": "trial_conversion",
+      "type": "trial_conversion"
+    },
+    {
+      "id": "3",
+      "name": "PBGA Winter Clinic",
+      "status": "completed",
+      "metaAdsCampaignId": "NULL",
+      "budget": "300.00",
+      "actualSpend": "266.00",
+      "category": "trial_conversion",
+      "type": "pbga_programs"
+    },
+    {
+      "id": "4",
+      "name": "$25 1-Hour Trial Session",
+      "status": "active",
+      "metaAdsCampaignId": "NULL",
+      "budget": "200.00",
+      "actualSpend": "55.20",
+      "category": "trial_conversion",
+      "type": "trial_conversion"
+    },
+    {
+      "id": "5",
+      "name": "Annual Membership Giveaway",
+      "status": "active",
+      "metaAdsCampaignId": "120239570172470217,120239627905950217",
+      "budget": "3000.00",
+      "actualSpend": "467.59",
+      "category": "membership_acquisition",
+      "type": "membership_acquisition"
+    },
+    {
+      "id": "7",
+      "name": "Instagram Follower Growth",
+      "status": "completed",
+      "metaAdsCampaignId": "120238971719500217",
+      "budget": "200.00",
+      "actualSpend": "43.24",
+      "category": "membership_acquisition",
+      "type": "event_specific"
+    },
+    {
+      "id": "30001",
+      "name": "Superbowl Watch Party",
+      "status": "completed",
+      "metaAdsCampaignId": "120238976291690217",
+      "budget": "100.00",
+      "actualSpend": "75.43",
+      "category": "member_retention",
+      "type": "event_specific"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tstatus\tmetaAdsCampaignId\tbudget\tactualSpend\tcategory\ttype\n1\tPBGA Junior Summer Camp\tactive\t120239269191520217\t100.00\t293.16\ttrial_conversion\tpbga_programs\n2\tSunday Clinic\tactive\tNULL\t500.00\t120.00\ttrial_conversion\ttrial_conversion\n3\tPBGA Winter Clinic\tcompleted\tNULL\t300.00\t266.00\ttrial_conversion\tpbga_programs\n4\t$25 1-Hour Trial Session\tactive\tNULL\t200.00\t55.20\ttrial_conversion\ttrial_conversion\n5\tAnnual Membership Giveaway\tactive\t120239570172470217,120239627905950217\t3000.00\t467.59\tmembership_acquisition\tmembership_acquisition\n7\tInstagram Follower Growth\tcompleted\t120238971719500217\t200.00\t43.24\tmembership_acquisition\tevent_specific\n30001\tSuperbowl Watch Party\tcompleted\t120238976291690217\t100.00\t75.43\tmember_retention\tevent_specific\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}
