@@ -177,3 +177,10 @@
 - [x] Test template ID 497225 → All-Access Aces 325 ✓
 - [x] Write 9 vitest unit tests (all passing)
 - [x] TypeScript: 0 errors
+
+## Navigation Structure Update (2026-02-24)
+- [x] Replace App.tsx with new routing (collapsible sections + backward-compat aliases)
+- [x] Replace DashboardLayout.tsx with new grouped sidebar navigation
+- [x] Add new page stubs: AIActions, AccountSettings, Announcements, Automations, DripCampaigns, Guests, Integrations, Leads, Leagues, NewsManager, Overview, Performance, PrivateEvents, SiteControl
+- [x] TypeScript: 0 errors
+- [x] Dev server: 200 OK
