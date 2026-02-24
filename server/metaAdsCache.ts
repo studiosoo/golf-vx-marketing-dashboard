@@ -31,6 +31,15 @@ interface CachedInsight {
   cost_per_action_type?: Array<{ action_type: string; value: string }>;
   date_start?: string;
   date_stop?: string;
+  // Campaign metadata fields (populated by MCP refresh)
+  status?: string;
+  objective?: string;
+  daily_budget?: string;
+  created_time?: string;
+  updated_time?: string;
+  frequency?: string;
+  inline_link_clicks?: string;
+  account_id?: string;
 }
 
 const CACHE_FILE_PATH = path.join(process.cwd(), '.meta-ads-cache', 'insights.json');
@@ -61,6 +70,22 @@ export function readMetaAdsCache(): CachedInsight[] {
   } catch (error) {
     console.error('Error reading Meta Ads cache:', error);
     return [];
+  }
+}
+
+/**
+ * Write data to cache file
+ */
+export function writeMetaAdsCache(data: CachedInsight[]): void {
+  try {
+    const cacheDir = path.dirname(CACHE_FILE_PATH);
+    if (!fs.existsSync(cacheDir)) {
+      fs.mkdirSync(cacheDir, { recursive: true });
+    }
+    fs.writeFileSync(CACHE_FILE_PATH, JSON.stringify(data, null, 2));
+    console.log(`[Meta Ads Cache] Written ${data.length} campaigns to cache`);
+  } catch (error) {
+    console.error('Error writing Meta Ads cache:', error);
   }
 }
 
@@ -103,9 +128,27 @@ export function getCampaignInsightsFromCache(
 }
 
 /**
- * Get all campaigns with insights from cache
+ * Get campaign metadata from cache (status, objective, etc.)
  */
-export function getAllCampaignsFromCache(): MetaAdInsights[] {
+export function getCampaignMetadataFromCache(campaignId: string) {
+  const cacheData = readMetaAdsCache();
+  const cached = cacheData.find((item) => item.campaign_id === campaignId);
+  
+  if (!cached) return null;
+  
+  return {
+    status: cached.status || 'UNKNOWN',
+    objective: cached.objective || 'UNKNOWN',
+    daily_budget: cached.daily_budget || '',
+    created_time: cached.created_time || '',
+    updated_time: cached.updated_time || '',
+  };
+}
+
+/**
+ * Get all campaigns with insights from cache (includes status/objective)
+ */
+export function getAllCampaignsFromCache(): (MetaAdInsights & { status?: string; objective?: string })[] {
   const cacheData = readMetaAdsCache();
   
   return cacheData.map((cached) => {
@@ -126,6 +169,8 @@ export function getAllCampaignsFromCache(): MetaAdInsights[] {
       cost_per_conversion: leadCostAction?.value,
       date_start: cached.date_start || '',
       date_stop: cached.date_stop || '',
+      status: cached.status,
+      objective: cached.objective,
     };
   });
 }

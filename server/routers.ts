@@ -1102,8 +1102,8 @@ export const appRouter = router({
             return cachedData.map(c => ({
               id: c.campaign_id,
               name: c.campaign_name,
-              status: "ACTIVE" as const,
-              objective: "OUTCOME_AWARENESS" as const,
+              status: c.status || "UNKNOWN",
+              objective: c.objective || "UNKNOWN",
               created_time: c.date_start || "",
               updated_time: c.date_stop || "",
               insights: {

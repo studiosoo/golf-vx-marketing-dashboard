@@ -128,3 +128,11 @@
 ## Bug Fixes
 - [x] Fix Annual Giveaway page error: rclone Google Drive sync fails in deployed environment
 - [x] Import giveaway application data from Google Sheet into database (43 entries: 37 real, 6 test)
+- [x] Verify all Meta Ads data is reflecting live in the dashboard
+- [x] Check Meta Ads API connectivity and campaign data accuracy
+- [x] Mark Superbowl Watch Party as completed in dashboard
+- [x] Mark IG $100 Giveaway as completed in dashboard
+- [x] Update Meta Ads cache with correct statuses
+- [x] Clean up fake Meta IDs from programs without real ads
+- [x] Update Meta Ads spend values from live MCP data
+- [x] Prepare Sonnet 4.6 handoff package with full code and instructions (SONNET_HANDOFF.md)

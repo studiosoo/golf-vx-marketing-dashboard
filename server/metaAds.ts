@@ -190,14 +190,27 @@ export async function getAllCampaignsWithInsights(datePreset: string = "last_30d
   const allInsights = readMetaAdsCache();
   
   // Transform cache data to match expected campaign format
-  const campaignsWithInsights = allInsights.map((insight) => ({
+  // Status and objective are now stored in the cache from MCP refresh
+  const campaignsWithInsights = allInsights.map((insight: any) => ({
     id: insight.campaign_id,
     name: insight.campaign_name,
-    status: "ACTIVE", // Cache doesn't have status, assume active
-    objective: "OUTCOME_AWARENESS", // Default objective
-    created_time: "",
-    updated_time: "",
-    insights: insight,
+    status: insight.status || "UNKNOWN",
+    objective: insight.objective || "UNKNOWN",
+    created_time: insight.created_time || "",
+    updated_time: insight.updated_time || "",
+    insights: {
+      campaign_id: insight.campaign_id || "",
+      campaign_name: insight.campaign_name || "",
+      impressions: insight.impressions || "0",
+      clicks: insight.clicks || "0",
+      spend: insight.spend || "0",
+      reach: insight.reach || "0",
+      cpc: insight.cpc || "0",
+      cpm: insight.cpm || "0",
+      ctr: insight.ctr || "0",
+      date_start: insight.date_start || "",
+      date_stop: insight.date_stop || "",
+    },
   }));
   
   return campaignsWithInsights;
