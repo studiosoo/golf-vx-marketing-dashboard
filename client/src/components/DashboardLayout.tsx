@@ -21,29 +21,21 @@ import {
 } from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users, Target, TrendingUp, BarChart3, DollarSign, CheckSquare, FileText, Share2, Wallet, Image, Instagram, Globe, Calendar, GanttChart, UserX, Trophy, Mail, Sparkles } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Users, Target, BarChart3, Share2, Wallet, Instagram, Sparkles } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "Overview", path: "/" },
+  { icon: LayoutDashboard, label: "Marketing HQ", path: "/" },
   { icon: Sparkles, label: "Marketing Intelligence", path: "/marketing-intelligence" },
   { icon: Target, label: "Programs", path: "/programs" },
   { icon: BarChart3, label: "Strategic Campaigns", path: "/strategic-campaigns" },
-  { icon: Trophy, label: "Annual Giveaway", path: "/annual-giveaway" },
-  { icon: TrendingUp, label: "ROI Analytics", path: "/roi" },
   { icon: Share2, label: "Meta Ads", path: "/meta-ads" },
-  { icon: Mail, label: "Email Marketing", path: "/email-marketing" },
   { icon: Wallet, label: "Budget Manager", path: "/budget" },
-  { icon: Image, label: "Program Visuals", path: "/campaign-visuals" },
-  { icon: Calendar, label: "Calendar", path: "/calendar" },
-  { icon: GanttChart, label: "Timeline", path: "/timeline" },
   { icon: Instagram, label: "Instagram", path: "/instagram" },
   { icon: Users, label: "Members", path: "/members" },
-  { icon: DollarSign, label: "Revenue", path: "/revenue" },
-  { icon: FileText, label: "Reports", path: "/reports" },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";

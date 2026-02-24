@@ -136,3 +136,5 @@
 - [x] Clean up fake Meta IDs from programs without real ads
 - [x] Update Meta Ads spend values from live MCP data
 - [x] Prepare Sonnet 4.6 handoff package with full code and instructions (SONNET_HANDOFF.md)
+- [x] Remove unnecessary sidebar tabs (Annual Giveaway, ROI Analytics, Email Marketing, Program Visuals, Calendar, Timeline, Revenue, Reports)
+- [x] Rename and simplify Home page to "Marketing HQ" with clean summary cards and quick navigation

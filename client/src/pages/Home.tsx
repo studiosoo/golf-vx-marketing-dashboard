@@ -1,22 +1,18 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
-import { TrendingUp, TrendingDown, Target, DollarSign, BarChart3, Loader2, ChevronRight, RefreshCw } from "lucide-react";
+import { Target, DollarSign, BarChart3, Loader2, ChevronRight, RefreshCw, Users, Sparkles, Share2, Wallet } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { ActionCenter } from "@/components/ActionCenter";
-import AlertsBanner from "@/components/AlertsBanner";
 
 export default function Home() {
   const { data: categories, isLoading } = trpc.campaigns.getCategorySummary.useQuery();
-  const { data: kpiData } = trpc.intelligence.getStrategicKPIs.useQuery();
   const syncMutation = trpc.autonomous.syncAllData.useMutation();
   const utils = trpc.useUtils();
 
   const handleSync = async () => {
     try {
       await syncMutation.mutateAsync();
-      // Invalidate all queries to refetch fresh data
       utils.invalidate();
       alert("All marketing data synced successfully!");
     } catch (error: any) {
@@ -33,20 +29,6 @@ export default function Home() {
     }).format(value);
   };
 
-  const formatPercent = (value: number) => {
-    return `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`;
-  };
-
-  const getCategoryColor = (categoryId: string) => {
-    const colors: Record<string, string> = {
-      trial_conversion: "oklch(0.65 0.25 142)", // Green
-      membership_acquisition: "oklch(0.70 0.20 30)", // Pink/Red
-      member_retention: "oklch(0.60 0.20 250)", // Blue
-      corporate_events: "oklch(0.65 0.20 60)", // Yellow/Gold
-    };
-    return colors[categoryId] || "oklch(0.60 0.15 200)";
-  };
-
   if (isLoading) {
     return (
       <DashboardLayout>
@@ -57,6 +39,12 @@ export default function Home() {
     );
   }
 
+  // Calculate totals from categories
+  const totalSpend = categories?.reduce((sum, c) => sum + c.totalSpend, 0) ?? 0;
+  const totalBudget = categories?.reduce((sum, c) => sum + c.totalBudget, 0) ?? 0;
+  const totalActiveCampaigns = categories?.reduce((sum, c) => sum + c.activeCampaigns, 0) ?? 0;
+  const totalCompletedCampaigns = categories?.reduce((sum, c) => sum + c.completedCampaigns, 0) ?? 0;
+
   return (
     <DashboardLayout>
       <div className="space-y-8 p-6">
@@ -64,10 +52,10 @@ export default function Home() {
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-4xl font-bold tracking-tight text-foreground">
-              Marketing <span className="text-primary">Control Tower</span>
+              Marketing <span className="text-primary">HQ</span>
             </h1>
             <p className="text-muted-foreground mt-2 text-lg">
-              Strategic campaigns aligned with Asana Marketing Master Timeline
+              Golf VX Arlington Heights — Campaign Command Center
             </p>
           </div>
           <Button
@@ -82,327 +70,156 @@ export default function Home() {
           </Button>
         </div>
 
-        {/* Meta Ads Performance Alerts */}
-        <AlertsBanner />
-        
-        {/* Seasonal Membership Alert (Apr-May critical window) */}
-        {(() => {
-          const currentMonth = new Date().getMonth() + 1;
-          if (currentMonth === 4 || currentMonth === 5) {
-            const weeksUntilJune = currentMonth === 4 ? 8 : 4;
-            return (
-              <Card className="border-orange-300 dark:border-orange-700 bg-gradient-to-r from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20">
-                <CardContent className="pt-6">
-                  <div className="flex items-start gap-4">
-                    <div className="text-3xl">🚨</div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold text-orange-900 dark:text-orange-200 mb-2">
-                        Pre-Summer Critical Window: {weeksUntilJune} Weeks Until June Churn Season
-                      </h3>
-                      <p className="text-sm text-orange-800 dark:text-orange-300 mb-3">
-                        Current pace needs to accelerate to protect year-end goal of 300 members. 
-                        Summer months (Jun-Aug) typically see net member loss. Maximize acquisition NOW.
-                      </p>
-                      <div className="flex gap-3">
-                        <Link href="/programs">
-                          <Button size="sm" variant="default" className="bg-orange-600 hover:bg-orange-700">
-                            View Membership Programs
-                          </Button>
-                        </Link>
-                        <Link href="/marketing-intelligence">
-                          <Button size="sm" variant="outline" className="border-orange-600 text-orange-600 hover:bg-orange-50">
-                            Get AI Recommendations
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          }
-          return null;
-        })()}
-        
-        {/* Action Center - AI-powered alerts and recommendations */}
-        <ActionCenter />
-
-        {/* Campaign Categories Grid */}
-        <div className="grid gap-6 md:grid-cols-2">
-          {categories?.map((category) => {
-            const categoryColor = getCategoryColor(category.id);
-            const roiPositive = category.roi >= 0;
-
-            return (
-              <Card
-                key={category.id}
-                className="bg-card border-2 hover:border-primary/50 transition-all cursor-pointer group relative overflow-hidden"
-                style={{
-                  borderColor: `color-mix(in oklch, ${categoryColor} 30%, transparent)`,
-                }}
-              >
-                {/* Category Color Accent */}
-                <div
-                  className="absolute top-0 left-0 right-0 h-1.5"
-                  style={{ backgroundColor: categoryColor }}
-                />
-
-                <Link href={`/category/${category.id}`}>
-                  <CardHeader className="pb-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
-                          {category.name}
-                        </CardTitle>
-                        <CardDescription className="mt-1.5 text-sm">
-                          {category.description}
-                        </CardDescription>
-                      </div>
-                      <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                    </div>
-                  </CardHeader>
-
-                  <CardContent className="space-y-6">
-                    {/* Campaign Count */}
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Promotions</span>
-                      <span className="font-semibold text-foreground">
-                        {category.activeCampaigns} active • {category.completedCampaigns} completed
-                      </span>
-                    </div>
-
-                    {/* Financial Metrics */}
-                    <div className="grid grid-cols-2 gap-4">
-                      {/* Total Spend */}
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-1.5">
-                          <BarChart3 className="h-3.5 w-3.5 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">Total Spend</span>
-                        </div>
-                        <div className="text-lg font-bold text-foreground">
-                          {formatCurrency(category.totalSpend)}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          Meta Ads: {formatCurrency(category.totalMetaAdsSpend)}
-                        </div>
-                      </div>
-
-                      {/* Total Revenue */}
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-1.5">
-                          <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">Total Revenue</span>
-                        </div>
-                        <div className="text-lg font-bold text-foreground">
-                          {formatCurrency(category.totalRevenue)}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          Budget: {formatCurrency(category.totalBudget)}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Goal/KPI Progress Section - Added for landing page integration */}
-                    {category.id === 'membership_acquisition' && kpiData && (
-                      <div className="pt-4 border-t border-border">
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">Membership Goal</span>
-                            <span className="font-semibold">
-                              {kpiData.membershipAcquisition.current} / {kpiData.membershipAcquisition.target} members
-                            </span>
-                          </div>
-                          <div className="w-full bg-muted rounded-full h-2">
-                            <div
-                              className="h-2 rounded-full transition-all"
-                              style={{ width: `${kpiData.membershipAcquisition.progress}%`, backgroundColor: categoryColor }}
-                            />
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            {kpiData.membershipAcquisition.progress.toFixed(1)}% to year-end target • Need{' '}
-                            {kpiData.membershipAcquisition.target - kpiData.membershipAcquisition.current} more members
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                    {category.id === 'trial_conversion' && kpiData && (
-                      <div className="pt-4 border-t border-border">
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">Trial Conversion Rate</span>
-                            <span className="font-semibold">{kpiData.trialConversion.current.toFixed(1)}%</span>
-                          </div>
-                          <div className="w-full bg-muted rounded-full h-2">
-                            <div
-                              className="h-2 rounded-full transition-all"
-                              style={{ width: `${kpiData.trialConversion.progress}%`, backgroundColor: categoryColor }}
-                            />
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            Target: {kpiData.trialConversion.target}% •{' '}
-                            {kpiData.trialConversion.current < kpiData.trialConversion.target
-                              ? `${(kpiData.trialConversion.target - kpiData.trialConversion.current).toFixed(1)}% below target`
-                              : `${(kpiData.trialConversion.current - kpiData.trialConversion.target).toFixed(1)}% above target`}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                    {category.id === 'member_retention' && kpiData && (
-                      <div className="pt-4 border-t border-border">
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">Retention Rate</span>
-                            <span className={`font-semibold ${
-                              kpiData.memberRetention.current >= kpiData.memberRetention.target
-                                ? 'text-green-600 dark:text-green-400'
-                                : 'text-orange-600 dark:text-orange-400'
-                            }`}>
-                              {kpiData.memberRetention.current.toFixed(1)}%
-                            </span>
-                          </div>
-                          <div className="w-full bg-muted rounded-full h-2">
-                            <div
-                              className="h-2 rounded-full transition-all"
-                              style={{ width: `${kpiData.memberRetention.progress}%`, backgroundColor: categoryColor }}
-                            />
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            Target: {kpiData.memberRetention.target}% •{' '}
-                            {kpiData.memberRetention.current >= kpiData.memberRetention.target
-                              ? `Exceeding goal by ${(kpiData.memberRetention.current - kpiData.memberRetention.target).toFixed(1)}%`
-                              : `${(kpiData.memberRetention.target - kpiData.memberRetention.current).toFixed(1)}% below target`}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                    {category.id === 'corporate_events' && kpiData && (
-                      <div className="pt-4 border-t border-border">
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">B2B Events (This Month)</span>
-                            <span className="font-semibold">
-                              {kpiData.corporateEvents.current} / {kpiData.corporateEvents.target} events
-                            </span>
-                          </div>
-                          <div className="w-full bg-muted rounded-full h-2">
-                            <div
-                              className="h-2 rounded-full transition-all"
-                              style={{ width: `${kpiData.corporateEvents.progress}%`, backgroundColor: categoryColor }}
-                            />
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            Target: 1 event/week •{' '}
-                            {kpiData.corporateEvents.current >= kpiData.corporateEvents.target
-                              ? 'On track'
-                              : `Need ${kpiData.corporateEvents.target - kpiData.corporateEvents.current} more events`}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Visual Previews - Removed for landing page integration */}
-                    {false && category.visualPreviews && category.visualPreviews.length > 0 && (
-                      <div className="pt-4 border-t border-border">
-                        <div className="flex gap-2 overflow-x-auto">
-                          {category.visualPreviews.map((preview: any, idx: number) => {
-                            const content = (
-                              <>
-                                {preview.posterImageUrl && (
-                                  <img
-                                    src={preview.posterImageUrl}
-                                    alt={preview.campaignName}
-                                    className="h-16 w-16 object-cover rounded-md border border-border"
-                                    title={preview.campaignName}
-                                  />
-                                )}
-                                {!preview.posterImageUrl && preview.landingPageUrl && (
-                                  <img
-                                    src={preview.posterImageUrl || preview.landingPageUrl}
-                                    alt={preview.campaignName}
-                                    className="h-16 w-24 object-cover rounded-md border border-border"
-                                    title={preview.campaignName}
-                                  />
-                                )}
-                                {!preview.posterImageUrl && !preview.landingPageUrl && preview.reelThumbnailUrl && (
-                                  <img
-                                    src={preview.reelThumbnailUrl}
-                                    alt={preview.campaignName}
-                                    className="h-16 w-16 object-cover rounded-md border border-border"
-                                    title={preview.campaignName}
-                                  />
-                                )}
-                              </>
-                            );
-                            
-                            // If landing page URL exists, make it clickable with event propagation stop
-                            if (preview.landingPageUrl) {
-                              return (
-                                <div
-                                  key={idx}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    e.preventDefault();
-                                    window.open(preview.landingPageUrl, '_blank', 'noopener,noreferrer');
-                                  }}
-                                  className="flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
-                                >
-                                  {content}
-                                </div>
-                              );
-                            }
-                            
-                            return (
-                              <div key={idx} className="flex-shrink-0">
-                                {content}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* ROI Indicator */}
-                    <div className="pt-4 border-t border-border">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Target className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm font-medium text-muted-foreground">ROI</span>
-                        </div>
-                        <div className={`flex items-center gap-1.5 text-sm font-bold ${roiPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                          {roiPositive ? (
-                            <TrendingUp className="h-4 w-4" />
-                          ) : (
-                            <TrendingDown className="h-4 w-4" />
-                          )}
-                          {formatPercent(category.roi)}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Link>
-              </Card>
-            );
-          })}
+        {/* Summary Cards */}
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Target className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Active Programs</p>
+                  <p className="text-2xl font-bold">{totalActiveCampaigns}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                  <BarChart3 className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Completed</p>
+                  <p className="text-2xl font-bold">{totalCompletedCampaigns}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                  <DollarSign className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Spend</p>
+                  <p className="text-2xl font-bold">{formatCurrency(totalSpend)}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                  <Wallet className="h-5 w-5 text-orange-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Budget</p>
+                  <p className="text-2xl font-bold">{formatCurrency(totalBudget)}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Quick Actions */}
-        <Card className="bg-card border-border">
-          <CardHeader>
-            <CardTitle className="text-lg">Quick Actions</CardTitle>
-            <CardDescription>Manage programs and view detailed reports</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-3">
-            <Button variant="outline" asChild>
-              <Link href="/programs">View All Programs</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/budget">Budget Manager</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/meta-ads">Meta Ads Dashboard</Link>
-            </Button>
-          </CardContent>
-        </Card>
+        {/* Quick Navigation */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <Link href="/marketing-intelligence">
+            <Card className="hover:border-primary/50 transition-all cursor-pointer group h-full">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                    <Sparkles className="h-5 w-5 text-purple-600" />
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                </div>
+                <CardTitle className="text-lg mt-3">Marketing Intelligence</CardTitle>
+                <CardDescription>AI-powered campaign analysis, auto-optimization, and approval queue</CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href="/programs">
+            <Card className="hover:border-primary/50 transition-all cursor-pointer group h-full">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Target className="h-5 w-5 text-primary" />
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                </div>
+                <CardTitle className="text-lg mt-3">Programs</CardTitle>
+                <CardDescription>
+                  {totalActiveCampaigns} active, {totalCompletedCampaigns} completed — manage all marketing programs
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href="/meta-ads">
+            <Card className="hover:border-primary/50 transition-all cursor-pointer group h-full">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                    <Share2 className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                </div>
+                <CardTitle className="text-lg mt-3">Meta Ads</CardTitle>
+                <CardDescription>Live campaign performance, spend tracking, and optimization insights</CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href="/members">
+            <Card className="hover:border-primary/50 transition-all cursor-pointer group h-full">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="h-10 w-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                    <Users className="h-5 w-5 text-green-600" />
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                </div>
+                <CardTitle className="text-lg mt-3">Members</CardTitle>
+                <CardDescription>Member database, Acuity bookings, Boomerang loyalty, and email captures</CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href="/budget">
+            <Card className="hover:border-primary/50 transition-all cursor-pointer group h-full">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="h-10 w-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                    <Wallet className="h-5 w-5 text-orange-600" />
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                </div>
+                <CardTitle className="text-lg mt-3">Budget Manager</CardTitle>
+                <CardDescription>Track expenses, allocate budgets, and monitor spend across all programs</CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href="/strategic-campaigns">
+            <Card className="hover:border-primary/50 transition-all cursor-pointer group h-full">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="h-10 w-10 rounded-lg bg-red-500/10 flex items-center justify-center">
+                    <BarChart3 className="h-5 w-5 text-red-600" />
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                </div>
+                <CardTitle className="text-lg mt-3">Strategic Campaigns</CardTitle>
+                <CardDescription>Category-level performance view aligned with Asana Marketing Timeline</CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+        </div>
       </div>
     </DashboardLayout>
   );
