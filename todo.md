@@ -155,16 +155,25 @@
 - [ ] Update Members.tsx with 4-tab structure (Overview, Email Leads, Boomerang Cards, Communications)
 - [ ] Run TypeScript check and tests
 
-## Boomerang Webhook Integration (Express)
+## Boomerang Webhook Integration (Express) v2
 - [x] Convert Next.js webhook handler to Express format (server/boomerangWebhook.ts)
 - [x] Add Boomerang webhook columns to email_captures table (boomerang_card_status, boomerang_template_id, boomerang_template_name, boomerang_device, boomerang_installed_at, boomerang_deleted_at)
 - [x] Run DB migration for new columns via webdev_execute_sql
 - [x] Register webhook at POST /api/webhooks/boomerang in server/_core/index.ts
 - [x] Fix TypeScript errors (enchargeSubscriberId → enchargeId, name → firstName/lastName)
 - [x] Fix schema column names (createdAt/updatedAt → created_at/updated_at for email_captures)
-- [x] Test CardIssuedEvent → creates new record ✓
+- [x] v2: Dual-format payload support (full nested .data AND flat Make.com selected-fields)
+- [x] v2: Confirmed payload structure from Make.com Operation 1 screenshot
+- [x] v2: Phone normalization (13175010143 → +13175010143 Boomerang format)
+- [x] v2: Extended template map (10 membership types incl. 497225 All-Access Aces 325)
+- [x] v2: Rich tag builder (#membership-{type}, #card-installed, #apple-wallet, #utm-{source})
+- [x] v2: utm_source field support
+- [x] Test CardIssuedEvent full payload → creates new record ✓
+- [x] Test CardIssuedEvent flat payload → creates new record ✓
 - [x] Test CardInstalledEvent → updates existing record ✓
 - [x] Test CardDeletedEvent → updates with deleted status ✓
 - [x] Test unauthorized request → 401 ✓
-- [x] Write 6 vitest unit tests (all passing)
+- [x] Test phone normalization ✓
+- [x] Test template ID 497225 → All-Access Aces 325 ✓
+- [x] Write 9 vitest unit tests (all passing)
 - [x] TypeScript: 0 errors
