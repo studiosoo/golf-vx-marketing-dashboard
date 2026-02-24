@@ -26,7 +26,10 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Mail, Phone, Calendar, Upload, Users } from "lucide-react";
+import { Plus, Search, Mail, Phone, Calendar, Upload, Users, CreditCard, MessageSquare } from "lucide-react";
+import { BoomerangMembersTab } from "@/components/tabs/BoomerangMembersTab";
+import { EmailCapturesTab } from "@/components/tabs/EmailCapturesTab";
+
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Link } from "wouter";
@@ -128,6 +131,18 @@ export default function Members() {
           <TabsTrigger value="duplicates">
             <Users className="mr-2 h-4 w-4" />
             Duplicates
+          </TabsTrigger>
+          <TabsTrigger value="boomerang">
+            <CreditCard className="mr-2 h-4 w-4" />
+            Boomerang Cards
+          </TabsTrigger>
+          <TabsTrigger value="email-leads">
+            <Mail className="mr-2 h-4 w-4" />
+            Email Leads
+          </TabsTrigger>
+          <TabsTrigger value="communications">
+            <MessageSquare className="mr-2 h-4 w-4" />
+            Communications
           </TabsTrigger>
         </TabsList>
 
@@ -358,6 +373,15 @@ export default function Members() {
         <TabsContent value="duplicates">
           <DuplicatesTab />
         </TabsContent>
+        <TabsContent value="boomerang">
+          <BoomerangMembersTab />
+        </TabsContent>
+        <TabsContent value="email-leads">
+          <EmailCapturesTab />
+        </TabsContent>
+        <TabsContent value="communications">
+          <CommunicationsHistoryTab />
+        </TabsContent>
       </Tabs>
     </div>
   );
@@ -537,6 +561,75 @@ function DuplicatesTab() {
           </div>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+// Communications History Tab — shows all sent SMS/email logs
+function CommunicationsHistoryTab() {
+  const { data: logs, isLoading } = trpc.communication.getHistory.useQuery({ limit: 100 });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-xl font-semibold">Communications History</h2>
+        <p className="text-sm text-muted-foreground">All sent SMS and email messages to members and leads</p>
+      </div>
+      <Card>
+        <CardContent className="p-0">
+          {!logs || logs.data.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground">
+              <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-30" />
+              <p>No communications sent yet.</p>
+              <p className="text-xs mt-1">Messages sent via member profiles will appear here.</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Recipient</TableHead>
+                  <TableHead>Message</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Sent At</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {logs.data.map((log: any) => (
+                  <TableRow key={log.id}>
+                    <TableCell>
+                      <Badge variant={log.type === 'sms' ? 'default' : 'secondary'}>
+                        {log.type?.toUpperCase() ?? 'SMS'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      <div>{log.recipientName || '—'}</div>
+                      <div className="text-muted-foreground text-xs">{log.recipientPhone || log.recipientEmail || '—'}</div>
+                    </TableCell>
+                    <TableCell className="max-w-xs truncate text-sm">{log.message || log.body || '—'}</TableCell>
+                    <TableCell>
+                      <Badge variant={log.status === 'sent' || log.status === 'delivered' ? 'default' : 'destructive'}>
+                        {log.status || 'sent'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {log.createdAt ? format(new Date(log.createdAt), 'MMM d, yyyy h:mm a') : '—'}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

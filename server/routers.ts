@@ -27,9 +27,15 @@ import * as giveawaySync from "./giveawaySync";
 import { calculateCampaignPerformance, GOAL_TEMPLATES } from "./goalTemplates";
 import { eq, desc } from "drizzle-orm";
 import { aiRecommendations, userActions } from "../drizzle/schema";
+import { emailCaptureRouter } from "./emailCaptureRouter";
+import { boomerangRouter } from "./boomerangRouter";
+import { communicationRouter } from "./communicationRouter";
 
 export const appRouter = router({
   system: systemRouter,
+  emailCapture: emailCaptureRouter,
+  boomerang: boomerangRouter,
+  communication: communicationRouter,
   
   // Public endpoints for landing pages
   public: router({

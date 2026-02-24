@@ -138,3 +138,33 @@
 - [x] Prepare Sonnet 4.6 handoff package with full code and instructions (SONNET_HANDOFF.md)
 - [x] Remove unnecessary sidebar tabs (Annual Giveaway, ROI Analytics, Email Marketing, Program Visuals, Calendar, Timeline, Revenue, Reports)
 - [x] Rename and simplify Home page to "Marketing HQ" with clean summary cards and quick navigation
+
+## Boomerang Clients Import (report_24.02.2026.xlsx)
+- [ ] Import 1,049 Boomerang clients into members/email_captures tables
+- [ ] Map card status (installed=348, not_installed=10, deleted=691)
+- [ ] Preserve card serial numbers, device types, UTM sources
+- [ ] Verify Boomerang Members tab shows correct stats
+
+## Genspark v4 Integration (Phase 1 — Twilio A2P)
+- [ ] Install twilio and @sendgrid/mail packages
+- [ ] Create server/boomerang.ts from OUTPUT_boomerang.ts
+- [ ] Create server/enchargeSync.ts from OUTPUT_enchargeSync.ts
+- [ ] Create server/twilio.ts from OUTPUT_twilio.ts
+- [ ] Merge router additions (emailCapture, boomerang, communication) into server/routers.ts
+- [ ] Create client/src/components/tabs/ directory with EmailCapturesTab.tsx, BoomerangMembersTab.tsx, CommunicationsTab.tsx
+- [ ] Update Members.tsx with 4-tab structure (Overview, Email Leads, Boomerang Cards, Communications)
+- [ ] Run TypeScript check and tests
+
+## Boomerang Webhook Integration (Express)
+- [x] Convert Next.js webhook handler to Express format (server/boomerangWebhook.ts)
+- [x] Add Boomerang webhook columns to email_captures table (boomerang_card_status, boomerang_template_id, boomerang_template_name, boomerang_device, boomerang_installed_at, boomerang_deleted_at)
+- [x] Run DB migration for new columns via webdev_execute_sql
+- [x] Register webhook at POST /api/webhooks/boomerang in server/_core/index.ts
+- [x] Fix TypeScript errors (enchargeSubscriberId → enchargeId, name → firstName/lastName)
+- [x] Fix schema column names (createdAt/updatedAt → created_at/updated_at for email_captures)
+- [x] Test CardIssuedEvent → creates new record ✓
+- [x] Test CardInstalledEvent → updates existing record ✓
+- [x] Test CardDeletedEvent → updates with deleted status ✓
+- [x] Test unauthorized request → 401 ✓
+- [x] Write 6 vitest unit tests (all passing)
+- [x] TypeScript: 0 errors

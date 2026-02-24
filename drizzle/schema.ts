@@ -1189,3 +1189,76 @@ export const autonomousActions = mysqlTable("autonomous_actions", {
 
 export type AutonomousAction = typeof autonomousActions.$inferSelect;
 export type InsertAutonomousAction = typeof autonomousActions.$inferInsert;
+
+// ---------------------------------------------------------------------------
+// Email Captures — unified lead/email capture from all sources
+// ---------------------------------------------------------------------------
+export const emailCaptures = mysqlTable("email_captures", {
+  id: int("id").primaryKey().autoincrement(),
+  email: varchar("email", { length: 255 }).notNull(),
+  firstName: varchar("first_name", { length: 100 }),
+  lastName: varchar("last_name", { length: 100 }),
+  phone: varchar("phone", { length: 20 }),
+  source: mysqlEnum("source", [
+    "web_form", "meta_lead_ad", "giveaway", "clickfunnels",
+    "instagram", "manual_csv", "boomerang", "acuity",
+    "referral", "walk_in", "other",
+  ]).notNull().default("other"),
+  sourceDetail: varchar("source_detail", { length: 255 }),
+  status: mysqlEnum("status", [
+    "new", "contacted", "qualified", "converted", "unsubscribed", "bounced",
+  ]).notNull().default("new"),
+  enchargeId: varchar("encharge_id", { length: 100 }),
+  enchargeSegments: text("encharge_segments"),
+  enchargeSyncedAt: bigint("encharge_synced_at", { mode: "number" }),
+  boomerangClientId: varchar("boomerang_client_id", { length: 100 }),
+  boomerangCardSerial: varchar("boomerang_card_serial", { length: 100 }),
+  boomerangCardStatus: varchar("boomerang_card_status", { length: 50 }),
+  boomerangTemplateId: varchar("boomerang_template_id", { length: 50 }),
+  boomerangTemplateName: varchar("boomerang_template_name", { length: 100 }),
+  boomerangDevice: varchar("boomerang_device", { length: 50 }),
+  boomerangInstalledAt: timestamp("boomerang_installed_at"),
+  boomerangDeletedAt: timestamp("boomerang_deleted_at"),
+  boomerangSyncedAt: bigint("boomerang_synced_at", { mode: "number" }),
+  convertedToMemberId: int("converted_to_member_id"),
+  convertedAt: bigint("converted_at", { mode: "number" }),
+  tags: text("tags"),
+  notes: text("notes"),
+  capturedAt: bigint("captured_at", { mode: "number" }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+export type EmailCapture = typeof emailCaptures.$inferSelect;
+export type NewEmailCapture = typeof emailCaptures.$inferInsert;
+
+// ---------------------------------------------------------------------------
+// Communication Logs — audit log for every SMS / email sent or received
+// ---------------------------------------------------------------------------
+export const communicationLogs = mysqlTable("communication_logs", {
+  id: int("id").primaryKey().autoincrement(),
+  recipientType: mysqlEnum("recipient_type", ["member", "lead"]).notNull(),
+  recipientId: int("recipient_id"),
+  recipientEmail: varchar("recipient_email", { length: 255 }),
+  recipientPhone: varchar("recipient_phone", { length: 20 }),
+  recipientName: varchar("recipient_name", { length: 200 }),
+  channel: mysqlEnum("channel", ["sms", "email", "push"]).notNull(),
+  direction: mysqlEnum("direction", ["outbound", "inbound"]).notNull().default("outbound"),
+  subject: varchar("subject", { length: 500 }),
+  body: text("body").notNull(),
+  status: mysqlEnum("status", [
+    "queued", "sent", "delivered", "failed", "bounced", "opened", "clicked",
+  ]).notNull().default("queued"),
+  provider: mysqlEnum("provider", [
+    "twilio_sms", "twilio_email", "encharge", "boomerang_push",
+  ]).notNull(),
+  providerMessageId: varchar("provider_message_id", { length: 255 }),
+  providerStatus: varchar("provider_status", { length: 100 }),
+  errorMessage: text("error_message"),
+  campaignName: varchar("campaign_name", { length: 255 }),
+  costCents: int("cost_cents"),
+  sentAt: bigint("sent_at", { mode: "number" }),
+  deliveredAt: bigint("delivered_at", { mode: "number" }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type CommunicationLog = typeof communicationLogs.$inferSelect;
+export type NewCommunicationLog = typeof communicationLogs.$inferInsert;
