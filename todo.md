@@ -203,3 +203,10 @@
 - [x] AccountSettings.tsx — user profile, system info, webhook config, security status
 - [x] TypeScript: 0 errors
 - [x] Tests: 112/132 passing (20 external API failures unchanged from before)
+
+## Dashboard Fixes (2026-02-25)
+- [x] Today's Priorities: remove checkbox/strikethrough, add creation date display, navigate to section on click
+- [x] Boomerang member sync: import 303 missing members from report_24.02.2026.xlsx (54 → 359 total)
+- [x] Drive Day Clinics: restore Acuity data view (SundayClinicDetail) instead of public landing page redirect
+- [x] Programs sidebar: replace Private Events with Annual Membership Giveaway (Gift icon)
+- [x] App.tsx: /programs/drive-day → SundayClinicDetail, /programs/annual-giveaway → AnnualGiveaway

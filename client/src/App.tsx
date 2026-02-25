@@ -101,12 +101,11 @@ function Router() {
 
       {/* ── MARKETING & PROGRAMS / Programs ── */}
       <Route path="/programs" component={Programs} />
-      <Route path="/programs/drive-day" component={DriveDay} />
-      <Route path="/programs/drive-day/:id" component={SundayClinicDetail} />
+      <Route path="/programs/drive-day" component={SundayClinicDetail} />
       <Route path="/programs/winter-clinics" component={WinterClinicDetail} />
       <Route path="/programs/summer-camp" component={JuniorSummerCamp} />
       <Route path="/programs/leagues" component={Leagues} />
-      <Route path="/programs/private-events" component={PrivateEvents} />
+      <Route path="/programs/annual-giveaway" component={AnnualGiveaway} />
 
       {/* ── AUDIENCE / List ── */}
       <Route path="/list" component={Members} />

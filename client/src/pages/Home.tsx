@@ -2,8 +2,8 @@ import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
-import { Target, DollarSign, BarChart3, Loader2, ChevronRight, RefreshCw, Users, Sparkles, Share2, Wallet, CheckCircle2, XCircle } from "lucide-react";
-import { Link } from "wouter";
+import { Target, DollarSign, BarChart3, Loader2, ChevronRight, RefreshCw, Users, Sparkles, Share2, Wallet, CheckCircle2, XCircle, ArrowRight, Clock } from "lucide-react";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -15,18 +15,20 @@ interface Task {
   label: string;
   priority: Priority;
   category: string;
+  createdAt: string;
+  path: string;
 }
 
 // ─── Static data ──────────────────────────────────────────────────────────────
 const KPI_BARS = [
   {
     label: "Membership Growth",
-    value: "127 members",
-    progress: 42,
+    value: "359 members",
+    progress: 60,
     color: "bg-blue-500",
-    badge: "+12 this month",
+    badge: "+305 synced",
     badgeColor: "text-green-400",
-    goal: "Goal: 300",
+    goal: "Goal: 600",
   },
   {
     label: "Trial Conversion",
@@ -65,11 +67,11 @@ const STATIC_CAMPAIGNS = [
 ];
 
 const TODAY_TASKS: Task[] = [
-  { id: 1, label: "Review Meta Ads CTR — pause 2 underperforming ad sets", priority: "URGENT", category: "Campaigns" },
-  { id: 2, label: "Send Winter Clinic reminder email to leads segment", priority: "TODAY", category: "Communication" },
-  { id: 3, label: "Confirm B2B event booking for March corporate outing", priority: "TODAY", category: "Programs" },
-  { id: 4, label: "Update membership offer copy on site control page", priority: "THIS WEEK", category: "Website" },
-  { id: 5, label: "Export monthly revenue report for ownership review", priority: "THIS WEEK", category: "Intelligence" },
+  { id: 1, label: "Review Meta Ads CTR — pause 2 underperforming ad sets", priority: "URGENT", category: "Campaigns", createdAt: "Feb 25", path: "/campaigns/meta-ads" },
+  { id: 2, label: "Send Winter Clinic reminder email to leads segment", priority: "TODAY", category: "Communication", createdAt: "Feb 25", path: "/communication/announcements" },
+  { id: 3, label: "Confirm B2B event booking for March corporate outing", priority: "TODAY", category: "Programs", createdAt: "Feb 25", path: "/programs" },
+  { id: 4, label: "Update membership offer copy on site control page", priority: "THIS WEEK", category: "Website", createdAt: "Feb 24", path: "/website/site-control" },
+  { id: 5, label: "Export monthly revenue report for ownership review", priority: "THIS WEEK", category: "Intelligence", createdAt: "Feb 24", path: "/intelligence/reports" },
 ];
 
 const PRIORITY_STYLES: Record<Priority, string> = {
@@ -86,6 +88,7 @@ export default function Home() {
   const utils = trpc.useUtils();
   const [approvingId, setApprovingId] = useState<number | null>(null);
   const [dismissingId, setDismissingId] = useState<number | null>(null);
+  const [, setLocation] = useLocation();
 
   const approveMutation = trpc.autonomous.approveAction.useMutation({
     onSuccess: (result) => {
@@ -111,8 +114,6 @@ export default function Home() {
     onError: (err) => { toast.error(err.message); setDismissingId(null); },
   });
 
-  const [checkedTasks, setCheckedTasks] = useState<Set<number>>(new Set());
-
   const handleSync = async () => {
     try {
       await syncMutation.mutateAsync();
@@ -130,14 +131,6 @@ export default function Home() {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(value);
-  };
-
-  const toggleTask = (id: number) => {
-    setCheckedTasks((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
   };
 
   if (isLoading) {
@@ -362,6 +355,7 @@ export default function Home() {
             </CardContent>
            </Card>
         </div>
+
         {/* ── Section 3: Today's Priorities ── */}
         <Card>
           <CardHeader className="pb-3 flex-row items-center justify-between space-y-0">
@@ -370,53 +364,41 @@ export default function Home() {
               <CardDescription className="text-xs mt-0.5">{todayStr}</CardDescription>
             </div>
             <span className="text-xs text-muted-foreground">
-              {checkedTasks.size}/{TODAY_TASKS.length} done
+              {TODAY_TASKS.length} items
             </span>
           </CardHeader>
-          <CardContent className="space-y-2">
-            {TODAY_TASKS.map((task) => {
-              const done = checkedTasks.has(task.id);
-              return (
-                <button
-                  key={task.id}
-                  onClick={() => toggleTask(task.id)}
-                  className={`w-full flex items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-opacity
-                    hover:bg-muted/50 ${done ? "opacity-40" : "opacity-100"}`}
-                >
-                  {/* Checkbox */}
-                  <div
-                    className={`mt-0.5 h-4 w-4 flex-shrink-0 rounded border transition-colors
-                      ${done
-                        ? "bg-primary border-primary flex items-center justify-center"
-                        : "border-border bg-background"
-                      }`}
-                  >
-                    {done && (
-                      <svg className="h-2.5 w-2.5 text-primary-foreground" viewBox="0 0 10 10" fill="none">
-                        <path d="M1.5 5l2.5 2.5 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    )}
-                  </div>
+          <CardContent className="space-y-1">
+            {TODAY_TASKS.map((task) => (
+              <button
+                key={task.id}
+                onClick={() => setLocation(task.path)}
+                className="w-full flex items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-muted/60 group"
+              >
+                {/* Priority dot */}
+                <div className={`mt-1.5 h-2 w-2 flex-shrink-0 rounded-full ${
+                  task.priority === "URGENT" ? "bg-red-400" :
+                  task.priority === "TODAY" ? "bg-blue-400" : "bg-muted-foreground/40"
+                }`} />
 
-                  {/* Label */}
-                  <span
-                    className={`flex-1 text-sm text-foreground ${done ? "line-through" : ""}`}
-                  >
-                    {task.label}
+                {/* Label + created date */}
+                <div className="flex-1 min-w-0">
+                  <span className="text-sm text-foreground leading-snug block">{task.label}</span>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <Clock className="h-3 w-3 text-muted-foreground/50" />
+                    <span className="text-xs text-muted-foreground/60">Added {task.createdAt}</span>
+                  </div>
+                </div>
+
+                {/* Badges + arrow */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <span className={`text-xs font-semibold rounded px-2 py-0.5 ${PRIORITY_STYLES[task.priority]}`}>
+                    {task.priority}
                   </span>
-
-                  {/* Badges */}
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <span
-                      className={`text-xs font-semibold rounded px-2 py-0.5 ${PRIORITY_STYLES[task.priority]}`}
-                    >
-                      {task.priority}
-                    </span>
-                    <span className="text-xs text-muted-foreground hidden sm:block">{task.category}</span>
-                  </div>
-                </button>
-              );
-            })}
+                  <span className="text-xs text-muted-foreground hidden sm:block">{task.category}</span>
+                  <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
+                </div>
+              </button>
+            ))}
           </CardContent>
         </Card>
 
