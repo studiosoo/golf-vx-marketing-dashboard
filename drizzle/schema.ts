@@ -1279,3 +1279,62 @@ export const priorities = mysqlTable("priorities", {
 });
 export type PriorityItem = typeof priorities.$inferSelect;
 export type NewPriorityItem = typeof priorities.$inferInsert;
+
+// ---------------------------------------------------------------------------
+// Toast Revenue — daily summary imported from Toast SFTP export
+// ---------------------------------------------------------------------------
+export const toastDailySummary = mysqlTable("toast_daily_summary", {
+  id: int("id").primaryKey().autoincrement(),
+  date: varchar("date", { length: 8 }).notNull().unique(), // YYYYMMDD
+  totalRevenue: decimal("total_revenue", { precision: 10, scale: 2 }).notNull().default("0"),
+  bayRevenue: decimal("bay_revenue", { precision: 10, scale: 2 }).notNull().default("0"),
+  foodBevRevenue: decimal("food_bev_revenue", { precision: 10, scale: 2 }).notNull().default("0"),
+  golfRevenue: decimal("golf_revenue", { precision: 10, scale: 2 }).notNull().default("0"),
+  totalOrders: int("total_orders").notNull().default(0),
+  totalGuests: int("total_guests").notNull().default(0),
+  totalTax: decimal("total_tax", { precision: 10, scale: 2 }).notNull().default("0"),
+  totalTips: decimal("total_tips", { precision: 10, scale: 2 }).notNull().default("0"),
+  totalDiscounts: decimal("total_discounts", { precision: 10, scale: 2 }).notNull().default("0"),
+  cashRevenue: decimal("cash_revenue", { precision: 10, scale: 2 }).notNull().default("0"),
+  creditRevenue: decimal("credit_revenue", { precision: 10, scale: 2 }).notNull().default("0"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+export type ToastDailySummary = typeof toastDailySummary.$inferSelect;
+export type NewToastDailySummary = typeof toastDailySummary.$inferInsert;
+
+// ---------------------------------------------------------------------------
+// Toast Payments — individual payment records from PaymentDetails.csv
+// ---------------------------------------------------------------------------
+export const toastPayments = mysqlTable("toast_payments", {
+  id: int("id").primaryKey().autoincrement(),
+  date: varchar("date", { length: 8 }).notNull(), // YYYYMMDD
+  orderId: varchar("order_id", { length: 100 }),
+  checkId: varchar("check_id", { length: 100 }),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull().default("0"),
+  tip: decimal("tip", { precision: 10, scale: 2 }).notNull().default("0"),
+  paymentType: varchar("payment_type", { length: 50 }),
+  cardType: varchar("card_type", { length: 50 }),
+  customerName: varchar("customer_name", { length: 255 }),
+  revenueCenter: varchar("revenue_center", { length: 100 }),
+  status: varchar("status", { length: 50 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  dateIdx: index("toast_payments_date_idx").on(table.date),
+}));
+export type ToastPayment = typeof toastPayments.$inferSelect;
+export type NewToastPayment = typeof toastPayments.$inferInsert;
+
+// ---------------------------------------------------------------------------
+// Toast Sync Log — tracks which SFTP folders have been processed
+// ---------------------------------------------------------------------------
+export const toastSyncLog = mysqlTable("toast_sync_log", {
+  id: int("id").primaryKey().autoincrement(),
+  date: varchar("date", { length: 8 }).notNull().unique(), // YYYYMMDD
+  status: mysqlEnum("status", ["success", "error", "partial"]).notNull().default("success"),
+  ordersImported: int("orders_imported").notNull().default(0),
+  paymentsImported: int("payments_imported").notNull().default(0),
+  errorMessage: text("error_message"),
+  syncedAt: timestamp("synced_at").defaultNow().notNull(),
+});
+export type ToastSyncLog = typeof toastSyncLog.$inferSelect;

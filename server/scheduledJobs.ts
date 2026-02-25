@@ -2,6 +2,7 @@ import cron from "node-cron";
 import { syncGiveawayApplications } from "./giveawaySync";
 import { runDailySnapshot } from "./jobs/dailySnapshot";
 import { runWeeklyEmailReport } from "./jobs/weeklyEmailReport";
+import { runToastDailySync } from "./jobs/toastDailySync";
 
 /**
  * Initialize all scheduled jobs
@@ -49,8 +50,27 @@ export function initializeScheduledJobs() {
     timezone: "America/Chicago"
   });
 
+  // Toast SFTP daily sync at 5:30 AM EST (= 4:30 AM CST)
+  // Toast publishes previous day's data at 5:00 AM EST
+  cron.schedule("0 30 4 * * *", async () => {
+    try {
+      console.log("[ScheduledJobs] Running Toast SFTP daily sync at 5:30 AM EST...");
+      const result = await runToastDailySync();
+      if (result.success) {
+        console.log(`[ScheduledJobs] Toast sync completed for ${result.date}`);
+      } else {
+        console.error(`[ScheduledJobs] Toast sync failed for ${result.date}: ${result.error}`);
+      }
+    } catch (error) {
+      console.error("[ScheduledJobs] Error in Toast daily sync:", error);
+    }
+  }, {
+    timezone: "America/Chicago" // 4:30 AM CST = 5:30 AM EST
+  });
+
   console.log("[ScheduledJobs] Scheduled jobs initialized:");
   console.log("  - Annual Giveaway sync: Daily at 12:00 AM CST");
   console.log("  - Campaign metrics snapshot: Daily at 2:00 AM CST");
   console.log("  - Weekly email report: Every Monday at 8:00 AM CST");
+  console.log("  - Toast SFTP daily sync: Daily at 4:30 AM CST (5:30 AM EST)");
 }

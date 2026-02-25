@@ -800,7 +800,7 @@ export const appRouter = router({
         return await db.getTotalRevenue(input.startDate, input.endDate);
       }),
     
-    create: protectedProcedure
+     create: protectedProcedure
       .input(z.object({
         date: z.date(),
         amount: z.string(),
@@ -813,8 +813,142 @@ export const appRouter = router({
         const id = await db.createRevenue(input);
         return { id };
       }),
-  }),
 
+    // Toast POS revenue
+    getToastDaily: protectedProcedure
+      .input(z.object({ startDate: z.string().optional(), endDate: z.string().optional() }))
+      .query(async () => {
+        const dbConn = await db.getDb();
+        if (!dbConn) return [];
+        const [rows] = await dbConn.execute(
+          `SELECT date, total_revenue, bay_revenue, food_bev_revenue, golf_revenue,
+                  total_orders, total_guests, total_tax, total_tips, total_discounts,
+                  cash_revenue, credit_revenue
+           FROM toast_daily_summary ORDER BY date ASC`
+        ) as any[];
+        return (rows as any[]).map((r: any) => ({
+          date: r.date as string,
+          totalRevenue: parseFloat(r.total_revenue || '0'),
+          bayRevenue: parseFloat(r.bay_revenue || '0'),
+          foodBevRevenue: parseFloat(r.food_bev_revenue || '0'),
+          golfRevenue: parseFloat(r.golf_revenue || '0'),
+          totalOrders: Number(r.total_orders),
+          totalGuests: Number(r.total_guests),
+          totalTax: parseFloat(r.total_tax || '0'),
+          totalTips: parseFloat(r.total_tips || '0'),
+          totalDiscounts: parseFloat(r.total_discounts || '0'),
+          cashRevenue: parseFloat(r.cash_revenue || '0'),
+          creditRevenue: parseFloat(r.credit_revenue || '0'),
+        }));
+      }),
+
+    getToastMonthly: protectedProcedure
+      .query(async () => {
+        const dbConn = await db.getDb();
+        if (!dbConn) return [];
+        const [rows] = await dbConn.execute(
+          `SELECT LEFT(date,6) as month,
+                  SUM(total_revenue) as total_revenue,
+                  SUM(bay_revenue) as bay_revenue,
+                  SUM(food_bev_revenue) as food_bev_revenue,
+                  SUM(golf_revenue) as golf_revenue,
+                  SUM(total_orders) as total_orders,
+                  SUM(total_guests) as total_guests,
+                  SUM(total_tips) as total_tips,
+                  SUM(total_discounts) as total_discounts,
+                  SUM(cash_revenue) as cash_revenue,
+                  SUM(credit_revenue) as credit_revenue
+           FROM toast_daily_summary GROUP BY LEFT(date,6) ORDER BY month ASC`
+        ) as any[];
+        return (rows as any[]).map((r: any) => ({
+          month: r.month as string,
+          totalRevenue: parseFloat(r.total_revenue || '0'),
+          bayRevenue: parseFloat(r.bay_revenue || '0'),
+          foodBevRevenue: parseFloat(r.food_bev_revenue || '0'),
+          golfRevenue: parseFloat(r.golf_revenue || '0'),
+          totalOrders: Number(r.total_orders),
+          totalGuests: Number(r.total_guests),
+          totalTips: parseFloat(r.total_tips || '0'),
+          totalDiscounts: parseFloat(r.total_discounts || '0'),
+          cashRevenue: parseFloat(r.cash_revenue || '0'),
+          creditRevenue: parseFloat(r.credit_revenue || '0'),
+        }));
+      }),
+
+    getToastSummary: protectedProcedure
+      .query(async () => {
+        const dbConn = await db.getDb();
+        if (!dbConn) return null;
+        const [rows] = await dbConn.execute(
+          `SELECT
+            SUM(total_revenue) as all_time_revenue,
+            SUM(bay_revenue) as all_time_bay,
+            SUM(food_bev_revenue) as all_time_food_bev,
+            SUM(golf_revenue) as all_time_golf,
+            SUM(total_orders) as all_time_orders,
+            SUM(total_guests) as all_time_guests,
+            SUM(total_tips) as all_time_tips,
+            MAX(CAST(date AS UNSIGNED)) as latest_date,
+            COUNT(*) as days_with_data,
+            SUM(CASE WHEN LEFT(date,6)=DATE_FORMAT(NOW(),'%Y%m') THEN total_revenue ELSE 0 END) as this_month_revenue,
+            SUM(CASE WHEN LEFT(date,6)=DATE_FORMAT(DATE_SUB(NOW(),INTERVAL 1 MONTH),'%Y%m') THEN total_revenue ELSE 0 END) as last_month_revenue,
+            SUM(CASE WHEN LEFT(date,6)=DATE_FORMAT(NOW(),'%Y%m') THEN total_orders ELSE 0 END) as this_month_orders
+           FROM toast_daily_summary`
+        ) as any[];
+        const r = (rows as any[])[0];
+        if (!r) return null;
+        return {
+          allTimeRevenue: parseFloat(r.all_time_revenue || '0'),
+          allTimeBay: parseFloat(r.all_time_bay || '0'),
+          allTimeFoodBev: parseFloat(r.all_time_food_bev || '0'),
+          allTimeGolf: parseFloat(r.all_time_golf || '0'),
+          allTimeOrders: Number(r.all_time_orders),
+          allTimeGuests: Number(r.all_time_guests),
+          allTimeTips: parseFloat(r.all_time_tips || '0'),
+          latestDate: String(r.latest_date || ''),
+          daysWithData: Number(r.days_with_data),
+          thisMonthRevenue: parseFloat(r.this_month_revenue || '0'),
+          lastMonthRevenue: parseFloat(r.last_month_revenue || '0'),
+          thisMonthOrders: Number(r.this_month_orders),
+        };
+      }),
+
+    getToastPaymentBreakdown: protectedProcedure
+      .query(async () => {
+        const dbConn = await db.getDb();
+        if (!dbConn) return [];
+        const [rows] = await dbConn.execute(
+          `SELECT payment_type, card_type, COUNT(*) as count,
+                  SUM(amount) as total_amount, SUM(tip) as total_tips
+           FROM toast_payments
+           WHERE status NOT IN ('VOIDED','VOID','REFUNDED') OR status IS NULL
+           GROUP BY payment_type, card_type ORDER BY total_amount DESC`
+        ) as any[];
+        return (rows as any[]).map((r: any) => ({
+          paymentType: r.payment_type as string,
+          cardType: r.card_type as string,
+          count: Number(r.count),
+          totalAmount: parseFloat(r.total_amount || '0'),
+          totalTips: parseFloat(r.total_tips || '0'),
+        }));
+      }),
+
+    getToastSyncStatus: protectedProcedure
+      .query(async () => {
+        const dbConn = await db.getDb();
+        if (!dbConn) return { total: 0, success: 0, errors: 0, latest: null };
+        const [rows] = await dbConn.execute(
+          `SELECT status, COUNT(*) as cnt, MAX(synced_at) as latest FROM toast_sync_log GROUP BY status`
+        ) as any[];
+        const result = { total: 0, success: 0, errors: 0, latest: null as string | null };
+        for (const r of (rows as any[])) {
+          result.total += Number(r.cnt);
+          if (r.status === 'success') { result.success = Number(r.cnt); result.latest = r.latest; }
+          if (r.status === 'error') result.errors = Number(r.cnt);
+        }
+        return result;
+      }),
+  }),
   // Task Management (Asana Integration)
   tasks: router({
     list: protectedProcedure.query(async () => {

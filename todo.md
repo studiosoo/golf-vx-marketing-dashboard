@@ -219,3 +219,13 @@
 - [x] Update member status: active (302) / trial (57) based on tier data
 - [x] Membership Tier Breakdown card now uses real DB data (All-Access Aces: 37, Swing Savers: 28, Golf VX Pro: 10)
 - [x] Write vitest tests for priorities router (12 tests passing)
+
+## Toast Revenue Integration (2026-02-25)
+- [x] Explore Toast SFTP CSV schemas (PaymentDetails, AllItemsReport, CheckDetails)
+- [x] Generate new SSH key pair and register in Toast portal
+- [x] Design and create toast_daily_summary, toast_payments, toast_sync_log tables
+- [x] Build and run historical import script (207/211 days imported successfully)
+- [x] Add tRPC procedures: getToastSummary, getToastMonthly, getToastDaily, getToastPaymentBreakdown, getToastSyncStatus
+- [x] Build Revenue.tsx page with real Toast data (area chart, stacked bar, pie charts, KPI cards)
+- [x] Add daily 4:30am CST (5:30am EST) Toast SFTP sync to scheduledJobs.ts
+- [x] Write vitest tests for Toast revenue (10 tests passing)

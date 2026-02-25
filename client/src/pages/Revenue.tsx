@@ -1,11 +1,340 @@
+import { useState, useMemo } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
+import { trpc } from "@/lib/trpc";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
+} from "recharts";
+import { DollarSign, TrendingUp, TrendingDown, Users, ShoppingCart, CreditCard, Banknote, Calendar } from "lucide-react";
+
+const COLORS = ["#EAB308", "#3B82F6", "#10B981", "#F97316", "#8B5CF6", "#EC4899"];
+
+function fmt(n: number) {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
+}
+
+function fmtMonth(yyyymm: string) {
+  if (!yyyymm || yyyymm.length < 6) return yyyymm;
+  const y = yyyymm.slice(0, 4);
+  const m = yyyymm.slice(4, 6);
+  return new Date(`${y}-${m}-01`).toLocaleDateString("en-US", { month: "short", year: "numeric" });
+}
+
+function StatCard({ title, value, sub, icon: Icon, trend }: {
+  title: string; value: string; sub?: string; icon: any; trend?: "up" | "down" | null;
+}) {
+  return (
+    <Card>
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-sm text-muted-foreground">{title}</p>
+            <p className="text-2xl font-bold mt-1">{value}</p>
+            {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
+          </div>
+          <div className="p-2 rounded-lg bg-primary/10">
+            <Icon className="w-5 h-5 text-primary" />
+          </div>
+        </div>
+        {trend && (
+          <div className={`flex items-center gap-1 mt-2 text-xs font-medium ${trend === "up" ? "text-green-500" : "text-red-500"}`}>
+            {trend === "up" ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+            vs last month
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function Revenue() {
+  const [view, setView] = useState<"monthly" | "daily">("monthly");
+
+  const { data: summary, isLoading: summaryLoading } = trpc.revenue.getToastSummary.useQuery();
+  const { data: monthly, isLoading: monthlyLoading } = trpc.revenue.getToastMonthly.useQuery();
+  const { data: daily, isLoading: dailyLoading } = trpc.revenue.getToastDaily.useQuery({});
+  const { data: payments, isLoading: paymentsLoading } = trpc.revenue.getToastPaymentBreakdown.useQuery();
+  const { data: syncStatus } = trpc.revenue.getToastSyncStatus.useQuery();
+
+  // Last 30 days daily data
+  const last30Days = useMemo(() => {
+    if (!daily) return [];
+    return daily.slice(-30);
+  }, [daily]);
+
+  // Payment type pie data
+  const paymentPieData = useMemo(() => {
+    if (!payments) return [];
+    const grouped: Record<string, number> = {};
+    for (const p of payments) {
+      const key = p.paymentType || "Other";
+      grouped[key] = (grouped[key] || 0) + p.totalAmount;
+    }
+    return Object.entries(grouped).map(([name, value]) => ({ name, value }));
+  }, [payments]);
+
+  // Revenue category pie data
+  const categoryPieData = useMemo(() => {
+    if (!summary) return [];
+    return [
+      { name: "Bay Usage", value: summary.allTimeBay },
+      { name: "Food & Beverage", value: summary.allTimeFoodBev },
+      { name: "Golf", value: summary.allTimeGolf },
+    ].filter(d => d.value > 0);
+  }, [summary]);
+
+  const momChange = summary
+    ? summary.lastMonthRevenue > 0
+      ? ((summary.thisMonthRevenue - summary.lastMonthRevenue) / summary.lastMonthRevenue) * 100
+      : null
+    : null;
+
+  const isLoading = summaryLoading || monthlyLoading || dailyLoading || paymentsLoading;
+
   return (
     <DashboardLayout>
-      <div className="p-6">
-        <h1 className="text-3xl font-bold text-foreground">Revenue <span className="text-primary">Dashboard</span></h1>
-        <p className="text-muted-foreground mt-2">Coming soon - Revenue analytics and insights</p>
+      <div className="p-6 space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Revenue <span className="text-primary">Dashboard</span></h1>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Toast POS data — {syncStatus ? `${syncStatus.success} days synced` : "Loading..."}{" "}
+              {syncStatus?.latest && `· Last sync: ${new Date(syncStatus.latest).toLocaleDateString()}`}
+            </p>
+          </div>
+          <Badge variant="outline" className="gap-1 text-green-600 border-green-600">
+            <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
+            Live Toast Data
+          </Badge>
+        </div>
+
+        {isLoading ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <Card key={i}><CardContent className="p-5 h-24 animate-pulse bg-muted/30 rounded-lg" /></Card>
+            ))}
+          </div>
+        ) : (
+          <>
+            {/* KPI Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <StatCard
+                title="All-Time Revenue"
+                value={fmt(summary?.allTimeRevenue || 0)}
+                sub={`${summary?.daysWithData || 0} days of data`}
+                icon={DollarSign}
+              />
+              <StatCard
+                title="This Month"
+                value={fmt(summary?.thisMonthRevenue || 0)}
+                sub={momChange !== null ? `${momChange > 0 ? "+" : ""}${momChange.toFixed(1)}% vs last month` : undefined}
+                icon={TrendingUp}
+                trend={momChange !== null ? (momChange >= 0 ? "up" : "down") : null}
+              />
+              <StatCard
+                title="All-Time Orders"
+                value={(summary?.allTimeOrders || 0).toLocaleString()}
+                sub={`${summary?.allTimeGuests || 0} total guests`}
+                icon={ShoppingCart}
+              />
+              <StatCard
+                title="All-Time Tips"
+                value={fmt(summary?.allTimeTips || 0)}
+                sub="Included in revenue"
+                icon={Users}
+              />
+            </div>
+
+            {/* Revenue Category Breakdown */}
+            <div className="grid grid-cols-3 gap-4">
+              <Card className="border-l-4 border-l-yellow-500">
+                <CardContent className="p-4">
+                  <p className="text-sm text-muted-foreground">Bay Usage Revenue</p>
+                  <p className="text-xl font-bold">{fmt(summary?.allTimeBay || 0)}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {summary?.allTimeRevenue ? ((summary.allTimeBay / summary.allTimeRevenue) * 100).toFixed(1) : 0}% of total
+                  </p>
+                </CardContent>
+              </Card>
+              <Card className="border-l-4 border-l-blue-500">
+                <CardContent className="p-4">
+                  <p className="text-sm text-muted-foreground">Food & Beverage</p>
+                  <p className="text-xl font-bold">{fmt(summary?.allTimeFoodBev || 0)}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {summary?.allTimeRevenue ? ((summary.allTimeFoodBev / summary.allTimeRevenue) * 100).toFixed(1) : 0}% of total
+                  </p>
+                </CardContent>
+              </Card>
+              <Card className="border-l-4 border-l-green-500">
+                <CardContent className="p-4">
+                  <p className="text-sm text-muted-foreground">Golf Revenue</p>
+                  <p className="text-xl font-bold">{fmt(summary?.allTimeGolf || 0)}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {summary?.allTimeRevenue ? ((summary.allTimeGolf / summary.allTimeRevenue) * 100).toFixed(1) : 0}% of total
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Monthly Revenue Chart */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-base font-semibold">Monthly Revenue Trend</CardTitle>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setView("monthly")}
+                    className={`text-xs px-3 py-1 rounded-full transition-colors ${view === "monthly" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+                  >Monthly</button>
+                  <button
+                    onClick={() => setView("daily")}
+                    className={`text-xs px-3 py-1 rounded-full transition-colors ${view === "daily" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+                  >Last 30 Days</button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={280}>
+                  {view === "monthly" ? (
+                    <AreaChart data={monthly || []} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                      <defs>
+                        <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#EAB308" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#EAB308" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="month" tickFormatter={fmtMonth} tick={{ fontSize: 11 }} />
+                      <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
+                      <Tooltip formatter={(v: number) => [fmt(v), "Revenue"]} labelFormatter={fmtMonth} />
+                      <Area type="monotone" dataKey="totalRevenue" stroke="#EAB308" fill="url(#colorRevenue)" strokeWidth={2} name="Total Revenue" />
+                    </AreaChart>
+                  ) : (
+                    <AreaChart data={last30Days} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                      <defs>
+                        <linearGradient id="colorRevenue2" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#EAB308" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#EAB308" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={(d) => d.slice(4)} />
+                      <YAxis tickFormatter={(v) => `$${v}`} tick={{ fontSize: 11 }} />
+                      <Tooltip formatter={(v: number) => [fmt(v), "Revenue"]} />
+                      <Area type="monotone" dataKey="totalRevenue" stroke="#EAB308" fill="url(#colorRevenue2)" strokeWidth={2} name="Daily Revenue" />
+                    </AreaChart>
+                  )}
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            {/* Revenue Breakdown by Category (Monthly Stacked) */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-semibold">Revenue by Category (Monthly)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={240}>
+                  <BarChart data={monthly || []} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="month" tickFormatter={fmtMonth} tick={{ fontSize: 11 }} />
+                    <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
+                    <Tooltip formatter={(v: number) => fmt(v)} labelFormatter={fmtMonth} />
+                    <Legend />
+                    <Bar dataKey="bayRevenue" name="Bay Usage" stackId="a" fill="#EAB308" />
+                    <Bar dataKey="foodBevRevenue" name="Food & Bev" stackId="a" fill="#3B82F6" />
+                    <Bar dataKey="golfRevenue" name="Golf" stackId="a" fill="#10B981" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            {/* Payment Breakdown + Category Pie */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base font-semibold flex items-center gap-2">
+                    <CreditCard className="w-4 h-4" /> Payment Method Breakdown
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={200}>
+                    <PieChart>
+                      <Pie data={paymentPieData} cx="50%" cy="50%" outerRadius={75} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
+                        {paymentPieData.map((_, i) => (
+                          <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(v: number) => fmt(v)} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="mt-3 space-y-1">
+                    {payments?.slice(0, 6).map((p, i) => (
+                      <div key={i} className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">{p.paymentType}{p.cardType ? ` · ${p.cardType}` : ""}</span>
+                        <span className="font-medium">{fmt(p.totalAmount)} ({p.count} txns)</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base font-semibold flex items-center gap-2">
+                    <Banknote className="w-4 h-4" /> Revenue Category Split
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={200}>
+                    <PieChart>
+                      <Pie data={categoryPieData} cx="50%" cy="50%" outerRadius={75} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
+                        {categoryPieData.map((_, i) => (
+                          <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(v: number) => fmt(v)} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="mt-3 space-y-1">
+                    {categoryPieData.map((d, i) => (
+                      <div key={i} className="flex justify-between text-xs">
+                        <span className="flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full inline-block" style={{ background: COLORS[i] }} />
+                          <span className="text-muted-foreground">{d.name}</span>
+                        </span>
+                        <span className="font-medium">{fmt(d.value)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Monthly Orders & Guests */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                  <Calendar className="w-4 h-4" /> Monthly Orders & Guests
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={monthly || []} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="month" tickFormatter={fmtMonth} tick={{ fontSize: 11 }} />
+                    <YAxis tick={{ fontSize: 11 }} />
+                    <Tooltip labelFormatter={fmtMonth} />
+                    <Legend />
+                    <Bar dataKey="totalOrders" name="Orders" fill="#EAB308" radius={[3, 3, 0, 0]} />
+                    <Bar dataKey="totalGuests" name="Guests" fill="#3B82F6" radius={[3, 3, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
     </DashboardLayout>
   );
