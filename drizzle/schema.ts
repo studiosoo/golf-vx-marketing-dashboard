@@ -1262,3 +1262,20 @@ export const communicationLogs = mysqlTable("communication_logs", {
 });
 export type CommunicationLog = typeof communicationLogs.$inferSelect;
 export type NewCommunicationLog = typeof communicationLogs.$inferInsert;
+
+// ---------------------------------------------------------------------------
+// Priorities — Today's Priorities task list (DB-backed, team-editable)
+// ---------------------------------------------------------------------------
+export const priorities = mysqlTable("priorities", {
+  id: int("id").primaryKey().autoincrement(),
+  title: varchar("title", { length: 500 }).notNull(),
+  category: varchar("category", { length: 100 }).notNull().default("General"),
+  path: varchar("path", { length: 255 }).notNull().default("/overview"),
+  urgency: mysqlEnum("urgency", ["URGENT", "TODAY", "THIS WEEK"]).notNull().default("TODAY"),
+  completedAt: bigint("completed_at", { mode: "number" }),
+  createdBy: varchar("created_by", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+export type PriorityItem = typeof priorities.$inferSelect;
+export type NewPriorityItem = typeof priorities.$inferInsert;

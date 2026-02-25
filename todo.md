@@ -210,3 +210,12 @@
 - [x] Drive Day Clinics: restore Acuity data view (SundayClinicDetail) instead of public landing page redirect
 - [x] Programs sidebar: replace Private Events with Annual Membership Giveaway (Gift icon)
 - [x] App.tsx: /programs/drive-day → SundayClinicDetail, /programs/annual-giveaway → AnnualGiveaway
+
+## Today's Priorities DB Upgrade & Membership Tier Sync (2026-02-25)
+- [x] Add priorities table to DB (created directly via SQL since migration was blocked by existing tables)
+- [x] Add tRPC procedures: priorities.list, priorities.create, priorities.complete, priorities.delete
+- [x] Rebuild Today's Priorities UI: DB-backed, add/complete/delete, creation date, navigate-on-click
+- [x] Boomerang API tier sync: fetch card type per member, update membershipTier in DB (80 members updated)
+- [x] Update member status: active (302) / trial (57) based on tier data
+- [x] Membership Tier Breakdown card now uses real DB data (All-Access Aces: 37, Swing Savers: 28, Golf VX Pro: 10)
+- [x] Write vitest tests for priorities router (12 tests passing)

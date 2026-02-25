@@ -2,22 +2,15 @@ import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
-import { Target, DollarSign, BarChart3, Loader2, ChevronRight, RefreshCw, Users, Sparkles, Share2, Wallet, CheckCircle2, XCircle, ArrowRight, Clock } from "lucide-react";
+import { Target, DollarSign, BarChart3, Loader2, ChevronRight, RefreshCw, Users, Sparkles, Share2, Wallet, CheckCircle2, XCircle, ArrowRight, Clock, Plus, Trash2, Check } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-type Priority = "URGENT" | "TODAY" | "THIS WEEK";
-
-interface Task {
-  id: number;
-  label: string;
-  priority: Priority;
-  category: string;
-  createdAt: string;
-  path: string;
-}
+type Urgency = "URGENT" | "TODAY" | "THIS WEEK";
 
 // ─── Static data ──────────────────────────────────────────────────────────────
 const KPI_BARS = [
@@ -66,19 +59,21 @@ const STATIC_CAMPAIGNS = [
   { name: "B2B Sales", spend: 91, budget: 300 },
 ];
 
-const TODAY_TASKS: Task[] = [
-  { id: 1, label: "Review Meta Ads CTR — pause 2 underperforming ad sets", priority: "URGENT", category: "Campaigns", createdAt: "Feb 25", path: "/campaigns/meta-ads" },
-  { id: 2, label: "Send Winter Clinic reminder email to leads segment", priority: "TODAY", category: "Communication", createdAt: "Feb 25", path: "/communication/announcements" },
-  { id: 3, label: "Confirm B2B event booking for March corporate outing", priority: "TODAY", category: "Programs", createdAt: "Feb 25", path: "/programs" },
-  { id: 4, label: "Update membership offer copy on site control page", priority: "THIS WEEK", category: "Website", createdAt: "Feb 24", path: "/website/site-control" },
-  { id: 5, label: "Export monthly revenue report for ownership review", priority: "THIS WEEK", category: "Intelligence", createdAt: "Feb 24", path: "/intelligence/reports" },
-];
-
-const PRIORITY_STYLES: Record<Priority, string> = {
+const URGENCY_STYLES: Record<Urgency, string> = {
   URGENT: "bg-red-500/15 text-red-400 border border-red-500/30",
   TODAY: "bg-blue-500/15 text-blue-400 border border-blue-500/30",
   "THIS WEEK": "bg-muted/60 text-muted-foreground border border-border",
 };
+
+const CATEGORY_OPTIONS = [
+  { value: "Campaigns", path: "/campaigns" },
+  { value: "Communication", path: "/communication/announcements" },
+  { value: "Programs", path: "/programs" },
+  { value: "Website", path: "/website/site-control" },
+  { value: "Intelligence", path: "/intelligence/reports" },
+  { value: "Members", path: "/audience/members" },
+  { value: "General", path: "/overview" },
+];
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function Home() {
@@ -89,6 +84,55 @@ export default function Home() {
   const [approvingId, setApprovingId] = useState<number | null>(null);
   const [dismissingId, setDismissingId] = useState<number | null>(null);
   const [, setLocation] = useLocation();
+
+  // Priorities DB state
+  const { data: dbPriorities, isLoading: prioritiesLoading } = trpc.priorities.list.useQuery();
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const [newCategory, setNewCategory] = useState("General");
+  const [newUrgency, setNewUrgency] = useState<Urgency>("TODAY");
+
+  const createPriority = trpc.priorities.create.useMutation({
+    onSuccess: () => {
+      utils.priorities.list.invalidate();
+      setNewTitle("");
+      setNewCategory("General");
+      setNewUrgency("TODAY");
+      setShowAddForm(false);
+      toast.success("Priority added");
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const completePriority = trpc.priorities.complete.useMutation({
+    onMutate: async ({ id, completed }) => {
+      await utils.priorities.list.cancel();
+      const prev = utils.priorities.list.getData();
+      utils.priorities.list.setData(undefined, (old) =>
+        old?.map((p) => p.id === id ? { ...p, completedAt: completed ? Date.now() : null } : p)
+      );
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) utils.priorities.list.setData(undefined, ctx.prev);
+      toast.error("Failed to update");
+    },
+    onSettled: () => utils.priorities.list.invalidate(),
+  });
+
+  const deletePriority = trpc.priorities.delete.useMutation({
+    onMutate: async ({ id }) => {
+      await utils.priorities.list.cancel();
+      const prev = utils.priorities.list.getData();
+      utils.priorities.list.setData(undefined, (old) => old?.filter((p) => p.id !== id));
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) utils.priorities.list.setData(undefined, ctx.prev);
+      toast.error("Failed to delete");
+    },
+    onSettled: () => utils.priorities.list.invalidate(),
+  });
 
   const approveMutation = trpc.autonomous.approveAction.useMutation({
     onSuccess: (result) => {
@@ -118,9 +162,9 @@ export default function Home() {
     try {
       await syncMutation.mutateAsync();
       utils.invalidate();
-      alert("All marketing data synced successfully!");
+      toast.success("All marketing data synced successfully!");
     } catch (error: any) {
-      alert(`Sync failed: ${error.message}`);
+      toast.error(`Sync failed: ${error.message}`);
     }
   };
 
@@ -131,6 +175,19 @@ export default function Home() {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(value);
+  };
+
+  const formatDate = (ts: Date | string) => {
+    const d = new Date(ts);
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  };
+
+  const handlePriorityClick = (path: string) => {
+    setLocation(path);
+  };
+
+  const getCategoryPath = (category: string): string => {
+    return CATEGORY_OPTIONS.find((c) => c.value === category)?.path ?? "/overview";
   };
 
   if (isLoading) {
@@ -146,8 +203,6 @@ export default function Home() {
   // Calculate totals from categories
   const totalSpend = categories?.reduce((sum, c) => sum + c.totalSpend, 0) ?? 0;
   const totalBudget = categories?.reduce((sum, c) => sum + c.totalBudget, 0) ?? 0;
-  const totalActiveCampaigns = categories?.reduce((sum, c) => sum + c.activeCampaigns, 0) ?? 0;
-  const totalCompletedCampaigns = categories?.reduce((sum, c) => sum + c.completedCampaigns, 0) ?? 0;
 
   const remaining = totalBudget - totalSpend;
   const spentPct = totalBudget > 0 ? Math.round((totalSpend / totalBudget) * 100) : 0;
@@ -163,6 +218,12 @@ export default function Home() {
     month: "long",
     day: "numeric",
   });
+
+  // Split priorities: active vs completed
+  const activePriorities = dbPriorities?.filter((p) => !p.completedAt) ?? [];
+  const completedPriorities = dbPriorities?.filter((p) => p.completedAt) ?? [];
+  const doneCount = completedPriorities.length;
+  const totalCount = (dbPriorities?.length ?? 0);
 
   return (
     <DashboardLayout>
@@ -200,7 +261,6 @@ export default function Home() {
                   <span className={`text-xs font-semibold ${kpi.badgeColor}`}>{kpi.badge}</span>
                 </div>
                 <p className="text-2xl font-bold text-foreground">{kpi.value}</p>
-                {/* Progress bar */}
                 <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
                   <div
                     className={`h-full rounded-full ${kpi.color} transition-all duration-500`}
@@ -228,7 +288,6 @@ export default function Home() {
               </Link>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Totals */}
               <div className="grid grid-cols-3 gap-3 text-sm">
                 <div>
                   <p className="text-muted-foreground text-xs mb-1">Total Budget</p>
@@ -243,23 +302,13 @@ export default function Home() {
                   <p className="font-bold text-green-400">{formatCurrency(remaining)}</p>
                 </div>
               </div>
-
-              {/* Stacked bar */}
               <div className="space-y-1">
                 <div className="w-full h-3 rounded-full bg-muted overflow-hidden flex">
-                  <div
-                    className="h-full bg-orange-400 transition-all duration-500"
-                    style={{ width: `${spentPct}%` }}
-                  />
-                  <div
-                    className="h-full bg-green-500 transition-all duration-500"
-                    style={{ width: `${remainingPct}%` }}
-                  />
+                  <div className="h-full bg-orange-400 transition-all duration-500" style={{ width: `${spentPct}%` }} />
+                  <div className="h-full bg-green-500 transition-all duration-500" style={{ width: `${remainingPct}%` }} />
                 </div>
                 <p className="text-xs text-muted-foreground">{spentPct}% of budget used</p>
               </div>
-
-              {/* Campaign rows */}
               <div className="space-y-2 pt-1">
                 {campaignRows.map((row) => {
                   const pct = row.budget > 0 ? Math.round((row.spend / row.budget) * 100) : 0;
@@ -267,10 +316,7 @@ export default function Home() {
                     <div key={row.name} className="flex items-center gap-3 text-sm">
                       <span className="text-muted-foreground w-36 truncate text-xs">{row.name}</span>
                       <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
-                        <div
-                          className="h-full bg-primary transition-all duration-500"
-                          style={{ width: `${pct}%` }}
-                        />
+                        <div className="h-full bg-primary transition-all duration-500" style={{ width: `${pct}%` }} />
                       </div>
                       <span className="text-xs text-muted-foreground w-20 text-right">
                         {formatCurrency(row.spend)} / {formatCurrency(row.budget)}
@@ -353,52 +399,197 @@ export default function Home() {
                 );
               })()}
             </CardContent>
-           </Card>
+          </Card>
         </div>
 
-        {/* ── Section 3: Today's Priorities ── */}
+        {/* ── Section 3: Today's Priorities (DB-backed) ── */}
         <Card>
           <CardHeader className="pb-3 flex-row items-center justify-between space-y-0">
             <div>
               <CardTitle className="text-base font-semibold">Today's Priorities</CardTitle>
-              <CardDescription className="text-xs mt-0.5">{todayStr}</CardDescription>
+              <CardDescription className="text-xs mt-0.5">
+                {todayStr} &nbsp;·&nbsp; {doneCount}/{totalCount} done
+              </CardDescription>
             </div>
-            <span className="text-xs text-muted-foreground">
-              {TODAY_TASKS.length} items
-            </span>
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5 h-8 text-xs"
+              onClick={() => setShowAddForm((v) => !v)}
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add
+            </Button>
           </CardHeader>
-          <CardContent className="space-y-1">
-            {TODAY_TASKS.map((task) => (
-              <button
-                key={task.id}
-                onClick={() => setLocation(task.path)}
-                className="w-full flex items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-muted/60 group"
-              >
-                {/* Priority dot */}
-                <div className={`mt-1.5 h-2 w-2 flex-shrink-0 rounded-full ${
-                  task.priority === "URGENT" ? "bg-red-400" :
-                  task.priority === "TODAY" ? "bg-blue-400" : "bg-muted-foreground/40"
-                }`} />
 
-                {/* Label + created date */}
-                <div className="flex-1 min-w-0">
-                  <span className="text-sm text-foreground leading-snug block">{task.label}</span>
+          <CardContent className="space-y-1">
+            {/* ── Add form ── */}
+            {showAddForm && (
+              <div className="mb-3 p-3 rounded-lg border border-border bg-muted/30 space-y-2">
+                <Input
+                  placeholder="What needs to be done?"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && newTitle.trim()) {
+                      createPriority.mutate({
+                        title: newTitle.trim(),
+                        category: newCategory,
+                        path: getCategoryPath(newCategory),
+                        urgency: newUrgency,
+                      });
+                    }
+                  }}
+                  className="h-8 text-sm"
+                  autoFocus
+                />
+                <div className="flex gap-2">
+                  <Select value={newUrgency} onValueChange={(v) => setNewUrgency(v as Urgency)}>
+                    <SelectTrigger className="h-8 text-xs flex-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="URGENT">URGENT</SelectItem>
+                      <SelectItem value="TODAY">TODAY</SelectItem>
+                      <SelectItem value="THIS WEEK">THIS WEEK</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={newCategory} onValueChange={setNewCategory}>
+                    <SelectTrigger className="h-8 text-xs flex-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CATEGORY_OPTIONS.map((c) => (
+                        <SelectItem key={c.value} value={c.value}>{c.value}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    size="sm"
+                    className="h-8 text-xs px-3"
+                    disabled={!newTitle.trim() || createPriority.isPending}
+                    onClick={() => {
+                      if (!newTitle.trim()) return;
+                      createPriority.mutate({
+                        title: newTitle.trim(),
+                        category: newCategory,
+                        path: getCategoryPath(newCategory),
+                        urgency: newUrgency,
+                      });
+                    }}
+                  >
+                    {createPriority.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Save"}
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* ── Loading state ── */}
+            {prioritiesLoading && (
+              <div className="flex items-center justify-center py-6">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            )}
+
+            {/* ── Empty state ── */}
+            {!prioritiesLoading && activePriorities.length === 0 && completedPriorities.length === 0 && (
+              <div className="py-8 text-center">
+                <CheckCircle2 className="h-8 w-8 text-green-400 mx-auto mb-2" />
+                <p className="text-sm font-medium text-foreground">All clear!</p>
+                <p className="text-xs text-muted-foreground mt-1">No priorities yet — click Add to create one</p>
+              </div>
+            )}
+
+            {/* ── Active priorities ── */}
+            {activePriorities.map((task) => (
+              <div
+                key={task.id}
+                className="w-full flex items-start gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-muted/60 group"
+              >
+                {/* Complete checkbox */}
+                <button
+                  onClick={() => completePriority.mutate({ id: task.id, completed: true })}
+                  className="mt-0.5 h-5 w-5 flex-shrink-0 rounded border border-border hover:border-green-400 hover:bg-green-400/10 transition-colors flex items-center justify-center"
+                  title="Mark complete"
+                >
+                  <Check className="h-3 w-3 text-transparent group-hover:text-green-400/60 transition-colors" />
+                </button>
+
+                {/* Label + created date — click to navigate */}
+                <button
+                  onClick={() => handlePriorityClick(task.path)}
+                  className="flex-1 min-w-0 text-left"
+                >
+                  <span className="text-sm text-foreground leading-snug block">{task.title}</span>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <Clock className="h-3 w-3 text-muted-foreground/50" />
-                    <span className="text-xs text-muted-foreground/60">Added {task.createdAt}</span>
+                    <span className="text-xs text-muted-foreground/60">
+                      Added {formatDate(task.createdAt)}
+                      {task.createdBy && ` · ${task.createdBy}`}
+                    </span>
                   </div>
-                </div>
+                </button>
 
-                {/* Badges + arrow */}
+                {/* Badges + navigate arrow + delete */}
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <span className={`text-xs font-semibold rounded px-2 py-0.5 ${PRIORITY_STYLES[task.priority]}`}>
-                    {task.priority}
+                  <span className={`text-xs font-semibold rounded px-2 py-0.5 ${URGENCY_STYLES[task.urgency as Urgency]}`}>
+                    {task.urgency}
                   </span>
                   <span className="text-xs text-muted-foreground hidden sm:block">{task.category}</span>
-                  <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
+                  <button
+                    onClick={() => handlePriorityClick(task.path)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    title="Go to section"
+                  >
+                    <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/60" />
+                  </button>
+                  <button
+                    onClick={() => deletePriority.mutate({ id: task.id })}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400/60 hover:text-red-400"
+                    title="Delete"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
                 </div>
-              </button>
+              </div>
             ))}
+
+            {/* ── Completed priorities (collapsed) ── */}
+            {completedPriorities.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-border/50">
+                <p className="text-xs text-muted-foreground/60 px-3 mb-1">
+                  {completedPriorities.length} completed
+                </p>
+                {completedPriorities.map((task) => (
+                  <div
+                    key={task.id}
+                    className="w-full flex items-start gap-3 rounded-lg px-3 py-2 opacity-50 group"
+                  >
+                    {/* Uncheck */}
+                    <button
+                      onClick={() => completePriority.mutate({ id: task.id, completed: false })}
+                      className="mt-0.5 h-5 w-5 flex-shrink-0 rounded border border-green-500/50 bg-green-500/20 flex items-center justify-center"
+                      title="Mark incomplete"
+                    >
+                      <Check className="h-3 w-3 text-green-400" />
+                    </button>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm text-muted-foreground line-through leading-snug block">{task.title}</span>
+                      <span className="text-xs text-muted-foreground/50">
+                        Done {task.completedAt ? formatDate(new Date(task.completedAt)) : ""}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => deletePriority.mutate({ id: task.id })}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400/60 hover:text-red-400 mt-0.5"
+                      title="Delete"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 

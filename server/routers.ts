@@ -26,7 +26,7 @@ import * as toastTransactionSync from "./toastTransactionSync";
 import * as giveawaySync from "./giveawaySync";
 import { calculateCampaignPerformance, GOAL_TEMPLATES } from "./goalTemplates";
 import { eq, desc } from "drizzle-orm";
-import { aiRecommendations, userActions } from "../drizzle/schema";
+import { aiRecommendations, userActions, priorities } from "../drizzle/schema";
 import { emailCaptureRouter } from "./emailCaptureRouter";
 import { boomerangRouter } from "./boomerangRouter";
 import { communicationRouter } from "./communicationRouter";
@@ -2202,6 +2202,62 @@ export const appRouter = router({
     seedDemo: protectedProcedure.mutation(async () => {
       return seedDemoData();
     }),
+  }),
+
+  // ---------------------------------------------------------------------------
+  // Priorities — DB-backed Today's Priorities task list
+  // ---------------------------------------------------------------------------
+  priorities: router({
+    list: protectedProcedure.query(async () => {
+      const drizzleDb = await db.getDb();
+      if (!drizzleDb) return [];
+      return drizzleDb
+        .select()
+        .from(priorities)
+        .orderBy(priorities.createdAt);
+    }),
+
+    create: protectedProcedure
+      .input(z.object({
+        title: z.string().min(1).max(500),
+        category: z.string().default("General"),
+        path: z.string().default("/overview"),
+        urgency: z.enum(["URGENT", "TODAY", "THIS WEEK"]).default("TODAY"),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const drizzleDb = await db.getDb();
+        if (!drizzleDb) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        const [result] = await drizzleDb.insert(priorities).values({
+          title: input.title,
+          category: input.category,
+          path: input.path,
+          urgency: input.urgency,
+          createdBy: ctx.user.name || ctx.user.email || "Team",
+        });
+        const [created] = await drizzleDb.select().from(priorities).where(eq(priorities.id, (result as any).insertId));
+        return created;
+      }),
+
+    complete: protectedProcedure
+      .input(z.object({ id: z.number(), completed: z.boolean() }))
+      .mutation(async ({ input }) => {
+        const drizzleDb = await db.getDb();
+        if (!drizzleDb) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        await drizzleDb
+          .update(priorities)
+          .set({ completedAt: input.completed ? Date.now() : null })
+          .where(eq(priorities.id, input.id));
+        return { success: true };
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const drizzleDb = await db.getDb();
+        if (!drizzleDb) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        await drizzleDb.delete(priorities).where(eq(priorities.id, input.id));
+        return { success: true };
+      }),
   }),
 });
 export type AppRouter = typeof appRouter;
