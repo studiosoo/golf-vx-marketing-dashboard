@@ -107,7 +107,7 @@ const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
         path: "/intelligence",
         icon: Sparkles,
         children: [
-          { label: "AI Actions", path: "/intelligence/ai-actions", icon: Bot },
+          { label: "Actions", path: "/intelligence/ai-actions", icon: Bot },
           { label: "Performance", path: "/intelligence/performance", icon: TrendingUp },
           { label: "Revenue & ROI", path: "/intelligence/revenue", icon: DollarSign },
           { label: "Reports", path: "/intelligence/reports", icon: FileText },

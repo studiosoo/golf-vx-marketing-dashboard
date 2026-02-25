@@ -160,7 +160,7 @@ function AllHistory() {
   return <div className="space-y-3">{all.map((a) => <ActionCard key={`${a.status}-${a.id}`} action={a} />)}</div>;
 }
 
-export default function AIActions() {
+export default function Actions() {
   const { user } = useAuth();
   const utils = trpc.useUtils();
   const [activeTab, setActiveTab] = useState<Tab>("pending");
@@ -176,8 +176,14 @@ export default function AIActions() {
     onSuccess: (result) => {
       utils.autonomous.getApprovalCards.invalidate();
       utils.autonomous.getAutoExecuted.invalidate();
-      if (result.success) toast.success("Action approved and executed");
-      else toast.error(`Execution failed: ${(result as any).error ?? "unknown error"}`);
+      if (result.success) {
+        toast.success("Action approved and executed successfully");
+      } else {
+        const errMsg = (result.executionResult as any)?.error
+          ?? (result.executionResult as any)?.details
+          ?? "Execution failed — check server logs";
+        toast.error(`Execution failed: ${errMsg}`);
+      }
       setApprovingId(null);
     },
     onError: (err) => { toast.error(err.message); setApprovingId(null); },
@@ -208,7 +214,7 @@ export default function AIActions() {
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-              <Sparkles className="h-6 w-6 text-amber-400" />AI Actions
+              <Sparkles className="h-6 w-6 text-amber-400" />Actions
             </h1>
             <p className="text-muted-foreground mt-1 text-sm">Autonomous marketing decisions — approve, dismiss, or let the engine execute</p>
           </div>
