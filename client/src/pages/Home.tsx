@@ -2,9 +2,10 @@ import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
-import { Target, DollarSign, BarChart3, Loader2, ChevronRight, RefreshCw, Users, Sparkles, Share2, Wallet } from "lucide-react";
+import { Target, DollarSign, BarChart3, Loader2, ChevronRight, RefreshCw, Users, Sparkles, Share2, Wallet, CheckCircle2, XCircle } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Priority = "URGENT" | "TODAY" | "THIS WEEK";
@@ -80,8 +81,35 @@ const PRIORITY_STYLES: Record<Priority, string> = {
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function Home() {
   const { data: categories, isLoading } = trpc.campaigns.getCategorySummary.useQuery();
+  const { data: pendingActions } = trpc.autonomous.getApprovalCards.useQuery();
   const syncMutation = trpc.autonomous.syncAllData.useMutation();
   const utils = trpc.useUtils();
+  const [approvingId, setApprovingId] = useState<number | null>(null);
+  const [dismissingId, setDismissingId] = useState<number | null>(null);
+
+  const approveMutation = trpc.autonomous.approveAction.useMutation({
+    onSuccess: (result) => {
+      utils.autonomous.getApprovalCards.invalidate();
+      utils.autonomous.getAutoExecuted.invalidate();
+      if (result.success) {
+        toast.success("Action approved and executed");
+      } else {
+        const errMsg = (result.executionResult as any)?.error ?? "Execution failed";
+        toast.error(`Execution failed: ${errMsg}`);
+      }
+      setApprovingId(null);
+    },
+    onError: (err) => { toast.error(err.message); setApprovingId(null); },
+  });
+
+  const dismissMutation = trpc.autonomous.rejectAction.useMutation({
+    onSuccess: () => {
+      utils.autonomous.getApprovalCards.invalidate();
+      toast.success("Action dismissed");
+      setDismissingId(null);
+    },
+    onError: (err) => { toast.error(err.message); setDismissingId(null); },
+  });
 
   const [checkedTasks, setCheckedTasks] = useState<Set<number>>(new Set());
 
@@ -270,45 +298,70 @@ export default function Home() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Priority badge */}
-              <span className="inline-block text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30 rounded px-2 py-0.5">
-                HIGH PRIORITY
-              </span>
-
-              <div>
-                <p className="font-semibold text-foreground text-sm leading-snug mb-2">
-                  Pause 2 underperforming Meta ad sets
-                </p>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Ad sets targeting "Golf Beginners 25–34" and "Corporate Events Chicago" are delivering
-                  CTR below 0.4% over the last 7 days. Reallocating their combined $85/week budget to
-                  the top-performing "Members Lookalike" ad set is projected to improve overall ROAS.
-                </p>
-              </div>
-
-              <p className="text-xs font-medium text-amber-400">
-                Estimated impact: Save ~$85/week
-              </p>
-
-              <div className="flex gap-2">
-                <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white text-xs h-8 px-3">
-                  APPROVE
-                </Button>
-                <Button size="sm" variant="outline" className="text-xs h-8 px-3">
-                  DISMISS
-                </Button>
-              </div>
-
-              <Link
-                href="/intelligence"
-                className="text-xs text-primary hover:underline flex items-center gap-1 pt-1"
-              >
-                3 more actions awaiting review <ChevronRight className="h-3 w-3" />
-              </Link>
+              {!pendingActions || pendingActions.length === 0 ? (
+                <div className="py-4 text-center">
+                  <CheckCircle2 className="h-8 w-8 text-green-400 mx-auto mb-2" />
+                  <p className="text-sm font-medium text-foreground">All clear!</p>
+                  <p className="text-xs text-muted-foreground mt-1">No actions awaiting approval</p>
+                </div>
+              ) : (() => {
+                const action = pendingActions[0];
+                const remaining = pendingActions.length - 1;
+                const riskColor = action.riskLevel === "high"
+                  ? "bg-red-500/20 text-red-400 border-red-500/30"
+                  : action.riskLevel === "medium"
+                  ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
+                  : "bg-green-500/20 text-green-400 border-green-500/30";
+                return (
+                  <>
+                    <span className={`inline-block text-xs font-bold border rounded px-2 py-0.5 ${riskColor}`}>
+                      {action.riskLevel.toUpperCase()} PRIORITY
+                    </span>
+                    <div>
+                      <p className="font-semibold text-foreground text-sm leading-snug mb-2">{action.title}</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{action.description}</p>
+                    </div>
+                    {action.expectedImpact && (
+                      <p className="text-xs font-medium text-amber-400">{action.expectedImpact}</p>
+                    )}
+                    {action.confidence != null && (
+                      <p className="text-xs text-muted-foreground">{action.confidence}% confidence</p>
+                    )}
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700 text-white text-xs h-8 px-3 gap-1"
+                        onClick={() => { setApprovingId(action.id); approveMutation.mutate({ actionId: action.id }); }}
+                        disabled={approvingId === action.id || dismissingId === action.id}
+                      >
+                        {approvingId === action.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle2 className="h-3 w-3" />}
+                        APPROVE
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-xs h-8 px-3 gap-1 text-red-400 border-red-500/30 hover:bg-red-500/10"
+                        onClick={() => { setDismissingId(action.id); dismissMutation.mutate({ actionId: action.id }); }}
+                        disabled={approvingId === action.id || dismissingId === action.id}
+                      >
+                        {dismissingId === action.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <XCircle className="h-3 w-3" />}
+                        DISMISS
+                      </Button>
+                    </div>
+                    {remaining > 0 && (
+                      <Link
+                        href="/intelligence/ai-actions"
+                        className="text-xs text-primary hover:underline flex items-center gap-1 pt-1"
+                      >
+                        {remaining} more action{remaining > 1 ? "s" : ""} awaiting review <ChevronRight className="h-3 w-3" />
+                      </Link>
+                    )}
+                  </>
+                );
+              })()}
             </CardContent>
-          </Card>
+           </Card>
         </div>
-
         {/* ── Section 3: Today's Priorities ── */}
         <Card>
           <CardHeader className="pb-3 flex-row items-center justify-between space-y-0">
