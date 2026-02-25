@@ -1,31 +1,151 @@
+import { useState, useMemo } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Construction } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { trpc } from "@/lib/trpc";
+import { Loader2, TrendingUp, TrendingDown, DollarSign, Users, BarChart3, Target, RefreshCw, Calendar } from "lucide-react";
 
+const fmt = (v: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(v);
+const fmtPct = (v: number | string) => `${parseFloat(String(v)).toFixed(1)}%`;
+type Range = "7d" | "30d" | "90d";
+function getRangeDates(range: Range) {
+  const end = new Date(); const start = new Date();
+  if (range === "7d") start.setDate(end.getDate() - 7);
+  else if (range === "30d") start.setDate(end.getDate() - 30);
+  else start.setDate(end.getDate() - 90);
+  return { start, end };
+}
 export default function Performance() {
+  const [range, setRange] = useState<Range>("30d");
+  const dates = useMemo(() => getRangeDates(range), [range]);
+  const { data: overview, isLoading: ovLoading, refetch } = trpc.dashboard.getOverview.useQuery({ startDate: dates.start, endDate: dates.end });
+  const { data: categories, isLoading: catLoading } = trpc.campaigns.getCategorySummary.useQuery();
+  const { data: revenueChart, isLoading: revLoading } = trpc.dashboard.getRevenueChart.useQuery({ startDate: dates.start, endDate: dates.end });
+  const isLoading = ovLoading || catLoading;
+  const roiValue = parseFloat(String(overview?.overallROI ?? 0));
+  const kpis = [
+    { label: "Total Revenue", value: fmt(parseFloat(String(overview?.totalRevenue ?? 0))), icon: DollarSign, color: "text-green-400", bg: "bg-green-500/10", trend: "up" as const },
+    { label: "MRR", value: fmt(overview?.monthlyRecurringRevenue ?? 0), icon: TrendingUp, color: "text-primary", bg: "bg-primary/10", trend: "up" as const },
+    { label: "Active Members", value: String(overview?.activeMembers ?? "—"), icon: Users, color: "text-blue-400", bg: "bg-blue-500/10", trend: "up" as const },
+    { label: "Marketing Spend", value: fmt(parseFloat(String(overview?.marketingSpend ?? 0))), icon: BarChart3, color: "text-orange-400", bg: "bg-orange-500/10", trend: "flat" as const },
+    { label: "Overall ROI", value: fmtPct(overview?.overallROI ?? 0), icon: Target, color: roiValue >= 0 ? "text-green-400" : "text-red-400", bg: roiValue >= 0 ? "bg-green-500/10" : "bg-red-500/10", trend: roiValue >= 0 ? "up" as const : "down" as const },
+    { label: "Active Campaigns", value: String(overview?.activeCampaignsCount ?? "—"), icon: Target, color: "text-purple-400", bg: "bg-purple-500/10", trend: "flat" as const },
+  ];
   return (
     <DashboardLayout>
-      <div className="p-6 max-w-2xl">
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold tracking-tight">Performance</h1>
-          <p className="text-muted-foreground mt-1 text-sm">Campaign performance metrics and analytics</p>
+      <div className="space-y-6 p-6">
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Performance</h1>
+            <p className="text-muted-foreground mt-1 text-sm">Campaign KPIs, revenue, and ROI across all programs</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {(["7d", "30d", "90d"] as Range[]).map((r) => (
+              <Button key={r} size="sm" variant={range === r ? "default" : "outline"} className="h-8 px-3 text-xs" onClick={() => setRange(r)}>
+                {r === "7d" ? "7 Days" : r === "30d" ? "30 Days" : "90 Days"}
+              </Button>
+            ))}
+            <Button size="sm" variant="outline" className="h-8 px-3 text-xs gap-1" onClick={() => refetch()} disabled={isLoading}>
+              <RefreshCw className={`h-3 w-3 ${isLoading ? "animate-spin" : ""}`} />
+            </Button>
+          </div>
         </div>
+        {isLoading ? <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div> : (
+          <div className="grid gap-4 grid-cols-2 lg:grid-cols-3">
+            {kpis.map((kpi) => (
+              <Card key={kpi.label}>
+                <CardContent className="pt-4 pb-4">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">{kpi.label}</p>
+                      <p className="text-2xl font-bold text-foreground">{kpi.value}</p>
+                    </div>
+                    <div className={`h-9 w-9 rounded-lg ${kpi.bg} flex items-center justify-center`}>
+                      <kpi.icon className={`h-4 w-4 ${kpi.color}`} />
+                    </div>
+                  </div>
+                  <div className={`flex items-center gap-1 mt-2 text-xs ${kpi.color}`}>
+                    {kpi.trend === "up" ? <TrendingUp className="h-3 w-3" /> : kpi.trend === "down" ? <TrendingDown className="h-3 w-3" /> : null}
+                    <span>{kpi.trend === "up" ? "Trending up" : kpi.trend === "down" ? "Trending down" : "Stable"}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
         <Card>
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <Construction className="h-5 w-5 text-muted-foreground" />
-              <CardTitle className="text-base">Coming Soon</CardTitle>
-            </div>
-            <CardDescription>
-              This section is under development and will be available shortly.
-            </CardDescription>
-          </CardHeader>
+          <CardHeader className="pb-3"><CardTitle className="text-base font-semibold">Campaign Category Breakdown</CardTitle></CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Check back soon for Performance functionality.
-            </p>
+            {catLoading ? <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+              : !categories?.length ? <p className="text-sm text-muted-foreground text-center py-8">No campaign data available</p>
+              : <div className="space-y-3">{categories.map((cat) => {
+                  const pct = cat.totalBudget > 0 ? Math.round((cat.totalSpend / cat.totalBudget) * 100) : 0;
+                  const over = pct > 100;
+                  return (
+                    <div key={cat.name} className="space-y-1.5">
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-foreground">{cat.name}</span>
+                          <Badge variant="outline" className="text-xs">{cat.activeCampaigns} active</Badge>
+                        </div>
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                          <span className={over ? "text-red-400 font-semibold" : ""}>{fmt(cat.totalSpend)} / {fmt(cat.totalBudget)}</span>
+                          <span className={`font-semibold ${over ? "text-red-400" : pct > 80 ? "text-amber-400" : "text-green-400"}`}>{pct}%</span>
+                        </div>
+                      </div>
+                      <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
+                        <div className={`h-full rounded-full transition-all duration-500 ${over ? "bg-red-500" : pct > 80 ? "bg-amber-500" : "bg-primary"}`} style={{ width: `${Math.min(pct, 100)}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}</div>}
           </CardContent>
         </Card>
+        <Card>
+          <CardHeader className="pb-3 flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-base font-semibold">Monthly Revenue</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {revLoading ? <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+              : !revenueChart?.length ? <p className="text-sm text-muted-foreground text-center py-8">No revenue data for this period</p>
+              : <div className="space-y-2">{revenueChart.map((row) => {
+                  const maxRev = Math.max(...revenueChart.map((r) => r.revenue));
+                  const pct = maxRev > 0 ? Math.round((row.revenue / maxRev) * 100) : 0;
+                  return (
+                    <div key={row.month} className="flex items-center gap-3 text-sm">
+                      <span className="text-muted-foreground w-16 text-xs shrink-0">{row.month}</span>
+                      <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
+                        <div className="h-full bg-green-500 transition-all duration-500" style={{ width: `${pct}%` }} />
+                      </div>
+                      <span className="text-xs text-foreground w-20 text-right font-medium">{fmt(row.revenue)}</span>
+                    </div>
+                  );
+                })}</div>}
+          </CardContent>
+        </Card>
+        {overview?.memberStats && (
+          <Card>
+            <CardHeader className="pb-3"><CardTitle className="text-base font-semibold">Membership Tier Breakdown</CardTitle></CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  { label: "All-Access Aces", count: overview.memberStats.allAccessCount, mrr: overview.memberStats.allAccessCount * 325, color: "text-primary" },
+                  { label: "Swing Savers", count: overview.memberStats.swingSaversCount, mrr: overview.memberStats.swingSaversCount * 225, color: "text-blue-400" },
+                  { label: "Golf VX Pro", count: overview.memberStats.golfVxProCount, mrr: overview.memberStats.golfVxProCount * 500, color: "text-purple-400" },
+                  { label: "Total Active", count: overview.memberStats.activeMembers, mrr: overview.monthlyRecurringRevenue, color: "text-green-400" },
+                ].map((tier) => (
+                  <div key={tier.label} className="space-y-1">
+                    <p className="text-xs text-muted-foreground">{tier.label}</p>
+                    <p className={`text-xl font-bold ${tier.color}`}>{tier.count}</p>
+                    <p className="text-xs text-muted-foreground">{fmt(tier.mrr)} MRR</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </DashboardLayout>
   );

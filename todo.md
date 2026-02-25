@@ -184,3 +184,22 @@
 - [x] Add new page stubs: AIActions, AccountSettings, Announcements, Automations, DripCampaigns, Guests, Integrations, Leads, Leagues, NewsManager, Overview, Performance, PrivateEvents, SiteControl
 - [x] TypeScript: 0 errors
 - [x] Dev server: 200 OK
+
+## Handoff Package v2 — 14 Pages Implementation (2026-02-25)
+- [x] Apply handoff package: App.tsx, DashboardLayout.tsx, Home.tsx replaced
+- [x] Overview.tsx — dedicated high-level metrics view (member stats, campaign summary, quick links)
+- [x] AIActions.tsx — autonomous action queue with approve/dismiss, risk badges, execution history
+- [x] Performance.tsx — campaign KPI charts, channel performance, revenue metrics
+- [x] Leads.tsx — email captures list with search, filter by source/status, stats bar
+- [x] Guests.tsx — members/guests list with Acuity sync, membership type filter, stats
+- [x] Announcements.tsx — bulk SMS/email broadcast with member targeting and history
+- [x] Automations.tsx — Encharge sequences overview with status and subscriber counts
+- [x] DripCampaigns.tsx — Encharge people/segments drip view with tag management
+- [x] Leagues.tsx — Sunday Clinic + PBGA Winter Clinic metrics from Acuity, corporate events
+- [x] PrivateEvents.tsx — giveaway applications table, stats, corporate event campaigns
+- [x] SiteControl.tsx — quick access links (6 platforms), active campaign landing pages, analytics shortcuts
+- [x] NewsManager.tsx — AI intelligence alerts + generated reports with one-click monthly summary
+- [x] Integrations.tsx — 10 integration status cards (Meta, Encharge, Acuity, Boomerang, ClickFunnels, Make.com, Asana, Instagram, Twilio, GA4)
+- [x] AccountSettings.tsx — user profile, system info, webhook config, security status
+- [x] TypeScript: 0 errors
+- [x] Tests: 112/132 passing (20 external API failures unchanged from before)
