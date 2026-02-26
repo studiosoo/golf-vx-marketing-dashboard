@@ -1247,7 +1247,7 @@ export const communicationLogs = mysqlTable("communication_logs", {
   direction: mysqlEnum("direction", ["outbound", "inbound"]).notNull().default("outbound"),
   subject: varchar("subject", { length: 500 }),
   body: text("body").notNull(),
-  status: mysqlEnum("status", [
+  status: mysqlEnum("comm_status", [
     "queued", "sent", "delivered", "failed", "bounced", "opened", "clicked",
   ]).notNull().default("queued"),
   provider: mysqlEnum("provider", [
@@ -1260,7 +1260,7 @@ export const communicationLogs = mysqlTable("communication_logs", {
   costCents: int("cost_cents"),
   sentAt: bigint("sent_at", { mode: "number" }),
   deliveredAt: bigint("delivered_at", { mode: "number" }),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 export type CommunicationLog = typeof communicationLogs.$inferSelect;
 export type NewCommunicationLog = typeof communicationLogs.$inferInsert;
