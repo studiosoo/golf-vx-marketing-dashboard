@@ -3068,5 +3068,163 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
         return { success: true };
       }),
   }),
+
+  // ── MARKET RESEARCH ──
+  research: router({
+    list: protectedProcedure.query(async () => {
+      const drizzleDb = await db.getDb();
+      if (!drizzleDb) return [];
+      const { marketResearchReports } = await import("../drizzle/schema");
+      const { desc } = await import("drizzle-orm");
+      return drizzleDb.select().from(marketResearchReports).orderBy(desc(marketResearchReports.createdAt));
+    }),
+
+    getById: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        const drizzleDb = await db.getDb();
+        if (!drizzleDb) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        const { marketResearchReports } = await import("../drizzle/schema");
+        const { eq: eqOp } = await import("drizzle-orm");
+        const [report] = await drizzleDb.select().from(marketResearchReports).where(eqOp(marketResearchReports.id, input.id));
+        if (!report) throw new TRPCError({ code: "NOT_FOUND" });
+        return report;
+      }),
+
+    generate: protectedProcedure
+      .input(z.object({
+        title: z.string(),
+        topic: z.string(),
+        category: z.enum(["b2b_corporate_events", "local_demographics", "competitor_analysis", "seasonal_trends", "membership_pricing", "custom"]),
+        customContext: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const drizzleDb = await db.getDb();
+        if (!drizzleDb) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        const { marketResearchReports } = await import("../drizzle/schema");
+        // Insert placeholder record with 'generating' status
+        const [inserted] = await drizzleDb.insert(marketResearchReports).values({
+          title: input.title,
+          topic: input.topic,
+          category: input.category,
+          status: "generating",
+          generatedBy: "ai",
+        });
+        const reportId = (inserted as any).insertId as number;
+
+        // Build category-specific LLM prompt
+        const categoryPrompts: Record<string, string> = {
+          b2b_corporate_events: `Research the B2B corporate events market in Arlington Heights, IL and surrounding suburbs (Schaumburg, Palatine, Rolling Meadows, Elk Grove Village). Focus on: corporate team-building activities, company outing budgets, decision-maker profiles (HR managers, office managers, event coordinators), typical group sizes (10-50 people), pricing expectations ($30-80/person), and how indoor golf simulators fit into corporate entertainment. Identify top industries in the area (healthcare, tech, finance, manufacturing) and their event frequency.`,
+          local_demographics: `Analyze the local demographics of Arlington Heights, IL relevant to Golf VX's target market. Focus on: household income distribution, age groups (25-55 primary), golf participation rates, disposable income for entertainment, commuter patterns, family composition, and proximity to corporate offices. Include data on the broader northwest Chicago suburbs market.`,
+          competitor_analysis: `Analyze direct and indirect competitors for Golf VX Arlington Heights (indoor golf simulator facility). Direct competitors: other indoor golf simulators within 20 miles. Indirect: TopGolf, bowling alleys, escape rooms, arcades, and other entertainment venues targeting the same demographic. Assess their pricing, membership models, marketing strategies, and weaknesses Golf VX can exploit.`,
+          seasonal_trends: `Analyze seasonal trends for indoor golf simulator facilities in the Chicago/Arlington Heights area. Focus on: peak months (Oct-Mar for indoor golf), slow season strategies (Apr-Sep), holiday corporate event demand (Nov-Dec), summer junior camp opportunities, and how weather patterns affect booking rates. Include recommendations for seasonal promotions and staffing.`,
+          membership_pricing: `Research optimal membership pricing strategies for indoor golf simulator facilities in the Chicago suburbs market. Analyze: current Golf VX tiers (All-Access Ace $325/mo, Swing Saver $225/mo, Trial $9/hr), competitor pricing, price elasticity, upsell opportunities, corporate membership packages, and family plan potential. Include recommendations for B2B pricing (group packages, corporate accounts).`,
+          custom: `Research the following topic for Golf VX Arlington Heights, an indoor golf simulator facility: ${input.topic}. ${input.customContext || ""} Provide actionable insights relevant to marketing strategy and campaign planning.`,
+        };
+
+        const systemPrompt = `You are a market research analyst specializing in the sports entertainment and hospitality industry in the Chicago suburbs. You have deep knowledge of Arlington Heights, IL demographics, corporate culture, and entertainment spending patterns. Provide detailed, data-driven research reports with specific, actionable insights for Golf VX Arlington Heights.`;
+
+        const userPrompt = `${categoryPrompts[input.category] || categoryPrompts.custom}
+
+Return a JSON object with exactly these fields:
+- summary: 2-3 sentence executive summary
+- keyFindings: array of 5-7 specific, data-backed findings (strings)
+- opportunities: array of 4-6 specific opportunities Golf VX can act on (strings)
+- risks: array of 3-5 risks or challenges to be aware of (strings)
+- recommendedActions: array of 4-6 objects, each with { action: string, priority: "high"|"medium"|"low", campaignType: string }
+- sources: array of 3-5 reference types or data sources used (strings, e.g. "US Census Bureau - Arlington Heights Demographics 2023")`;
+
+        try {
+          const { invokeLLM } = await import("./_core/llm");
+          const response = await invokeLLM({
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: userPrompt },
+            ],
+            response_format: {
+              type: "json_schema",
+              json_schema: {
+                name: "market_research_report",
+                strict: true,
+                schema: {
+                  type: "object",
+                  properties: {
+                    summary: { type: "string" },
+                    keyFindings: { type: "array", items: { type: "string" } },
+                    opportunities: { type: "array", items: { type: "string" } },
+                    risks: { type: "array", items: { type: "string" } },
+                    recommendedActions: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          action: { type: "string" },
+                          priority: { type: "string", enum: ["high", "medium", "low"] },
+                          campaignType: { type: "string" },
+                        },
+                        required: ["action", "priority", "campaignType"],
+                        additionalProperties: false,
+                      },
+                    },
+                    sources: { type: "array", items: { type: "string" } },
+                  },
+                  required: ["summary", "keyFindings", "opportunities", "risks", "recommendedActions", "sources"],
+                  additionalProperties: false,
+                },
+              },
+            },
+          });
+          const rawContent = response.choices?.[0]?.message?.content;
+          const parsed = typeof rawContent === "string" ? JSON.parse(rawContent) : rawContent;
+          const { eq: eqOp } = await import("drizzle-orm");
+          await drizzleDb.update(marketResearchReports)
+            .set({
+              status: "ready",
+              summary: parsed.summary,
+              keyFindings: parsed.keyFindings,
+              opportunities: parsed.opportunities,
+              risks: parsed.risks,
+              recommendedActions: parsed.recommendedActions,
+              sources: parsed.sources,
+            })
+            .where(eqOp(marketResearchReports.id, reportId));
+          return { success: true, reportId };
+        } catch (err) {
+          const { eq: eqOp } = await import("drizzle-orm");
+          await drizzleDb.update(marketResearchReports)
+            .set({ status: "archived" })
+            .where(eqOp(marketResearchReports.id, reportId));
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "LLM generation failed" });
+        }
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const drizzleDb = await db.getDb();
+        if (!drizzleDb) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        const { marketResearchReports } = await import("../drizzle/schema");
+        const { eq: eqOp } = await import("drizzle-orm");
+        await drizzleDb.delete(marketResearchReports).where(eqOp(marketResearchReports.id, input.id));
+        return { success: true };
+      }),
+
+    linkToCampaign: protectedProcedure
+      .input(z.object({ reportId: z.number(), campaignId: z.string() }))
+      .mutation(async ({ input }) => {
+        const drizzleDb = await db.getDb();
+        if (!drizzleDb) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        const { marketResearchReports } = await import("../drizzle/schema");
+        const { eq: eqOp } = await import("drizzle-orm");
+        const [report] = await drizzleDb.select().from(marketResearchReports).where(eqOp(marketResearchReports.id, input.reportId));
+        if (!report) throw new TRPCError({ code: "NOT_FOUND" });
+        const existing = (report.linkedCampaignIds as string[]) || [];
+        const updated = existing.includes(input.campaignId) ? existing : [...existing, input.campaignId];
+        await drizzleDb.update(marketResearchReports)
+          .set({ linkedCampaignIds: updated })
+          .where(eqOp(marketResearchReports.id, input.reportId));
+        return { success: true };
+      }),
+  }),
 });
 export type AppRouter = typeof appRouter;

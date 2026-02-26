@@ -490,3 +490,30 @@
 - [x] AI Actions dismiss: Add dismiss button for error/monitoring items (new 'dismissed' status, dismissAction backend + frontend)
 - [x] Navigation: Rename Campaigns page title from "Strategic Campaigns" to "Campaigns", Meta Ads stays under Promotions
 - [x] Email draft: Add Drive Day + Instagram reel context to both campaigns and giveaway LLM prompts
+
+## Market Research Module under Intelligence (2026-02-26)
+
+### Phase 1: Schema & Backend
+- [ ] Add market_research_reports table (id, title, topic, category, status, summary, full_report, sources, campaign_links, created_at)
+- [ ] Add market_research_insights table (report_id, insight_type, content, priority, action_suggested)
+- [ ] Run db:push migration
+- [ ] Add tRPC procedures: research.list, research.getById, research.generate, research.delete, research.linkToCampaign
+
+### Phase 2: Market Research Page UI
+- [ ] Create MarketResearch.tsx under client/src/pages/
+- [ ] Research topic picker: B2B/Corporate Events, Local Demographics, Competitor Analysis, Seasonal Trends, Membership Pricing
+- [ ] Report card grid with status badges (generating, ready, archived)
+- [ ] Full report viewer modal with structured sections (Summary, Key Findings, Opportunities, Risks, Recommended Actions)
+- [ ] "Use in Campaign" button to link insights to a campaign strategy
+
+### Phase 3: AI Research Generation
+- [ ] LLM prompt for each research category (B2B corporate events in Arlington Heights IL, competitor indoor golf venues, etc.)
+- [ ] Structured JSON output: summary, keyFindings[], opportunities[], risks[], recommendedActions[]
+- [ ] Link generated insights to relevant campaigns (B2B research → Corporate Events campaign)
+- [ ] Add "Generate Strategy" button that pre-fills campaign brief from research findings
+
+### Phase 4: Navigation & Polish
+- [ ] Add "Research" sub-item under Intelligence in DashboardLayout.tsx
+- [ ] Add route /intelligence/research in App.tsx
+- [ ] Write vitest tests for research router
+- [ ] Save checkpoint

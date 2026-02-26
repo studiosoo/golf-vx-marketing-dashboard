@@ -24,6 +24,7 @@ import BudgetManager from "./pages/BudgetManager";
 import MarketingIntelligence from "./pages/MarketingIntelligence";
 import AIActions from "./pages/AIActions";
 import Performance from "./pages/Performance";
+import MarketResearch from "./pages/MarketResearch";
 import ROI from "./pages/ROI";
 import Revenue from "./pages/Revenue";
 import Reports from "./pages/Reports";
@@ -98,6 +99,7 @@ function Router() {
       <Route path="/intelligence" component={MarketingIntelligence} />
       <Route path="/intelligence/ai-actions" component={AIActions} />
       <Route path="/intelligence/performance" component={Performance} />
+      <Route path="/intelligence/research" component={MarketResearch} />
       <Route path="/intelligence/revenue" component={Revenue} />
       <Route path="/intelligence/reports" component={Reports} />
 

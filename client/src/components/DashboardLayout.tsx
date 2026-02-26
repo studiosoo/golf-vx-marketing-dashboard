@@ -53,6 +53,7 @@ import {
   ChevronDown,
   ChevronRight,
   MessageSquare,
+  Search,
 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -112,6 +113,7 @@ const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
         children: [
           { label: "Actions", path: "/intelligence/ai-actions", icon: Bot },
           { label: "Performance", path: "/intelligence/performance", icon: TrendingUp },
+          { label: "Research", path: "/intelligence/research", icon: Search },
           { label: "Reports", path: "/intelligence/reports", icon: FileText },
         ],
       },
