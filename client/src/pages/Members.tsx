@@ -88,11 +88,15 @@ export default function Members() {
     reader.readAsText(file);
   };
 
-  const { data: members, isLoading } = trpc.members.list.useQuery({
+  const { data: allMembersRaw, isLoading } = trpc.members.list.useQuery({
     search: search || undefined,
     status: statusFilter !== "all" ? (statusFilter as any) : undefined,
     membershipTier: tierFilter !== "all" ? (tierFilter as any) : undefined,
   });
+  // "All Members" = All-Access Aces + Swing Savers (excludes Pro unless explicitly filtered)
+  const members = tierFilter === "all"
+    ? (allMembersRaw || []).filter(m => m.membershipTier !== "golf_vx_pro")
+    : allMembersRaw;
 
   const { data: stats } = trpc.members.getStats.useQuery();
 

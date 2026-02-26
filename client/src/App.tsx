@@ -52,6 +52,7 @@ import Automations from "./pages/Automations";
 import DripCampaigns from "./pages/DripCampaigns";
 import EmailMarketing from "./pages/EmailMarketing";
 import Channels from "./pages/Channels";
+import CommunicationsHub from "./pages/CommunicationsHub";
 
 // ── WEBSITE ──
 import SiteControl from "./pages/SiteControl";
@@ -109,6 +110,9 @@ function Router() {
       <Route path="/programs/leagues" component={Leagues} />
       <Route path="/programs/annual-giveaway" component={AnnualGiveaway} />
 
+      {/* ── PROMOTIONS ── */}
+      <Route path="/promotions/annual-giveaway" component={AnnualGiveaway} />
+
       {/* ── AUDIENCE / List ── */}
       <Route path="/list" component={Members} />
       <Route path="/list/members" component={Members} />
@@ -118,7 +122,9 @@ function Router() {
       <Route path="/duplicates" component={Duplicates} />
 
       {/* ── AUDIENCE / Communication ── */}
-      <Route path="/communication" component={EmailMarketing} />
+      <Route path="/communication" component={CommunicationsHub} />
+      <Route path="/communication/hub" component={CommunicationsHub} />
+      <Route path="/communication/email-marketing" component={EmailMarketing} />
       <Route path="/communication/announcements" component={Announcements} />
       <Route path="/communication/automations" component={Automations} />
       <Route path="/communication/drip" component={DripCampaigns} />

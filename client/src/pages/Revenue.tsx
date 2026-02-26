@@ -3,6 +3,9 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Mail, Phone, X } from "lucide-react";
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
@@ -57,7 +60,12 @@ export default function Revenue() {
   const { data: daily, isLoading: dailyLoading } = trpc.revenue.getToastDaily.useQuery({});
   const { data: payments, isLoading: paymentsLoading } = trpc.revenue.getToastPaymentBreakdown.useQuery();
   const { data: syncStatus } = trpc.revenue.getToastSyncStatus.useQuery();
-  const { data: acuityRevenue, isLoading: acuityLoading } = trpc.revenue.getAcuityRevenue.useQuery({});
+  const currentYear = new Date().getFullYear();
+  const [selectedAcuityType, setSelectedAcuityType] = useState<{ id: number; name: string } | null>(null);
+  const { data: acuityRevenue, isLoading: acuityLoading } = trpc.revenue.getAcuityRevenue.useQuery({
+    minDate: `${currentYear}-01-01`,
+    maxDate: `${currentYear}-12-31`,
+  });
   const { data: acuityMonthly } = trpc.revenue.getAcuityMonthly.useQuery({ months: 6 });
 
   // Last 30 days daily data
@@ -428,8 +436,13 @@ export default function Revenue() {
                           const pct = acuityRevenue?.total ? (t.totalRevenue / acuityRevenue.total) * 100 : 0;
                           const isPbga = (t.appointmentType || '').toLowerCase().includes('pbga') || (t.appointmentType || '').toLowerCase().includes('clinic') || (t.appointmentType || '').toLowerCase().includes('drive day') || (t.appointmentType || '').toLowerCase().includes('camp');
                           return (
-                            <div key={i} className="flex items-center gap-3">
-                              <div className="w-40 text-xs text-muted-foreground truncate">{t.appointmentType}</div>
+                            <div
+                              key={i}
+                              className="flex items-center gap-3 cursor-pointer hover:bg-muted/40 rounded-md px-1 py-0.5 transition-colors group"
+                              onClick={() => setSelectedAcuityType({ id: t.appointmentTypeId, name: t.appointmentType })}
+                              title="Click to see attendee list"
+                            >
+                              <div className="w-40 text-xs text-muted-foreground truncate group-hover:text-foreground">{t.appointmentType}</div>
                               <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                                 <div
                                   className="h-full rounded-full"
@@ -437,7 +450,10 @@ export default function Revenue() {
                                 />
                               </div>
                               <div className="text-xs font-medium w-20 text-right">{fmt(t.totalRevenue)}</div>
-                              <div className="text-xs text-muted-foreground w-16 text-right">{t.bookingCount} bookings</div>
+                              <button
+                                className="text-xs text-primary underline w-20 text-right"
+                                onClick={(e) => { e.stopPropagation(); setSelectedAcuityType({ id: t.appointmentTypeId, name: t.appointmentType }); }}
+                              >{t.bookingCount} bookings</button>
                             </div>
                           );
                         })}
@@ -565,6 +581,116 @@ export default function Revenue() {
           </>
         )}
       </div>
+      {/* Acuity Bookings Drill-Down Modal */}
+      {selectedAcuityType && (
+        <AcuityBookingsModal
+          typeId={selectedAcuityType.id}
+          typeName={selectedAcuityType.name}
+          onClose={() => setSelectedAcuityType(null)}
+        />
+      )}
     </DashboardLayout>
+  );
+}
+
+function AcuityBookingsModal({ typeId, typeName, onClose }: { typeId: number; typeName: string; onClose: () => void }) {
+  const currentYear = new Date().getFullYear();
+  const { data: bookings, isLoading } = trpc.revenue.getAcuityBookingsList.useQuery({
+    appointmentTypeId: typeId,
+    minDate: `${currentYear}-01-01`,
+    maxDate: `${currentYear}-12-31`,
+  });
+  const sendEmail = trpc.communication.sendEmail.useMutation();
+  const sendSMS = trpc.communication.sendSMS.useMutation();
+
+  const handleEmailAll = async () => {
+    if (!bookings) return;
+    const unique = Array.from(new Map(bookings.map(b => [b.email, b])).values());
+    for (const b of unique) {
+      if (b.email) {
+        await sendEmail.mutateAsync({
+          recipientId: b.id,
+          recipientType: 'lead' as const,
+          email: b.email,
+          subject: `Thank you for booking ${typeName}`,
+          htmlBody: `<p>Hi ${b.firstName}, thank you for your recent booking at Golf VX Arlington Heights. We look forward to seeing you!</p>`,
+          recipientName: `${b.firstName} ${b.lastName}`,
+          campaignName: typeName,
+        });
+      }
+    }
+  };
+
+  const handleSMSAll = async () => {
+    if (!bookings) return;
+    const unique = Array.from(new Map(bookings.map(b => [b.phone, b])).values());
+    for (const b of unique.filter(b => b.phone)) {
+      await sendSMS.mutateAsync({
+        recipientId: b.id,
+        recipientType: 'lead' as const,
+        phone: b.phone,
+        body: `Hi ${b.firstName}! Thanks for booking ${typeName} at Golf VX Arlington Heights. See you soon!`,
+        recipientName: `${b.firstName} ${b.lastName}`,
+        campaignName: typeName,
+      });
+    }
+  };
+
+  const uniqueBookings = bookings ? Array.from(new Map(bookings.map(b => [b.email, b])).values()) : [];
+
+  return (
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center justify-between">
+            <span>{typeName}</span>
+            <Badge variant="outline">{uniqueBookings.length} unique bookers</Badge>
+          </DialogTitle>
+        </DialogHeader>
+        {isLoading ? (
+          <div className="py-8 text-center text-muted-foreground">Loading bookings...</div>
+        ) : (
+          <>
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {uniqueBookings.map((b) => (
+                <div key={b.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/30 hover:bg-muted/50">
+                  <div>
+                    <p className="text-sm font-medium">{b.firstName} {b.lastName}</p>
+                    <p className="text-xs text-muted-foreground">{b.date} · {b.type}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium text-green-600">${b.amountPaid.toFixed(2)}</span>
+                    {b.email && (
+                      <a href={`mailto:${b.email}`} className="p-1 rounded hover:bg-muted" title={b.email}>
+                        <Mail className="w-3.5 h-3.5 text-muted-foreground" />
+                      </a>
+                    )}
+                    {b.phone && (
+                      <a href={`tel:${b.phone}`} className="p-1 rounded hover:bg-muted" title={b.phone}>
+                        <Phone className="w-3.5 h-3.5 text-muted-foreground" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {uniqueBookings.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">No bookings found for this appointment type.</p>
+              )}
+            </div>
+            <div className="flex gap-2 pt-3 border-t">
+              <Button size="sm" variant="outline" className="flex-1" onClick={handleEmailAll} disabled={sendEmail.isPending}>
+                <Mail className="w-3.5 h-3.5 mr-1" /> Email All ({uniqueBookings.filter(b => b.email).length})
+              </Button>
+              <Button size="sm" variant="outline" className="flex-1" onClick={handleSMSAll} disabled={sendSMS.isPending}>
+                <Phone className="w-3.5 h-3.5 mr-1" /> SMS All ({uniqueBookings.filter(b => b.phone).length})
+              </Button>
+              <Button size="sm" variant="ghost" onClick={onClose}>
+                <X className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }

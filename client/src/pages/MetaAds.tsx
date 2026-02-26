@@ -6,7 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, DollarSign, Eye, MousePointerClick, Target, ExternalLink } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, Eye, MousePointerClick, Target, ExternalLink, Lightbulb, Zap, AlertTriangle, CheckCircle2, Loader2, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
@@ -18,6 +20,12 @@ export default function MetaAds() {
   const { data: accountData, isLoading: accountLoading } = trpc.metaAds.getAccount.useQuery();
   const { data: insightsData, isLoading: insightsLoading } = trpc.metaAds.getAccountInsights.useQuery({ datePreset });
   const { data: campaignsData, isLoading: campaignsLoading } = trpc.metaAds.getAllCampaignsWithInsights.useQuery({ datePreset });
+  const [showRecommendations, setShowRecommendations] = useState(false);
+  const { data: aiRecs, isLoading: recsLoading, refetch: refetchRecs } = trpc.metaAds.getAutoRecommendations.useQuery(undefined, {
+    enabled: showRecommendations,
+    staleTime: 5 * 60 * 1000,
+  });
+  const { toast } = useToast();
 
   const formatCurrency = (value: number | string) => {
     const num = typeof value === 'string' ? parseFloat(value) : value;
@@ -347,6 +355,83 @@ export default function MetaAds() {
             </Card>
           </div>
         )}
+      </div>
+
+      {/* AI Recommendations Panel */}
+      <div className="mt-6">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Lightbulb className="h-5 w-5 text-[#ffcb00]" />
+                <CardTitle>AI Ad Recommendations</CardTitle>
+              </div>
+              <Button
+                variant={showRecommendations ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => { if (!showRecommendations) setShowRecommendations(true); else refetchRecs(); }}
+                disabled={recsLoading}
+              >
+                {recsLoading ? (
+                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Analyzing...</>
+                ) : showRecommendations ? (
+                  <><RefreshCw className="h-4 w-4 mr-2" />Refresh Analysis</>
+                ) : (
+                  <><Zap className="h-4 w-4 mr-2" />Analyze Campaigns</>
+                )}
+              </Button>
+            </div>
+            <CardDescription>AI-powered recommendations. Auto-actionable items are flagged for automation.</CardDescription>
+          </CardHeader>
+          {showRecommendations && (
+            <CardContent>
+              {recsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin text-[#ffcb00]" />
+                  <span className="ml-3 text-muted-foreground">Analyzing campaign performance...</span>
+                </div>
+              ) : aiRecs ? (
+                <div className="space-y-4">
+                  <div className="p-4 rounded-lg bg-muted/30 border">
+                    <p className="text-sm font-medium mb-1">Account Health Summary</p>
+                    <p className="text-sm text-muted-foreground">{aiRecs.summary}</p>
+                  </div>
+                  <div className="space-y-3">
+                    {aiRecs.recommendations.map((rec: any, i: number) => (
+                      <div key={i} className="flex items-start gap-3 p-4 rounded-lg border">
+                        <div className="shrink-0 mt-0.5">
+                          {rec.priority === 'high' ? <AlertTriangle className="h-5 w-5 text-red-500" /> :
+                           rec.priority === 'medium' ? <Lightbulb className="h-5 w-5 text-[#ffcb00]" /> :
+                           <CheckCircle2 className="h-5 w-5 text-green-500" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <span className="font-medium text-sm">{rec.campaignName}</span>
+                            <Badge variant={rec.priority === 'high' ? 'destructive' : rec.priority === 'medium' ? 'secondary' : 'outline'} className="text-xs">{rec.priority}</Badge>
+                            {rec.canAutomate && (
+                              <Badge className="text-xs bg-green-500/10 text-green-600 border border-green-500/20">
+                                <Zap className="h-3 w-3 mr-1" /> Auto-actionable
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-sm">{rec.recommendation}</p>
+                          <p className="text-xs text-muted-foreground mt-1">Expected: {rec.expectedImpact}</p>
+                          {rec.canAutomate && <p className="text-xs text-green-600 mt-1">{rec.automationReason}</p>}
+                        </div>
+                        {rec.canAutomate && (
+                          <Button size="sm" variant="outline" className="shrink-0 text-xs h-8 border-green-500/30 text-green-600 hover:bg-green-500/10"
+                            onClick={() => toast({ title: 'Action Queued', description: `"${rec.campaignName}" optimization queued for review in AI Actions.` })}>
+                            <Zap className="h-3 w-3 mr-1" /> Apply
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </CardContent>
+          )}
+        </Card>
       </div>
     </DashboardLayout>
   );

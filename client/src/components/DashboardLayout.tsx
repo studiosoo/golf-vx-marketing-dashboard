@@ -52,6 +52,7 @@ import {
   Settings,
   ChevronDown,
   ChevronRight,
+  MessageSquare,
 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -127,7 +128,14 @@ const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
           { label: "Winter Clinics", path: "/programs/winter-clinics", icon: Target },
           { label: "Junior Summer Camp", path: "/programs/summer-camp", icon: GraduationCap },
           { label: "Leagues", path: "/programs/leagues", icon: Trophy },
-          { label: "Annual Membership Giveaway", path: "/programs/annual-giveaway", icon: Gift },
+        ],
+      },
+      {
+        label: "Promotions",
+        path: "/promotions",
+        icon: Gift,
+        children: [
+          { label: "Annual Membership Giveaway", path: "/promotions/annual-giveaway", icon: Gift },
         ],
       },
     ],
@@ -152,6 +160,8 @@ const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
         path: "/communication",
         icon: Mail,
         children: [
+          { label: "Hub (Email & SMS)", path: "/communication", icon: MessageSquare },
+          { label: "Email Marketing", path: "/communication/email-marketing", icon: Mail },
           { label: "Announcements", path: "/communication/announcements", icon: Bell },
           { label: "Automations", path: "/communication/automations", icon: Workflow },
           { label: "Drip Campaigns", path: "/communication/drip", icon: Mail },

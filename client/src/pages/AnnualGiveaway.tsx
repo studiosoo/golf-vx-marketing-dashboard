@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, RefreshCw, TrendingUp, Users, DollarSign, Target, Mail, Send, CheckCircle2, AlertCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Loader2, RefreshCw, TrendingUp, Users, DollarSign, Target, Mail, Send, CheckCircle2, AlertCircle, FileText, Copy, UserCheck, UserX } from "lucide-react";
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 
@@ -22,10 +23,10 @@ export default function AnnualGiveaway() {
   const [syncTags, setSyncTags] = useState<string[]>(["giveaway-2026", "drive-day-prospect"]);
   const { toast } = useToast();
 
-  const { data: applications, isLoading: loadingApps, refetch: refetchApps } = trpc.giveaway.getApplications.useQuery();
-  const { data: stats, isLoading: loadingStats, refetch: refetchStats } = trpc.giveaway.getStats.useQuery();
-  const { data: lastSyncInfo } = trpc.giveaway.getLastSyncInfo.useQuery();
-  const { data: driveDayData, isLoading: loadingProspects } = trpc.giveaway.getDriveDayProspects.useQuery();
+  const { data: applications, isLoading: loadingApps, refetch: refetchApps } = trpc.giveaway.getApplications.useQuery(undefined, { refetchInterval: 30000 });
+  const { data: stats, isLoading: loadingStats, refetch: refetchStats } = trpc.giveaway.getStats.useQuery(undefined, { refetchInterval: 30000 });
+  const { data: lastSyncInfo } = trpc.giveaway.getLastSyncInfo.useQuery(undefined, { refetchInterval: 30000 });
+  const { data: driveDayData, isLoading: loadingProspects } = trpc.giveaway.getDriveDayProspects.useQuery(undefined, { refetchInterval: 60000 });
   
   const syncMutation = trpc.giveaway.sync.useMutation({
     onSuccess: () => { refetchApps(); refetchStats(); },
@@ -47,6 +48,28 @@ export default function AnnualGiveaway() {
   const updateStatusMutation = trpc.giveaway.updateStatus.useMutation({
     onSuccess: () => { refetchApps(); },
   });
+
+  // Email draft modal state
+  const [emailDraftModal, setEmailDraftModal] = useState<{ open: boolean; applicantId: number | null; draft: any | null }>({
+    open: false, applicantId: null, draft: null,
+  });
+  const [visitHistoryModal, setVisitHistoryModal] = useState<{ open: boolean; applicantId: number | null }>({
+    open: false, applicantId: null,
+  });
+
+  const generateEmailDraft = trpc.giveaway.generateEmailDraft.useMutation({
+    onSuccess: (draft) => {
+      setEmailDraftModal(prev => ({ ...prev, draft }));
+    },
+    onError: (err) => {
+      toast({ title: 'Draft generation failed', description: err.message, variant: 'destructive' });
+    },
+  });
+
+  const { data: visitHistory } = trpc.giveaway.checkVisitHistory.useQuery(
+    { applicantId: visitHistoryModal.applicantId! },
+    { enabled: visitHistoryModal.open && visitHistoryModal.applicantId !== null }
+  );
 
   // Filter applications
   const filteredApplications = applications?.filter(app => {
@@ -263,21 +286,44 @@ export default function AnnualGiveaway() {
                               {new Date(app.submissionTimestamp).toLocaleDateString()}
                             </TableCell>
                             <TableCell>
-                              <Select
-                                value={app.status}
-                                onValueChange={(val) => updateStatusMutation.mutate({ id: app.id, status: val as any })}
-                              >
-                                <SelectTrigger className="w-28 h-8 text-xs">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="pending">Pending</SelectItem>
-                                  <SelectItem value="contacted">Contacted</SelectItem>
-                                  <SelectItem value="scheduled">Scheduled</SelectItem>
-                                  <SelectItem value="completed">Completed</SelectItem>
-                                  <SelectItem value="declined">Declined</SelectItem>
-                                </SelectContent>
-                              </Select>
+                              <div className="flex items-center gap-1 flex-wrap">
+                                <Select
+                                  value={app.status}
+                                  onValueChange={(val) => updateStatusMutation.mutate({ id: app.id, status: val as any })}
+                                >
+                                  <SelectTrigger className="w-28 h-8 text-xs">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="pending">Pending</SelectItem>
+                                    <SelectItem value="contacted">Contacted</SelectItem>
+                                    <SelectItem value="scheduled">Scheduled</SelectItem>
+                                    <SelectItem value="completed">Completed</SelectItem>
+                                    <SelectItem value="declined">Declined</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 px-2 text-xs"
+                                  onClick={() => {
+                                    setEmailDraftModal({ open: true, applicantId: app.id, draft: null });
+                                    generateEmailDraft.mutate({ applicantId: app.id });
+                                  }}
+                                >
+                                  <FileText className="h-3 w-3 mr-1" />
+                                  Draft Email
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 px-2 text-xs"
+                                  onClick={() => setVisitHistoryModal({ open: true, applicantId: app.id })}
+                                >
+                                  <UserCheck className="h-3 w-3 mr-1" />
+                                  History
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))
@@ -514,6 +560,124 @@ export default function AnnualGiveaway() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Email Draft Modal */}
+      <Dialog open={emailDraftModal.open} onOpenChange={(open) => setEmailDraftModal(prev => ({ ...prev, open }))}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-[#ffcb00]" />
+              AI Email Draft
+              {emailDraftModal.draft?.isNewVisitor !== undefined && (
+                <Badge variant={emailDraftModal.draft.isNewVisitor ? 'secondary' : 'default'} className="ml-2 text-xs">
+                  {emailDraftModal.draft.isNewVisitor ? 'New Visitor' : 'Returning Visitor'}
+                </Badge>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          {generateEmailDraft.isPending ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-[#ffcb00]" />
+              <span className="ml-3 text-muted-foreground">Generating personalized email draft...</span>
+            </div>
+          ) : emailDraftModal.draft ? (
+            <div className="space-y-4">
+              <div className="rounded-lg border p-4 space-y-3">
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Subject Line</p>
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="font-medium">{emailDraftModal.draft.subject}</p>
+                    <Button variant="ghost" size="sm" className="h-7 px-2 shrink-0" onClick={() => { navigator.clipboard.writeText(emailDraftModal.draft.subject); toast({ title: 'Copied!' }); }}>
+                      <Copy className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Preheader</p>
+                  <p className="text-sm text-muted-foreground italic">{emailDraftModal.draft.preheader}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Email Body</p>
+                  <div className="bg-muted/30 rounded p-3 text-sm whitespace-pre-wrap">{emailDraftModal.draft.body}</div>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Call to Action</p>
+                  <p className="text-sm font-medium text-[#ffcb00]">{emailDraftModal.draft.cta}</p>
+                </div>
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => {
+                  const full = `Subject: ${emailDraftModal.draft.subject}\nPreheader: ${emailDraftModal.draft.preheader}\n\n${emailDraftModal.draft.body}\n\nCTA: ${emailDraftModal.draft.cta}`;
+                  navigator.clipboard.writeText(full);
+                  toast({ title: 'Full email copied to clipboard!' });
+                }}>
+                  <Copy className="h-4 w-4 mr-2" /> Copy Full Email
+                </Button>
+                <Button onClick={() => setEmailDraftModal({ open: false, applicantId: null, draft: null })}>
+                  Done
+                </Button>
+              </div>
+            </div>
+          ) : null}
+        </DialogContent>
+      </Dialog>
+
+      {/* Visit History Modal */}
+      <Dialog open={visitHistoryModal.open} onOpenChange={(open) => setVisitHistoryModal(prev => ({ ...prev, open }))}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserCheck className="h-5 w-5 text-[#ffcb00]" />
+              Visit History
+            </DialogTitle>
+          </DialogHeader>
+          {visitHistory ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-4 rounded-lg border">
+                {visitHistory.hasVisited ? (
+                  <UserCheck className="h-8 w-8 text-green-500" />
+                ) : (
+                  <UserX className="h-8 w-8 text-muted-foreground" />
+                )}
+                <div>
+                  <p className="font-semibold">{visitHistory.hasVisited ? 'Has visited Golf VX' : 'New to Golf VX'}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {visitHistory.visitCount > 0 ? `${visitHistory.visitCount} recorded visits` : 'No recorded visits in system'}
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Self-reported:</span>
+                  <span>{visitHistory.selfReported}</span>
+                </div>
+                {visitHistory.memberTier && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Member tier:</span>
+                    <Badge variant="outline">{visitHistory.memberTier}</Badge>
+                  </div>
+                )}
+                {visitHistory.memberStatus && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Member status:</span>
+                    <span>{visitHistory.memberStatus}</span>
+                  </div>
+                )}
+                {visitHistory.lastVisit && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Last visit:</span>
+                    <span>{new Date(visitHistory.lastVisit).toLocaleDateString()}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin" />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }

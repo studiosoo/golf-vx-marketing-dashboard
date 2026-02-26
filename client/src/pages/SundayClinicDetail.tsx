@@ -597,7 +597,7 @@ export default function SundayClinicDetail() {
           </div>
           <ProgramMarketingPanel
             programName="Drive Day Clinics"
-            programKeywords={["drive day", "sunday clinic", "putting clinic", "sunday's putting", "this sunday"]}
+            programKeywords={["drive day", "sunday clinic", "putting clinic", "sunday's putting", "this sunday", "instagram post"]}
           />
         </div>
       </div>

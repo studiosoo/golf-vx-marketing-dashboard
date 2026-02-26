@@ -1371,6 +1371,33 @@ Write compelling, personalized emails that convert leads to Golf VX members. Inc
         }
         return results;
       }),
+    getAcuityBookingsList: protectedProcedure
+      .input(z.object({
+        appointmentTypeId: z.number(),
+        minDate: z.string().optional(),
+        maxDate: z.string().optional(),
+      }))
+      .query(async ({ input }) => {
+        const { getAppointments } = await import('./acuity');
+        const currentYear = new Date().getFullYear();
+        const apts = await getAppointments({
+          appointmentTypeID: input.appointmentTypeId,
+          minDate: input.minDate || `${currentYear}-01-01`,
+          maxDate: input.maxDate || `${currentYear}-12-31`,
+          canceled: false,
+        });
+        return apts.map(a => ({
+          id: a.id,
+          firstName: a.firstName,
+          lastName: a.lastName,
+          email: a.email,
+          phone: a.phone,
+          date: a.date,
+          time: a.time,
+          amountPaid: parseFloat(a.amountPaid || a.priceSold || a.price || '0'),
+          type: a.type,
+        }));
+      }),
   }),
   // Task Management (Asana Integration)
   tasks: router({
@@ -1845,9 +1872,67 @@ Write compelling, personalized emails that convert leads to Golf VX members. Inc
         const metaAdsAlerts = await import('./metaAdsAlerts');
         return await metaAdsAlerts.resolveAlert(input.alertId, input.notes);
       }),
-  }),
 
-  // Encharge Email Marketing
+    // AI-powered ad recommendations with auto-decision logic
+    getAutoRecommendations: protectedProcedure.query(async () => {
+      const { invokeLLM } = await import("./_core/llm");
+      const cachedData = metaAdsCache.getAllCampaignsFromCache();
+      if (!cachedData || cachedData.length === 0) return { recommendations: [], summary: 'No campaign data available.' };
+      const campaignSummary = cachedData.map((c: any) => ({
+        name: c.campaign_name,
+        status: c.effective_status || c.status,
+        spend: c.spend,
+        impressions: c.impressions,
+        clicks: c.clicks,
+        ctr: c.ctr,
+        cpc: c.cpc,
+        results: c.results,
+        costPerResult: c.cost_per_result,
+        objective: c.objective,
+      }));
+      const prompt = `You are a Meta Ads expert analyzing campaigns for Golf VX Arlington Heights, an indoor golf simulator facility.\n\nCampaign data:\n${JSON.stringify(campaignSummary, null, 2)}\n\nFor each active campaign, provide:\n1. A specific actionable recommendation (budget change, audience adjustment, creative suggestion, or bid strategy)\n2. Priority: high/medium/low\n3. Auto-action: whether this can be safely automated (true/false) and why\n4. Expected impact: brief description\n\nAlso provide an overall summary of account health.\nRespond as JSON only.`;
+      const response = await invokeLLM({
+        messages: [
+          { role: 'system', content: 'You are a Meta Ads expert. Respond with valid JSON only.' },
+          { role: 'user', content: prompt },
+        ],
+        response_format: {
+          type: 'json_schema',
+          json_schema: {
+            name: 'meta_recommendations',
+            strict: true,
+            schema: {
+              type: 'object',
+              properties: {
+                recommendations: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      campaignName: { type: 'string' },
+                      recommendation: { type: 'string' },
+                      priority: { type: 'string' },
+                      canAutomate: { type: 'boolean' },
+                      automationReason: { type: 'string' },
+                      expectedImpact: { type: 'string' },
+                    },
+                    required: ['campaignName', 'recommendation', 'priority', 'canAutomate', 'automationReason', 'expectedImpact'],
+                    additionalProperties: false,
+                  },
+                },
+                summary: { type: 'string' },
+              },
+              required: ['recommendations', 'summary'],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      const content = response.choices?.[0]?.message?.content as string;
+      return JSON.parse(content);
+    }),
+  }),
+  // Encharge Email Marketingg
   encharge: router({    getAccount: protectedProcedure.query(async () => {
       return await encharge.getEnchargeAccount();
     }),
@@ -1914,11 +1999,11 @@ Write compelling, personalized emails that convert leads to Golf VX members. Inc
         return await toastTransactionSync.getMemberTransactionStats(input.memberId);
       }),
     
-    getPerformanceWithROAS: protectedProcedure.query(async () => {
+     getPerformanceWithROAS: protectedProcedure.query(async () => {
       return await conversionTracking.getCampaignPerformanceWithROAS();
     }),
-  }),
 
+  }),
   // Annual Giveaway
   giveaway: router({
     getApplications: protectedProcedure.query(async () => {
@@ -2031,11 +2116,66 @@ Write compelling, personalized emails that convert leads to Golf VX members. Inc
         if (input.status === 'contacted') updates.contactedAt = now;
         if (input.status === 'scheduled') updates.scheduledAt = now;
         if (input.status === 'completed') updates.completedAt = now;
-        await database.update(giveawayApplications).set(updates).where(eqOp(giveawayApplications.id, input.id));
+         await database.update(giveawayApplications).set(updates).where(eqOp(giveawayApplications.id, input.id));
         return { success: true };
       }),
-  }),
 
+    // Generate personalized email draft for a giveaway applicant
+    generateEmailDraft: protectedProcedure
+      .input(z.object({ applicantId: z.number() }))
+      .mutation(async ({ input }) => {
+        const database = await (await import("./db")).getDb();
+        if (!database) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database unavailable' });
+        const { giveawayApplications } = await import("../drizzle/schema");
+        const { eq: eqOp2 } = await import("drizzle-orm");
+        const [applicant] = await database.select().from(giveawayApplications).where(eqOp2(giveawayApplications.id, input.applicantId));
+        if (!applicant) throw new TRPCError({ code: 'NOT_FOUND', message: 'Applicant not found' });
+        const firstName = applicant.name.split(' ')[0] || applicant.name;
+        const isNewVisitor = !applicant.visitedBefore || applicant.visitedBefore.toLowerCase() === 'no' || applicant.visitedBefore.toLowerCase() === 'new';
+        const { invokeLLM } = await import("./_core/llm");
+        const prompt = `Write a warm follow-up email for a Golf VX Arlington Heights giveaway applicant.\nApplicant: ${applicant.name} (${firstName}), Golf experience: ${applicant.golfExperienceLevel || 'unknown'}, Visited before: ${applicant.visitedBefore || 'unknown'}, Indoor golf familiarity: ${applicant.indoorGolfFamiliarity || 'unknown'}, City: ${applicant.city || 'unknown'}, Status: ${isNewVisitor ? 'New visitor' : 'Returning visitor'}.\nWrite a personalized follow-up email with subject, preheader (1 sentence), body (150-200 words, warm community-driven tone), and CTA (book trial or claim prize). Respond as JSON only.`;
+        const response = await invokeLLM({
+          messages: [
+            { role: 'system', content: 'You are a marketing copywriter for Golf VX. Always respond with valid JSON only with fields: subject, preheader, body, cta' },
+            { role: 'user', content: prompt },
+          ],
+          response_format: { type: 'json_schema', json_schema: { name: 'email_draft', strict: true, schema: { type: 'object', properties: { subject: { type: 'string' }, preheader: { type: 'string' }, body: { type: 'string' }, cta: { type: 'string' } }, required: ['subject', 'preheader', 'body', 'cta'], additionalProperties: false } } },
+        });
+        const content = response.choices?.[0]?.message?.content as string;
+        const draft = JSON.parse(content);
+        return { ...draft, applicantName: applicant.name, isNewVisitor };
+      }),
+
+    // Check if applicant has visited Golf VX before
+    checkVisitHistory: protectedProcedure
+      .input(z.object({ applicantId: z.number() }))
+      .query(async ({ input }) => {
+        const database = await (await import("./db")).getDb();
+        if (!database) return { hasVisited: false, visitCount: 0, lastVisit: null, memberStatus: null, memberTier: null, selfReported: 'Not specified' };
+        const { giveawayApplications, members: membersTable, memberAppointments: apptTable } = await import("../drizzle/schema");
+        const { eq: eqOp2, or, ilike } = await import("drizzle-orm");
+        const [applicant] = await database.select().from(giveawayApplications).where(eqOp2(giveawayApplications.id, input.applicantId));
+        if (!applicant) return { hasVisited: false, visitCount: 0, lastVisit: null, memberStatus: null, memberTier: null, selfReported: 'Not specified' };
+        const conditions: any[] = [];
+        if (applicant.email) conditions.push(ilike(membersTable.email, applicant.email));
+        if (applicant.phone) conditions.push(ilike(membersTable.phone, applicant.phone));
+        const memberMatches = conditions.length > 0 ? await database.select().from(membersTable).where(or(...conditions)) : [];
+        const member = memberMatches[0] || null;
+        let visitCount = 0;
+        let lastVisit: Date | null = null;
+        if (member) {
+          const appts = await database.select().from(apptTable).where(eqOp2(apptTable.memberId, member.id));
+          visitCount = appts.length;
+          if (appts.length > 0) {
+            const sorted = appts.sort((a: any, b: any) => new Date(b.appointmentDate).getTime() - new Date(a.appointmentDate).getTime());
+            lastVisit = new Date(sorted[0].appointmentDate);
+          }
+        }
+        const selfReported = applicant.visitedBefore?.toLowerCase();
+        const hasVisited = !!member || visitCount > 0 || selfReported === 'yes';
+        return { hasVisited, visitCount, lastVisit, memberStatus: member ? member.status : null, memberTier: member ? member.membershipTier : null, selfReported: applicant.visitedBefore || 'Not specified' };
+      }),
+  }),
   // Reports
   reports: router({
     list: protectedProcedure.query(async () => {

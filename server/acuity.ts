@@ -178,19 +178,37 @@ export async function getAppointmentTypeRevenue(
  * Get all revenue data grouped by appointment type
  */
 export async function getAllRevenueByType(minDate?: string, maxDate?: string) {
-  const appointmentTypes = await getAppointmentTypes();
-  const revenueData = await Promise.all(
-    appointmentTypes.map(async (type) => {
-      const revenue = await getAppointmentTypeRevenue(type.id, minDate, maxDate);
-      return {
-        appointmentType: type.name,
-        appointmentTypeId: type.id,
-        category: type.category,
-        ...revenue,
-      };
-    })
-  );
-
+  // Single API call + in-memory grouping (avoids 80+ parallel requests that cause rate limiting)
+  const [appointments, appointmentTypes] = await Promise.all([
+    getAppointments({ minDate, maxDate, canceled: false }),
+    getAppointmentTypes(),
+  ]);
+  // Build a map of typeId -> type info
+  const typeMap: Record<number, AcuityAppointmentType> = {};
+  for (const t of appointmentTypes) typeMap[t.id] = t;
+  // Group appointments by type
+  const grouped: Record<number, { totalRevenue: number; bookingCount: number; appointments: AcuityAppointment[] }> = {};
+  for (const apt of appointments) {
+    const typeId = apt.appointmentTypeID;
+    if (!grouped[typeId]) grouped[typeId] = { totalRevenue: 0, bookingCount: 0, appointments: [] };
+    const rev = parseFloat(apt.amountPaid || apt.priceSold || apt.price || '0');
+    grouped[typeId].totalRevenue += rev;
+    grouped[typeId].bookingCount++;
+    grouped[typeId].appointments.push(apt);
+  }
+  // Build result array
+  const revenueData = Object.entries(grouped).map(([typeIdStr, data]) => {
+    const typeId = parseInt(typeIdStr);
+    const typeInfo = typeMap[typeId];
+    return {
+      appointmentType: typeInfo?.name || `Type ${typeId}`,
+      appointmentTypeId: typeId,
+      category: typeInfo?.category || '',
+      totalRevenue: data.totalRevenue,
+      bookingCount: data.bookingCount,
+      appointments: data.appointments,
+    };
+  });
   return revenueData;
 }
 

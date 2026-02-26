@@ -398,3 +398,71 @@
 - [x] Wire to existing Communication tRPC router (sendSMS, sendEmail)
 - [x] SundayClinicDetail: Members/NewVisitors modal + Source modal + Event modal all have SMS/Email All buttons
 - [x] WinterClinicDetail: Registration modal has SMS/Email All buttons
+
+## Sprint: 12-Issue Comprehensive Dashboard Update (2026-02-26 Session 3)
+
+### Issue 1: Drive Day Members Attended - Encharge Email Button
+- [ ] Add "Send via Encharge" button in Members Attended modal (trigger Encharge tag)
+- [ ] Keep existing Email All / SMS All buttons for direct send
+
+### Issue 2: Clickable Numbers → Contact List → Contact Detail Page
+- [ ] Create ContactDetailPage.tsx (member profile: name, email, phone, tier, visits, booking history)
+- [ ] Add /contacts/:id route in App.tsx
+- [ ] All attendee modals: clicking a contact name navigates to /contacts/:id
+- [ ] Revenue by Appointment Type: clicking booking count shows attendee list modal
+
+### Issue 3: Instagram Reel + Meta Ads on Program Dashboard
+- [ ] SundayClinicDetail: expand programKeywords to match Instagram post campaigns
+- [ ] ProgramMarketingPanel: show all campaigns (not just active) for the program
+- [ ] Show Instagram posts/reels linked to program keywords
+
+### Issue 4: Instagram Sync - Complete Integration
+- [ ] Add Instagram Graph API sync endpoint (fetch media, insights via Meta access token)
+- [ ] InstagramViewer.tsx: show recent posts/reels from API, not just static links
+- [ ] Auto-sync Instagram insights daily via scheduler
+
+### Issue 5: Annual Giveaway - Live Count
+- [ ] Add refetchInterval: 30000 to giveaway queries for live polling
+- [ ] Add "Last updated" timestamp display
+
+### Issue 6: Acuity Revenue Data Accuracy
+- [ ] Fix getAcuityRevenue to use current year date range by default
+- [ ] Debug why clinic appointments show $0 (check amountPaid vs priceSold vs price fields)
+- [ ] Add fallback: if amountPaid=0, use price field from appointment type
+- [ ] Revenue.tsx: show correct Acuity clinic revenue
+
+### Issue 7: Meta Ads Auto-Recommendations
+- [ ] Add generateMetaAdsRecommendations LLM procedure (analyze CTR, CPC, spend vs results)
+- [ ] Auto-apply low-risk recommendations (budget adjustments within 20%)
+- [ ] MetaAds.tsx: show AI recommendations panel with auto/manual action buttons
+- [ ] Store recommendation history in aiRecommendations table
+
+### Issue 8: Programs/Promotions Restructure
+- [ ] Add "Promotions" section to sidebar (separate from Programs)
+- [ ] Move Annual Membership Giveaway from Programs to Promotions
+- [ ] Update App.tsx routes: /promotions/annual-giveaway
+- [ ] Update DashboardLayout.tsx sidebar navigation
+
+### Issue 9: Giveaway Applicants - Email Draft + Visit History
+- [ ] AnnualGiveaway.tsx: add "Draft Email" button per applicant
+- [ ] LLM generates personalized email draft for each applicant
+- [ ] Show email draft modal with copy-to-clipboard
+- [ ] Check if applicant is in members DB (new visitor vs existing member)
+- [ ] Show "Known Member" or "New Visitor" badge per applicant
+
+### Issue 10: Members List - Exclude Pro from All Members
+- [ ] getAllMembers: by default exclude golf_vx_pro tier from "All Members" query
+- [ ] Add excludePro: boolean param to members.list procedure
+- [ ] All Members tab: pass excludePro=true
+- [ ] Pro Members tab: filter only golf_vx_pro tier
+
+### Issue 11: Communications Hub
+- [ ] Communications.tsx: full send panel (compose email + SMS, select recipients)
+- [ ] Recipient picker: search members, filter by tier/status
+- [ ] Template library: pre-built message templates
+- [ ] Send history with status tracking
+
+### Issue 12: Revenue - Acuity Appointment Type Drill-Down
+- [ ] Revenue.tsx: clicking appointment type row shows attendee list modal
+- [ ] Add getAcuityRevenueAttendees(appointmentTypeId, minDate, maxDate) endpoint
+- [ ] Fix Acuity Clinic showing $0 - investigate data source

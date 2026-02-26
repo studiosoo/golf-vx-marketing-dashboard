@@ -194,7 +194,7 @@ export async function getAllCampaignsWithInsights(datePreset: string = "last_30d
   const campaignsWithInsights = allInsights.map((insight: any) => ({
     id: insight.campaign_id,
     name: insight.campaign_name,
-    status: insight.status || "UNKNOWN",
+    status: insight.effective_status || insight.status || "UNKNOWN",
     objective: insight.objective || "UNKNOWN",
     created_time: insight.created_time || "",
     updated_time: insight.updated_time || "",
