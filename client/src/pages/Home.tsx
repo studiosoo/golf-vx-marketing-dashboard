@@ -18,25 +18,25 @@ const KPI_BARS = [
     label: "Membership Growth",
     value: "359 members",
     progress: 60,
-    color: "bg-blue-500",
+    color: "bg-[#ef9253]",
     badge: "+305 synced",
-    badgeColor: "text-green-400",
+    badgeColor: "text-[#ef9253]",
     goal: "Goal: 600",
   },
   {
     label: "Trial Conversion",
     value: "18.5%",
     progress: 74,
-    color: "bg-green-500",
+    color: "bg-[#5daf68]",
     badge: "+2.1% vs last month",
-    badgeColor: "text-green-400",
+    badgeColor: "text-[#5daf68]",
     goal: "Goal: 25%",
   },
   {
     label: "Member Retention",
     value: "92%",
     progress: 97,
-    color: "bg-amber-500",
+    color: "bg-[#a87fbe]",
     badge: "Stable",
     badgeColor: "text-muted-foreground",
     goal: "Goal: 95%",
@@ -45,9 +45,9 @@ const KPI_BARS = [
     label: "B2B Events",
     value: "2 booked",
     progress: 50,
-    color: "bg-purple-500",
+    color: "bg-[#76addc]",
     badge: "+1 new this week",
-    badgeColor: "text-green-400",
+    badgeColor: "text-[#76addc]",
     goal: "Goal: 4",
   },
 ];
@@ -343,17 +343,17 @@ export default function Home() {
                 </div>
                 <div>
                   <p className="text-muted-foreground text-xs mb-1">Total Spent</p>
-                  <p className="font-bold text-orange-400">{formatCurrency(totalSpend)}</p>
+                  <p className="font-bold text-[#ef9253]">{formatCurrency(totalSpend)}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground text-xs mb-1">Remaining</p>
-                  <p className="font-bold text-green-400">{formatCurrency(remaining)}</p>
+                  <p className="font-bold text-[#5daf68]">{formatCurrency(remaining)}</p>
                 </div>
               </div>
               <div className="space-y-1">
                 <div className="w-full h-3 rounded-full bg-muted overflow-hidden flex">
-                  <div className="h-full bg-orange-400 transition-all duration-500" style={{ width: `${spentPct}%` }} />
-                  <div className="h-full bg-green-500 transition-all duration-500" style={{ width: `${remainingPct}%` }} />
+                  <div className="h-full bg-[#ef9253] transition-all duration-500" style={{ width: `${spentPct}%` }} />
+                  <div className="h-full bg-[#5daf68] transition-all duration-500" style={{ width: `${remainingPct}%` }} />
                 </div>
                 <p className="text-xs text-muted-foreground">{spentPct}% of budget used</p>
               </div>

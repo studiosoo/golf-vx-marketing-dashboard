@@ -686,8 +686,8 @@ function TierMembersList({
     search: search || undefined,
   });
 
-  const accentColor = color === "yellow" ? "text-yellow-500" : "text-blue-500";
-  const bgColor = color === "yellow" ? "bg-yellow-50 dark:bg-yellow-950/20" : "bg-blue-50 dark:bg-blue-950/20";
+  const accentColor = color === "yellow" ? "text-primary" : "text-[#76addc]";
+  const bgColor = color === "yellow" ? "bg-primary/10" : "bg-[#76addc]/10";
 
   return (
     <div className="space-y-6">
@@ -829,11 +829,11 @@ function UnclassifiedMembersPanel() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="rounded-xl p-6 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800">
+      <div className="rounded-xl p-6 bg-[#ef9253]/10 border border-[#ef9253]/30">
         <div className="flex items-center gap-3 mb-1">
-          <Activity className="h-6 w-6 text-orange-500" />
+          <Activity className="h-6 w-6 text-[#ef9253]" />
           <h2 className="text-2xl font-bold">Unclassified Members</h2>
-          <Badge variant="outline" className="text-orange-500 border-orange-400">
+          <Badge variant="outline" className="text-[#ef9253] border-[#ef9253]/60">
             {members?.length ?? "—"} members
           </Badge>
         </div>
@@ -862,7 +862,7 @@ function UnclassifiedMembersPanel() {
             <Button
               disabled={selected.size === 0 || !targetTier || bulkReclassify.isPending}
               onClick={() => bulkReclassify.mutate({ memberIds: Array.from(selected), newTier: targetTier as any })}
-              className="bg-orange-500 hover:bg-orange-600 text-white"
+              className="bg-[#ef9253] hover:bg-[#ef9253]/90 text-white"
             >
               {bulkReclassify.isPending ? "Saving..." : `Reclassify ${selected.size > 0 ? selected.size : ''}`}
             </Button>
@@ -908,7 +908,7 @@ function UnclassifiedMembersPanel() {
               </TableHeader>
               <TableBody>
                 {filtered.map(member => (
-                  <TableRow key={member.id} className={selected.has(member.id) ? "bg-orange-50/50 dark:bg-orange-950/10" : ""}>
+                  <TableRow key={member.id} className={selected.has(member.id) ? "bg-[#ef9253]/10" : ""}>
                     <TableCell>
                       <input type="checkbox" checked={selected.has(member.id)} onChange={() => toggle(member.id)} className="cursor-pointer" />
                     </TableCell>
@@ -951,11 +951,11 @@ function ProMembersPanel() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="rounded-xl p-6 bg-purple-50 dark:bg-purple-950/20 border">
+      <div className="rounded-xl p-6 bg-[#a87fbe]/10 border border-[#a87fbe]/30">
         <div className="flex items-center gap-3 mb-1">
-          <Award className="h-6 w-6 text-purple-500" />
+          <Award className="h-6 w-6 text-[#a87fbe]" />
           <h2 className="text-2xl font-bold">Pro Members</h2>
-          <Badge variant="outline" className="text-purple-500 border-purple-500">
+          <Badge variant="outline" className="text-[#a87fbe] border-[#a87fbe]/60">
             {members?.length ?? "—"} coaches
           </Badge>
         </div>
@@ -966,34 +966,34 @@ function ProMembersPanel() {
 
       {/* Billing Structure Info */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-purple-200 dark:border-purple-800">
+        <Card className="border-[#a87fbe]/40">
           <CardHeader className="pb-3">
             <CardDescription className="flex items-center gap-1">
               <DollarSign className="h-3 w-3" /> Monthly Base Fee
             </CardDescription>
-            <CardTitle className="text-3xl text-purple-600">$500</CardTitle>
+            <CardTitle className="text-3xl text-[#a87fbe]">$500</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">Per coach per month</p>
           </CardContent>
         </Card>
-        <Card className="border-purple-200 dark:border-purple-800">
+        <Card className="border-[#a87fbe]/40">
           <CardHeader className="pb-3">
             <CardDescription className="flex items-center gap-1">
               <Activity className="h-3 w-3" /> Bay Usage Credit
             </CardDescription>
-            <CardTitle className="text-3xl text-purple-600">$25</CardTitle>
+            <CardTitle className="text-3xl text-[#a87fbe]">$25</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">Deducted per coaching session (up to 20/mo)</p>
           </CardContent>
         </Card>
-        <Card className="border-purple-200 dark:border-purple-800">
+        <Card className="border-[#a87fbe]/40">
           <CardHeader className="pb-3">
             <CardDescription className="flex items-center gap-1">
               <DollarSign className="h-3 w-3" /> Overage Rate
             </CardDescription>
-            <CardTitle className="text-3xl text-purple-600">$25/hr</CardTitle>
+            <CardTitle className="text-3xl text-[#a87fbe]">$25/hr</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">Charged for sessions beyond 20/month</p>
@@ -1063,7 +1063,7 @@ function ProMembersPanel() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="text-purple-600 border-purple-400">
+                        <Badge variant="outline" className="text-[#a87fbe] border-[#a87fbe]/60">
                           {isChuck ? "Lead Coach (PBGA)" : "Pro Coach"}
                         </Badge>
                       </TableCell>

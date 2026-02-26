@@ -6,10 +6,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 const CATEGORY_COLORS = {
-  trial_conversion: "bg-green-500",
-  membership_acquisition: "bg-red-500",
-  member_retention: "bg-blue-500",
-  corporate_events: "bg-orange-500",
+  trial_conversion: "bg-[#5daf68]",
+  membership_acquisition: "bg-[#ef9253]",
+  member_retention: "bg-[#a87fbe]",
+  corporate_events: "bg-[#76addc]",
 };
 
 const CATEGORY_LABELS = {

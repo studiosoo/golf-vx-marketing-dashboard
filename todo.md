@@ -293,3 +293,14 @@
 - [x] Instagram: show account-level insights table, link to Instagram sidebar tab
 - [x] Newsletter: show Encharge segments matching program keywords, link to drip/announcements
 - [x] Add ProgramMarketingPanel to SundayClinicDetail (Drive Day), WinterClinicDetail, JuniorCampDashboard
+
+## 컬러 테마 업데이트 (2026-02-26)
+- [x] CSS 변수 (--primary, --chart-*) 업데이트: #ffcb00 (Primary), #ef9253 (Membership Growth), #5daf68 (Trial Conversion), #a87fbe (Member Retention), #76addc (B2B Events)
+- [x] index.css @theme inline 블록 OKLCH 변환 후 교체
+- [x] Home.tsx KPI 카드 하드코딩 컬러 교체
+- [x] Performance.tsx 차트/배지 컬러 교체
+- [x] Members.tsx 멤버십 티어 컬러 교체 (Unclassified: #ef9253, Pro: #a87fbe, All-Access: primary, Swing Saver: #76addc)
+- [x] DashboardLayout.tsx 사이드바 active 컬러 확인 (primary 변수 사용 — 자동 반영)
+- [x] WinterClinicDetail.tsx, Overview.tsx, ProgramMarketingPanel.tsx, InstagramAnalytics.tsx, CampaignTimeline.tsx, Revenue.tsx 컬러 교체
+- [x] SundayClinicDetail.tsx JSX 오류 수정 (Marketing Intelligence div 중첩 오류)
+- [x] TypeScript 0 errors 확인 후 체크포인트 저장

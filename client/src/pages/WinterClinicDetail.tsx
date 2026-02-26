@@ -90,8 +90,8 @@ export default function WinterClinicDetail() {
     "PBGA Links & Tees": "bg-emerald-500",
     "Social Media": "bg-blue-500",
     "Golf VX": "bg-primary",
-    "Google Search": "bg-purple-500",
-    "Friend / Family": "bg-orange-500",
+    "Google Search": "bg-[#a87fbe]",
+    "Friend / Family": "bg-[#ef9253]",
     "Flyer / Signage": "bg-pink-500",
     "Unknown": "bg-gray-400",
   };
@@ -100,10 +100,10 @@ export default function WinterClinicDetail() {
   const experienceColors: Record<string, string> = {
     "Beginner": "bg-green-500",
     "Intermediate": "bg-blue-500",
-    "Advanced": "bg-purple-500",
-    "beginner": "bg-green-500",
-    "intermediate": "bg-blue-500",
-    "advanced": "bg-purple-500",
+    "Advanced": "bg-[#a87fbe]",
+    "beginner": "bg-[#5daf68]",
+    "intermediate": "bg-[#76addc]",
+    "advanced": "bg-[#a87fbe]",
   };
 
   const getCategoryIcon = (category: string) => {

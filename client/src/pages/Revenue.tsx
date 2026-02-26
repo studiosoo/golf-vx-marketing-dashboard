@@ -9,7 +9,7 @@ import {
 } from "recharts";
 import { DollarSign, TrendingUp, TrendingDown, Users, ShoppingCart, CreditCard, Banknote, Calendar, BookOpen, GraduationCap } from "lucide-react";
 
-const COLORS = ["#EAB308", "#3B82F6", "#10B981", "#F97316", "#8B5CF6", "#EC4899"];
+const COLORS = ["#ffcb00", "#ef9253", "#5daf68", "#a87fbe", "#76addc", "#EC4899"];
 
 function fmt(n: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
@@ -106,9 +106,9 @@ export default function Revenue() {
       currMonth: curr.month,
       prevMonth: prev.month,
       categories: [
-        { name: "Bay Usage", color: "#EAB308", curr: curr.bayRevenue, prev: prev.bayRevenue, delta: delta(curr.bayRevenue, prev.bayRevenue), note: "Non-member & additional-hour bay time" },
-        { name: "Food & Beverage", color: "#10B981", curr: curr.foodBevRevenue, prev: prev.foodBevRevenue, delta: delta(curr.foodBevRevenue, prev.foodBevRevenue), note: "Bar & food sales" },
-        { name: "Golf / Merch", color: "#3B82F6", curr: curr.golfRevenue, prev: prev.golfRevenue, delta: delta(curr.golfRevenue, prev.golfRevenue), note: "Golf retail & merchandise" },
+        { name: "Bay Usage", color: "#ffcb00", curr: curr.bayRevenue, prev: prev.bayRevenue, delta: delta(curr.bayRevenue, prev.bayRevenue), note: "Non-member & additional-hour bay time" },
+        { name: "Food & Beverage", color: "#5daf68", curr: curr.foodBevRevenue, prev: prev.foodBevRevenue, delta: delta(curr.foodBevRevenue, prev.foodBevRevenue), note: "Bar & food sales" },
+        { name: "Golf / Merch", color: "#76addc", curr: curr.golfRevenue, prev: prev.golfRevenue, delta: delta(curr.golfRevenue, prev.golfRevenue), note: "Golf retail & merchandise" },
       ],
       totalCurr: curr.totalRevenue,
       totalPrev: prev.totalRevenue,
@@ -182,7 +182,7 @@ export default function Revenue() {
 
             {/* Revenue Category Breakdown */}
             <div className="grid grid-cols-3 gap-4">
-              <Card className="border-l-4 border-l-yellow-500">
+              <Card className="border-l-4 border-l-primary">
                 <CardContent className="p-4">
                   <p className="text-sm text-muted-foreground">Bay Usage Revenue</p>
                   <p className="text-xl font-bold">{fmt(summary?.allTimeBay || 0)}</p>
@@ -191,7 +191,7 @@ export default function Revenue() {
                   </p>
                 </CardContent>
               </Card>
-              <Card className="border-l-4 border-l-blue-500">
+              <Card className="border-l-4 border-l-[#76addc]">
                 <CardContent className="p-4">
                   <p className="text-sm text-muted-foreground">Food & Beverage</p>
                   <p className="text-xl font-bold">{fmt(summary?.allTimeFoodBev || 0)}</p>
@@ -200,7 +200,7 @@ export default function Revenue() {
                   </p>
                 </CardContent>
               </Card>
-              <Card className="border-l-4 border-l-green-500">
+              <Card className="border-l-4 border-l-[#5daf68]">
                 <CardContent className="p-4">
                   <p className="text-sm text-muted-foreground">Golf Revenue</p>
                   <p className="text-xl font-bold">{fmt(summary?.allTimeGolf || 0)}</p>
@@ -232,29 +232,29 @@ export default function Revenue() {
                     <AreaChart data={monthly || []} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
                       <defs>
                         <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#EAB308" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#EAB308" stopOpacity={0} />
+                          <stop offset="5%" stopColor="#ffcb00" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#ffcb00" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                       <XAxis dataKey="month" tickFormatter={fmtMonth} tick={{ fontSize: 11 }} />
                       <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
                       <Tooltip formatter={(v: number) => [fmt(v), "Revenue"]} labelFormatter={fmtMonth} />
-                      <Area type="monotone" dataKey="totalRevenue" stroke="#EAB308" fill="url(#colorRevenue)" strokeWidth={2} name="Total Revenue" />
+                      <Area type="monotone" dataKey="totalRevenue" stroke="#ffcb00" fill="url(#colorRevenue)" strokeWidth={2} name="Total Revenue" />
                     </AreaChart>
                   ) : (
                     <AreaChart data={last30Days} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
                       <defs>
                         <linearGradient id="colorRevenue2" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#EAB308" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#EAB308" stopOpacity={0} />
+                          <stop offset="5%" stopColor="#ffcb00" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#ffcb00" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                       <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={(d) => d.slice(4)} />
                       <YAxis tickFormatter={(v) => `$${v}`} tick={{ fontSize: 11 }} />
                       <Tooltip formatter={(v: number) => [fmt(v), "Revenue"]} />
-                      <Area type="monotone" dataKey="totalRevenue" stroke="#EAB308" fill="url(#colorRevenue2)" strokeWidth={2} name="Daily Revenue" />
+                      <Area type="monotone" dataKey="totalRevenue" stroke="#ffcb00" fill="url(#colorRevenue2)" strokeWidth={2} name="Daily Revenue" />
                     </AreaChart>
                   )}
                 </ResponsiveContainer>
@@ -274,9 +274,9 @@ export default function Revenue() {
                     <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
                     <Tooltip formatter={(v: number) => fmt(v)} labelFormatter={fmtMonth} />
                     <Legend />
-                    <Bar dataKey="bayRevenue" name="Bay Usage" stackId="a" fill="#EAB308" />
-                    <Bar dataKey="foodBevRevenue" name="Food & Bev" stackId="a" fill="#3B82F6" />
-                    <Bar dataKey="golfRevenue" name="Golf" stackId="a" fill="#10B981" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="bayRevenue" name="Bay Usage" stackId="a" fill="#ffcb00" />
+                    <Bar dataKey="foodBevRevenue" name="Food & Bev" stackId="a" fill="#5daf68" />
+                    <Bar dataKey="golfRevenue" name="Golf" stackId="a" fill="#76addc" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -359,8 +359,8 @@ export default function Revenue() {
                     <YAxis tick={{ fontSize: 11 }} />
                     <Tooltip labelFormatter={fmtMonth} />
                     <Legend />
-                    <Bar dataKey="totalOrders" name="Orders" fill="#EAB308" radius={[3, 3, 0, 0]} />
-                    <Bar dataKey="totalGuests" name="Guests" fill="#3B82F6" radius={[3, 3, 0, 0]} />
+                    <Bar dataKey="totalOrders" name="Orders" fill="#ffcb00" radius={[3, 3, 0, 0]} />
+                    <Bar dataKey="totalGuests" name="Guests" fill="#76addc" radius={[3, 3, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -392,14 +392,14 @@ export default function Revenue() {
                 <>
                   {/* Acuity KPI Cards */}
                   <div className="grid grid-cols-3 gap-4 mb-4">
-                    <Card className="border-l-4 border-l-purple-500">
+                    <Card className="border-l-4 border-l-[#a87fbe]">
                       <CardContent className="p-4">
                         <p className="text-sm text-muted-foreground">PBGA Clinics Revenue</p>
                         <p className="text-xl font-bold">{fmt(acuityRevenue?.grouped?.pbga_clinics?.totalRevenue || 0)}</p>
                         <p className="text-xs text-muted-foreground mt-1">{acuityRevenue?.grouped?.pbga_clinics?.bookingCount || 0} bookings</p>
                       </CardContent>
                     </Card>
-                    <Card className="border-l-4 border-l-orange-500">
+                    <Card className="border-l-4 border-l-[#ef9253]">
                       <CardContent className="p-4">
                         <p className="text-sm text-muted-foreground">Trial Sessions Revenue</p>
                         <p className="text-xl font-bold">{fmt(acuityRevenue?.grouped?.trial?.totalRevenue || 0)}</p>
@@ -433,7 +433,7 @@ export default function Revenue() {
                               <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                                 <div
                                   className="h-full rounded-full"
-                                  style={{ width: `${pct}%`, background: isPbga ? '#8B5CF6' : '#F97316' }}
+                                  style={{ width: `${pct}%`, background: isPbga ? '#a87fbe' : '#ef9253' }}
                                 />
                               </div>
                               <div className="text-xs font-medium w-20 text-right">{fmt(t.totalRevenue)}</div>
@@ -532,7 +532,7 @@ export default function Revenue() {
                               <Tooltip formatter={(v: number) => fmt(v)} />
                               <Legend />
                               <Bar dataKey={fmtMonth(momCategoryData.prevMonth)} fill="#6B7280" radius={[3, 3, 0, 0]} />
-                              <Bar dataKey={fmtMonth(momCategoryData.currMonth)} fill="#EAB308" radius={[3, 3, 0, 0]} />
+                              <Bar dataKey={fmtMonth(momCategoryData.currMonth)} fill="#ffcb00" radius={[3, 3, 0, 0]} />
                             </BarChart>
                           </ResponsiveContainer>
                         </div>
@@ -553,8 +553,8 @@ export default function Revenue() {
                           <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
                           <Tooltip formatter={(v: number) => fmt(v)} labelFormatter={fmtMonth} />
                           <Legend />
-                          <Bar dataKey="totalRevenue" name="Toast (POS)" fill="#EAB308" stackId="a" />
-                          <Bar dataKey="acuityRevenue" name="Acuity (Clinics)" fill="#8B5CF6" stackId="a" radius={[3, 3, 0, 0]} />
+                          <Bar dataKey="totalRevenue" name="Toast (POS)" fill="#ffcb00" stackId="a" />
+                          <Bar dataKey="acuityRevenue" name="Acuity (Clinics)" fill="#a87fbe" stackId="a" radius={[3, 3, 0, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     </CardContent>

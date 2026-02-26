@@ -25,12 +25,12 @@ export default function Performance() {
   const isLoading = ovLoading || catLoading;
   const roiValue = parseFloat(String(overview?.overallROI ?? 0));
   const kpis = [
-    { label: "Total Revenue", value: fmt(parseFloat(String(overview?.totalRevenue ?? 0))), icon: DollarSign, color: "text-green-400", bg: "bg-green-500/10", trend: "up" as const },
+    { label: "Total Revenue", value: fmt(parseFloat(String(overview?.totalRevenue ?? 0))), icon: DollarSign, color: "text-[#5daf68]", bg: "bg-[#5daf68]/10", trend: "up" as const },
     { label: "MRR", value: fmt(overview?.monthlyRecurringRevenue ?? 0), icon: TrendingUp, color: "text-primary", bg: "bg-primary/10", trend: "up" as const },
-    { label: "Active Members", value: String(overview?.activeMembers ?? "—"), icon: Users, color: "text-blue-400", bg: "bg-blue-500/10", trend: "up" as const },
-    { label: "Marketing Spend", value: fmt(parseFloat(String(overview?.marketingSpend ?? 0))), icon: BarChart3, color: "text-orange-400", bg: "bg-orange-500/10", trend: "flat" as const },
-    { label: "Overall ROI", value: fmtPct(overview?.overallROI ?? 0), icon: Target, color: roiValue >= 0 ? "text-green-400" : "text-red-400", bg: roiValue >= 0 ? "bg-green-500/10" : "bg-red-500/10", trend: roiValue >= 0 ? "up" as const : "down" as const },
-    { label: "Active Campaigns", value: String(overview?.activeCampaignsCount ?? "—"), icon: Target, color: "text-purple-400", bg: "bg-purple-500/10", trend: "flat" as const },
+    { label: "Active Members", value: String(overview?.activeMembers ?? "—"), icon: Users, color: "text-[#ef9253]", bg: "bg-[#ef9253]/10", trend: "up" as const },
+    { label: "Marketing Spend", value: fmt(parseFloat(String(overview?.marketingSpend ?? 0))), icon: BarChart3, color: "text-[#76addc]", bg: "bg-[#76addc]/10", trend: "flat" as const },
+    { label: "Overall ROI", value: fmtPct(overview?.overallROI ?? 0), icon: Target, color: roiValue >= 0 ? "text-[#5daf68]" : "text-red-400", bg: roiValue >= 0 ? "bg-[#5daf68]/10" : "bg-red-500/10", trend: roiValue >= 0 ? "up" as const : "down" as const },
+    { label: "Active Campaigns", value: String(overview?.activeCampaignsCount ?? "—"), icon: Target, color: "text-[#a87fbe]", bg: "bg-[#a87fbe]/10", trend: "flat" as const },
   ];
   return (
     <DashboardLayout>
@@ -95,7 +95,7 @@ export default function Performance() {
                         </div>
                       </div>
                       <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
-                        <div className={`h-full rounded-full transition-all duration-500 ${over ? "bg-red-500" : pct > 80 ? "bg-amber-500" : "bg-primary"}`} style={{ width: `${Math.min(pct, 100)}%` }} />
+                        <div className={`h-full rounded-full transition-all duration-500 ${over ? "bg-red-500" : pct > 80 ? "bg-[#ef9253]" : "bg-primary"}`} style={{ width: `${Math.min(pct, 100)}%` }} />
                       </div>
                     </div>
                   );
@@ -117,7 +117,7 @@ export default function Performance() {
                     <div key={row.month} className="flex items-center gap-3 text-sm">
                       <span className="text-muted-foreground w-16 text-xs shrink-0">{row.month}</span>
                       <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
-                        <div className="h-full bg-green-500 transition-all duration-500" style={{ width: `${pct}%` }} />
+                        <div className="h-full bg-[#5daf68] transition-all duration-500" style={{ width: `${pct}%` }} />
                       </div>
                       <span className="text-xs text-foreground w-20 text-right font-medium">{fmt(row.revenue)}</span>
                     </div>
@@ -135,22 +135,22 @@ export default function Performance() {
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="space-y-1">
                     <p className="text-xs text-muted-foreground">All-Access Aces</p>
-                    <p className="text-xl font-bold text-yellow-500">{overview.memberStats.allAccessCount}</p>
+                    <p className="text-xl font-bold text-primary">{overview.memberStats.allAccessCount}</p>
                     <p className="text-xs text-muted-foreground">{fmt(overview.memberStats.allAccessCount * 325)} MRR · $325/mo</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs text-muted-foreground">Swing Savers</p>
-                    <p className="text-xl font-bold text-blue-400">{overview.memberStats.swingSaversCount}</p>
+                    <p className="text-xl font-bold text-[#76addc]">{overview.memberStats.swingSaversCount}</p>
                     <p className="text-xs text-muted-foreground">{fmt(overview.memberStats.swingSaversCount * 225)} MRR · $225/mo</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs text-muted-foreground">Trial</p>
-                    <p className="text-xl font-bold text-orange-400">{overview.memberStats.activeMembers - overview.memberStats.allAccessCount - overview.memberStats.swingSaversCount - overview.memberStats.golfVxProCount}</p>
+                    <p className="text-xl font-bold text-[#ef9253]">{overview.memberStats.activeMembers - overview.memberStats.allAccessCount - overview.memberStats.swingSaversCount - overview.memberStats.golfVxProCount}</p>
                     <p className="text-xs text-muted-foreground">Trial / Unclassified</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs text-muted-foreground">Regular MRR</p>
-                    <p className="text-xl font-bold text-green-400">{fmt(overview.memberStats.allAccessCount * 325 + overview.memberStats.swingSaversCount * 225)}</p>
+                    <p className="text-xl font-bold text-[#5daf68]">{fmt(overview.memberStats.allAccessCount * 325 + overview.memberStats.swingSaversCount * 225)}</p>
                     <p className="text-xs text-muted-foreground">Combined</p>
                   </div>
                 </div>
@@ -161,22 +161,22 @@ export default function Performance() {
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="space-y-1">
                     <p className="text-xs text-muted-foreground">Pro Coaches</p>
-                    <p className="text-xl font-bold text-purple-400">{overview.memberStats.golfVxProCount}</p>
+                    <p className="text-xl font-bold text-[#a87fbe]">{overview.memberStats.golfVxProCount}</p>
                     <p className="text-xs text-muted-foreground">incl. Coach Chuck Lynch</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs text-muted-foreground">Base MRR</p>
-                    <p className="text-xl font-bold text-purple-400">{fmt(overview.memberStats.golfVxProCount * 500)}</p>
+                    <p className="text-xl font-bold text-[#a87fbe]">{fmt(overview.memberStats.golfVxProCount * 500)}</p>
                     <p className="text-xs text-muted-foreground">$500/mo · via Stripe</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs text-muted-foreground">Bay Credit</p>
-                    <p className="text-xl font-bold text-purple-300">$25/session</p>
+                    <p className="text-xl font-bold" style={{color:'#a87fbe'}}>$25/session</p>
                     <p className="text-xs text-muted-foreground">Deducted from base</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs text-muted-foreground">Overage Rate</p>
-                    <p className="text-xl font-bold text-purple-300">$25/hr</p>
+                    <p className="text-xl font-bold" style={{color:'#a87fbe'}}>$25/hr</p>
                     <p className="text-xs text-muted-foreground">After 20 sessions/mo</p>
                   </div>
                 </div>

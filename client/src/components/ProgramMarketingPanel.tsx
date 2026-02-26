@@ -240,10 +240,10 @@ function NewsletterTab({ programName, programKeywords }: ProgramMarketingPanelPr
 
   return (
     <div className="space-y-4">
-      <div className="flex items-start gap-3 bg-purple-400/10 border border-purple-400/30 rounded-xl p-4 text-sm">
-        <Mail className="h-4 w-4 text-purple-400 mt-0.5 shrink-0" />
+      <div className="flex items-start gap-3 bg-[#a87fbe]/10 border border-[#a87fbe]/30 rounded-xl p-4 text-sm">
+        <Mail className="h-4 w-4 text-[#a87fbe] mt-0.5 shrink-0" />
         <div>
-          <p className="font-medium text-purple-300">Email / Newsletter via Encharge</p>
+          <p className="font-medium text-[#a87fbe]">Email / Newsletter via Encharge</p>
           <p className="text-muted-foreground mt-1">
             Newsletter campaigns and drip flows for {programName} are managed through Encharge.
             Segments and broadcasts related to this program appear below.

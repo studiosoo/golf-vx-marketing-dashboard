@@ -289,18 +289,18 @@ export default function SundayClinicDetail() {
             </CardContent>
           </Card>
         </div>
-      </div>
 
-      {/* ── Marketing Intelligence ── */}
-      <div className="space-y-4">
-        <div>
-          <h2 className="text-xl font-bold">Marketing Intelligence</h2>
-          <p className="text-sm text-muted-foreground mt-1">Meta Ads, Instagram, and newsletter efforts for Drive Day Clinics.</p>
+        {/* ── Marketing Intelligence ── */}
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-xl font-bold">Marketing Intelligence</h2>
+            <p className="text-sm text-muted-foreground mt-1">Meta Ads, Instagram, and newsletter efforts for Drive Day Clinics.</p>
+          </div>
+          <ProgramMarketingPanel
+            programName="Drive Day Clinics"
+            programKeywords={["drive day", "sunday clinic"]}
+          />
         </div>
-        <ProgramMarketingPanel
-          programName="Drive Day Clinics"
-          programKeywords={["drive day", "sunday clinic"]}
-        />
       </div>
     </DashboardLayout>
   );

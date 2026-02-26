@@ -121,9 +121,9 @@ export default function Overview() {
         {/* KPI Strip */}
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
           <StatCard label="Active Programs" value={String(activeCampaigns)} sub="running now" trend="flat" color="bg-primary" />
-          <StatCard label="Total Spend" value={fmt(totalSpend)} sub={`of ${fmt(totalBudget)} budget`} trend="up" color="bg-orange-500" />
-          <StatCard label="Members" value={String(memberStats?.totalMembers ?? "—")} sub={`${memberStats?.activeMembers ?? 0} active`} trend="up" color="bg-green-500" />
-          <StatCard label="Leads" value={String(emailStats?.total ?? "—")} sub={`${emailStats?.byStatus?.new ?? 0} new`} trend="up" color="bg-blue-500" />
+          <StatCard label="Total Spend" value={fmt(totalSpend)} sub={`of ${fmt(totalBudget)} budget`} trend="up" color="bg-[#ef9253]" />
+          <StatCard label="Members" value={String(memberStats?.totalMembers ?? "—")} sub={`${memberStats?.activeMembers ?? 0} active`} trend="up" color="bg-[#5daf68]" />
+          <StatCard label="Leads" value={String(emailStats?.total ?? "—")} sub={`${emailStats?.byStatus?.new ?? 0} new`} trend="up" color="bg-[#76addc]" />
         </div>
 
         {/* Last sync info */}
