@@ -14,10 +14,10 @@ const CAMPAIGN_COLORS: Record<string, string> = {
 };
 
 const CAMPAIGN_BG_COLORS: Record<string, string> = {
-  emerald: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300",
-  pink: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300",
-  blue: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-  amber: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
+  emerald: "bg-emerald-600 text-white dark:bg-emerald-500 dark:text-white font-semibold shadow-sm",
+  pink: "bg-pink-600 text-white dark:bg-pink-500 dark:text-white font-semibold shadow-sm",
+  blue: "bg-blue-600 text-white dark:bg-blue-500 dark:text-white font-semibold shadow-sm",
+  amber: "bg-amber-500 text-white dark:bg-amber-400 dark:text-gray-900 font-semibold shadow-sm",
 };
 
 export default function StrategicCampaigns() {
