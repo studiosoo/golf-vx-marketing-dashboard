@@ -3209,6 +3209,96 @@ Return a JSON object with exactly these fields:
         return { success: true };
       }),
 
+    getLatestByCategory: protectedProcedure
+      .input(z.object({
+        category: z.enum(["b2b_corporate_events", "local_demographics", "competitor_analysis", "seasonal_trends", "membership_pricing", "custom"])
+      }))
+      .query(async ({ input }) => {
+        const drizzleDb = await db.getDb();
+        if (!drizzleDb) return null;
+        const { marketResearchReports } = await import("../drizzle/schema");
+        const { eq: eqOp, desc: descOp, and: andOp } = await import("drizzle-orm");
+        const [report] = await drizzleDb
+          .select()
+          .from(marketResearchReports)
+          .where(andOp(
+            eqOp(marketResearchReports.category, input.category),
+            eqOp(marketResearchReports.status, "ready")
+          ))
+          .orderBy(descOp(marketResearchReports.createdAt))
+          .limit(1);
+        return report ?? null;
+      }),
+    generateB2BOutreachEmail: protectedProcedure
+      .input(z.object({
+        researchSummary: z.string().optional(),
+        targetIndustry: z.string().optional(),
+        groupSize: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { invokeLLM } = await import("./_core/llm");
+        const systemPrompt = `You are a B2B sales email copywriter for Golf VX Arlington Heights, an indoor golf simulator facility. Write professional, concise cold outreach emails targeting local businesses for corporate team-building events and company outings. Tone: professional yet approachable, value-focused.`;
+        const researchContext = input.researchSummary ? `\n\nMarket Research Context:\n${input.researchSummary}` : "";
+        const industryContext = input.targetIndustry ? `\nTarget Industry: ${input.targetIndustry}` : "";
+        const groupContext = input.groupSize ? `\nTypical Group Size: ${input.groupSize}` : "";
+        const userPrompt = `Write a 3-email B2B cold outreach sequence for Golf VX Arlington Heights targeting local businesses for corporate events and team-building outings.${researchContext}${industryContext}${groupContext}
+
+Golf VX Offering for B2B:
+- Private simulator bay rentals for groups (up to 6 per bay)
+- Corporate outing packages with food & beverage
+- Team-building events with professional instruction
+- Flexible scheduling including evenings and weekends
+- Located in Arlington Heights, IL (easy access from Schaumburg, Palatine, Rolling Meadows)
+- Pricing: ~$50-80/person for 2-hour corporate events
+
+Return a JSON object with:
+- emails: array of 3 objects, each with { emailNumber, subject, preheader, body, callToAction, sendDelay }
+- subject: overall campaign subject line
+- preheader: overall preheader`;
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "b2b_outreach_email",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  subject: { type: "string" },
+                  preheader: { type: "string" },
+                  emails: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        emailNumber: { type: "integer" },
+                        subject: { type: "string" },
+                        preheader: { type: "string" },
+                        body: { type: "string" },
+                        callToAction: { type: "string" },
+                        sendDelay: { type: "string" },
+                      },
+                      required: ["emailNumber", "subject", "preheader", "body", "callToAction", "sendDelay"],
+                      additionalProperties: false,
+                    },
+                  },
+                },
+                required: ["subject", "preheader", "emails"],
+                additionalProperties: false,
+              },
+            },
+          },
+        });
+        const rawContent = response?.choices?.[0]?.message?.content;
+        const content = typeof rawContent === "string" ? rawContent : null;
+        if (!content) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "LLM returned no content" });
+        const draft = JSON.parse(content);
+        return { success: true, draft };
+      }),
     linkToCampaign: protectedProcedure
       .input(z.object({ reportId: z.number(), campaignId: z.string() }))
       .mutation(async ({ input }) => {

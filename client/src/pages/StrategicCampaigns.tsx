@@ -2,11 +2,14 @@ import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TrendingUp, Target, DollarSign, BarChart3, ChevronRight, TrendingDown, Search, ChevronDown } from "lucide-react";
+import { TrendingUp, Target, DollarSign, BarChart3, ChevronRight, TrendingDown, Search, ChevronDown, Mail, Loader2, BookOpen, ArrowUpDown, CheckCircle2, AlertCircle, Copy, Check } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLocation } from "wouter";
 import { useState } from "react";
+import { toast } from "sonner";
 
 const CAMPAIGN_COLORS: Record<string, string> = {
   trial_conversion: "emerald",
@@ -22,7 +25,6 @@ const CAMPAIGN_BG_COLORS: Record<string, string> = {
   amber: "bg-amber-500 text-white dark:bg-amber-400 dark:text-gray-900 font-semibold shadow-sm cursor-pointer hover:bg-amber-600 dark:hover:bg-amber-300 transition-colors",
 };
 
-// Status badge colors for program status
 function getStatusBadgeClass(status: string): string {
   switch (status) {
     case "active":
@@ -38,26 +40,173 @@ function getStatusBadgeClass(status: string): string {
   }
 }
 
+type SortOption = "roi" | "date" | "status";
+
+type EmailDraft = {
+  subject: string;
+  preheader: string;
+  emails: Array<{
+    emailNumber: number;
+    subject: string;
+    preheader: string;
+    body: string;
+    callToAction: string;
+    sendDelay: string;
+  }>;
+};
+
+function EmailDraftModal({
+  open,
+  onClose,
+  draft,
+  title,
+}: {
+  open: boolean;
+  onClose: () => void;
+  draft: EmailDraft;
+  title: string;
+}) {
+  const [expandedEmail, setExpandedEmail] = useState<number>(1);
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
+  const handleCopy = (text: string, idx: number) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedIdx(idx);
+      setTimeout(() => setCopiedIdx(null), 2000);
+    });
+  };
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Mail className="h-5 w-5 text-primary" />
+            {title}
+          </DialogTitle>
+          <DialogDescription>
+            AI-generated email sequence. Review, edit, and copy into Encharge or your email tool.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="overflow-y-auto flex-1 space-y-3 mt-2">
+          {draft.emails.map((email) => (
+            <div key={email.emailNumber} className="border border-border rounded-xl overflow-hidden">
+              <button
+                className="w-full flex items-center justify-between p-4 hover:bg-muted/30 transition-colors text-left"
+                onClick={() => setExpandedEmail(expandedEmail === email.emailNumber ? -1 : email.emailNumber)}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <span className="text-xs font-bold text-primary">{email.emailNumber}</span>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm text-foreground">{email.subject}</p>
+                    <p className="text-xs text-muted-foreground">{email.sendDelay} · {email.callToAction}</p>
+                  </div>
+                </div>
+                {expandedEmail === email.emailNumber ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+              </button>
+              {expandedEmail === email.emailNumber && (
+                <div className="px-4 pb-4 space-y-3 border-t border-border bg-muted/10">
+                  <div className="pt-3 space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Subject</p>
+                    <p className="text-sm font-medium">{email.subject}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Preheader</p>
+                    <p className="text-sm text-muted-foreground">{email.preheader}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Body</p>
+                    <pre className="text-sm whitespace-pre-wrap font-sans leading-relaxed">{email.body}</pre>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-1.5"
+                    onClick={() => handleCopy(`Subject: ${email.subject}\nPreheader: ${email.preheader}\n\n${email.body}\n\nCTA: ${email.callToAction}`, email.emailNumber)}
+                  >
+                    {copiedIdx === email.emailNumber ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+                    {copiedIdx === email.emailNumber ? "Copied!" : "Copy Email"}
+                  </Button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function StrategicCampaigns() {
   const [, setLocation] = useLocation();
   const [expandedPrograms, setExpandedPrograms] = useState<Record<string, boolean>>({});
+  const [programSort, setProgramSort] = useState<Record<string, SortOption>>({});
+  const [emailDraft, setEmailDraft] = useState<EmailDraft | null>(null);
+  const [draftModalOpen, setDraftModalOpen] = useState(false);
+
   const { data: campaigns, isLoading } = trpc.strategicCampaigns.getOverview.useQuery();
   const { data: kpiData } = trpc.intelligence.getStrategicKPIs.useQuery();
+  const { data: latestB2BResearch } = trpc.research.getLatestByCategory.useQuery({ category: "b2b_corporate_events" });
+
+  const generateOutreachMutation = trpc.research.generateB2BOutreachEmail.useMutation({
+    onSuccess: (result) => {
+      if (result.success && result.draft) {
+        setEmailDraft(result.draft as EmailDraft);
+        setDraftModalOpen(true);
+      } else {
+        toast.error("Failed to generate outreach email");
+      }
+    },
+    onError: (err) => toast.error(`Generation failed: ${err.message}`),
+  });
 
   function togglePrograms(campaignId: string) {
     setExpandedPrograms(prev => ({ ...prev, [campaignId]: !prev[campaignId] }));
+  }
+
+  type Program = { id: number; name: string; status: string; spend: number; revenue: number; startDate?: string | null; [key: string]: unknown };
+  function getSortedPrograms(programs: Program[], sort: SortOption) {
+    const sorted = [...programs];
+    switch (sort) {
+      case "roi":
+        return sorted.sort((a, b) => {
+          const roiA = a.spend > 0 ? ((a.revenue - a.spend) / a.spend) * 100 : 0;
+          const roiB = b.spend > 0 ? ((b.revenue - b.spend) / b.spend) * 100 : 0;
+          return roiB - roiA;
+        });
+      case "date":
+        return sorted.sort((a, b) => {
+          const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
+          const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
+          return dateB - dateA;
+        });
+      case "status": {
+        const statusOrder: Record<string, number> = { active: 0, planned: 1, paused: 2, completed: 3 };
+        return sorted.sort((a, b) => (statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9));
+      }
+      default:
+        return sorted;
+    }
   }
 
   if (isLoading) {
     return (
       <div className="space-y-6">
         <div>
-          <Skeleton className="h-10 w-96 mb-2" />
-          <Skeleton className="h-5 w-full max-w-2xl" />
+          <Skeleton className="h-8 w-48 mb-2" />
+          <Skeleton className="h-4 w-96" />
         </div>
         <div className="grid gap-6 md:grid-cols-2">
           {[1, 2, 3, 4].map(i => (
-            <Skeleton key={i} className="h-96" />
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-6 w-40" />
+                <Skeleton className="h-4 w-64" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-32 w-full" />
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>
@@ -66,80 +215,62 @@ export default function StrategicCampaigns() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Campaigns</h1>
-        <p className="text-muted-foreground mt-2">
-          Strategic objectives with aggregated program performance
-        </p>
+        <h1 className="text-2xl font-bold tracking-tight">Campaigns</h1>
+        <p className="text-muted-foreground mt-1">Strategic campaign overview with program performance and ROI tracking</p>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Campaigns</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{campaigns?.length || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Strategic objectives
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Programs</CardTitle>
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {campaigns?.reduce((sum, c) => sum + c.totalPrograms, 0) || 0}
+      {/* Summary KPI Bar */}
+      {kpiData && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card className="p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <Target className="h-4 w-4 text-emerald-500" />
+              <span className="text-xs text-muted-foreground font-medium">Membership Growth</span>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Tactical programs
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Spend</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              ${campaigns?.reduce((sum, c) => sum + c.totalSpend, 0).toFixed(2) || "0.00"}
+            <p className="text-2xl font-bold">{kpiData.membershipAcquisition.current}</p>
+            <p className="text-xs text-muted-foreground">Goal: {kpiData.membershipAcquisition.target}</p>
+            <Progress value={(kpiData.membershipAcquisition.current / kpiData.membershipAcquisition.target) * 100} className="mt-2 h-1.5" />
+          </Card>
+          <Card className="p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <BarChart3 className="h-4 w-4 text-pink-500" />
+              <span className="text-xs text-muted-foreground font-medium">Trial Conversion</span>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Across all programs
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              ${campaigns?.reduce((sum, c) => sum + c.totalRevenue, 0).toFixed(2) || "0.00"}
+            <p className="text-2xl font-bold">{kpiData.trialConversion.current.toFixed(1)}%</p>
+            <p className="text-xs text-muted-foreground">Goal: {kpiData.trialConversion.target}%</p>
+            <Progress value={(kpiData.trialConversion.current / kpiData.trialConversion.target) * 100} className="mt-2 h-1.5" />
+          </Card>
+          <Card className="p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <TrendingUp className="h-4 w-4 text-blue-500" />
+              <span className="text-xs text-muted-foreground font-medium">Member Retention</span>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Generated revenue
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+            <p className="text-2xl font-bold">{kpiData.memberRetention.current.toFixed(0)}%</p>
+            <p className="text-xs text-muted-foreground">Goal: {kpiData.memberRetention.target}%</p>
+            <Progress value={(kpiData.memberRetention.current / kpiData.memberRetention.target) * 100} className="mt-2 h-1.5" />
+          </Card>
+          <Card className="p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <DollarSign className="h-4 w-4 text-amber-500" />
+              <span className="text-xs text-muted-foreground font-medium">B2B Events</span>
+            </div>
+            <p className="text-2xl font-bold">{kpiData.corporateEvents.current} booked</p>
+            <p className="text-xs text-muted-foreground">Goal: {kpiData.corporateEvents.target}/month</p>
+            <Progress value={(kpiData.corporateEvents.current / kpiData.corporateEvents.target) * 100} className="mt-2 h-1.5" />
+          </Card>
+        </div>
+      )}
 
       {/* Campaign Cards */}
       <div className="grid gap-6 md:grid-cols-2">
         {campaigns?.map(campaign => {
           const colorClass = CAMPAIGN_BG_COLORS[campaign.color] || CAMPAIGN_BG_COLORS.blue;
           const isExpanded = expandedPrograms[campaign.id] ?? true;
-          
+          const sort = programSort[campaign.id] ?? "roi";
+          const sortedPrograms = getSortedPrograms(campaign.programs, sort);
+
           return (
             <Card key={campaign.id} className="hover:shadow-lg transition-shadow">
               <CardHeader>
@@ -164,68 +295,97 @@ export default function StrategicCampaigns() {
                   <div className="p-4 rounded-lg bg-muted/50">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium">Membership Goal</span>
-                      <span className="text-sm font-bold">
-                        {kpiData.membershipAcquisition.current} / {kpiData.membershipAcquisition.target} members
-                      </span>
+                      <span className="text-sm font-bold">{kpiData.membershipAcquisition.current} / {kpiData.membershipAcquisition.target} members</span>
                     </div>
-                    <Progress value={kpiData.membershipAcquisition.progress} className="h-2" />
+                    <Progress value={(kpiData.membershipAcquisition.current / kpiData.membershipAcquisition.target) * 100} className="h-2" />
                     <p className="text-xs text-muted-foreground mt-2">
-                      {kpiData.membershipAcquisition.progress.toFixed(1)}% to year-end target • Need{' '}
-                      {kpiData.membershipAcquisition.target - kpiData.membershipAcquisition.current} more members
+                      {((kpiData.membershipAcquisition.current / kpiData.membershipAcquisition.target) * 100).toFixed(1)}% to year-end target •{' '}
+                      Need {Math.max(0, kpiData.membershipAcquisition.target - kpiData.membershipAcquisition.current)} more members
                     </p>
                   </div>
                 )}
+
                 {campaign.id === 'trial_conversion' && kpiData && (
                   <div className="p-4 rounded-lg bg-muted/50">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium">Trial Conversion Rate</span>
                       <span className="text-sm font-bold">{kpiData.trialConversion.current.toFixed(1)}%</span>
                     </div>
-                    <Progress value={kpiData.trialConversion.progress} className="h-2" />
+                    <Progress value={(kpiData.trialConversion.current / kpiData.trialConversion.target) * 100} className="h-2" />
                     <p className="text-xs text-muted-foreground mt-2">
                       Target: {kpiData.trialConversion.target}% •{' '}
-                      {kpiData.trialConversion.current < kpiData.trialConversion.target
-                        ? `${(kpiData.trialConversion.target - kpiData.trialConversion.current).toFixed(1)}% below target`
-                        : `${(kpiData.trialConversion.current - kpiData.trialConversion.target).toFixed(1)}% above target`}
+                      {kpiData.trialConversion.current >= kpiData.trialConversion.target
+                        ? 'Goal met!'
+                        : `${(kpiData.trialConversion.target - kpiData.trialConversion.current).toFixed(1)}% below target`}
                     </p>
                   </div>
                 )}
+
                 {campaign.id === 'member_retention' && kpiData && (
                   <div className="p-4 rounded-lg bg-muted/50">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium">Retention Rate</span>
-                      <span className={`text-sm font-bold ${
-                        kpiData.memberRetention.current >= kpiData.memberRetention.target
-                          ? 'text-green-600 dark:text-green-400'
-                          : 'text-orange-600 dark:text-orange-400'
-                      }`}>
-                        {kpiData.memberRetention.current.toFixed(1)}%
-                      </span>
+                      <span className="text-sm font-bold">{kpiData.memberRetention.current.toFixed(0)}%</span>
                     </div>
-                    <Progress value={kpiData.memberRetention.progress} className="h-2" />
+                    <Progress value={(kpiData.memberRetention.current / kpiData.memberRetention.target) * 100} className="h-2" />
                     <p className="text-xs text-muted-foreground mt-2">
                       Target: {kpiData.memberRetention.target}% •{' '}
-                      {kpiData.memberRetention.current >= kpiData.memberRetention.target
-                        ? `Exceeding goal by ${(kpiData.memberRetention.current - kpiData.memberRetention.target).toFixed(1)}%`
-                        : `${(kpiData.memberRetention.target - kpiData.memberRetention.current).toFixed(1)}% below target`}
+                      {kpiData.memberRetention.current >= kpiData.memberRetention.target ? 'Goal met!' : 'Below target'}
                     </p>
                   </div>
                 )}
+
                 {campaign.id === 'corporate_events' && kpiData && (
                   <div className="p-4 rounded-lg bg-muted/50">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium">B2B Events (This Month)</span>
-                      <span className="text-sm font-bold">
-                        {kpiData.corporateEvents.current} / {kpiData.corporateEvents.target} events
-                      </span>
+                      <span className="text-sm font-bold">{kpiData.corporateEvents.current} / {kpiData.corporateEvents.target}</span>
                     </div>
-                    <Progress value={kpiData.corporateEvents.progress} className="h-2" />
+                    <Progress value={(kpiData.corporateEvents.current / kpiData.corporateEvents.target) * 100} className="h-2" />
                     <p className="text-xs text-muted-foreground mt-2">
                       Goal: 1 B2B event/month •{' '}
                       {kpiData.corporateEvents.current >= kpiData.corporateEvents.target
                         ? 'Goal met this month'
                         : `Need ${kpiData.corporateEvents.target - kpiData.corporateEvents.current} more event this month`}
                     </p>
+                  </div>
+                )}
+
+                {/* B2B Research Summary — inline if available */}
+                {campaign.id === 'corporate_events' && latestB2BResearch && (
+                  <div className="p-4 rounded-lg border border-amber-200 dark:border-amber-800/40 bg-amber-50/50 dark:bg-amber-950/20 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <BookOpen className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                        <span className="text-sm font-semibold text-amber-800 dark:text-amber-300">Latest B2B Research</span>
+                        <Badge className="bg-green-600 text-white text-xs border-0">
+                          <CheckCircle2 className="h-3 w-3 mr-1" />ready
+                        </Badge>
+                      </div>
+                      <button
+                        className="text-xs text-amber-600 dark:text-amber-400 hover:underline"
+                        onClick={() => setLocation("/intelligence/research")}
+                      >
+                        View full report →
+                      </button>
+                    </div>
+                    <p className="text-xs text-amber-900 dark:text-amber-200 leading-relaxed">{latestB2BResearch.summary}</p>
+                    {latestB2BResearch.recommendedActions && (latestB2BResearch.recommendedActions as Array<{ action: string; priority: string; campaignType: string }>).slice(0, 2).map((rec, i) => (
+                      <div key={i} className="flex items-start gap-2">
+                        <Badge className={`text-xs border-0 shrink-0 ${rec.priority === "high" ? "bg-red-500 text-white" : rec.priority === "medium" ? "bg-amber-500 text-white" : "bg-slate-400 text-white"}`}>
+                          {rec.priority}
+                        </Badge>
+                        <span className="text-xs text-amber-800 dark:text-amber-200">{rec.action}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* B2B — no research yet prompt */}
+                {campaign.id === 'corporate_events' && !latestB2BResearch && (
+                  <div className="p-3 rounded-lg border border-dashed border-amber-300 dark:border-amber-700 bg-amber-50/30 dark:bg-amber-950/10 flex items-center gap-3">
+                    <AlertCircle className="h-4 w-4 text-amber-500 shrink-0" />
+                    <p className="text-xs text-amber-700 dark:text-amber-400">No B2B market research yet. Generate a report to inform your outreach strategy.</p>
                   </div>
                 )}
 
@@ -262,19 +422,39 @@ export default function StrategicCampaigns() {
                   </div>
                 </div>
 
-                {/* B2B Research Button — only for corporate_events */}
+                {/* B2B Action Buttons */}
                 {campaign.id === 'corporate_events' && (
-                  <div className="pt-2">
+                  <div className="flex gap-2 pt-2">
                     <Button
                       variant="outline"
-                      className="w-full gap-2 border-amber-500 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                      className="flex-1 gap-2 border-amber-500 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30"
                       onClick={() => setLocation("/intelligence/research")}
                     >
                       <Search className="h-4 w-4" />
-                      Start Market Research
+                      Market Research
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="flex-1 gap-2 border-amber-500 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                      disabled={generateOutreachMutation.isPending}
+                      onClick={() => {
+                        generateOutreachMutation.mutate({
+                          researchSummary: latestB2BResearch?.summary ?? undefined,
+                          targetIndustry: "healthcare, tech, finance, manufacturing",
+                          groupSize: "10-30 people",
+                        });
+                      }}
+                    >
+                      {generateOutreachMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Mail className="h-4 w-4" />
+                      )}
+                      {generateOutreachMutation.isPending ? "Generating..." : "Outreach Email"}
                     </Button>
                   </div>
                 )}
+
                 {/* View Landing Page Button */}
                 {campaign.landingPageUrl && (
                   <div className="pt-4">
@@ -292,12 +472,30 @@ export default function StrategicCampaigns() {
                 {/* Programs List */}
                 {campaign.programs.length > 0 && isExpanded && (
                   <div className="pt-4 border-t space-y-2">
-                    <p className="text-sm font-medium text-muted-foreground mb-3">Supporting Programs</p>
-                    {campaign.programs.map(program => {
-                      const programRoi = program.spend > 0 
-                        ? ((program.revenue - program.spend) / program.spend) * 100 
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-sm font-medium text-muted-foreground">Supporting Programs</p>
+                      <div className="flex items-center gap-1.5">
+                        <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
+                        <Select
+                          value={sort}
+                          onValueChange={(v) => setProgramSort(prev => ({ ...prev, [campaign.id]: v as SortOption }))}
+                        >
+                          <SelectTrigger className="h-7 w-28 text-xs border-0 bg-muted/50 focus:ring-0">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="roi">By ROI</SelectItem>
+                            <SelectItem value="date">By Date</SelectItem>
+                            <SelectItem value="status">By Status</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    {sortedPrograms.map(program => {
+                      const programRoi = program.spend > 0
+                        ? ((program.revenue - program.spend) / program.spend) * 100
                         : 0;
-                      
+
                       return (
                         <button
                           key={program.id}
@@ -334,6 +532,16 @@ export default function StrategicCampaigns() {
           );
         })}
       </div>
+
+      {/* B2B Outreach Email Draft Modal */}
+      {emailDraft && (
+        <EmailDraftModal
+          open={draftModalOpen}
+          onClose={() => setDraftModalOpen(false)}
+          draft={emailDraft}
+          title="B2B Corporate Outreach Email Sequence"
+        />
+      )}
     </div>
   );
 }

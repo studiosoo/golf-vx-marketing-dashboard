@@ -517,3 +517,8 @@
 - [ ] Add route /intelligence/research in App.tsx
 - [ ] Write vitest tests for research router
 - [ ] Save checkpoint
+
+## Campaigns Page Enhancements (2026-02-26)
+- [ ] Link Research reports to B2B Sales campaign card (show latest research summary inline)
+- [ ] Add program list sorting (ROI, date, status) to all campaign cards
+- [ ] Add B2B outreach email draft button to B2B Sales card
