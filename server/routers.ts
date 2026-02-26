@@ -2177,6 +2177,72 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
         const hasVisited = !!member || visitCount > 0 || selfReported === 'yes';
         return { hasVisited, visitCount, lastVisit, memberStatus: member ? member.status : null, memberTier: member ? member.membershipTier : null, selfReported: applicant.visitedBefore || 'Not specified' };
       }),
+
+    // Daily Dashboard: AI-driven daily action plan based on application count vs goal
+    getDailyDashboard: protectedProcedure.query(async () => {
+      const stats = await giveawaySync.getGiveawayStats();
+      const GOAL = 500;
+      const current = stats.totalApplications || 0;
+      const remaining = Math.max(0, GOAL - current);
+      const progressPct = Math.min((current / GOAL) * 100, 100);
+      const startDate = new Date('2026-01-01');
+      const today = new Date();
+      const daysSinceStart = Math.max(1, Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)));
+      const dailyAvg = current / daysSinceStart;
+      const endDate = new Date('2026-12-31');
+      const daysRemaining = Math.max(1, Math.floor((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)));
+      const requiredDailyRate = remaining / daysRemaining;
+      let statusLevel: 'critical' | 'behind' | 'on_track' | 'ahead';
+      if (progressPct < 20) statusLevel = 'critical';
+      else if (dailyAvg < requiredDailyRate * 0.7) statusLevel = 'behind';
+      else if (dailyAvg >= requiredDailyRate * 1.1) statusLevel = 'ahead';
+      else statusLevel = 'on_track';
+      const { invokeLLM } = await import('./_core/llm');
+      const todayStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      const llmPrompt = `You are the marketing strategist for Golf VX Arlington Heights, an indoor golf simulator facility.
+
+GIVEAWAY DAILY DASHBOARD — ${todayStr}
+Goal: 500 lead capture applications by Dec 31, 2026
+Current applications: ${current}
+Remaining: ${remaining}
+Progress: ${progressPct.toFixed(1)}%
+Days since launch: ${daysSinceStart}
+Daily average: ${dailyAvg.toFixed(1)} apps/day
+Required daily rate to hit goal: ${requiredDailyRate.toFixed(1)} apps/day
+Days remaining: ${daysRemaining}
+Status: ${statusLevel.replace('_', ' ').toUpperCase()}
+
+Provide a specific, actionable daily action plan for TODAY. Be direct and practical.
+Respond in JSON with this exact structure:
+{
+  "todayFocus": "One sentence describing today primary focus",
+  "urgencyMessage": "One sentence about the current pace and what it means",
+  "actions": [
+    { "priority": 1, "category": "Instagram", "action": "specific action", "expectedImpact": "X new applications", "timeRequired": "15 min" },
+    { "priority": 2, "category": "Email", "action": "specific action", "expectedImpact": "X new applications", "timeRequired": "30 min" },
+    { "priority": 3, "category": "In-Person", "action": "specific action", "expectedImpact": "X new applications", "timeRequired": "20 min" },
+    { "priority": 4, "category": "Drive Day", "action": "specific action", "expectedImpact": "X new applications", "timeRequired": "10 min" },
+    { "priority": 5, "category": "Follow-Up", "action": "specific action", "expectedImpact": "X new applications", "timeRequired": "20 min" }
+  ],
+  "weeklyMilestone": "What you should achieve by end of this week",
+  "quickWin": "One thing you can do in the next 5 minutes right now"
+}`;
+      const llmResponse = await invokeLLM({
+        messages: [
+          { role: 'system', content: 'You are a marketing strategist. Always respond with valid JSON only, no markdown.' },
+          { role: 'user', content: llmPrompt },
+        ],
+        response_format: { type: 'json_object' },
+      });
+      let actionPlan: any = null;
+      try {
+        const rawContent = llmResponse?.choices?.[0]?.message?.content;
+        actionPlan = typeof rawContent === 'string' ? JSON.parse(rawContent) : rawContent;
+      } catch (e) {
+        actionPlan = { todayFocus: 'Focus on growing giveaway applications today.', urgencyMessage: 'Keep pushing to reach the 500 goal.', actions: [], weeklyMilestone: 'Increase daily application rate.', quickWin: 'Post a story on Instagram about the giveaway.' };
+      }
+      return { current, goal: GOAL, remaining, progressPct, daysSinceStart, dailyAvg, requiredDailyRate, daysRemaining, statusLevel, actionPlan, lastUpdated: new Date().toISOString() };
+    }),
   }),
   // Reports
   reports: router({
@@ -2375,11 +2441,24 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
           throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
         }
 
-        // 1. Membership Acquisition: Count active members
+        // 1. Membership KPIs: Customer members = All Access Aces + Swing Savers ONLY
+        //    Pro members (golf_vx_pro) are tracked separately, NOT counted toward the 300 goal
         const memberCountResult = await database.execute(
-          `SELECT COUNT(*) as count FROM members WHERE status = 'active'`
+          `SELECT 
+            COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers') THEN 1 END) as customerMembers,
+            COUNT(CASE WHEN membershipTier = 'golf_vx_pro' THEN 1 END) as proMembers,
+            COUNT(CASE WHEN membershipTier = 'all_access_aces' THEN 1 END) as allAccessCount,
+            COUNT(CASE WHEN membershipTier = 'swing_savers' THEN 1 END) as swingSaverCount
+          FROM members WHERE status = 'active'`
         );
-        const memberCount = Number((memberCountResult as any)[0]?.count || 0);
+        const customerMemberCount = Number((memberCountResult as any)[0]?.customerMembers || 0);
+        const proMemberCount = Number((memberCountResult as any)[0]?.proMembers || 0);
+        const allAccessCount = Number((memberCountResult as any)[0]?.allAccessCount || 0);
+        const swingSaverCount = Number((memberCountResult as any)[0]?.swingSaverCount || 0);
+        // Acquisition goal: 300 total customer members over 2 years
+        // Retention goal: retain all current customer members (target = 300)
+        const MEMBERSHIP_GOAL = 300;
+        const memberCount = customerMemberCount; // alias for downstream use
 
         // 2. Trial Conversion: Calculate conversion rate from Acuity appointments
         // Count total trial appointments and converted members in last 90 days
@@ -2427,21 +2506,44 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
         } catch {
           eventsThisMonth = 0;
         }
+        // Retention rate: only among customer members (All Access + Swing Saver)
+        const customerRetentionResult = await database.execute(`
+          SELECT 
+            COUNT(*) as total,
+            COUNT(CASE WHEN status = 'active' AND membershipTier IN ('all_access_aces', 'swing_savers') THEN 1 END) as activeCustomers
+          FROM members
+          WHERE membershipTier IN ('all_access_aces', 'swing_savers')
+        `);
+        const totalCustomers = Number((customerRetentionResult as any)[0]?.total || 1);
+        const activeCustomers = Number((customerRetentionResult as any)[0]?.activeCustomers || 0);
+        const customerRetentionRate = totalCustomers > 0 ? (activeCustomers / totalCustomers) * 100 : 0;
+
         return {
           membershipAcquisition: {
-            current: memberCount,
-            target: 300,
-            progress: (memberCount / 300) * 100,
+            current: customerMemberCount,
+            target: MEMBERSHIP_GOAL,
+            // Remaining = how many more needed to reach 300
+            remaining: Math.max(0, MEMBERSHIP_GOAL - customerMemberCount),
+            progress: Math.min((customerMemberCount / MEMBERSHIP_GOAL) * 100, 100),
+            breakdown: { allAccess: allAccessCount, swingSaver: swingSaverCount },
+          },
+          memberRetention: {
+            // Goal: retain all 300 customer members
+            current: customerMemberCount,
+            target: MEMBERSHIP_GOAL,
+            retentionRate: customerRetentionRate,
+            progress: Math.min((customerMemberCount / MEMBERSHIP_GOAL) * 100, 100),
+            breakdown: { allAccess: allAccessCount, swingSaver: swingSaverCount },
+          },
+          proMembers: {
+            // Pro members tracked separately — NOT part of the 300 goal
+            current: proMemberCount,
+            label: "Golf VX Pro (Coaches)",
           },
           trialConversion: {
             current: conversionRate,
             target: 20,
             progress: (conversionRate / 20) * 100,
-          },
-          memberRetention: {
-            current: retentionRate,
-            target: 90,
-            progress: (retentionRate / 90) * 100,
           },
           corporateEvents: {
             current: eventsThisMonth,

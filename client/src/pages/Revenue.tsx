@@ -556,21 +556,20 @@ export default function Revenue() {
                     </Card>
                   )}
 
-                  {/* Combined Toast + Acuity Monthly Chart */}
+                  {/* Toast POS Monthly Chart */}
                   <Card className="mt-4">
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-base font-semibold">Toast vs Acuity Revenue (Last 6 Months)</CardTitle>
+                      <CardTitle className="text-base font-semibold">Toast POS Revenue (Last 6 Months)</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <ResponsiveContainer width="100%" height={220}>
-                        <BarChart data={combinedMonthly} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                        <BarChart data={monthly} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
                           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                           <XAxis dataKey="month" tickFormatter={fmtMonth} tick={{ fontSize: 11 }} />
                           <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
                           <Tooltip formatter={(v: number) => fmt(v)} labelFormatter={fmtMonth} />
                           <Legend />
-                          <Bar dataKey="totalRevenue" name="Toast (POS)" fill="var(--color-brand-primary)" stackId="a" />
-                          <Bar dataKey="acuityRevenue" name="Acuity (Clinics)" fill="var(--color-brand-purple)" stackId="a" radius={[3, 3, 0, 0]} />
+                          <Bar dataKey="totalRevenue" name="Toast (POS)" fill="var(--color-brand-primary)" radius={[3, 3, 0, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     </CardContent>

@@ -15,13 +15,13 @@ type Urgency = "URGENT" | "TODAY" | "THIS WEEK";
 // ─── Static data ──────────────────────────────────────────────────────────────
 const KPI_BARS = [
   {
-    label: "Membership Growth",
-    value: "359 members",
-    progress: 60,
+    label: "Membership Acquisition",
+    value: "Loading...",
+    progress: 0,
     color: "bg-[#ef9253]",
-    badge: "+305 synced",
+    badge: "Loading...",
     badgeColor: "text-[#ef9253]",
-    goal: "Goal: 600",
+    goal: "Goal: 300 members (2-yr)",
     href: "/audience/members",
   },
   {
@@ -36,13 +36,13 @@ const KPI_BARS = [
   },
   {
     label: "Member Retention",
-    value: "92%",
-    progress: 97,
+    value: "Loading...",
+    progress: 0,
     color: "bg-[#a87fbe]",
-    badge: "Stable",
+    badge: "Loading...",
     badgeColor: "text-muted-foreground",
-    goal: "Goal: 95%",
-    href: "/intelligence/performance",
+    goal: "Goal: 300 members",
+    href: "/campaigns",
   },
   {
     label: "B2B Events",
@@ -219,8 +219,14 @@ export default function Home() {
       ? categories.map((c) => ({ name: c.name, spend: c.totalSpend, budget: c.totalBudget }))
       : STATIC_CAMPAIGNS;
 
-  // Build live KPI bars with real B2B events data
+  // Build live KPI bars with real data from strategicKPIs
   const b2bCount = strategicKPIs?.corporateEvents?.current ?? null;
+  const customerMembers = strategicKPIs?.membershipAcquisition?.current ?? null;
+  const memberGoal = strategicKPIs?.membershipAcquisition?.target ?? 300;
+  const memberRemaining = strategicKPIs?.membershipAcquisition?.remaining ?? null;
+  const allAccess = strategicKPIs?.membershipAcquisition?.breakdown?.allAccess ?? 0;
+  const swingSaver = strategicKPIs?.membershipAcquisition?.breakdown?.swingSaver ?? 0;
+
   const liveKpiBars = KPI_BARS.map((kpi) => {
     if (kpi.label === "B2B Events" && b2bCount !== null) {
       const progress = Math.min(b2bCount * 100, 100);
@@ -230,6 +236,28 @@ export default function Home() {
         progress,
         badge: b2bCount >= 1 ? "Goal met! ✓" : "Goal: 1/month",
         badgeColor: b2bCount >= 1 ? "text-green-500" : "text-[#76addc]",
+      };
+    }
+    if (kpi.label === "Membership Acquisition" && customerMembers !== null) {
+      const progress = Math.min((customerMembers / memberGoal) * 100, 100);
+      return {
+        ...kpi,
+        value: `${customerMembers} members`,
+        progress,
+        badge: memberRemaining !== null ? `${memberRemaining} more needed` : `Goal: ${memberGoal}`,
+        badgeColor: progress >= 100 ? "text-green-500" : "text-[#ef9253]",
+        goal: `Goal: ${memberGoal} (All Access: ${allAccess}, Swing Saver: ${swingSaver})`,
+      };
+    }
+    if (kpi.label === "Member Retention" && customerMembers !== null) {
+      const progress = Math.min((customerMembers / memberGoal) * 100, 100);
+      return {
+        ...kpi,
+        value: `${customerMembers} / ${memberGoal}`,
+        progress,
+        badge: progress >= 100 ? "Goal reached! ✓" : `${(progress).toFixed(0)}% to goal`,
+        badgeColor: progress >= 100 ? "text-green-500" : "text-[#a87fbe]",
+        goal: `Retain ${memberGoal} customer members`,
       };
     }
     return kpi;

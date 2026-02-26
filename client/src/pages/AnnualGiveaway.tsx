@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Loader2, RefreshCw, TrendingUp, Users, DollarSign, Target, Mail, Send, CheckCircle2, AlertCircle, FileText, Copy, UserCheck, UserX } from "lucide-react";
+import { Loader2, RefreshCw, TrendingUp, Users, DollarSign, Target, Mail, Send, CheckCircle2, AlertCircle, FileText, Copy, UserCheck, UserX, Zap, Clock, ArrowRight, Activity } from "lucide-react";
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useToast } from "@/hooks/use-toast";
 
@@ -214,6 +214,10 @@ export default function AnnualGiveaway() {
               )}
             </TabsTrigger>
             <TabsTrigger value="demographics">Demographics</TabsTrigger>
+            <TabsTrigger value="daily" className="flex items-center gap-1">
+              <Zap className="h-3.5 w-3.5" />
+              Daily Plan
+            </TabsTrigger>
           </TabsList>
 
           {/* ── Tab 1: Applications ── */}
@@ -558,6 +562,11 @@ export default function AnnualGiveaway() {
               </Card>
             </div>
           </TabsContent>
+
+          {/* ── Tab 4: Daily Dashboard ── */}
+          <TabsContent value="daily">
+            <GiveawayDailyDashboard />
+          </TabsContent>
         </Tabs>
       </div>
 
@@ -679,5 +688,157 @@ export default function AnnualGiveaway() {
         </DialogContent>
       </Dialog>
     </DashboardLayout>
+  );
+}
+
+
+function GiveawayDailyDashboard() {
+  const { data, isLoading, refetch } = trpc.giveaway.getDailyDashboard.useQuery(undefined, {
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes — LLM call is expensive
+  });
+
+  const statusConfig = {
+    critical: { color: 'border-red-500 bg-red-50 dark:bg-red-950/20', badge: 'bg-red-500 text-white', label: 'Critical' },
+    behind: { color: 'border-amber-500 bg-amber-50 dark:bg-amber-950/20', badge: 'bg-amber-500 text-white', label: 'Behind' },
+    on_track: { color: 'border-green-500 bg-green-50 dark:bg-green-950/20', badge: 'bg-green-500 text-white', label: 'On Track' },
+    ahead: { color: 'border-blue-500 bg-blue-50 dark:bg-blue-950/20', badge: 'bg-blue-500 text-white', label: 'Ahead' },
+  };
+
+  const categoryIcon: Record<string, React.ReactNode> = {
+    Instagram: <Activity className="h-4 w-4 text-pink-500" />,
+    Email: <Mail className="h-4 w-4 text-blue-500" />,
+    'In-Person': <Users className="h-4 w-4 text-green-500" />,
+    'Drive Day': <Target className="h-4 w-4 text-[#ffcb00]" />,
+    'Follow-Up': <ArrowRight className="h-4 w-4 text-purple-500" />,
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 gap-4">
+        <Loader2 className="h-10 w-10 animate-spin text-[#ffcb00]" />
+        <p className="text-muted-foreground text-sm">Generating your daily action plan...</p>
+        <p className="text-xs text-muted-foreground">AI is analyzing your current progress vs. goal</p>
+      </div>
+    );
+  }
+
+  if (!data) return <div className="p-8 text-center text-muted-foreground">No data available.</div>;
+
+  const status = statusConfig[data.statusLevel] || statusConfig.on_track;
+  const plan = data.actionPlan;
+
+  return (
+    <div className="space-y-6">
+      {/* Header + Status */}
+      <div className={`rounded-xl border-2 p-5 ${status.color}`}>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Zap className="h-5 w-5" />
+              <h2 className="text-xl font-bold">Today's Action Plan</h2>
+              <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${status.badge}`}>{status.label}</span>
+            </div>
+            <p className="text-sm font-medium">{plan?.todayFocus}</p>
+            <p className="text-xs text-muted-foreground mt-1">{plan?.urgencyMessage}</p>
+          </div>
+          <button
+            onClick={() => refetch()}
+            className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 shrink-0"
+          >
+            <RefreshCw className="h-3 w-3" /> Refresh
+          </button>
+        </div>
+      </div>
+
+      {/* Progress Metrics */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground">Applications</p>
+            <p className="text-2xl font-bold">{data.current} <span className="text-sm text-muted-foreground">/ {data.goal}</span></p>
+            <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
+              <div className="h-full bg-[#ffcb00] rounded-full" style={{ width: `${data.progressPct}%` }} />
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">{data.progressPct.toFixed(1)}% to goal</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground">Daily Average</p>
+            <p className="text-2xl font-bold">{data.dailyAvg.toFixed(1)}</p>
+            <p className="text-xs text-muted-foreground">apps/day so far</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground">Required Rate</p>
+            <p className="text-2xl font-bold">{data.requiredDailyRate.toFixed(1)}</p>
+            <p className="text-xs text-muted-foreground">apps/day needed</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground">Days Remaining</p>
+            <p className="text-2xl font-bold">{data.daysRemaining}</p>
+            <p className="text-xs text-muted-foreground">{data.remaining} apps still needed</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Quick Win Banner */}
+      {plan?.quickWin && (
+        <div className="rounded-lg border border-[#ffcb00]/50 bg-[#ffcb00]/10 p-4 flex items-start gap-3">
+          <Zap className="h-5 w-5 text-[#ffcb00] shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold">Do this right now (5 min)</p>
+            <p className="text-sm">{plan.quickWin}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Action Items */}
+      <div>
+        <h3 className="text-base font-semibold mb-3 flex items-center gap-2">
+          <Clock className="h-4 w-4" /> Today's Prioritized Actions
+        </h3>
+        <div className="space-y-3">
+          {(plan?.actions || []).map((action: any) => (
+            <div key={action.priority} className="flex items-start gap-3 p-4 rounded-lg border bg-card hover:bg-accent/30 transition-colors">
+              <div className="flex items-center justify-center w-7 h-7 rounded-full bg-muted text-sm font-bold shrink-0">
+                {action.priority}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  {categoryIcon[action.category] || <ArrowRight className="h-4 w-4" />}
+                  <span className="text-sm font-semibold">{action.category}</span>
+                  <span className="text-xs text-muted-foreground ml-auto flex items-center gap-1">
+                    <Clock className="h-3 w-3" />{action.timeRequired}
+                  </span>
+                </div>
+                <p className="text-sm">{action.action}</p>
+                <p className="text-xs text-green-600 dark:text-green-400 mt-1">Expected: {action.expectedImpact}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Weekly Milestone */}
+      {plan?.weeklyMilestone && (
+        <Card className="border-dashed">
+          <CardContent className="p-4 flex items-start gap-3">
+            <Target className="h-5 w-5 text-[#ffcb00] shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold">Weekly Milestone</p>
+              <p className="text-sm text-muted-foreground">{plan.weeklyMilestone}</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <p className="text-xs text-muted-foreground text-right">
+        Last updated: {new Date(data.lastUpdated).toLocaleTimeString()}
+      </p>
+    </div>
   );
 }

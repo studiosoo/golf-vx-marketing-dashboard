@@ -1095,6 +1095,122 @@ function ProMembersPanel() {
           )}
         </CardContent>
       </Card>
+
+      {/* Stripe Payment Tracking */}
+      <ProMemberBillingSection />
+    </div>
+  );
+}
+
+function ProMemberBillingSection() {
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  const [billingMonth, setBillingMonth] = useState(currentMonth);
+  const { data: billSummary, isLoading } = trpc.proMembers.getMonthlyBillSummary.useQuery({ billingMonth });
+
+  const totalNetBill = billSummary?.reduce((sum, b) => sum + b.netBill, 0) ?? 0;
+  const pendingCount = billSummary?.filter(b => b.stripeStatus === 'pending').length ?? 0;
+  const paidCount = (billSummary?.length ?? 0) - pendingCount;
+
+  const statusColor = (s: string) => {
+    if (s === 'paid') return 'bg-green-100 text-green-700 border-green-200';
+    if (s === 'failed') return 'bg-red-100 text-red-700 border-red-200';
+    return 'bg-amber-100 text-amber-700 border-amber-200';
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <CreditCard className="h-5 w-5 text-[#a87fbe]" />
+            Stripe Payment Tracking
+          </h3>
+          <p className="text-sm text-muted-foreground">Monthly billing per Pro coach — separate from Toast POS revenue</p>
+        </div>
+        <input
+          type="month"
+          value={billingMonth}
+          onChange={e => setBillingMonth(e.target.value)}
+          className="text-sm border rounded-md px-3 py-1.5 bg-background text-foreground"
+        />
+      </div>
+
+      <div className="grid grid-cols-3 gap-3">
+        <Card className="border-[#a87fbe]/30">
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground">Total Net Bill</p>
+            <p className="text-2xl font-bold text-[#a87fbe]">${totalNetBill.toFixed(2)}</p>
+            <p className="text-xs text-muted-foreground mt-1">for {billingMonth}</p>
+          </CardContent>
+        </Card>
+        <Card className="border-amber-300/50">
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground">Pending Stripe</p>
+            <p className="text-2xl font-bold text-amber-600">{pendingCount}</p>
+            <p className="text-xs text-muted-foreground mt-1">awaiting payment</p>
+          </CardContent>
+        </Card>
+        <Card className="border-green-300/50">
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground">Paid</p>
+            <p className="text-2xl font-bold text-green-600">{paidCount}</p>
+            <p className="text-xs text-muted-foreground mt-1">confirmed</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">Per-Coach Breakdown — {billingMonth}</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="p-6 text-center text-muted-foreground text-sm">Loading billing data...</div>
+          ) : !billSummary || billSummary.length === 0 ? (
+            <div className="p-6 text-center text-muted-foreground text-sm">No Pro members found for this month.</div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Coach</TableHead>
+                  <TableHead className="text-right">Base</TableHead>
+                  <TableHead className="text-right">Sessions</TableHead>
+                  <TableHead className="text-right">Bay Credit</TableHead>
+                  <TableHead className="text-right">Overage</TableHead>
+                  <TableHead className="text-right font-semibold">Net Bill</TableHead>
+                  <TableHead className="text-center">Stripe Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {billSummary.map((b) => (
+                  <TableRow key={b.memberId}>
+                    <TableCell className="font-medium">
+                      <div>
+                        <p>{b.memberName}</p>
+                        <p className="text-xs text-muted-foreground">{b.memberEmail}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">${b.baseFee}</TableCell>
+                    <TableCell className="text-right">{b.sessionCount} sessions</TableCell>
+                    <TableCell className="text-right text-green-600">-${b.bayCreditTotal}</TableCell>
+                    <TableCell className="text-right text-red-500">{b.overageAmount > 0 ? `+$${b.overageAmount}` : "—"}</TableCell>
+                    <TableCell className="text-right font-bold">${b.netBill.toFixed(2)}</TableCell>
+                    <TableCell className="text-center">
+                      <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${statusColor(b.stripeStatus)}`}>
+                        {b.stripeStatus === "paid" ? "✓ Paid" : b.stripeStatus === "failed" ? "✗ Failed" : "⏳ Pending"}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <div className="rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800 p-4 text-sm text-blue-800 dark:text-blue-300">
+        <strong>Stripe Integration:</strong> Once Stripe is connected next week, payment status will update automatically. Each coach pays $500/mo base minus $25 per coaching session (up to 20 sessions), plus $25/hr overage beyond 20 sessions.
+      </div>
     </div>
   );
 }

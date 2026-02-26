@@ -522,3 +522,9 @@
 - [ ] Link Research reports to B2B Sales campaign card (show latest research summary inline)
 - [ ] Add program list sorting (ROI, date, status) to all campaign cards
 - [ ] Add B2B outreach email draft button to B2B Sales card
+
+## Business Logic Sprint (2026-02-26)
+- [ ] Remove Acuity from Revenue page comparison chart (Toast-only POS view)
+- [ ] Fix membership KPIs: All Access + Swing Saver = customer members, goal 300; Pro members tracked separately
+- [ ] Add Pro member Stripe payment tracking schema + placeholder UI
+- [ ] Build Giveaway daily dashboard with AI daily action recommendations (goal: 500 applications)
