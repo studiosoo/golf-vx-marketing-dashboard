@@ -270,3 +270,7 @@
 - [x] Add "Assign Tier" action bar that appears when members are selected
 - [x] Show count of unclassified members prominently as a banner/alert
 - [ ] Write vitest tests for bulk reclassify mutation
+
+## Bug Fix: /programs/annual-giveaway (2026-02-26)
+- [x] Fix TRPCClientError "Page not found" mutation — root cause: JuniorSummerCamp/DriveDay/TrialSession fire trackPageEvent on mount; no landing_pages DB records exist; fixed by adding onError: () => {} to suppress the global mutation error handler
+- [x] Fix nested <a> inside <Link> (nested anchor tag) — root cause: PublicLayout.tsx had <Link><a>...</a></Link> pattern throughout; fixed by moving className to Link directly and removing inner <a> elements

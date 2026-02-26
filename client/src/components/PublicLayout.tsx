@@ -24,25 +24,25 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <nav className="container flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/">
-            <a className="flex items-center space-x-2">
-              <div className="flex items-center">
-                <span className="text-2xl font-bold text-foreground">GOLF</span>
-                <span className="text-2xl font-bold text-primary">VX</span>
-              </div>
-              <span className="hidden text-sm text-muted-foreground md:inline-block">
-                Arlington Heights
-              </span>
-            </a>
+          <Link href="/" className="flex items-center space-x-2">
+            <div className="flex items-center">
+              <span className="text-2xl font-bold text-foreground">GOLF</span>
+              <span className="text-2xl font-bold text-primary">VX</span>
+            </div>
+            <span className="hidden text-sm text-muted-foreground md:inline-block">
+              Arlington Heights
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex md:gap-6">
             {navigation.map((item) => (
-              <Link key={item.name} href={item.href}>
-                <a className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
-                  {item.name}
-                </a>
+              <Link
+                key={item.name}
+                href={item.href}
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+              >
+                {item.name}
               </Link>
             ))}
           </div>
@@ -73,13 +73,13 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
           <div className="md:hidden">
             <div className="space-y-1 px-4 pb-3 pt-2">
               {navigation.map((item) => (
-                <Link key={item.name} href={item.href}>
-                  <a
-                    className="block rounded-md px-3 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-primary"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {item.name}
-                  </a>
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="block rounded-md px-3 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-primary"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item.name}
                 </Link>
               ))}
               <Link href="/trial-session">
@@ -115,24 +115,16 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
               <h3 className="text-sm font-semibold">Programs</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
-                  <Link href="/trial-session">
-                    <a className="hover:text-primary">Free Trial Session</a>
-                  </Link>
+                  <Link href="/trial-session" className="hover:text-primary">Free Trial Session</Link>
                 </li>
                 <li>
-                  <Link href="/sunday-clinic">
-                    <a className="hover:text-primary">Sunday Clinics</a>
-                  </Link>
+                  <Link href="/sunday-clinic" className="hover:text-primary">Sunday Clinics</Link>
                 </li>
                 <li>
-                  <Link href="/winter-clinic">
-                    <a className="hover:text-primary">PBGA Winter Clinics</a>
-                  </Link>
+                  <Link href="/winter-clinic" className="hover:text-primary">PBGA Winter Clinics</Link>
                 </li>
                 <li>
-                  <Link href="/junior-camp">
-                    <a className="hover:text-primary">Junior Summer Camp</a>
-                  </Link>
+                  <Link href="/junior-camp" className="hover:text-primary">Junior Summer Camp</Link>
                 </li>
               </ul>
             </div>
@@ -142,19 +134,13 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
               <h3 className="text-sm font-semibold">Company</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
-                  <Link href="/about">
-                    <a className="hover:text-primary">About Us</a>
-                  </Link>
+                  <Link href="/about" className="hover:text-primary">About Us</Link>
                 </li>
                 <li>
-                  <Link href="/membership">
-                    <a className="hover:text-primary">Membership</a>
-                  </Link>
+                  <Link href="/membership" className="hover:text-primary">Membership</Link>
                 </li>
                 <li>
-                  <Link href="/contact">
-                    <a className="hover:text-primary">Contact</a>
-                  </Link>
+                  <Link href="/contact" className="hover:text-primary">Contact</Link>
                 </li>
               </ul>
             </div>

@@ -3,7 +3,7 @@ import { trpc } from "@/lib/trpc";
 import PublicLayout from "@/components/PublicLayout";
 
 export default function TrialSession() {
-  const trackEvent = trpc.public.trackPageEvent.useMutation();
+  const trackEvent = trpc.public.trackPageEvent.useMutation({ onError: () => {} });
 
   useEffect(() => {
     trackEvent.mutate({
