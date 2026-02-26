@@ -332,3 +332,46 @@
 - [x] Drive Day Targeting 탭 — 체크박스 선택 + 원클릭 Encharge 동기화
 - [x] CTA 정보 표시: $9 1시간 베이이용 예약 / Drive Day $20 for 90 min session
 - [x] 상태 관리: pending → contacted → scheduled → completed → declined
+
+## Sprint: 6가지 이슈 수정 (2026-02-26 Session 2)
+- [ ] Sunday Clinic: "Members Attended" 클릭 시 참석 멤버 리스트 모달
+- [ ] Sunday Clinic: "New Visitors" 클릭 시 신규 방문자 리스트 모달
+- [ ] Winter Clinic: Registrations 숫자 클릭 시 등록자 연락처 리스트 모달
+- [ ] Drive Day Meta Ads: 캠페인 이름 매칭 키워드 확장 ("putting clinic", "sunday", "instagram post", "this sunday")
+- [ ] Instagram 페이지: iframe 제거 → Meta Graph API 데이터 기반 뷰로 교체
+- [ ] AI Actions Approve: LLM 이메일 초안 생성 워크플로우 (3단계 시퀀스 초안 자동 생성)
+- [ ] AI Actions: Approve 후 이메일 초안 리뷰/편집/Encharge 발송 UI 추가
+
+## Sprint: 6 Issues Fix (2026-02-26)
+
+### Issue 1: Sunday Clinic - Attendee List Modals
+- [x] Add getSundayClinicAttendeeList tRPC endpoint (members vs new_visitors)
+- [x] SundayClinicDetail: 'member attended' count → clickable → opens member list modal
+- [x] SundayClinicDetail: 'new visitor acquisition' count → clickable → opens new visitor list modal
+- [x] Modal shows: name, email (mailto link), phone, appointment type, date
+
+### Issue 2: Drive Day Meta Ads Campaign Detection
+- [x] Update SundayClinicDetail programKeywords to include broader Drive Day terms
+- [x] Keywords now: ["drive day", "sunday clinic", "putting clinic", "sunday's putting", "this sunday"]
+
+### Issue 3: Instagram Page Fix
+- [x] Replace broken iframe embed with proper explanation (X-Frame-Options restriction)
+- [x] Add quick action cards: View Profile, Analytics, Sync Data
+- [x] Add direct links to profile feed, reels, tagged posts, Meta Business Suite
+- [x] Add optional live feed widget section (Elfsight/LightWidget instructions)
+
+### Issue 4: Winter Clinic - Registration Contact List
+- [x] Add getWinterClinicAttendeeList tRPC endpoint (filter by clinic short name)
+- [x] WinterClinicDetail: registration number → clickable → opens contact list modal
+- [x] Modal shows: name, email, phone, amount paid
+
+### Issue 5: AI Actions - Email Draft Workflow
+- [x] Add generateEmailDraft tRPC mutation (LLM-powered, structured JSON output)
+- [x] LLM generates: subject, preheader, 3-email sequence with body, CTA, send delay
+- [x] AIActions: Add "Draft Emails" button for all email-type actions
+- [x] Email draft modal: expandable per-email view, copy individual or all emails
+- [x] Approve button still triggers Encharge tag; Draft Emails generates content first
+
+### Issue 6: Email Sending Strategy (Analysis - no code changes needed)
+- [x] Analyzed 3 scenarios: Encharge API, Encharge UI, Dashboard direct send
+- [x] Recommendation documented in final result message

@@ -3,10 +3,11 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { trpc } from "@/lib/trpc";
 import {
   Sparkles, CheckCircle2, XCircle, RotateCcw, Loader2,
-  AlertTriangle, TrendingUp, Eye, Zap, Clock,
+  AlertTriangle, TrendingUp, Eye, Zap, Clock, Mail, ChevronDown, ChevronUp, Copy, Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -59,9 +60,151 @@ type AnyAction = {
   reviewedAt?: number | null;
   reviewedBy?: string | null;
   executionResult?: Record<string, unknown> | null;
+  actionParams?: Record<string, unknown> | null;
   createdAt?: Date | string | null;
 };
 
+type EmailDraft = {
+  subject: string;
+  preheader: string;
+  emails: Array<{
+    emailNumber: number;
+    subject: string;
+    preheader: string;
+    body: string;
+    callToAction: string;
+    sendDelay: string;
+  }>;
+};
+
+// ─── Email Draft Modal ────────────────────────────────────────────────────────
+function EmailDraftModal({
+  open,
+  onClose,
+  draft,
+  campaignName,
+}: {
+  open: boolean;
+  onClose: () => void;
+  draft: EmailDraft;
+  campaignName: string;
+}) {
+  const [expandedEmail, setExpandedEmail] = useState<number>(1);
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
+
+  const handleCopy = (text: string, idx: number) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedIdx(idx);
+      setTimeout(() => setCopiedIdx(null), 2000);
+    });
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Mail className="h-5 w-5 text-primary" />
+            Email Sequence Draft — {campaignName}
+          </DialogTitle>
+          <DialogDescription>
+            AI-generated email sequence. Review, edit, and copy into Encharge or your email tool.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="overflow-y-auto flex-1 space-y-3 mt-2">
+          {draft.emails.map((email) => (
+            <div key={email.emailNumber} className="border border-border rounded-xl overflow-hidden">
+              <button
+                className="w-full flex items-center justify-between p-4 hover:bg-muted/30 transition-colors text-left"
+                onClick={() => setExpandedEmail(expandedEmail === email.emailNumber ? -1 : email.emailNumber)}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <span className="text-xs font-bold text-primary">{email.emailNumber}</span>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm text-foreground">{email.subject}</p>
+                    <p className="text-xs text-muted-foreground">{email.sendDelay} · {email.callToAction}</p>
+                  </div>
+                </div>
+                {expandedEmail === email.emailNumber
+                  ? <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0" />
+                  : <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />}
+              </button>
+
+              {expandedEmail === email.emailNumber && (
+                <div className="px-4 pb-4 space-y-3 border-t border-border">
+                  <div className="grid grid-cols-2 gap-3 mt-3">
+                    <div className="bg-muted/30 rounded-lg p-3">
+                      <p className="text-xs text-muted-foreground mb-1">Subject Line</p>
+                      <p className="text-sm font-medium">{email.subject}</p>
+                    </div>
+                    <div className="bg-muted/30 rounded-lg p-3">
+                      <p className="text-xs text-muted-foreground mb-1">Preview Text</p>
+                      <p className="text-sm">{email.preheader}</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-muted/20 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs font-medium text-muted-foreground">Email Body</p>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 px-2 text-xs gap-1"
+                        onClick={() => handleCopy(email.body, email.emailNumber)}
+                      >
+                        {copiedIdx === email.emailNumber
+                          ? <><Check className="h-3 w-3 text-green-400" /> Copied</>
+                          : <><Copy className="h-3 w-3" /> Copy</>}
+                      </Button>
+                    </div>
+                    <div
+                      className="text-sm text-foreground prose prose-sm max-w-none prose-invert"
+                      dangerouslySetInnerHTML={{ __html: email.body.replace(/\n/g, '<br/>') }}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">
+                      CTA: <span className="text-primary font-medium">{email.callToAction}</span>
+                    </span>
+                    <span className="text-muted-foreground">
+                      Send: <span className="font-medium text-foreground">{email.sendDelay}</span>
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="pt-3 border-t border-border flex items-center justify-between gap-3">
+          <p className="text-xs text-muted-foreground">
+            Copy each email into Encharge's flow builder or email composer.
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleCopy(
+                draft.emails.map(e => `--- Email ${e.emailNumber} (${e.sendDelay}) ---\nSubject: ${e.subject}\nPreview: ${e.preheader}\n\n${e.body}\n\nCTA: ${e.callToAction}`).join('\n\n'),
+                0
+              )}
+              className="gap-1"
+            >
+              {copiedIdx === 0 ? <><Check className="h-3 w-3 text-green-400" /> Copied All</> : <><Copy className="h-3 w-3" /> Copy All</>}
+            </Button>
+            <Button size="sm" onClick={onClose}>Close</Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── Action Card ──────────────────────────────────────────────────────────────
 function ActionCard({
   action, onApprove, onUndo, isApproving, isUndoing, showApprove, showUndo,
 }: {
@@ -73,65 +216,143 @@ function ActionCard({
   showApprove?: boolean;
   showUndo?: boolean;
 }) {
+  const [emailDraft, setEmailDraft] = useState<EmailDraft | null>(null);
+  const [draftModalOpen, setDraftModalOpen] = useState(false);
+
+  const isEmailAction = action.actionType === "send_email" ||
+    action.title?.toLowerCase().includes("email") ||
+    action.description?.toLowerCase().includes("email");
+
+  const params = action.actionParams as Record<string, unknown> | null;
+
+  const generateDraftMutation = trpc.campaigns.generateEmailDraft.useMutation({
+    onSuccess: (result) => {
+      if (result.success && result.draft) {
+        setEmailDraft(result.draft as EmailDraft);
+        setDraftModalOpen(true);
+      } else {
+        toast.error("Failed to generate email draft");
+      }
+    },
+    onError: (err) => toast.error(`Draft generation failed: ${err.message}`),
+  });
+
+  const handleGenerateDraft = () => {
+    generateDraftMutation.mutate({
+      actionId: action.id,
+      actionTitle: action.title,
+      actionDescription: action.description,
+      campaignName: action.campaignName,
+      targetAudience: (params?.targetAudience as string) || undefined,
+      emailType: (params?.emailType as string) || undefined,
+      conversions: (params?.conversions as number) || undefined,
+    });
+  };
+
   const result = action.executionResult as { success?: boolean; error?: string } | null;
+
   return (
-    <Card className={action.status === "pending_approval" ? "border-amber-500/30" : ""}>
-      <CardContent className="pt-4 pb-4">
-        <div className="flex items-start gap-4">
-          <div className="flex-1 min-w-0">
-            <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className="text-xs text-muted-foreground font-medium">{action.campaignName}</span>
-              <Badge variant="outline" className={`text-xs border ${RISK_BADGE[action.riskLevel] ?? ""}`}>
-                {action.riskLevel.toUpperCase()}
-              </Badge>
-              <Badge variant="outline" className={`text-xs border ${STATUS_BADGE[action.status] ?? ""}`}>
-                {STATUS_LABEL[action.status] ?? action.status}
-              </Badge>
-              {action.confidence != null && (
-                <span className="text-xs text-muted-foreground">{action.confidence}% confidence</span>
-              )}
-            </div>
-            <p className="font-semibold text-foreground text-sm leading-snug">{action.title}</p>
-            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{action.description}</p>
-            {action.expectedImpact && (
-              <p className="text-xs text-amber-400 mt-2 flex items-center gap-1">
-                <TrendingUp className="h-3 w-3" />{action.expectedImpact}
-              </p>
-            )}
-            {result && (
-              <div className={`mt-2 text-xs flex items-center gap-1 ${result.success ? "text-green-400" : "text-red-400"}`}>
-                {result.success
-                  ? <><CheckCircle2 className="h-3 w-3" /> Executed successfully</>
-                  : <><AlertTriangle className="h-3 w-3" /> {(result as any).error ?? "Execution failed"}</>}
+    <>
+      <Card className={action.status === "pending_approval" ? "border-amber-500/30" : ""}>
+        <CardContent className="pt-4 pb-4">
+          <div className="flex items-start gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                <span className="text-xs text-muted-foreground font-medium">{action.campaignName}</span>
+                <Badge variant="outline" className={`text-xs border ${RISK_BADGE[action.riskLevel] ?? ""}`}>
+                  {action.riskLevel.toUpperCase()}
+                </Badge>
+                <Badge variant="outline" className={`text-xs border ${STATUS_BADGE[action.status] ?? ""}`}>
+                  {STATUS_LABEL[action.status] ?? action.status}
+                </Badge>
+                {action.confidence != null && (
+                  <span className="text-xs text-muted-foreground">{action.confidence}% confidence</span>
+                )}
               </div>
-            )}
-            <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-              {action.executedAt && <span>Executed {fmtTime(action.executedAt)}</span>}
-              {action.reviewedBy && <span>by {action.reviewedBy}</span>}
+              <p className="font-semibold text-foreground text-sm leading-snug">{action.title}</p>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{action.description}</p>
+              {action.expectedImpact && (
+                <p className="text-xs text-amber-400 mt-2 flex items-center gap-1">
+                  <TrendingUp className="h-3 w-3" />{action.expectedImpact}
+                </p>
+              )}
+              {result && (
+                <div className={`mt-2 text-xs flex items-center gap-1 ${result.success ? "text-green-400" : "text-red-400"}`}>
+                  {result.success
+                    ? <><CheckCircle2 className="h-3 w-3" /> Executed successfully</>
+                    : <><AlertTriangle className="h-3 w-3" /> {(result as any).error ?? "Execution failed"}</>}
+                </div>
+              )}
+              <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                {action.executedAt && <span>Executed {fmtTime(action.executedAt)}</span>}
+                {action.reviewedBy && <span>by {action.reviewedBy}</span>}
+              </div>
             </div>
-          </div>
-          {(showApprove || showUndo) && (
+
             <div className="flex flex-col gap-2 shrink-0">
+              {/* Email Draft button — shown for all email-type actions */}
+              {isEmailAction && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 px-3 text-xs gap-1 border-primary/40 text-primary hover:bg-primary/10"
+                  onClick={handleGenerateDraft}
+                  disabled={generateDraftMutation.isPending}
+                  title="Generate AI email draft sequence"
+                >
+                  {generateDraftMutation.isPending
+                    ? <Loader2 className="h-3 w-3 animate-spin" />
+                    : <Mail className="h-3 w-3" />}
+                  {generateDraftMutation.isPending ? "Drafting…" : "Draft Emails"}
+                </Button>
+              )}
+
               {showApprove && (
                 <>
-                  <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white h-8 px-3 text-xs gap-1" onClick={onApprove} disabled={isApproving}>
-                    {isApproving ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle2 className="h-3 w-3" />}Approve
+                  <Button
+                    size="sm"
+                    className="bg-green-600 hover:bg-green-700 text-white h-8 px-3 text-xs gap-1"
+                    onClick={onApprove}
+                    disabled={isApproving}
+                  >
+                    {isApproving ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle2 className="h-3 w-3" />}
+                    Approve
                   </Button>
-                  <Button size="sm" variant="outline" className="h-8 px-3 text-xs gap-1 text-red-400 border-red-500/30 hover:bg-red-500/10">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 px-3 text-xs gap-1 text-red-400 border-red-500/30 hover:bg-red-500/10"
+                  >
                     <XCircle className="h-3 w-3" />Dismiss
                   </Button>
                 </>
               )}
+
               {showUndo && action.status === "auto_executed" && (
-                <Button size="sm" variant="outline" className="h-8 px-3 text-xs gap-1" onClick={onUndo} disabled={isUndoing}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 px-3 text-xs gap-1"
+                  onClick={onUndo}
+                  disabled={isUndoing}
+                >
                   {isUndoing ? <Loader2 className="h-3 w-3 animate-spin" /> : <RotateCcw className="h-3 w-3" />}Undo
                 </Button>
               )}
             </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+          </div>
+        </CardContent>
+      </Card>
+
+      {emailDraft && (
+        <EmailDraftModal
+          open={draftModalOpen}
+          onClose={() => setDraftModalOpen(false)}
+          draft={emailDraft}
+          campaignName={action.campaignName}
+        />
+      )}
+    </>
   );
 }
 
@@ -216,12 +437,20 @@ export default function Actions() {
             <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
               <Sparkles className="h-6 w-6 text-amber-400" />Actions
             </h1>
-            <p className="text-muted-foreground mt-1 text-sm">Autonomous marketing decisions — approve, dismiss, or let the engine execute</p>
+            <p className="text-muted-foreground mt-1 text-sm">Autonomous marketing decisions — approve, dismiss, or generate email drafts</p>
           </div>
           <Button onClick={() => syncMutation.mutate()} disabled={syncMutation.isPending} variant="outline" size="sm" className="gap-2">
             <Zap className={`h-4 w-4 ${syncMutation.isPending ? "animate-pulse text-amber-400" : ""}`} />
             {syncMutation.isPending ? "Syncing…" : "Sync Now"}
           </Button>
+        </div>
+
+        {/* Email workflow tip */}
+        <div className="flex items-start gap-3 bg-primary/5 border border-primary/20 rounded-lg px-4 py-3">
+          <Mail className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+          <p className="text-xs text-muted-foreground">
+            <span className="font-medium text-foreground">Email actions:</span> Click <span className="font-medium text-primary">Draft Emails</span> on any email action to generate a full AI-written sequence (subject, body, CTA) — then copy into Encharge or send directly. Click <span className="font-medium text-green-400">Approve</span> to trigger the Encharge tag and activate your pre-built flow.
+          </p>
         </div>
 
         <div className="flex items-center gap-3 text-xs text-muted-foreground bg-muted/30 rounded-lg px-4 py-2.5">
@@ -267,7 +496,13 @@ export default function Actions() {
             {pendingLoading ? <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
               : !pendingActions?.length ? <EmptyState message="All clear — no actions awaiting approval" />
               : pendingActions.map((a) => (
-                <ActionCard key={a.id} action={a} onApprove={() => { setApprovingId(a.id); approveMutation.mutate({ actionId: a.id }); }} isApproving={approvingId === a.id} showApprove />
+                <ActionCard
+                  key={a.id}
+                  action={a}
+                  onApprove={() => { setApprovingId(a.id); approveMutation.mutate({ actionId: a.id }); }}
+                  isApproving={approvingId === a.id}
+                  showApprove
+                />
               ))}
           </div>
         )}
@@ -276,7 +511,13 @@ export default function Actions() {
             {execLoading ? <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
               : !executedActions?.length ? <EmptyState message="No auto-executed actions yet" />
               : executedActions.map((a) => (
-                <ActionCard key={a.id} action={a} onUndo={() => { setUndoingId(a.id); undoMutation.mutate({ actionId: a.id }); }} isUndoing={undoingId === a.id} showUndo />
+                <ActionCard
+                  key={a.id}
+                  action={a}
+                  onUndo={() => { setUndoingId(a.id); undoMutation.mutate({ actionId: a.id }); }}
+                  isUndoing={undoingId === a.id}
+                  showUndo
+                />
               ))}
           </div>
         )}

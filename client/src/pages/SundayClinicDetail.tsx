@@ -1,12 +1,115 @@
+import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import ProgramMarketingPanel from "@/components/ProgramMarketingPanel";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Users, UserPlus, TrendingUp, Calendar, Share2 } from "lucide-react";
+import { Loader2, Users, UserPlus, TrendingUp, Calendar, Share2, Mail, Phone, X } from "lucide-react";
+
+type AttendeeType = "members" | "new_visitors";
+
+function AttendeeListModal({
+  open,
+  onClose,
+  type,
+  minDate,
+  maxDate,
+}: {
+  open: boolean;
+  onClose: () => void;
+  type: AttendeeType;
+  minDate: string;
+  maxDate: string;
+}) {
+  const { data: attendees, isLoading } = trpc.campaigns.getSundayClinicAttendeeList.useQuery(
+    { type, minDate, maxDate },
+    { enabled: open }
+  );
+
+  const title = type === "members" ? "Members Attended" : "New Visitors";
+  const description = type === "members"
+    ? "Existing members who attended Sunday Clinic events"
+    : "Non-member attendees — potential conversion opportunities";
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            {type === "members" ? <Users className="h-5 w-5 text-primary" /> : <UserPlus className="h-5 w-5 text-primary" />}
+            {title}
+            {attendees && (
+              <Badge variant="secondary" className="ml-2">{attendees.length}</Badge>
+            )}
+          </DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
+        </DialogHeader>
+
+        <div className="overflow-y-auto flex-1 mt-2">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : !attendees?.length ? (
+            <div className="text-center py-12 text-muted-foreground">
+              No {type === "members" ? "member" : "new visitor"} attendees found in this date range.
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {attendees.map((a) => (
+                <div key={`${a.email}-${a.date}`} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <span className="text-xs font-bold text-primary">
+                        {(a.firstName?.[0] || "?").toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm text-foreground truncate">
+                        {a.firstName} {a.lastName}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">{a.type}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0 ml-4">
+                    {a.email && (
+                      <a href={`mailto:${a.email}`} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors">
+                        <Mail className="h-3 w-3" />
+                        <span className="hidden sm:inline truncate max-w-[160px]">{a.email}</span>
+                      </a>
+                    )}
+                    {a.phone && (
+                      <a href={`tel:${a.phone}`} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors">
+                        <Phone className="h-3 w-3" />
+                        <span className="hidden sm:inline">{a.phone}</span>
+                      </a>
+                    )}
+                    <span className="text-xs text-muted-foreground">
+                      {a.date ? new Date(a.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : ""}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="pt-3 border-t border-border flex justify-end">
+          <Button variant="outline" size="sm" onClick={onClose}>
+            <X className="h-4 w-4 mr-1" /> Close
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export default function SundayClinicDetail() {
+  const [attendeeModal, setAttendeeModal] = useState<AttendeeType | null>(null);
+
   const { data: metrics, isLoading } = trpc.campaigns.getSundayClinicMetrics.useQuery({
     minDate: "2026-01-25",
     maxDate: "2026-03-29",
@@ -31,7 +134,7 @@ export default function SundayClinicDetail() {
   }
 
   const memberGoalProgress = (metrics.memberAttendees / metrics.totalMembers) * 100;
-  const targetMemberAttendance = 50; // Example target: 50% of members attend at least once
+  const targetMemberAttendance = 50;
   const memberPerformance = (memberGoalProgress / targetMemberAttendance) * 100;
 
   return (
@@ -67,7 +170,14 @@ export default function SundayClinicDetail() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Members Attended</p>
-                  <p className="text-2xl font-bold text-primary">{metrics.memberAttendees}</p>
+                  <button
+                    onClick={() => setAttendeeModal("members")}
+                    className="text-2xl font-bold text-primary hover:underline cursor-pointer transition-colors"
+                    title="Click to see member list"
+                  >
+                    {metrics.memberAttendees}
+                  </button>
+                  <p className="text-xs text-muted-foreground mt-0.5">↑ click to view list</p>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Attendance Rate</p>
@@ -106,7 +216,14 @@ export default function SundayClinicDetail() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs text-muted-foreground">New Visitors</p>
-                  <p className="text-2xl font-bold text-primary">{metrics.nonMemberAttendees}</p>
+                  <button
+                    onClick={() => setAttendeeModal("new_visitors")}
+                    className="text-2xl font-bold text-primary hover:underline cursor-pointer transition-colors"
+                    title="Click to see new visitor list"
+                  >
+                    {metrics.nonMemberAttendees}
+                  </button>
+                  <p className="text-xs text-muted-foreground mt-0.5">↑ click to view list</p>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Total Visits</p>
@@ -119,8 +236,8 @@ export default function SundayClinicDetail() {
                 <div>
                   <p className="text-xs text-muted-foreground">Avg Visits/Person</p>
                   <p className="text-lg font-semibold text-foreground">
-                    {metrics.nonMemberAttendees > 0 
-                      ? (metrics.nonMemberTotalBookings / metrics.nonMemberAttendees).toFixed(1) 
+                    {metrics.nonMemberAttendees > 0
+                      ? (metrics.nonMemberTotalBookings / metrics.nonMemberAttendees).toFixed(1)
                       : '0'}
                   </p>
                 </div>
@@ -152,18 +269,15 @@ export default function SundayClinicDetail() {
                   .sort(([, a], [, b]) => (b as number) - (a as number))
                   .map(([source, count]) => {
                     const percentage = ((count as number) / metrics.totalBookings) * 100;
-                    
-                    // Define goals for each source (example targets)
                     const sourceGoals: Record<string, number> = {
-                      'Social Media': 15,  // Target: 15 attendees from social
-                      'PBGA': 20,          // Target: 20 attendees from PBGA
-                      'Golf VX': 10,       // Target: 10 attendees from Golf VX
-                      'Referral': 5,       // Target: 5 from referrals
+                      'Social Media': 15,
+                      'PBGA': 20,
+                      'Golf VX': 10,
+                      'Referral': 5,
                     };
-                    
                     const goal = sourceGoals[source] || 0;
                     const goalProgress = goal > 0 ? Math.min(((count as number) / goal) * 100, 100) : 0;
-                    
+
                     return (
                       <div key={source} className="space-y-2 p-3 bg-muted/20 rounded-lg">
                         <div className="flex items-center justify-between">
@@ -177,7 +291,6 @@ export default function SundayClinicDetail() {
                           </div>
                         </div>
                         <Progress value={percentage} className="h-2" />
-                        
                         {goal > 0 && (
                           <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
                             <span>Goal: {goal} attendees</span>
@@ -216,8 +329,8 @@ export default function SundayClinicDetail() {
                       </div>
                       <div>
                         <p className="font-semibold text-foreground">
-                          {new Date(event.date).toLocaleDateString('en-US', { 
-                            month: 'short', 
+                          {new Date(event.date).toLocaleDateString('en-US', {
+                            month: 'short',
                             day: 'numeric',
                             year: 'numeric'
                           })}
@@ -232,8 +345,7 @@ export default function SundayClinicDetail() {
                       <p className="text-xs text-muted-foreground">bookings</p>
                     </div>
                   </div>
-                  
-                  {/* Source breakdown for this event */}
+
                   {event.sourceBreakdown && Object.keys(event.sourceBreakdown).length > 0 && (
                     <div className="pl-16 pr-3 pb-2">
                       <div className="flex flex-wrap gap-2">
@@ -290,7 +402,7 @@ export default function SundayClinicDetail() {
           </Card>
         </div>
 
-        {/* ── Marketing Intelligence ── */}
+        {/* Marketing Intelligence */}
         <div className="space-y-4">
           <div>
             <h2 className="text-xl font-bold">Marketing Intelligence</h2>
@@ -298,10 +410,21 @@ export default function SundayClinicDetail() {
           </div>
           <ProgramMarketingPanel
             programName="Drive Day Clinics"
-            programKeywords={["drive day", "sunday clinic"]}
+            programKeywords={["drive day", "sunday clinic", "putting clinic", "sunday's putting", "this sunday"]}
           />
         </div>
       </div>
+
+      {/* Attendee List Modal */}
+      {attendeeModal && (
+        <AttendeeListModal
+          open={true}
+          onClose={() => setAttendeeModal(null)}
+          type={attendeeModal}
+          minDate="2026-01-25"
+          maxDate="2026-03-29"
+        />
+      )}
     </DashboardLayout>
   );
 }

@@ -262,6 +262,188 @@ export const appRouter = router({
         });
       }),
 
+    // Get Sunday Clinic attendee list (members vs new visitors)
+    getSundayClinicAttendeeList: protectedProcedure
+      .input(z.object({
+        minDate: z.string().optional(),
+        maxDate: z.string().optional(),
+        type: z.enum(["members", "new_visitors"]),
+      }))
+      .query(async ({ input }) => {
+        const { getSundayClinicData } = await import("./acuity");
+        const members = await db.getAllMembers();
+        const memberEmailSet = new Set(members.map(m => m.email.toLowerCase()));
+
+        const data = await getSundayClinicData({
+          minDate: input.minDate,
+          maxDate: input.maxDate,
+        });
+
+        // Flatten all appointments
+        const allAppts = data.events.flatMap(e => e.appointments);
+
+        // Deduplicate by email
+        const seen = new Set<string>();
+        const filtered = allAppts.filter(apt => {
+          const email = apt.email.toLowerCase();
+          if (seen.has(email)) return false;
+          seen.add(email);
+          const isMember = memberEmailSet.has(email);
+          return input.type === "members" ? isMember : !isMember;
+        });
+
+        return filtered.map(apt => ({
+          id: apt.id,
+          firstName: apt.firstName,
+          lastName: apt.lastName,
+          email: apt.email,
+          phone: apt.phone,
+          date: apt.date,
+          type: apt.type,
+          isMember: memberEmailSet.has(apt.email.toLowerCase()),
+        }));
+      }),
+
+    // Get Winter Clinic attendee list per clinic type
+    getWinterClinicAttendeeList: protectedProcedure
+      .input(z.object({
+        minDate: z.string().optional(),
+        maxDate: z.string().optional(),
+        clinicShortName: z.string().optional(), // filter by clinic type, or all if omitted
+      }))
+      .query(async ({ input }) => {
+        // Collect appointments from matching clinics
+        const { getAppointments } = await import("./acuity");
+        const appointments = await getAppointments({
+          minDate: input.minDate || '2026-01-01',
+          maxDate: input.maxDate || '2026-03-31',
+          canceled: false,
+        });
+
+        const clinicAppointments = appointments.filter((apt: any) => {
+          const name = apt.type.toLowerCase();
+          const isClinic = name.includes('clinic') && (
+            name.includes('tots') ||
+            name.includes('bogey') ||
+            name.includes('par shooter') ||
+            name.includes('h.s.') ||
+            name.includes('player/prep') ||
+            name.includes('ladies') ||
+            name.includes('co-ed') ||
+            name.includes('adults & kids') ||
+            name.includes('adults and kids') ||
+            name.includes('morning mulligan')
+          );
+          if (!isClinic) return false;
+          if (input.clinicShortName) {
+            // Match by short name (first word of type)
+            return apt.type.toLowerCase().includes(input.clinicShortName.toLowerCase());
+          }
+          return true;
+        });
+
+        return clinicAppointments.map((apt: any) => ({
+          id: apt.id,
+          firstName: apt.firstName,
+          lastName: apt.lastName,
+          email: apt.email,
+          phone: apt.phone,
+          date: apt.date,
+          type: apt.type,
+          amountPaid: apt.amountPaid || apt.priceSold || apt.price || '0',
+        }));
+      }),
+
+    // Generate LLM email draft for an autonomous action
+    generateEmailDraft: protectedProcedure
+      .input(z.object({
+        actionId: z.number(),
+        actionTitle: z.string(),
+        actionDescription: z.string(),
+        campaignName: z.string(),
+        targetAudience: z.string().optional(),
+        emailType: z.string().optional(),
+        conversions: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { invokeLLM } = await import("./_core/llm");
+
+        const emailType = input.emailType || "nurture_sequence";
+        const targetAudience = input.targetAudience || "recent leads";
+        const conversions = input.conversions || 0;
+
+        const systemPrompt = `You are an expert email marketing copywriter for Golf VX Arlington Heights, an indoor golf simulator facility in Arlington Heights, IL.
+
+Brand voice: Friendly, energetic, community-focused. Golf VX offers simulator bays, memberships (All-Access Ace $325/mo, Swing Saver $225/mo), Drive Day clinics, PBGA Winter Clinics, and Junior Summer Camp.
+
+Write a ${emailType === 'nurture_sequence' ? '3-email nurture sequence' : 'follow-up email'} for ${targetAudience} from the "${input.campaignName}" campaign.
+
+Return a JSON object with:
+- subject: email subject line
+- preheader: preview text (50-90 chars)
+- emails: array of email objects, each with: { emailNumber, subject, preheader, body (HTML), callToAction, sendDelay }
+
+For nurture sequences, space emails: Email 1 (immediately), Email 2 (3 days later), Email 3 (7 days later).`;
+
+        const userPrompt = `Campaign: ${input.campaignName}
+Action: ${input.actionTitle}
+Context: ${input.actionDescription}
+Target: ${conversions} ${targetAudience}
+Email type: ${emailType}
+
+Write compelling, personalized emails that convert leads to Golf VX members. Include specific CTAs like booking a trial session ($9 for 1 hour) or signing up for a Drive Day clinic ($20 for 90 min).`;
+
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "email_sequence",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  subject: { type: "string" },
+                  preheader: { type: "string" },
+                  emails: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        emailNumber: { type: "integer" },
+                        subject: { type: "string" },
+                        preheader: { type: "string" },
+                        body: { type: "string" },
+                        callToAction: { type: "string" },
+                        sendDelay: { type: "string" },
+                      },
+                      required: ["emailNumber", "subject", "preheader", "body", "callToAction", "sendDelay"],
+                      additionalProperties: false,
+                    },
+                  },
+                },
+                required: ["subject", "preheader", "emails"],
+                additionalProperties: false,
+              },
+            },
+          },
+        });
+
+        const rawContent = response.choices?.[0]?.message?.content;
+        if (!rawContent) throw new Error("LLM returned no content");
+        const content = typeof rawContent === 'string' ? rawContent : JSON.stringify(rawContent);
+
+        try {
+          const parsed = JSON.parse(content);
+          return { success: true, draft: parsed };
+        } catch {
+          return { success: true, draft: { subject: "Email Draft", preheader: "", emails: [{ emailNumber: 1, subject: "Follow up from Golf VX", preheader: "", body: content, callToAction: "Book a Trial Session", sendDelay: "Immediately" }] } };
+        }
+      }),
+
     getByCategory: protectedProcedure
       .input(z.object({ category: z.enum(["trial_conversion", "membership_acquisition", "member_retention", "corporate_events"]) }))
       .query(async ({ input }) => {

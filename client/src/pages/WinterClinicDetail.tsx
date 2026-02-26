@@ -1,7 +1,10 @@
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import ProgramMarketingPanel from "@/components/ProgramMarketingPanel";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
   Users,
@@ -13,10 +16,96 @@ import {
   UserCheck,
   BarChart3,
   Megaphone,
+  Loader2,
+  Mail,
+  Phone,
+  X,
 } from "lucide-react";
+
+function WinterClinicAttendeeModal({
+  open,
+  onClose,
+  clinicShortName,
+  clinicDisplayName,
+}: {
+  open: boolean;
+  onClose: () => void;
+  clinicShortName: string;
+  clinicDisplayName: string;
+}) {
+  const { data: attendees, isLoading } = trpc.campaigns.getWinterClinicAttendeeList.useQuery(
+    { minDate: "2026-01-01", maxDate: "2026-03-31", clinicShortName },
+    { enabled: open }
+  );
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-primary" />
+            {clinicDisplayName} — Registrations
+            {attendees && <Badge variant="secondary" className="ml-2">{attendees.length}</Badge>}
+          </DialogTitle>
+          <DialogDescription>All registered contacts for this clinic program</DialogDescription>
+        </DialogHeader>
+        <div className="overflow-y-auto flex-1 mt-2">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : !attendees?.length ? (
+            <div className="text-center py-12 text-muted-foreground">
+              No registrations found for this clinic.
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {attendees.map((a, idx) => (
+                <div key={`${a.email}-${idx}`} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <span className="text-xs font-bold text-primary">{(a.firstName?.[0] || "?").toUpperCase()}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm text-foreground truncate">{a.firstName} {a.lastName}</p>
+                      <p className="text-xs text-muted-foreground truncate">{a.type}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0 ml-4">
+                    {a.email && (
+                      <a href={`mailto:${a.email}`} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors">
+                        <Mail className="h-3 w-3" />
+                        <span className="hidden sm:inline truncate max-w-[140px]">{a.email}</span>
+                      </a>
+                    )}
+                    {a.phone && (
+                      <a href={`tel:${a.phone}`} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors">
+                        <Phone className="h-3 w-3" />
+                        <span className="hidden sm:inline">{a.phone}</span>
+                      </a>
+                    )}
+                    {parseFloat(a.amountPaid || '0') > 0 && (
+                      <span className="text-xs font-medium text-green-600">${parseFloat(a.amountPaid || '0').toFixed(0)}</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="pt-3 border-t border-border flex justify-end">
+          <Button variant="outline" size="sm" onClick={onClose}>
+            <X className="h-4 w-4 mr-1" /> Close
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export default function WinterClinicDetail() {
   const [, setLocation] = useLocation();
+  const [selectedClinic, setSelectedClinic] = useState<{ shortName: string; displayName: string } | null>(null);
 
   const dateRange = useMemo(() => ({
     minDate: "2026-01-01",
@@ -342,8 +431,14 @@ export default function WinterClinicDetail() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                   <div className="bg-muted/50 rounded-lg p-3">
                     <p className="text-xs text-muted-foreground">Registrations</p>
-                    <p className="text-lg font-bold">{clinic.registrations}</p>
-                    <p className="text-xs text-muted-foreground">{clinic.uniqueStudents} unique</p>
+                    <button
+                      onClick={() => setSelectedClinic({ shortName: clinic.shortName, displayName: clinic.shortName })}
+                      className="text-lg font-bold text-primary hover:underline cursor-pointer transition-colors block"
+                      title="Click to view contact list"
+                    >
+                      {clinic.registrations}
+                    </button>
+                    <p className="text-xs text-muted-foreground">{clinic.uniqueStudents} unique · click to view</p>
                   </div>
                   <div className="bg-muted/50 rounded-lg p-3">
                     <p className="text-xs text-muted-foreground">Revenue</p>
@@ -428,6 +523,16 @@ export default function WinterClinicDetail() {
           programKeywords={["winter clinic", "pbga winter"]}
         />
       </div>
+
+      {/* Attendee List Modal */}
+      {selectedClinic && (
+        <WinterClinicAttendeeModal
+          open={true}
+          onClose={() => setSelectedClinic(null)}
+          clinicShortName={selectedClinic.shortName}
+          clinicDisplayName={selectedClinic.displayName}
+        />
+      )}
     </div>
   );
 }
