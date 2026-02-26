@@ -229,3 +229,10 @@
 - [x] Build Revenue.tsx page with real Toast data (area chart, stacked bar, pie charts, KPI cards)
 - [x] Add daily 4:30am CST (5:30am EST) Toast SFTP sync to scheduledJobs.ts
 - [x] Write vitest tests for Toast revenue (10 tests passing)
+
+## Revenue Sidebar & Home KPI Card (2026-02-25)
+- [ ] Move Revenue from Intelligence sub-item to top-level sidebar below Overview
+- [ ] Update App.tsx route for /revenue (keep backward compat alias from /intelligence/revenue)
+- [ ] Remove Revenue from Intelligence sub-menu in DashboardLayout.tsx
+- [ ] Add this month's Toast revenue KPI card to Home.tsx Marketing HQ
+- [ ] Add tRPC procedure for current month revenue summary (if not already available)

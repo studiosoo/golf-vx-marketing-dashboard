@@ -88,6 +88,12 @@ const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
     path: "/overview",
     icon: LayoutDashboard,
   },
+  // ── Revenue (top-level, no heading) ──
+  {
+    label: "Revenue",
+    path: "/revenue",
+    icon: DollarSign,
+  },
 
   // ── MARKETING & PROGRAMS ──
   {
@@ -109,7 +115,6 @@ const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
         children: [
           { label: "Actions", path: "/intelligence/ai-actions", icon: Bot },
           { label: "Performance", path: "/intelligence/performance", icon: TrendingUp },
-          { label: "Revenue & ROI", path: "/intelligence/revenue", icon: DollarSign },
           { label: "Reports", path: "/intelligence/reports", icon: FileText },
         ],
       },

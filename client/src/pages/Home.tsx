@@ -79,6 +79,7 @@ const CATEGORY_OPTIONS = [
 export default function Home() {
   const { data: categories, isLoading } = trpc.campaigns.getCategorySummary.useQuery();
   const { data: pendingActions } = trpc.autonomous.getApprovalCards.useQuery();
+  const { data: toastSummary } = trpc.revenue.getToastSummary.useQuery();
   const syncMutation = trpc.autonomous.syncAllData.useMutation();
   const utils = trpc.useUtils();
   const [approvingId, setApprovingId] = useState<number | null>(null);
@@ -250,6 +251,53 @@ export default function Home() {
             {syncMutation.isPending ? "Syncing..." : "Sync All Data"}
           </Button>
         </div>
+
+        {/* ── Section 0: Revenue KPI ── */}
+        {toastSummary && (
+          <Link href="/revenue">
+            <Card className="border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer">
+              <CardContent className="pt-4 pb-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/20">
+                      <DollarSign className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground font-medium">This Month's Revenue</p>
+                      <p className="text-2xl font-bold text-foreground">{formatCurrency(toastSummary.thisMonthRevenue)}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6 text-sm">
+                    <div className="text-right">
+                      <p className="text-xs text-muted-foreground">Last Month</p>
+                      <p className="font-semibold text-foreground">{formatCurrency(toastSummary.lastMonthRevenue)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-muted-foreground">This Month Orders</p>
+                      <p className="font-semibold text-foreground">{toastSummary.thisMonthOrders.toLocaleString()}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-muted-foreground">MoM Change</p>
+                      <p className={`font-semibold ${
+                        toastSummary.lastMonthRevenue > 0
+                          ? toastSummary.thisMonthRevenue >= toastSummary.lastMonthRevenue
+                            ? 'text-green-400'
+                            : 'text-red-400'
+                          : 'text-muted-foreground'
+                      }`}>
+                        {toastSummary.lastMonthRevenue > 0
+                          ? `${toastSummary.thisMonthRevenue >= toastSummary.lastMonthRevenue ? '+' : ''}${(((toastSummary.thisMonthRevenue - toastSummary.lastMonthRevenue) / toastSummary.lastMonthRevenue) * 100).toFixed(1)}%`
+                          : '—'
+                        }
+                      </p>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        )}
 
         {/* ── Section 1: KPI Progress Bars ── */}
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">

@@ -96,7 +96,7 @@ function Router() {
       <Route path="/intelligence" component={MarketingIntelligence} />
       <Route path="/intelligence/ai-actions" component={AIActions} />
       <Route path="/intelligence/performance" component={Performance} />
-      <Route path="/intelligence/revenue" component={ROI} />
+      <Route path="/intelligence/revenue" component={Revenue} />
       <Route path="/intelligence/reports" component={Reports} />
 
       {/* ── MARKETING & PROGRAMS / Programs ── */}
