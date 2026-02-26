@@ -1,4 +1,5 @@
 import DashboardLayout from "@/components/DashboardLayout";
+import ProgramMarketingPanel from "@/components/ProgramMarketingPanel";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -288,6 +289,18 @@ export default function SundayClinicDetail() {
             </CardContent>
           </Card>
         </div>
+      </div>
+
+      {/* ── Marketing Intelligence ── */}
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-xl font-bold">Marketing Intelligence</h2>
+          <p className="text-sm text-muted-foreground mt-1">Meta Ads, Instagram, and newsletter efforts for Drive Day Clinics.</p>
+        </div>
+        <ProgramMarketingPanel
+          programName="Drive Day Clinics"
+          programKeywords={["drive day", "sunday clinic"]}
+        />
       </div>
     </DashboardLayout>
   );

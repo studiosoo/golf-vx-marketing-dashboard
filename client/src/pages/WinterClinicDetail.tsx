@@ -1,6 +1,7 @@
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
 import { useMemo } from "react";
+import ProgramMarketingPanel from "@/components/ProgramMarketingPanel";
 import {
   ArrowLeft,
   Users,
@@ -414,6 +415,18 @@ export default function WinterClinicDetail() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* ── Marketing Intelligence ── */}
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-lg font-semibold">Marketing Intelligence</h2>
+          <p className="text-sm text-muted-foreground mt-1">Meta Ads, Instagram, and newsletter efforts for PBGA Winter Clinics.</p>
+        </div>
+        <ProgramMarketingPanel
+          programName="PBGA Winter Clinic"
+          programKeywords={["winter clinic", "pbga winter"]}
+        />
       </div>
     </div>
   );

@@ -594,3 +594,101 @@ export async function getWinterClinicData(params?: {
     overallExperienceLevels,
   };
 }
+
+/**
+ * Get PBGA Junior Summer Camp data from Acuity
+ * Categories: Full-Day (Ages 7-17), Half-Day (Ages 7-17), Tots (Ages 4-6)
+ */
+export async function getJuniorCampData(params?: {
+  minDate?: string;
+  maxDate?: string;
+}) {
+  const appointments = await getAppointments({
+    minDate: params?.minDate || '2026-06-01',
+    maxDate: params?.maxDate || '2026-08-31',
+    canceled: false,
+  });
+
+  // Filter for Junior Summer Camp appointments
+  const campAppointments = appointments.filter(apt => {
+    const cat = (apt.category || '').toLowerCase();
+    const name = apt.type.toLowerCase();
+    return cat.includes('summer camp') || name.includes('summer camp') || name.includes('weekly summer camp');
+  });
+
+  // Determine program track from category/name
+  function getCampTrack(apt: AcuityAppointment): { track: 'full_day' | 'half_day' | 'tots'; label: string; ageGroup: string } {
+    const cat = (apt.category || '').toLowerCase();
+    const name = apt.type.toLowerCase();
+    if (cat.includes('tots') || name.includes('tots')) {
+      return { track: 'tots', label: 'Tots Program', ageGroup: 'Ages 4–6' };
+    }
+    if (cat.includes('half') || name.includes('half-day') || name.includes('half day')) {
+      return { track: 'half_day', label: 'Half-Day Program', ageGroup: 'Ages 7–17' };
+    }
+    return { track: 'full_day', label: 'Full-Day Program', ageGroup: 'Ages 7–17' };
+  }
+
+  // Extract week label from appointment type name
+  function extractWeek(typeName: string): string {
+    const match = typeName.match(/(Jun|Jul|Aug)\s+\d+[–\-]\d+/);
+    return match ? match[0] : 'TBD';
+  }
+
+  type WeekEntry = {
+    week: string;
+    track: string;
+    label: string;
+    ageGroup: string;
+    registrations: number;
+    revenue: number;
+    participants: string[];
+    howHeard: Record<string, number>;
+  };
+
+  const weekMap: Record<string, WeekEntry> = {};
+
+  campAppointments.forEach(apt => {
+    const { track, label, ageGroup } = getCampTrack(apt);
+    const week = extractWeek(apt.type);
+    const key = `${week}__${track}`;
+    if (!weekMap[key]) {
+      weekMap[key] = { week, track, label, ageGroup, registrations: 0, revenue: 0, participants: [], howHeard: {} };
+    }
+    weekMap[key].registrations++;
+    weekMap[key].revenue += parseFloat(apt.amountPaid || apt.priceSold || apt.price || '0');
+    weekMap[key].participants.push(`${apt.firstName} ${apt.lastName}`);
+    const source = extractFormField(apt, 'heard') || extractFormField(apt, 'source') || 'Unknown';
+    weekMap[key].howHeard[source] = (weekMap[key].howHeard[source] || 0) + 1;
+  });
+
+  const weeks = Object.values(weekMap).sort((a, b) => a.week.localeCompare(b.week));
+
+  const overallHowHeard: Record<string, number> = {};
+  campAppointments.forEach(apt => {
+    const source = extractFormField(apt, 'heard') || extractFormField(apt, 'source') || 'Unknown';
+    overallHowHeard[source] = (overallHowHeard[source] || 0) + 1;
+  });
+
+  const totalRevenue = campAppointments.reduce((sum, apt) =>
+    sum + parseFloat(apt.amountPaid || apt.priceSold || apt.price || '0'), 0);
+
+  const allEmails = new Set(campAppointments.map(a => a.email.toLowerCase()));
+
+  const fullDay = campAppointments.filter(a => getCampTrack(a).track === 'full_day');
+  const halfDay = campAppointments.filter(a => getCampTrack(a).track === 'half_day');
+  const tots = campAppointments.filter(a => getCampTrack(a).track === 'tots');
+
+  return {
+    weeks,
+    trackSummary: {
+      full_day: { count: fullDay.length, revenue: fullDay.reduce((s, a) => s + parseFloat(a.amountPaid || a.priceSold || a.price || '0'), 0) },
+      half_day: { count: halfDay.length, revenue: halfDay.reduce((s, a) => s + parseFloat(a.amountPaid || a.priceSold || a.price || '0'), 0) },
+      tots: { count: tots.length, revenue: tots.reduce((s, a) => s + parseFloat(a.amountPaid || a.priceSold || a.price || '0'), 0) },
+    },
+    totalRegistrations: campAppointments.length,
+    uniqueParticipants: allEmails.size,
+    totalRevenue,
+    overallHowHeard,
+  };
+}

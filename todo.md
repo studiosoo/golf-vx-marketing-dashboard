@@ -274,3 +274,22 @@
 ## Bug Fix: /programs/annual-giveaway (2026-02-26)
 - [x] Fix TRPCClientError "Page not found" mutation — root cause: JuniorSummerCamp/DriveDay/TrialSession fire trackPageEvent on mount; no landing_pages DB records exist; fixed by adding onError: () => {} to suppress the global mutation error handler
 - [x] Fix nested <a> inside <Link> (nested anchor tag) — root cause: PublicLayout.tsx had <Link><a>...</a></Link> pattern throughout; fixed by moving className to Link directly and removing inner <a> elements
+
+## ## Sprint: Giveaway Data + Program Dashboards + Marketing Intelligence (2026-02-26)
+### Task 1: Fix Annual Giveaway 2026 Live Data
+- [x] Parse GOLFVXAHAnniversaryApplications2026.xlsx (45 real entries, sheet 2)
+- [x] Map Excel columns to giveawayApplications DB schema (submissionTimestamp, name, email, etc.)
+- [x] Import Excel data into DB via import-giveaway-excel.py (45 real entries, latest: 2026-02-25)
+- [x] Verify AnnualGiveaway.tsx shows live count and correct entries (getGiveawayApplications filters isTestEntry=false)
+### Task 2: Junior Summer Camp Acuity Dashboard
+- [x] Check Acuity appointment types: Full-Day (7-17), Half-Day (7-17), Tots (4-6) — Jun-Aug 2026
+- [x] Add getJuniorCampData to acuity.ts and getJuniorCampMetrics procedure to routers.ts
+- [x] Build JuniorCampDashboard.tsx matching WinterClinicDetail pattern
+- [x] Show: KPIs, track breakdown, weekly schedule, registration source, marketing panel
+- [x] Route /programs/summer-camp and /programs/junior-summer-camp to JuniorCampDashboard
+### Task 3: Per-Program Marketing Intelligence Panel
+- [x] Build ProgramMarketingPanel.tsx (Meta Ads + Instagram + Newsletter tabs)
+- [x] Meta Ads: filter campaigns by program keywords, show spend/impressions/clicks/CTR/CPC
+- [x] Instagram: show account-level insights table, link to Instagram sidebar tab
+- [x] Newsletter: show Encharge segments matching program keywords, link to drip/announcements
+- [x] Add ProgramMarketingPanel to SundayClinicDetail (Drive Day), WinterClinicDetail, JuniorCampDashboard

@@ -34,6 +34,7 @@ import DriveDay from "./pages/DriveDay";
 import SundayClinicDetail from "./pages/SundayClinicDetail";
 import WinterClinicDetail from "./pages/WinterClinicDetail";
 import JuniorSummerCamp from "./pages/JuniorSummerCamp";
+import JuniorCampDashboard from "./pages/JuniorCampDashboard";
 import SummerCamp from "./pages/SummerCamp";
 import Leagues from "./pages/Leagues";
 import PrivateEvents from "./pages/PrivateEvents";
@@ -103,7 +104,8 @@ function Router() {
       <Route path="/programs" component={Programs} />
       <Route path="/programs/drive-day" component={SundayClinicDetail} />
       <Route path="/programs/winter-clinics" component={WinterClinicDetail} />
-      <Route path="/programs/summer-camp" component={JuniorSummerCamp} />
+      <Route path="/programs/summer-camp" component={JuniorCampDashboard} />
+      <Route path="/programs/junior-summer-camp" component={JuniorCampDashboard} />
       <Route path="/programs/leagues" component={Leagues} />
       <Route path="/programs/annual-giveaway" component={AnnualGiveaway} />
 
@@ -151,7 +153,7 @@ function Router() {
       <Route path="/email-marketing" component={EmailMarketing} />
       <Route path="/marketing-intelligence" component={MarketingIntelligence} />
       <Route path="/drive-day" component={DriveDay} />
-      <Route path="/junior-summer-camp" component={JuniorSummerCamp} />
+      <Route path="/junior-summer-camp" component={JuniorCampDashboard} />
       <Route path="/summer-camp" component={SummerCamp} />
       <Route path="/sunday-clinic" component={SundayClinicDetail} />
       <Route path="/winter-clinic" component={WinterClinicDetail} />

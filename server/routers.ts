@@ -249,6 +249,19 @@ export const appRouter = router({
         return metrics;
       }),
 
+    getJuniorCampMetrics: protectedProcedure
+      .input(z.object({
+        minDate: z.string().optional(),
+        maxDate: z.string().optional(),
+      }))
+      .query(async ({ input }) => {
+        const { getJuniorCampData } = await import("./acuity");
+        return await getJuniorCampData({
+          minDate: input.minDate,
+          maxDate: input.maxDate,
+        });
+      }),
+
     getByCategory: protectedProcedure
       .input(z.object({ category: z.enum(["trial_conversion", "membership_acquisition", "member_retention", "corporate_events"]) }))
       .query(async ({ input }) => {
