@@ -7,7 +7,7 @@ import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from "recharts";
-import { DollarSign, TrendingUp, TrendingDown, Users, ShoppingCart, CreditCard, Banknote, Calendar } from "lucide-react";
+import { DollarSign, TrendingUp, TrendingDown, Users, ShoppingCart, CreditCard, Banknote, Calendar, BookOpen, GraduationCap } from "lucide-react";
 
 const COLORS = ["#EAB308", "#3B82F6", "#10B981", "#F97316", "#8B5CF6", "#EC4899"];
 
@@ -57,6 +57,8 @@ export default function Revenue() {
   const { data: daily, isLoading: dailyLoading } = trpc.revenue.getToastDaily.useQuery({});
   const { data: payments, isLoading: paymentsLoading } = trpc.revenue.getToastPaymentBreakdown.useQuery();
   const { data: syncStatus } = trpc.revenue.getToastSyncStatus.useQuery();
+  const { data: acuityRevenue, isLoading: acuityLoading } = trpc.revenue.getAcuityRevenue.useQuery({});
+  const { data: acuityMonthly } = trpc.revenue.getAcuityMonthly.useQuery({ months: 6 });
 
   // Last 30 days daily data
   const last30Days = useMemo(() => {
@@ -92,6 +94,15 @@ export default function Revenue() {
     : null;
 
   const isLoading = summaryLoading || monthlyLoading || dailyLoading || paymentsLoading;
+
+  // Combined monthly chart data (Toast + Acuity)
+  const combinedMonthly = useMemo(() => {
+    if (!monthly) return [];
+    return monthly.map(m => {
+      const acuityM = acuityMonthly?.find(a => a.month === m.month);
+      return { ...m, acuityRevenue: acuityM?.revenue || 0, acuityBookings: acuityM?.bookings || 0 };
+    });
+  }, [monthly, acuityMonthly]);
 
   return (
     <DashboardLayout>
@@ -333,6 +344,111 @@ export default function Revenue() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
+
+            {/* ── Acuity Revenue Section ── */}
+            <div className="border-t pt-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold flex items-center gap-2">
+                    <GraduationCap className="w-5 h-5 text-primary" />
+                    Acuity Scheduling Revenue
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-0.5">PBGA Clinics, Drive Day, Trial Sessions — Coach Chuck Lynch programs</p>
+                </div>
+                <Badge variant="outline" className="gap-1 text-blue-600 border-blue-600">
+                  <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
+                  Acuity Live
+                </Badge>
+              </div>
+
+              {acuityLoading ? (
+                <div className="grid grid-cols-3 gap-4">
+                  {[...Array(3)].map((_, i) => (
+                    <Card key={i}><CardContent className="p-5 h-20 animate-pulse bg-muted/30 rounded-lg" /></Card>
+                  ))}
+                </div>
+              ) : (
+                <>
+                  {/* Acuity KPI Cards */}
+                  <div className="grid grid-cols-3 gap-4 mb-4">
+                    <Card className="border-l-4 border-l-purple-500">
+                      <CardContent className="p-4">
+                        <p className="text-sm text-muted-foreground">PBGA Clinics Revenue</p>
+                        <p className="text-xl font-bold">{fmt(acuityRevenue?.grouped?.pbga_clinics?.totalRevenue || 0)}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{acuityRevenue?.grouped?.pbga_clinics?.bookingCount || 0} bookings</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-l-4 border-l-orange-500">
+                      <CardContent className="p-4">
+                        <p className="text-sm text-muted-foreground">Trial Sessions Revenue</p>
+                        <p className="text-xl font-bold">{fmt(acuityRevenue?.grouped?.trial?.totalRevenue || 0)}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{acuityRevenue?.grouped?.trial?.bookingCount || 0} trial bookings</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-l-4 border-l-teal-500">
+                      <CardContent className="p-4">
+                        <p className="text-sm text-muted-foreground">Total Acuity Revenue</p>
+                        <p className="text-xl font-bold">{fmt(acuityRevenue?.total || 0)}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{acuityRevenue?.totalBookings || 0} total bookings</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Acuity by Appointment Type */}
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base font-semibold flex items-center gap-2">
+                        <BookOpen className="w-4 h-4" /> Revenue by Appointment Type
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {(acuityRevenue?.byType || []).filter(t => t.totalRevenue > 0).map((t, i) => {
+                          const pct = acuityRevenue?.total ? (t.totalRevenue / acuityRevenue.total) * 100 : 0;
+                          const isPbga = (t.appointmentType || '').toLowerCase().includes('pbga') || (t.appointmentType || '').toLowerCase().includes('clinic') || (t.appointmentType || '').toLowerCase().includes('drive day') || (t.appointmentType || '').toLowerCase().includes('camp');
+                          return (
+                            <div key={i} className="flex items-center gap-3">
+                              <div className="w-40 text-xs text-muted-foreground truncate">{t.appointmentType}</div>
+                              <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                                <div
+                                  className="h-full rounded-full"
+                                  style={{ width: `${pct}%`, background: isPbga ? '#8B5CF6' : '#F97316' }}
+                                />
+                              </div>
+                              <div className="text-xs font-medium w-20 text-right">{fmt(t.totalRevenue)}</div>
+                              <div className="text-xs text-muted-foreground w-16 text-right">{t.bookingCount} bookings</div>
+                            </div>
+                          );
+                        })}
+                        {(acuityRevenue?.byType || []).filter(t => t.totalRevenue > 0).length === 0 && (
+                          <p className="text-sm text-muted-foreground text-center py-4">No paid Acuity appointments found for this period.</p>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Combined Toast + Acuity Monthly Chart */}
+                  <Card className="mt-4">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base font-semibold">Toast vs Acuity Revenue (Last 6 Months)</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={220}>
+                        <BarChart data={combinedMonthly} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                          <XAxis dataKey="month" tickFormatter={fmtMonth} tick={{ fontSize: 11 }} />
+                          <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
+                          <Tooltip formatter={(v: number) => fmt(v)} labelFormatter={fmtMonth} />
+                          <Legend />
+                          <Bar dataKey="totalRevenue" name="Toast (POS)" fill="#EAB308" stackId="a" />
+                          <Bar dataKey="acuityRevenue" name="Acuity (Clinics)" fill="#8B5CF6" stackId="a" radius={[3, 3, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                </>
+              )}
+            </div>
           </>
         )}
       </div>

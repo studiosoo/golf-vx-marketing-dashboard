@@ -231,8 +231,15 @@
 - [x] Write vitest tests for Toast revenue (10 tests passing)
 
 ## Revenue Sidebar & Home KPI Card (2026-02-25)
-- [ ] Move Revenue from Intelligence sub-item to top-level sidebar below Overview
-- [ ] Update App.tsx route for /revenue (keep backward compat alias from /intelligence/revenue)
-- [ ] Remove Revenue from Intelligence sub-menu in DashboardLayout.tsx
-- [ ] Add this month's Toast revenue KPI card to Home.tsx Marketing HQ
-- [ ] Add tRPC procedure for current month revenue summary (if not already available)
+- [x] Move Revenue from Intelligence sub-item to top-level sidebar below Overview
+- [x] Update App.tsx route for /revenue (keep backward compat alias from /intelligence/revenue)
+- [x] Remove Revenue from Intelligence sub-menu in DashboardLayout.tsx
+- [x] Add this month's Toast revenue KPI card to Home.tsx Marketing HQ
+- [x] Add tRPC procedure for current month revenue summary (if not already available)
+
+## Membership Tier Breakdown Update (2026-02-26)
+- [x] Update Performance.tsx Membership Tier Breakdown to show 3 tiers clearly
+- [x] Separate Regular Members (All-Access Aces, Swing Savers, Trial/Unclassified) from Pro Members (Coaches)
+- [x] Add Pro Members billing details: $500/mo base, $25/session Bay credit, $25/hr overage after 20 sessions
+- [x] Add Coach Chuck Lynch note in Pro Members section
+- [x] Fix TypeScript: 0 errors

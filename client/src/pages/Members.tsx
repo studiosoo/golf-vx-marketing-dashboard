@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Mail, Phone, Calendar, Upload, Users, CreditCard, MessageSquare } from "lucide-react";
+import { Plus, Search, Mail, Phone, Calendar, Upload, Users, CreditCard, MessageSquare, Trophy, Star, Award, DollarSign, Activity } from "lucide-react";
 import { BoomerangMembersTab } from "@/components/tabs/BoomerangMembersTab";
 import { EmailCapturesTab } from "@/components/tabs/EmailCapturesTab";
 
@@ -126,7 +126,19 @@ export default function Members() {
         <TabsList className="mb-8">
           <TabsTrigger value="members">
             <Users className="mr-2 h-4 w-4" />
-            Members
+            All Members
+          </TabsTrigger>
+          <TabsTrigger value="all-access-aces">
+            <Trophy className="mr-2 h-4 w-4" />
+            All-Access Aces
+          </TabsTrigger>
+          <TabsTrigger value="swing-savers">
+            <Star className="mr-2 h-4 w-4" />
+            Swing Savers
+          </TabsTrigger>
+          <TabsTrigger value="pro-members">
+            <Award className="mr-2 h-4 w-4" />
+            Pro Members
           </TabsTrigger>
           <TabsTrigger value="duplicates">
             <Users className="mr-2 h-4 w-4" />
@@ -368,6 +380,18 @@ export default function Members() {
           )}
         </CardContent>
       </Card>
+        </TabsContent>
+
+        <TabsContent value="all-access-aces">
+          <TierMembersList tier="all_access_aces" label="All-Access Aces" color="yellow" icon={Trophy} description="Full unlimited bay access members — top tier." />
+        </TabsContent>
+
+        <TabsContent value="swing-savers">
+          <TierMembersList tier="swing_savers" label="Swing Savers" color="blue" icon={Star} description="Value membership with bay access credits." />
+        </TabsContent>
+
+        <TabsContent value="pro-members">
+          <ProMembersPanel />
         </TabsContent>
 
         <TabsContent value="duplicates">
@@ -625,6 +649,278 @@ function CommunicationsHistoryTab() {
                     </TableCell>
                   </TableRow>
                 ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// ─── Tier Members List ──────────────────────────────────────────────────────
+function TierMembersList({
+  tier,
+  label,
+  color,
+  icon: Icon,
+  description,
+}: {
+  tier: string;
+  label: string;
+  color: string;
+  icon: React.ElementType;
+  description: string;
+}) {
+  const [search, setSearch] = useState("");
+  const { data: members, isLoading } = trpc.members.list.useQuery({
+    membershipTier: tier as any,
+    search: search || undefined,
+  });
+
+  const accentColor = color === "yellow" ? "text-yellow-500" : "text-blue-500";
+  const bgColor = color === "yellow" ? "bg-yellow-50 dark:bg-yellow-950/20" : "bg-blue-50 dark:bg-blue-950/20";
+
+  return (
+    <div className="space-y-6">
+      <div className={`rounded-xl p-6 ${bgColor} border`}>
+        <div className="flex items-center gap-3 mb-1">
+          <Icon className={`h-6 w-6 ${accentColor}`} />
+          <h2 className="text-2xl font-bold">{label}</h2>
+          <Badge variant="outline" className={`${accentColor} border-current`}>
+            {members?.length ?? "—"} members
+          </Badge>
+        </div>
+        <p className="text-sm text-muted-foreground">{description}</p>
+      </div>
+
+      <div className="relative">
+        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder={`Search ${label} members...`}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-10 max-w-md"
+        />
+      </div>
+
+      <Card>
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="p-8 text-center text-muted-foreground">Loading...</div>
+          ) : !members || members.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground">
+              <Icon className="h-12 w-12 mx-auto mb-4 opacity-20" />
+              <p>No {label} members found.</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Contact</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Join Date</TableHead>
+                  <TableHead>LTV</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {members.map((member) => (
+                  <TableRow key={member.id}>
+                    <TableCell className="font-medium">
+                      <Link href={`/members/${member.id}`}>
+                        <span className="hover:underline cursor-pointer">{member.name}</span>
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1 text-sm">
+                        {member.email && (
+                          <div className="flex items-center gap-1 text-muted-foreground">
+                            <Mail className="h-3 w-3" />
+                            {member.email}
+                          </div>
+                        )}
+                        {member.phone && (
+                          <div className="flex items-center gap-1 text-muted-foreground">
+                            <Phone className="h-3 w-3" />
+                            {member.phone}
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={member.status === "active" ? "default" : "secondary"}>
+                        {member.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1 text-sm">
+                        <Calendar className="h-3 w-3 text-muted-foreground" />
+                        {format(new Date(member.joinDate), "MMM d, yyyy")}
+                      </div>
+                    </TableCell>
+                    <TableCell>${parseFloat(member.lifetimeValue).toLocaleString()}</TableCell>
+                    <TableCell className="text-right">
+                      <Link href={`/members/${member.id}`}>
+                        <Button variant="ghost" size="sm">View</Button>
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// ─── Pro Members Panel ───────────────────────────────────────────────────────
+function ProMembersPanel() {
+  const { data: members, isLoading } = trpc.members.list.useQuery({
+    membershipTier: "golf_vx_pro" as any,
+  });
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="rounded-xl p-6 bg-purple-50 dark:bg-purple-950/20 border">
+        <div className="flex items-center gap-3 mb-1">
+          <Award className="h-6 w-6 text-purple-500" />
+          <h2 className="text-2xl font-bold">Pro Members</h2>
+          <Badge variant="outline" className="text-purple-500 border-purple-500">
+            {members?.length ?? "—"} coaches
+          </Badge>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          PGA/independent golf coaches with Pro Membership. Managed separately from regular members.
+        </p>
+      </div>
+
+      {/* Billing Structure Info */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="border-purple-200 dark:border-purple-800">
+          <CardHeader className="pb-3">
+            <CardDescription className="flex items-center gap-1">
+              <DollarSign className="h-3 w-3" /> Monthly Base Fee
+            </CardDescription>
+            <CardTitle className="text-3xl text-purple-600">$500</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-muted-foreground">Per coach per month</p>
+          </CardContent>
+        </Card>
+        <Card className="border-purple-200 dark:border-purple-800">
+          <CardHeader className="pb-3">
+            <CardDescription className="flex items-center gap-1">
+              <Activity className="h-3 w-3" /> Bay Usage Credit
+            </CardDescription>
+            <CardTitle className="text-3xl text-purple-600">$25</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-muted-foreground">Deducted per coaching session (up to 20/mo)</p>
+          </CardContent>
+        </Card>
+        <Card className="border-purple-200 dark:border-purple-800">
+          <CardHeader className="pb-3">
+            <CardDescription className="flex items-center gap-1">
+              <DollarSign className="h-3 w-3" /> Overage Rate
+            </CardDescription>
+            <CardTitle className="text-3xl text-purple-600">$25/hr</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-muted-foreground">Charged for sessions beyond 20/month</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Note about Stripe */}
+      <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 p-4 text-sm text-amber-800 dark:text-amber-300">
+        <strong>Note:</strong> Pro membership billing is processed via Stripe (not Toast). Stripe integration is pending — billing data will be available once connected next week.
+      </div>
+
+      {/* Pro Members Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Active Pro Coaches</CardTitle>
+          <CardDescription>
+            All coaches with active Pro Membership. Chuck Lynch (PBGA Lead Coach) runs Drive Day, Winter Clinics, and Summer Camp programs.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="p-8 text-center text-muted-foreground">Loading...</div>
+          ) : !members || members.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground">No Pro Members found.</div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Contact</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Join Date</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {members.map((member) => {
+                  const isChuck = member.name?.toLowerCase().includes("chuck lynch");
+                  return (
+                    <TableRow key={member.id} className={isChuck ? "bg-yellow-50/50 dark:bg-yellow-950/10" : ""}>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                          <Link href={`/members/${member.id}`}>
+                            <span className="hover:underline cursor-pointer">{member.name}</span>
+                          </Link>
+                          {isChuck && (
+                            <Badge className="bg-yellow-500 text-black text-xs">PBGA Lead</Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1 text-sm">
+                          {member.email && (
+                            <div className="flex items-center gap-1 text-muted-foreground">
+                              <Mail className="h-3 w-3" />
+                              {member.email}
+                            </div>
+                          )}
+                          {member.phone && (
+                            <div className="flex items-center gap-1 text-muted-foreground">
+                              <Phone className="h-3 w-3" />
+                              {member.phone}
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="text-purple-600 border-purple-400">
+                          {isChuck ? "Lead Coach (PBGA)" : "Pro Coach"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={member.status === "active" ? "default" : "secondary"}>
+                          {member.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1 text-sm">
+                          <Calendar className="h-3 w-3 text-muted-foreground" />
+                          {format(new Date(member.joinDate), "MMM d, yyyy")}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Link href={`/members/${member.id}`}>
+                          <Button variant="ghost" size="sm">View</Button>
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           )}

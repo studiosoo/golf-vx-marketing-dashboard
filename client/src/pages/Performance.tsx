@@ -128,20 +128,58 @@ export default function Performance() {
         {overview?.memberStats && (
           <Card>
             <CardHeader className="pb-3"><CardTitle className="text-base font-semibold">Membership Tier Breakdown</CardTitle></CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                {[
-                  { label: "All-Access Aces", count: overview.memberStats.allAccessCount, mrr: overview.memberStats.allAccessCount * 325, color: "text-primary" },
-                  { label: "Swing Savers", count: overview.memberStats.swingSaversCount, mrr: overview.memberStats.swingSaversCount * 225, color: "text-blue-400" },
-                  { label: "Golf VX Pro", count: overview.memberStats.golfVxProCount, mrr: overview.memberStats.golfVxProCount * 500, color: "text-purple-400" },
-                  { label: "Total Active", count: overview.memberStats.activeMembers, mrr: overview.monthlyRecurringRevenue, color: "text-green-400" },
-                ].map((tier) => (
-                  <div key={tier.label} className="space-y-1">
-                    <p className="text-xs text-muted-foreground">{tier.label}</p>
-                    <p className={`text-xl font-bold ${tier.color}`}>{tier.count}</p>
-                    <p className="text-xs text-muted-foreground">{fmt(tier.mrr)} MRR</p>
+            <CardContent className="space-y-4">
+              {/* Regular Members */}
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 pb-1 border-b">Regular Members</p>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">All-Access Aces</p>
+                    <p className="text-xl font-bold text-yellow-500">{overview.memberStats.allAccessCount}</p>
+                    <p className="text-xs text-muted-foreground">{fmt(overview.memberStats.allAccessCount * 325)} MRR · $325/mo</p>
                   </div>
-                ))}
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Swing Savers</p>
+                    <p className="text-xl font-bold text-blue-400">{overview.memberStats.swingSaversCount}</p>
+                    <p className="text-xs text-muted-foreground">{fmt(overview.memberStats.swingSaversCount * 225)} MRR · $225/mo</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Trial</p>
+                    <p className="text-xl font-bold text-orange-400">{overview.memberStats.activeMembers - overview.memberStats.allAccessCount - overview.memberStats.swingSaversCount - overview.memberStats.golfVxProCount}</p>
+                    <p className="text-xs text-muted-foreground">Trial / Unclassified</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Regular MRR</p>
+                    <p className="text-xl font-bold text-green-400">{fmt(overview.memberStats.allAccessCount * 325 + overview.memberStats.swingSaversCount * 225)}</p>
+                    <p className="text-xs text-muted-foreground">Combined</p>
+                  </div>
+                </div>
+              </div>
+              {/* Pro Members */}
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 pb-1 border-b">Pro Members (Coaches)</p>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Pro Coaches</p>
+                    <p className="text-xl font-bold text-purple-400">{overview.memberStats.golfVxProCount}</p>
+                    <p className="text-xs text-muted-foreground">incl. Coach Chuck Lynch</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Base MRR</p>
+                    <p className="text-xl font-bold text-purple-400">{fmt(overview.memberStats.golfVxProCount * 500)}</p>
+                    <p className="text-xs text-muted-foreground">$500/mo · via Stripe</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Bay Credit</p>
+                    <p className="text-xl font-bold text-purple-300">$25/session</p>
+                    <p className="text-xs text-muted-foreground">Deducted from base</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Overage Rate</p>
+                    <p className="text-xl font-bold text-purple-300">$25/hr</p>
+                    <p className="text-xs text-muted-foreground">After 20 sessions/mo</p>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

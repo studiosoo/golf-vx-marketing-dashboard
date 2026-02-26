@@ -948,6 +948,54 @@ export const appRouter = router({
         }
         return result;
       }),
+
+    getAcuityRevenue: protectedProcedure
+      .input(z.object({
+        minDate: z.string().optional(),
+        maxDate: z.string().optional(),
+      }))
+      .query(async ({ input }) => {
+        const { getAllRevenueByType } = await import('./acuity');
+        const data = await getAllRevenueByType(input.minDate, input.maxDate);
+        const grouped: Record<string, { totalRevenue: number; bookingCount: number; types: string[] }> = {
+          pbga_clinics: { totalRevenue: 0, bookingCount: 0, types: [] },
+          trial: { totalRevenue: 0, bookingCount: 0, types: [] },
+          other: { totalRevenue: 0, bookingCount: 0, types: [] },
+        };
+        for (const item of data) {
+          const name = (item.appointmentType || '').toLowerCase();
+          let group = 'other';
+          if (name.includes('pbga') || name.includes('clinic') || name.includes('drive day') || name.includes('winter') || name.includes('summer camp') || name.includes('camp')) {
+            group = 'pbga_clinics';
+          } else if (name.includes('trial') || name.includes('intro') || name.includes('free')) {
+            group = 'trial';
+          }
+          grouped[group].totalRevenue += item.totalRevenue;
+          grouped[group].bookingCount += item.bookingCount;
+          grouped[group].types.push(item.appointmentType);
+        }
+        const total = data.reduce((s, d) => s + d.totalRevenue, 0);
+        const totalBookings = data.reduce((s, d) => s + d.bookingCount, 0);
+        return { byType: data.sort((a, b) => b.totalRevenue - a.totalRevenue), grouped, total, totalBookings };
+      }),
+
+    getAcuityMonthly: protectedProcedure
+      .input(z.object({ months: z.number().default(6) }))
+      .query(async ({ input }) => {
+        const { getAppointments } = await import('./acuity');
+        const results: { month: string; revenue: number; bookings: number }[] = [];
+        const now = new Date();
+        for (let i = input.months - 1; i >= 0; i--) {
+          const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+          const minDate = d.toISOString().split('T')[0];
+          const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+          const maxDate = lastDay.toISOString().split('T')[0];
+          const apts = await getAppointments({ minDate, maxDate, canceled: false });
+          const revenue = apts.reduce((s, a) => s + parseFloat(a.amountPaid || a.priceSold || a.price || '0'), 0);
+          results.push({ month: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`, revenue, bookings: apts.length });
+        }
+        return results;
+      }),
   }),
   // Task Management (Asana Integration)
   tasks: router({
