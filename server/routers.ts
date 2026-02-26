@@ -15,6 +15,7 @@ import {
   approveAction,
   rejectAction,
   undoAction,
+  dismissAction,
   runAutonomousCycle,
   getAllActions,
 } from "./autonomous";
@@ -427,26 +428,27 @@ export const appRouter = router({
         const targetAudience = input.targetAudience || "recent leads";
         const conversions = input.conversions || 0;
 
-        const systemPrompt = `You are an expert email marketing copywriter for Golf VX Arlington Heights, an indoor golf simulator facility in Arlington Heights, IL.
-
+             const systemPrompt = `You are an expert email marketing copywriter for Golf VX Arlington Heights, an indoor golf simulator facility in Arlington Heights, IL.
 Brand voice: Friendly, energetic, community-focused. Golf VX offers simulator bays, memberships (All-Access Ace $325/mo, Swing Saver $225/mo), Drive Day clinics, PBGA Winter Clinics, and Junior Summer Camp.
 
-Write a ${emailType === 'nurture_sequence' ? '3-email nurture sequence' : 'follow-up email'} for ${targetAudience} from the "${input.campaignName}" campaign.
+CURRENT PRIORITY — DRIVE DAY CLINIC:
+The next Drive Day Clinic is coming up soon. This is a PBGA-coached 90-minute session with Coach Chuck Lynch for only $20. This should be the FIRST and PRIMARY call-to-action in the email sequence. Encourage readers to book their spot before it fills up.
 
+INSTAGRAM ENGAGEMENT:
+We recently posted a new reel on Instagram showcasing Golf VX Arlington Heights. Include a line encouraging readers to follow us on Instagram at @golfvxarlingtonheights and check out our latest reel: https://www.instagram.com/golfvxarlingtonheights/
+
+Write a ${emailType === 'nurture_sequence' ? '3-email nurture sequence' : 'follow-up email'} for ${targetAudience} from the "${input.campaignName}" campaign.
 Return a JSON object with:
 - subject: email subject line
 - preheader: preview text (50-90 chars)
 - emails: array of email objects, each with: { emailNumber, subject, preheader, body (HTML), callToAction, sendDelay }
-
-For nurture sequences, space emails: Email 1 (immediately), Email 2 (3 days later), Email 3 (7 days later).`;
-
+For nurture sequences, space emails: Email 1 (immediately — Drive Day focus), Email 2 (3 days later — membership benefits), Email 3 (7 days later — social proof + Instagram follow).`;
         const userPrompt = `Campaign: ${input.campaignName}
 Action: ${input.actionTitle}
 Context: ${input.actionDescription}
 Target: ${conversions} ${targetAudience}
 Email type: ${emailType}
-
-Write compelling, personalized emails that convert leads to Golf VX members. Include specific CTAs like booking a trial session ($9 for 1 hour) or signing up for a Drive Day clinic ($20 for 90 min).`;
+PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chuck Lynch) as the primary CTA. Also encourage following @golfvxarlingtonheights on Instagram and watching our latest reel. Secondary CTA: book a trial session ($9 for 1 hour).`;
 
         const response = await invokeLLM({
           messages: [
@@ -2133,7 +2135,7 @@ Write compelling, personalized emails that convert leads to Golf VX members. Inc
         const firstName = applicant.name.split(' ')[0] || applicant.name;
         const isNewVisitor = !applicant.visitedBefore || applicant.visitedBefore.toLowerCase() === 'no' || applicant.visitedBefore.toLowerCase() === 'new';
         const { invokeLLM } = await import("./_core/llm");
-        const prompt = `Write a warm follow-up email for a Golf VX Arlington Heights giveaway applicant.\nApplicant: ${applicant.name} (${firstName}), Golf experience: ${applicant.golfExperienceLevel || 'unknown'}, Visited before: ${applicant.visitedBefore || 'unknown'}, Indoor golf familiarity: ${applicant.indoorGolfFamiliarity || 'unknown'}, City: ${applicant.city || 'unknown'}, Status: ${isNewVisitor ? 'New visitor' : 'Returning visitor'}.\nWrite a personalized follow-up email with subject, preheader (1 sentence), body (150-200 words, warm community-driven tone), and CTA (book trial or claim prize). Respond as JSON only.`;
+        const prompt = `Write a warm follow-up email for a Golf VX Arlington Heights giveaway applicant.\nApplicant: ${applicant.name} (${firstName}), Golf experience: ${applicant.golfExperienceLevel || 'unknown'}, Visited before: ${applicant.visitedBefore || 'unknown'}, Indoor golf familiarity: ${applicant.indoorGolfFamiliarity || 'unknown'}, City: ${applicant.city || 'unknown'}, Status: ${isNewVisitor ? 'New visitor' : 'Returning visitor'}.\n\nCURRENT PRIORITY: The next Drive Day Clinic is coming up soon — a PBGA-coached 90-minute session with Coach Chuck Lynch for only $20. This should be the PRIMARY call-to-action in the email. Encourage the applicant to book their spot.\n\nALSO INCLUDE: A brief mention encouraging them to follow us on Instagram @golfvxarlingtonheights and check out our latest reel: https://www.instagram.com/golfvxarlingtonheights/\n\nWrite a personalized follow-up email with subject, preheader (1 sentence), body (150-200 words, warm community-driven tone), and CTA (Drive Day Clinic booking). Respond as JSON only.`;
         const response = await invokeLLM({
           messages: [
             { role: 'system', content: 'You are a marketing copywriter for Golf VX. Always respond with valid JSON only with fields: subject, preheader, body, cta' },
@@ -2404,9 +2406,27 @@ Write compelling, personalized emails that convert leads to Golf VX members. Inc
         const activeMembers = Number((retentionResult as any)[0]?.active || 0);
         const retentionRate = (activeMembers / totalMembers) * 100;
 
-        // 4. B2B Corporate Events: Use fallback value since appointments table doesn't exist yet
-        const eventsThisMonth = 2; // Default fallback - will be accurate once appointments table is created
-
+         // 4. B2B Corporate Events: Fetch real data from Acuity for current month
+        let eventsThisMonth = 0;
+        try {
+          const { getAppointments } = await import('./acuity');
+          const now = new Date();
+          const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+          const minDate = firstOfMonth.toISOString().split('T')[0];
+          const maxDate = now.toISOString().split('T')[0];
+          const allAppts = await getAppointments({ minDate, maxDate, canceled: false });
+          // Filter for B2B/corporate event appointment types
+          const b2bKeywords = ['corporate', 'outing', 'group event', 'party', 'league', 'b2b', 'private event', 'team', 'company'];
+          const b2bAppts = allAppts.filter((apt: any) => {
+            const typeName = (apt.type || '').toLowerCase();
+            return b2bKeywords.some((kw: string) => typeName.includes(kw));
+          });
+          // Count unique event dates (each unique date = 1 event)
+          const uniqueEventDates = new Set(b2bAppts.map((apt: any) => apt.date));
+          eventsThisMonth = uniqueEventDates.size;
+        } catch {
+          eventsThisMonth = 0;
+        }
         return {
           membershipAcquisition: {
             current: memberCount,
@@ -2425,8 +2445,8 @@ Write compelling, personalized emails that convert leads to Golf VX members. Inc
           },
           corporateEvents: {
             current: eventsThisMonth,
-            target: 4, // 1 event per week
-            progress: (eventsThisMonth / 4) * 100,
+            target: 1, // Goal: 1 B2B event per month
+            progress: Math.min((eventsThisMonth / 1) * 100, 100),
           },
         };
       }),
@@ -2975,13 +2995,18 @@ Write compelling, personalized emails that convert leads to Golf VX members. Inc
         return rejectAction(input.actionId, reviewerName);
       }),
 
-    /** Undo a previously executed or approved action */
+     /** Undo a previously executed or approved action */
     undoAction: protectedProcedure
       .input(z.object({ actionId: z.number() }))
       .mutation(async ({ input }) => {
         return undoAction(input.actionId);
       }),
-
+    /** Dismiss an action (error/monitoring/resolved) to remove it from the feed */
+    dismissAction: protectedProcedure
+      .input(z.object({ actionId: z.number() }))
+      .mutation(async ({ input }) => {
+        return dismissAction(input.actionId);
+      }),
     /** Seed demo data for testing */
     seedDemo: protectedProcedure.mutation(async () => {
       return seedDemoData();

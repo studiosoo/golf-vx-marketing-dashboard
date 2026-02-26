@@ -44,9 +44,9 @@ export default function StrategicCampaigns() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Strategic Campaigns</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Campaigns</h1>
         <p className="text-muted-foreground mt-2">
-          High-level strategic objectives with aggregated program performance
+          Strategic objectives with aggregated program performance
         </p>
       </div>
 
@@ -192,10 +192,10 @@ export default function StrategicCampaigns() {
                     </div>
                     <Progress value={kpiData.corporateEvents.progress} className="h-2" />
                     <p className="text-xs text-muted-foreground mt-2">
-                      Target: 1 event/week •{' '}
+                      Goal: 1 B2B event/month •{' '}
                       {kpiData.corporateEvents.current >= kpiData.corporateEvents.target
-                        ? 'On track'
-                        : `Need ${kpiData.corporateEvents.target - kpiData.corporateEvents.current} more events`}
+                        ? 'Goal met this month'
+                        : `Need ${kpiData.corporateEvents.target - kpiData.corporateEvents.current} more event this month`}
                     </p>
                   </div>
                 )}

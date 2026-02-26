@@ -915,6 +915,15 @@ export async function undoAction(actionId: number) {
   return { success: true };
 }
 
+export async function dismissAction(actionId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(autonomousActions)
+    .set({ status: "dismissed", reviewedAt: Date.now() })
+    .where(eq(autonomousActions.id, actionId));
+  return { success: true };
+}
+
 export async function getAllActions() {
   const db = await getDb();
   if (!db) return [];

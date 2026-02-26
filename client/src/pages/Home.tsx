@@ -46,12 +46,12 @@ const KPI_BARS = [
   },
   {
     label: "B2B Events",
-    value: "2 booked",
-    progress: 50,
+    value: "Loading...",
+    progress: 0,
     color: "bg-[#76addc]",
-    badge: "+1 new this week",
+    badge: "Goal: 1/month",
     badgeColor: "text-[#76addc]",
-    goal: "Goal: 4",
+    goal: "Goal: 1",
     href: "/campaigns",
   },
 ];
@@ -84,6 +84,7 @@ export default function Home() {
   const { data: categories, isLoading } = trpc.campaigns.getCategorySummary.useQuery();
   const { data: pendingActions } = trpc.autonomous.getApprovalCards.useQuery();
   const { data: toastSummary } = trpc.revenue.getToastSummary.useQuery();
+  const { data: strategicKPIs } = trpc.intelligence.getStrategicKPIs.useQuery();
   const syncMutation = trpc.autonomous.syncAllData.useMutation();
   const utils = trpc.useUtils();
   const [approvingId, setApprovingId] = useState<number | null>(null);
@@ -218,6 +219,22 @@ export default function Home() {
       ? categories.map((c) => ({ name: c.name, spend: c.totalSpend, budget: c.totalBudget }))
       : STATIC_CAMPAIGNS;
 
+  // Build live KPI bars with real B2B events data
+  const b2bCount = strategicKPIs?.corporateEvents?.current ?? null;
+  const liveKpiBars = KPI_BARS.map((kpi) => {
+    if (kpi.label === "B2B Events" && b2bCount !== null) {
+      const progress = Math.min(b2bCount * 100, 100);
+      return {
+        ...kpi,
+        value: `${b2bCount} booked`,
+        progress,
+        badge: b2bCount >= 1 ? "Goal met! ✓" : "Goal: 1/month",
+        badgeColor: b2bCount >= 1 ? "text-green-500" : "text-[#76addc]",
+      };
+    }
+    return kpi;
+  });
+
   const todayStr = new Date().toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
@@ -307,7 +324,7 @@ export default function Home() {
 
         {/* ── Section 1: KPI Progress Bars ── */}
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-          {KPI_BARS.map((kpi) => (
+          {liveKpiBars.map((kpi) => (
             <Link key={kpi.label} href={kpi.href}>
               <Card className="hover:bg-muted/40 transition-colors cursor-pointer h-full">
                 <CardContent className="pt-5 pb-4 space-y-3">

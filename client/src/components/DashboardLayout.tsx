@@ -104,10 +104,6 @@ const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
         label: "Campaigns",
         path: "/campaigns",
         icon: Megaphone,
-        children: [
-          { label: "Strategic Campaigns", path: "/campaigns/strategic", icon: Target },
-          { label: "Meta Ads", path: "/campaigns/meta-ads", icon: BarChart3 },
-        ],
       },
       {
         label: "Intelligence",
@@ -136,6 +132,7 @@ const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
         icon: Gift,
         children: [
           { label: "Annual Membership Giveaway", path: "/promotions/annual-giveaway", icon: Gift },
+          { label: "Meta Ads", path: "/campaigns/meta-ads", icon: BarChart3 },
         ],
       },
     ],

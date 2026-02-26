@@ -33,6 +33,7 @@ import {
   Database,
   Wifi,
   WifiOff,
+  X,
 } from "lucide-react";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -208,10 +209,14 @@ function AutoExecutedCard({
   action,
   onUndo,
   isUndoing,
+  onDismiss,
+  isDismissing,
 }: {
   action: AutonomousAction;
   onUndo: (id: number) => void;
   isUndoing: boolean;
+  onDismiss: (id: number) => void;
+  isDismissing: boolean;
 }) {
   return (
     <Card className="p-4 border-l-4 border-l-green-500 hover:shadow-md transition-shadow">
@@ -266,26 +271,41 @@ function AutoExecutedCard({
             )}
           </div>
         </div>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onUndo(action.id)}
-              disabled={isUndoing}
-              className="flex-shrink-0 text-muted-foreground hover:text-red-600"
-            >
-              {isUndoing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Undo2 className="w-4 h-4" />}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Undo this action</TooltipContent>
-        </Tooltip>
+        <div className="flex flex-col gap-1 flex-shrink-0">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onUndo(action.id)}
+                disabled={isUndoing || isDismissing}
+                className="text-muted-foreground hover:text-red-600 h-7 w-7 p-0"
+              >
+                {isUndoing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Undo2 className="w-4 h-4" />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Undo this action</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onDismiss(action.id)}
+                disabled={isUndoing || isDismissing}
+                className="text-muted-foreground hover:text-foreground h-7 w-7 p-0"
+              >
+                {isDismissing ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Dismiss this item</TooltipContent>
+          </Tooltip>
+        </div>
       </div>
     </Card>
   );
 }
-
-// ─── Approval Card ─────────────────────────────────────────────────────────────
+// ─── Approval Card ──────────────────────────────────────────────────────────────
 
 function ApprovalCard({
   action,
@@ -396,39 +416,63 @@ function ApprovalCard({
 
 // ─── Monitoring Card ───────────────────────────────────────────────────────────
 
-function MonitoringCard({ action }: { action: AutonomousAction }) {
+function MonitoringCard({
+  action,
+  onDismiss,
+  isDismissing,
+}: {
+  action: AutonomousAction;
+  onDismiss: (id: number) => void;
+  isDismissing: boolean;
+}) {
   return (
     <Card className="p-4 border-l-4 border-l-indigo-400 hover:shadow-md transition-shadow">
-      <div className="flex items-start gap-3">
-        <div className="p-2 rounded-lg bg-indigo-100 text-indigo-700 flex-shrink-0">
-          <Eye className="w-4 h-4" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h4 className="font-semibold text-sm">{action.title}</h4>
-            {getRiskBadge(action.riskLevel)}
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-3 flex-1 min-w-0">
+          <div className="p-2 rounded-lg bg-indigo-100 text-indigo-700 flex-shrink-0">
+            <Eye className="w-4 h-4" />
           </div>
-          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{action.description}</p>
-          <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <Target className="w-3 h-3" />
-              {action.campaignName}
-            </span>
-            <span className="flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              {formatTimeAgo(action.createdAt)}
-            </span>
-            {action.confidence && (
-              <span className={`flex items-center gap-1 ${getConfidenceColor(action.confidence)}`}>
-                <Activity className="w-3 h-3" />
-                {action.confidence}% confidence
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h4 className="font-semibold text-sm">{action.title}</h4>
+              {getRiskBadge(action.riskLevel)}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{action.description}</p>
+            <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <Target className="w-3 h-3" />
+                {action.campaignName}
               </span>
+              <span className="flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                {formatTimeAgo(action.createdAt)}
+              </span>
+              {action.confidence && (
+                <span className={`flex items-center gap-1 ${getConfidenceColor(action.confidence)}`}>
+                  <Activity className="w-3 h-3" />
+                  {action.confidence}% confidence
+                </span>
+              )}
+            </div>
+            {action.expectedImpact && (
+              <p className="text-xs text-indigo-700 mt-2 italic">{action.expectedImpact}</p>
             )}
           </div>
-          {action.expectedImpact && (
-            <p className="text-xs text-indigo-700 mt-2 italic">{action.expectedImpact}</p>
-          )}
         </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onDismiss(action.id)}
+              disabled={isDismissing}
+              className="flex-shrink-0 text-muted-foreground hover:text-foreground h-7 w-7 p-0"
+            >
+              {isDismissing ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Dismiss this item</TooltipContent>
+        </Tooltip>
       </div>
     </Card>
   );
@@ -505,6 +549,7 @@ export default function MarketingIntelligence() {
   const [undoingId, setUndoingId] = useState<number | null>(null);
   const [approvingId, setApprovingId] = useState<number | null>(null);
   const [rejectingId, setRejectingId] = useState<number | null>(null);
+  const [dismissingId, setDismissingId] = useState<number | null>(null);
 
   // ─── Queries ───────────────────────────────────────────────────────────────
   const syncStatusQuery = trpc.autonomous.getSyncStatus.useQuery(undefined, {
@@ -631,6 +676,22 @@ export default function MarketingIntelligence() {
   const handleUndo = (id: number) => {
     setUndoingId(id);
     undoMutation.mutate({ actionId: id });
+  };
+  const dismissMutation = trpc.autonomous.dismissAction.useMutation({
+    onSuccess: () => {
+      toast.success("Dismissed", { description: "Item removed from the feed." });
+      setDismissingId(null);
+      utils.autonomous.getAutoExecuted.invalidate();
+      utils.autonomous.getMonitoring.invalidate();
+    },
+    onError: (error) => {
+      toast.error("Dismiss Failed", { description: error.message });
+      setDismissingId(null);
+    },
+  });
+  const handleDismiss = (id: number) => {
+    setDismissingId(id);
+    dismissMutation.mutate({ actionId: id });
   };
 
   const handleSeedDemo = () => {
@@ -797,6 +858,8 @@ export default function MarketingIntelligence() {
                   action={action}
                   onUndo={handleUndo}
                   isUndoing={undoingId === action.id}
+                  onDismiss={handleDismiss}
+                  isDismissing={dismissingId === action.id}
                 />
               ))
             )}
@@ -834,7 +897,12 @@ export default function MarketingIntelligence() {
               </Card>
             ) : (
               monitoring.map((action) => (
-                <MonitoringCard key={action.id} action={action} />
+                <MonitoringCard
+                  key={action.id}
+                  action={action}
+                  onDismiss={handleDismiss}
+                  isDismissing={dismissingId === action.id}
+                />
               ))
             )}
           </TabsContent>

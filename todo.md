@@ -472,3 +472,21 @@
 - [x] Fix duplicate React keys in SundayClinicDetail SourceAttendeeModal
 - [x] Fix duplicate React keys in SundayClinicDetail AttendeeListModal
 - [x] Fix SendGrid not-configured error: show user-friendly toast instead of crashing DB insert
+
+## Sprint: 5 UI/UX Fixes (2026-02-26 v2)
+
+- [ ] Navigation: Remove 'Strategic Campaigns' submenu from Campaigns, move 'Meta Ads' under Promotions
+- [ ] Navigation: Campaigns becomes a direct link (no submenu) or is removed/renamed
+- [ ] B2B Events: Set goal to 1 per month (not 4), fix data source to use real Acuity data
+- [ ] Mobile: Fix overlapping X-axis labels in Meta Ads charts (truncate names, rotate labels)
+- [ ] Mobile: Fix chart tooltip overflow on mobile screens
+- [ ] AI Actions: Add dismiss/clear button for failed and resolved actions
+- [ ] AI Actions: Add 'Clear All Failed' bulk action button
+- [ ] Email Draft: Update Drive Day email draft context to focus on upcoming Drive Day + Instagram reel link
+
+## 5 Fixes Sprint (2026-02-26)
+- [x] B2B Events: Use real Acuity data and set goal to 1/month (getStrategicKPIs updated)
+- [x] Mobile chart overlap: Fix MetaAds.tsx chart labels for mobile (abbreviated X-axis, responsive containers)
+- [x] AI Actions dismiss: Add dismiss button for error/monitoring items (new 'dismissed' status, dismissAction backend + frontend)
+- [x] Navigation: Rename Campaigns page title from "Strategic Campaigns" to "Campaigns", Meta Ads stays under Promotions
+- [x] Email draft: Add Drive Day + Instagram reel context to both campaigns and giveaway LLM prompts

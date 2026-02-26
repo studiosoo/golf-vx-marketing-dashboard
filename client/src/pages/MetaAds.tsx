@@ -285,31 +285,41 @@ export default function MetaAds() {
                 <CardTitle>Spend by Campaign</CardTitle>
                 <CardDescription>Distribution of ad spend across campaigns</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="overflow-hidden">
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={campaignsData.filter(c => c.insights)}>
+                  <BarChart
+                    data={campaignsData.filter(c => c.insights).map(c => ({
+                      ...c,
+                      shortName: c.name.length > 14 ? c.name.substring(0, 14) + '…' : c.name,
+                    }))}
+                    margin={{ top: 5, right: 10, left: 0, bottom: 60 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis 
-                      dataKey="name" 
-                      className="text-xs"
-                      tick={{ fill: "hsl(var(--muted-foreground))" }}
-                      angle={-45}
+                    <XAxis
+                      dataKey="shortName"
+                      tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+                      angle={-35}
                       textAnchor="end"
-                      height={100}
+                      interval={0}
+                      height={70}
                     />
-                    <YAxis 
-                      className="text-xs"
-                      tick={{ fill: "hsl(var(--muted-foreground))" }}
+                    <YAxis
+                      tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+                      width={55}
+                      tickFormatter={(v: number) => `$${v}`}
                     />
-                    <Tooltip 
-                      contentStyle={{ 
+                    <Tooltip
+                      contentStyle={{
                         backgroundColor: "hsl(var(--card))",
                         border: "1px solid hsl(var(--border))",
-                        borderRadius: "var(--radius)"
+                        borderRadius: "var(--radius)",
+                        fontSize: 12,
+                        maxWidth: 200,
                       }}
-                      formatter={(value: number) => formatCurrency(value)}
+                      formatter={(value: number) => [formatCurrency(value), "Spend"]}
+                      labelFormatter={(label: string, payload: any[]) => payload?.[0]?.payload?.name ?? label}
                     />
-                    <Bar dataKey="insights.spend" fill="hsl(var(--primary))" name="Spend" />
+                    <Bar dataKey="insights.spend" fill="hsl(var(--primary))" name="Spend" radius={[3, 3, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -320,35 +330,44 @@ export default function MetaAds() {
                 <CardTitle>Click Performance</CardTitle>
                 <CardDescription>Clicks and CTR by campaign</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="overflow-hidden">
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={campaignsData.filter(c => c.insights)}>
+                  <BarChart
+                    data={campaignsData.filter(c => c.insights).map(c => ({
+                      ...c,
+                      shortName: c.name.length > 14 ? c.name.substring(0, 14) + '…' : c.name,
+                    }))}
+                    margin={{ top: 5, right: 10, left: 0, bottom: 60 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis 
-                      dataKey="name" 
-                      className="text-xs"
-                      tick={{ fill: "hsl(var(--muted-foreground))" }}
-                      angle={-45}
+                    <XAxis
+                      dataKey="shortName"
+                      tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+                      angle={-35}
                       textAnchor="end"
-                      height={100}
+                      interval={0}
+                      height={70}
                     />
-                    <YAxis 
-                      className="text-xs"
-                      tick={{ fill: "hsl(var(--muted-foreground))" }}
+                    <YAxis
+                      tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+                      width={45}
                     />
-                    <Tooltip 
-                      contentStyle={{ 
+                    <Tooltip
+                      contentStyle={{
                         backgroundColor: "hsl(var(--card))",
                         border: "1px solid hsl(var(--border))",
-                        borderRadius: "var(--radius)"
+                        borderRadius: "var(--radius)",
+                        fontSize: 12,
+                        maxWidth: 200,
                       }}
-                      formatter={(value: number, name: string) => 
-                        name === "CTR" ? formatPercentage(value) : formatNumber(value)
+                      formatter={(value: number, name: string) =>
+                        name === "CTR %" ? [formatPercentage(value), name] : [formatNumber(value), name]
                       }
+                      labelFormatter={(label: string, payload: any[]) => payload?.[0]?.payload?.name ?? label}
                     />
-                    <Legend />
-                    <Bar dataKey="insights.clicks" fill="hsl(var(--chart-1))" name="Clicks" />
-                    <Bar dataKey="insights.ctr" fill="hsl(var(--chart-2))" name="CTR %" />
+                    <Legend wrapperStyle={{ fontSize: 11, paddingTop: 4 }} />
+                    <Bar dataKey="insights.clicks" fill="hsl(var(--chart-1))" name="Clicks" radius={[3, 3, 0, 0]} />
+                    <Bar dataKey="insights.ctr" fill="hsl(var(--chart-2))" name="CTR %" radius={[3, 3, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
