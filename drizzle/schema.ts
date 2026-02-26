@@ -222,6 +222,8 @@ export const members = mysqlTable("members", {
   emailUnsubscribedAt: timestamp("emailUnsubscribedAt"),
   customerStatus: mysqlEnum("customerStatus", ["lead", "trial", "active", "churned"]).default("lead").notNull(),
   
+  // Stripe integration fields
+  stripeCustomerId: varchar("stripeCustomerId", { length: 100 }),
   // Toast POS integration fields
   toastCustomerId: varchar("toastCustomerId", { length: 100 }),
   totalPurchases: decimal("totalPurchases", { precision: 10, scale: 2 }).default("0").notNull(),

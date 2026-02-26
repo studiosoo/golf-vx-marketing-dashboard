@@ -304,3 +304,12 @@
 - [x] WinterClinicDetail.tsx, Overview.tsx, ProgramMarketingPanel.tsx, InstagramAnalytics.tsx, CampaignTimeline.tsx, Revenue.tsx 컬러 교체
 - [x] SundayClinicDetail.tsx JSX 오류 수정 (Marketing Intelligence div 중첩 오류)
 - [x] TypeScript 0 errors 확인 후 체크포인트 저장
+
+## 사이드바 컬러 + Recharts 통일 + Stripe 준비 (2026-02-26)
+- [ ] DashboardLayout 사이드바 active/hover 컬러 정비 (bg-primary/10, text-primary 가시성 확인)
+- [ ] Recharts 차트 컬러를 CSS 변수(var(--color-*))로 통일 — Revenue.tsx, Performance.tsx, Home.tsx
+- [ ] Stripe webhook endpoint POST /api/webhooks/stripe 등록 (server/_core/index.ts)
+- [ ] Stripe 이벤트 핸들러 작성 (customer.subscription.*, invoice.payment_succeeded/failed)
+- [ ] pro_member_billing 테이블에 Stripe payment_intent_id 자동 업데이트 로직
+- [ ] Stripe webhook secret 환경변수 등록 (STRIPE_WEBHOOK_SECRET)
+- [ ] TypeScript 0 errors 확인 후 체크포인트 저장

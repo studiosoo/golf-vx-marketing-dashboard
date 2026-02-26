@@ -73,10 +73,17 @@
   --ring: oklch(0.863 0.176 89.9);
   --sidebar: oklch(1 0 0); /* White sidebar */
   --sidebar-foreground: oklch(0.20 0 0);
-  --sidebar-accent: oklch(0.95 0 0);
-  --sidebar-accent-foreground: oklch(0.20 0 0);
+  --sidebar-accent: oklch(0.963 0.060 89.9); /* #ffcb00 tinted — active/hover bg */
+  --sidebar-accent-foreground: oklch(0.20 0 0); /* dark text on yellow tint */
   --sidebar-border: oklch(0.88 0 0);
   --sidebar-ring: oklch(0.863 0.176 89.9);
+  /* Brand color tokens for Recharts / inline styles */
+  --color-brand-primary: #ffcb00;
+  --color-brand-orange: #ef9253;
+  --color-brand-green: #5daf68;
+  --color-brand-purple: #a87fbe;
+  --color-brand-blue: #76addc;
+  --color-brand-gray: #6B7280;
 }
 
 .dark {
@@ -109,10 +116,17 @@
   --chart-5: oklch(0.727 0.090 245.3); /* #76addc B2B Events Blue */
   --sidebar: oklch(1 0 0);
   --sidebar-foreground: oklch(0.20 0 0);
-  --sidebar-accent: oklch(0.95 0 0);
+  --sidebar-accent: oklch(0.963 0.060 89.9); /* #ffcb00 tinted — active/hover bg */
   --sidebar-accent-foreground: oklch(0.20 0 0);
   --sidebar-border: oklch(0.88 0 0);
   --sidebar-ring: oklch(0.863 0.176 89.9);
+  /* Brand color tokens for Recharts / inline styles */
+  --color-brand-primary: #ffcb00;
+  --color-brand-orange: #ef9253;
+  --color-brand-green: #5daf68;
+  --color-brand-purple: #a87fbe;
+  --color-brand-blue: #76addc;
+  --color-brand-gray: #6B7280;
 }
 
 @layer base {

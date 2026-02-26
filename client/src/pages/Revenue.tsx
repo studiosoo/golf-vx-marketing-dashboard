@@ -232,29 +232,29 @@ export default function Revenue() {
                     <AreaChart data={monthly || []} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
                       <defs>
                         <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#ffcb00" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#ffcb00" stopOpacity={0} />
+                          <stop offset="5%" stopColor="var(--color-brand-primary)" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="var(--color-brand-primary)" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                       <XAxis dataKey="month" tickFormatter={fmtMonth} tick={{ fontSize: 11 }} />
                       <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
                       <Tooltip formatter={(v: number) => [fmt(v), "Revenue"]} labelFormatter={fmtMonth} />
-                      <Area type="monotone" dataKey="totalRevenue" stroke="#ffcb00" fill="url(#colorRevenue)" strokeWidth={2} name="Total Revenue" />
+                      <Area type="monotone" dataKey="totalRevenue" stroke="var(--color-brand-primary)" fill="url(#colorRevenue)" strokeWidth={2} name="Total Revenue" />
                     </AreaChart>
                   ) : (
                     <AreaChart data={last30Days} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
                       <defs>
                         <linearGradient id="colorRevenue2" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#ffcb00" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#ffcb00" stopOpacity={0} />
+                          <stop offset="5%" stopColor="var(--color-brand-primary)" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="var(--color-brand-primary)" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                       <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={(d) => d.slice(4)} />
                       <YAxis tickFormatter={(v) => `$${v}`} tick={{ fontSize: 11 }} />
                       <Tooltip formatter={(v: number) => [fmt(v), "Revenue"]} />
-                      <Area type="monotone" dataKey="totalRevenue" stroke="#ffcb00" fill="url(#colorRevenue2)" strokeWidth={2} name="Daily Revenue" />
+                      <Area type="monotone" dataKey="totalRevenue" stroke="var(--color-brand-primary)" fill="url(#colorRevenue2)" strokeWidth={2} name="Daily Revenue" />
                     </AreaChart>
                   )}
                 </ResponsiveContainer>
@@ -274,9 +274,9 @@ export default function Revenue() {
                     <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
                     <Tooltip formatter={(v: number) => fmt(v)} labelFormatter={fmtMonth} />
                     <Legend />
-                    <Bar dataKey="bayRevenue" name="Bay Usage" stackId="a" fill="#ffcb00" />
-                    <Bar dataKey="foodBevRevenue" name="Food & Bev" stackId="a" fill="#5daf68" />
-                    <Bar dataKey="golfRevenue" name="Golf" stackId="a" fill="#76addc" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="bayRevenue" name="Bay Usage" stackId="a" fill="var(--color-brand-primary)" />
+                    <Bar dataKey="foodBevRevenue" name="Food & Bev" stackId="a" fill="var(--color-brand-green)" />
+                    <Bar dataKey="golfRevenue" name="Golf" stackId="a" fill="var(--color-brand-blue)" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -359,8 +359,8 @@ export default function Revenue() {
                     <YAxis tick={{ fontSize: 11 }} />
                     <Tooltip labelFormatter={fmtMonth} />
                     <Legend />
-                    <Bar dataKey="totalOrders" name="Orders" fill="#ffcb00" radius={[3, 3, 0, 0]} />
-                    <Bar dataKey="totalGuests" name="Guests" fill="#76addc" radius={[3, 3, 0, 0]} />
+                    <Bar dataKey="totalOrders" name="Orders" fill="var(--color-brand-primary)" radius={[3, 3, 0, 0]} />
+                    <Bar dataKey="totalGuests" name="Guests" fill="var(--color-brand-blue)" radius={[3, 3, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -433,7 +433,7 @@ export default function Revenue() {
                               <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                                 <div
                                   className="h-full rounded-full"
-                                  style={{ width: `${pct}%`, background: isPbga ? '#a87fbe' : '#ef9253' }}
+                                  style={{ width: `${pct}%`, background: isPbga ? 'var(--color-brand-purple)' : 'var(--color-brand-orange)' }}
                                 />
                               </div>
                               <div className="text-xs font-medium w-20 text-right">{fmt(t.totalRevenue)}</div>
@@ -531,8 +531,8 @@ export default function Revenue() {
                               <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
                               <Tooltip formatter={(v: number) => fmt(v)} />
                               <Legend />
-                              <Bar dataKey={fmtMonth(momCategoryData.prevMonth)} fill="#6B7280" radius={[3, 3, 0, 0]} />
-                              <Bar dataKey={fmtMonth(momCategoryData.currMonth)} fill="#ffcb00" radius={[3, 3, 0, 0]} />
+                              <Bar dataKey={fmtMonth(momCategoryData.prevMonth)} fill="var(--color-brand-gray)" radius={[3, 3, 0, 0]} />
+                              <Bar dataKey={fmtMonth(momCategoryData.currMonth)} fill="var(--color-brand-primary)" radius={[3, 3, 0, 0]} />
                             </BarChart>
                           </ResponsiveContainer>
                         </div>
@@ -553,8 +553,8 @@ export default function Revenue() {
                           <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
                           <Tooltip formatter={(v: number) => fmt(v)} labelFormatter={fmtMonth} />
                           <Legend />
-                          <Bar dataKey="totalRevenue" name="Toast (POS)" fill="#ffcb00" stackId="a" />
-                          <Bar dataKey="acuityRevenue" name="Acuity (Clinics)" fill="#a87fbe" stackId="a" radius={[3, 3, 0, 0]} />
+                          <Bar dataKey="totalRevenue" name="Toast (POS)" fill="var(--color-brand-primary)" stackId="a" />
+                          <Bar dataKey="acuityRevenue" name="Acuity (Clinics)" fill="var(--color-brand-purple)" stackId="a" radius={[3, 3, 0, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     </CardContent>

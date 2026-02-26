@@ -9,6 +9,7 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { startScheduler } from "../scheduler";
 import { handleBoomerangWebhookRoute } from "../boomerangWebhook";
+import { handleStripeWebhookRoute } from "../stripeWebhook";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -37,6 +38,9 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+  // Stripe webhook — MUST be registered BEFORE global json() middleware
+  // Stripe requires the raw request body for signature verification
+  app.post("/api/webhooks/stripe", express.raw({ type: "application/json" }), handleStripeWebhookRoute);
   // Boomerang loyalty card webhook (Make.com → Golf VX)
   app.post("/api/webhooks/boomerang", handleBoomerangWebhookRoute);
   // tRPC API

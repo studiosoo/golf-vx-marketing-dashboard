@@ -204,7 +204,7 @@ export default function InstagramAnalytics() {
             <Line 
               type="monotone" 
               dataKey="impressions" 
-              stroke="#5daf68" 
+              stroke="var(--color-brand-green)" 
               strokeWidth={2}
               name="Impressions"
             />
