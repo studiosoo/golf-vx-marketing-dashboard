@@ -2,9 +2,11 @@ import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TrendingUp, Target, DollarSign, BarChart3, ChevronRight, TrendingDown } from "lucide-react";
+import { TrendingUp, Target, DollarSign, BarChart3, ChevronRight, TrendingDown, Search, ChevronDown } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
+import { useState } from "react";
 
 const CAMPAIGN_COLORS: Record<string, string> = {
   trial_conversion: "emerald",
@@ -14,16 +16,37 @@ const CAMPAIGN_COLORS: Record<string, string> = {
 };
 
 const CAMPAIGN_BG_COLORS: Record<string, string> = {
-  emerald: "bg-emerald-600 text-white dark:bg-emerald-500 dark:text-white font-semibold shadow-sm",
-  pink: "bg-pink-600 text-white dark:bg-pink-500 dark:text-white font-semibold shadow-sm",
-  blue: "bg-blue-600 text-white dark:bg-blue-500 dark:text-white font-semibold shadow-sm",
-  amber: "bg-amber-500 text-white dark:bg-amber-400 dark:text-gray-900 font-semibold shadow-sm",
+  emerald: "bg-emerald-600 text-white dark:bg-emerald-500 dark:text-white font-semibold shadow-sm cursor-pointer hover:bg-emerald-700 dark:hover:bg-emerald-400 transition-colors",
+  pink: "bg-pink-600 text-white dark:bg-pink-500 dark:text-white font-semibold shadow-sm cursor-pointer hover:bg-pink-700 dark:hover:bg-pink-400 transition-colors",
+  blue: "bg-blue-600 text-white dark:bg-blue-500 dark:text-white font-semibold shadow-sm cursor-pointer hover:bg-blue-700 dark:hover:bg-blue-400 transition-colors",
+  amber: "bg-amber-500 text-white dark:bg-amber-400 dark:text-gray-900 font-semibold shadow-sm cursor-pointer hover:bg-amber-600 dark:hover:bg-amber-300 transition-colors",
 };
+
+// Status badge colors for program status
+function getStatusBadgeClass(status: string): string {
+  switch (status) {
+    case "active":
+      return "bg-green-600 text-white dark:bg-green-500 dark:text-white border-0 font-medium";
+    case "completed":
+      return "bg-slate-500 text-white dark:bg-slate-400 dark:text-white border-0 font-medium";
+    case "paused":
+      return "bg-yellow-500 text-white dark:bg-yellow-400 dark:text-gray-900 border-0 font-medium";
+    case "planned":
+      return "bg-blue-500 text-white dark:bg-blue-400 dark:text-white border-0 font-medium";
+    default:
+      return "bg-slate-400 text-white border-0 font-medium";
+  }
+}
 
 export default function StrategicCampaigns() {
   const [, setLocation] = useLocation();
+  const [expandedPrograms, setExpandedPrograms] = useState<Record<string, boolean>>({});
   const { data: campaigns, isLoading } = trpc.strategicCampaigns.getOverview.useQuery();
   const { data: kpiData } = trpc.intelligence.getStrategicKPIs.useQuery();
+
+  function togglePrograms(campaignId: string) {
+    setExpandedPrograms(prev => ({ ...prev, [campaignId]: !prev[campaignId] }));
+  }
 
   if (isLoading) {
     return (
@@ -115,6 +138,7 @@ export default function StrategicCampaigns() {
       <div className="grid gap-6 md:grid-cols-2">
         {campaigns?.map(campaign => {
           const colorClass = CAMPAIGN_BG_COLORS[campaign.color] || CAMPAIGN_BG_COLORS.blue;
+          const isExpanded = expandedPrograms[campaign.id] ?? true;
           
           return (
             <Card key={campaign.id} className="hover:shadow-lg transition-shadow">
@@ -124,8 +148,13 @@ export default function StrategicCampaigns() {
                     <CardTitle className="text-xl">{campaign.name}</CardTitle>
                     <CardDescription>{campaign.description}</CardDescription>
                   </div>
-                  <Badge className={colorClass}>
+                  <Badge
+                    className={colorClass}
+                    onClick={() => togglePrograms(campaign.id)}
+                    title={isExpanded ? "Hide programs" : "Show programs"}
+                  >
                     {campaign.totalPrograms} {campaign.totalPrograms === 1 ? "program" : "programs"}
+                    <ChevronDown className={`ml-1 h-3 w-3 transition-transform ${isExpanded ? "" : "-rotate-90"}`} />
                   </Badge>
                 </div>
               </CardHeader>
@@ -233,6 +262,19 @@ export default function StrategicCampaigns() {
                   </div>
                 </div>
 
+                {/* B2B Research Button — only for corporate_events */}
+                {campaign.id === 'corporate_events' && (
+                  <div className="pt-2">
+                    <Button
+                      variant="outline"
+                      className="w-full gap-2 border-amber-500 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                      onClick={() => setLocation("/intelligence/research")}
+                    >
+                      <Search className="h-4 w-4" />
+                      Start Market Research
+                    </Button>
+                  </div>
+                )}
                 {/* View Landing Page Button */}
                 {campaign.landingPageUrl && (
                   <div className="pt-4">
@@ -248,7 +290,7 @@ export default function StrategicCampaigns() {
                 )}
 
                 {/* Programs List */}
-                {campaign.programs.length > 0 && (
+                {campaign.programs.length > 0 && isExpanded && (
                   <div className="pt-4 border-t space-y-2">
                     <p className="text-sm font-medium text-muted-foreground mb-3">Supporting Programs</p>
                     {campaign.programs.map(program => {
@@ -271,7 +313,7 @@ export default function StrategicCampaigns() {
                               <span className="text-xs text-muted-foreground">
                                 ${program.revenue.toFixed(2)} revenue
                               </span>
-                              <Badge variant="outline" className="text-xs">
+                              <Badge className={`text-xs ${getStatusBadgeClass(program.status)}`}>
                                 {program.status}
                               </Badge>
                             </div>
