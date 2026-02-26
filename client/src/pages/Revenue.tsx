@@ -95,6 +95,27 @@ export default function Revenue() {
 
   const isLoading = summaryLoading || monthlyLoading || dailyLoading || paymentsLoading;
 
+  // MoM category drill-down: last 2 months
+  const momCategoryData = useMemo(() => {
+    if (!monthly || monthly.length < 2) return null;
+    const sorted = [...monthly].sort((a, b) => a.month.localeCompare(b.month));
+    const curr = sorted[sorted.length - 1];
+    const prev = sorted[sorted.length - 2];
+    const delta = (c: number, p: number) => p === 0 ? null : ((c - p) / p) * 100;
+    return {
+      currMonth: curr.month,
+      prevMonth: prev.month,
+      categories: [
+        { name: "Bay Usage", color: "#EAB308", curr: curr.bayRevenue, prev: prev.bayRevenue, delta: delta(curr.bayRevenue, prev.bayRevenue), note: "Non-member & additional-hour bay time" },
+        { name: "Food & Beverage", color: "#10B981", curr: curr.foodBevRevenue, prev: prev.foodBevRevenue, delta: delta(curr.foodBevRevenue, prev.foodBevRevenue), note: "Bar & food sales" },
+        { name: "Golf / Merch", color: "#3B82F6", curr: curr.golfRevenue, prev: prev.golfRevenue, delta: delta(curr.golfRevenue, prev.golfRevenue), note: "Golf retail & merchandise" },
+      ],
+      totalCurr: curr.totalRevenue,
+      totalPrev: prev.totalRevenue,
+      totalDelta: delta(curr.totalRevenue, prev.totalRevenue),
+    };
+  }, [monthly]);
+
   // Combined monthly chart data (Toast + Acuity)
   const combinedMonthly = useMemo(() => {
     if (!monthly) return [];
@@ -426,6 +447,98 @@ export default function Revenue() {
                       </div>
                     </CardContent>
                   </Card>
+
+                  {/* MoM Category Drill-Down */}
+                  {momCategoryData && (
+                    <Card className="border border-primary/20 bg-primary/5">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base font-semibold flex items-center gap-2">
+                          <TrendingDown className="w-4 h-4 text-red-500" />
+                          Month-over-Month Drill-Down
+                          <span className="text-xs font-normal text-muted-foreground ml-2">
+                            {fmtMonth(momCategoryData.prevMonth)} → {fmtMonth(momCategoryData.currMonth)}
+                          </span>
+                        </CardTitle>
+                        <p className="text-xs text-muted-foreground">Toast POS revenue = non-member bay usage + additional hours. Membership fees tracked separately via Stripe.</p>
+                      </CardHeader>
+                      <CardContent>
+                        {/* Total MoM row */}
+                        <div className="flex items-center justify-between mb-4 p-3 rounded-lg bg-background border">
+                          <span className="font-semibold text-sm">Total POS Revenue</span>
+                          <div className="flex items-center gap-6">
+                            <div className="text-right">
+                              <p className="text-xs text-muted-foreground">{fmtMonth(momCategoryData.prevMonth)}</p>
+                              <p className="font-medium">{fmt(momCategoryData.totalPrev)}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-xs text-muted-foreground">{fmtMonth(momCategoryData.currMonth)}</p>
+                              <p className="font-medium">{fmt(momCategoryData.totalCurr)}</p>
+                            </div>
+                            <div className="text-right min-w-[60px]">
+                              {momCategoryData.totalDelta !== null && (
+                                <span className={`text-sm font-bold ${momCategoryData.totalDelta >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                  {momCategoryData.totalDelta > 0 ? '+' : ''}{momCategoryData.totalDelta.toFixed(1)}%
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        {/* Per-category rows */}
+                        <div className="space-y-3">
+                          {momCategoryData.categories.map((cat, i) => (
+                            <div key={i} className="space-y-1">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <span className="w-3 h-3 rounded-full inline-block" style={{ background: cat.color }} />
+                                  <span className="text-sm font-medium">{cat.name}</span>
+                                  <span className="text-xs text-muted-foreground hidden md:inline">{cat.note}</span>
+                                </div>
+                                <div className="flex items-center gap-6">
+                                  <div className="text-right">
+                                    <p className="text-xs text-muted-foreground">{fmtMonth(momCategoryData.prevMonth)}</p>
+                                    <p className="text-sm">{fmt(cat.prev)}</p>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-xs text-muted-foreground">{fmtMonth(momCategoryData.currMonth)}</p>
+                                    <p className="text-sm font-medium">{fmt(cat.curr)}</p>
+                                  </div>
+                                  <div className="text-right min-w-[60px]">
+                                    {cat.delta !== null ? (
+                                      <span className={`text-xs font-bold ${cat.delta >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                        {cat.delta > 0 ? '+' : ''}{cat.delta.toFixed(1)}%
+                                      </span>
+                                    ) : <span className="text-xs text-muted-foreground">—</span>}
+                                  </div>
+                                </div>
+                              </div>
+                              {/* Progress bar showing curr vs prev */}
+                              <div className="flex gap-1 h-1.5">
+                                <div className="h-full rounded-full opacity-40" style={{ width: `${Math.min(100, cat.prev > 0 ? (cat.prev / Math.max(cat.prev, cat.curr)) * 100 : 0)}%`, background: cat.color }} />
+                                <div className="h-full rounded-full" style={{ width: `${Math.min(100, cat.curr > 0 ? (cat.curr / Math.max(cat.prev, cat.curr)) * 100 : 0)}%`, background: cat.color }} />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        {/* Side-by-side bar chart */}
+                        <div className="mt-4">
+                          <ResponsiveContainer width="100%" height={160}>
+                            <BarChart
+                              data={momCategoryData.categories.map(c => ({ name: c.name, [fmtMonth(momCategoryData.prevMonth)]: c.prev, [fmtMonth(momCategoryData.currMonth)]: c.curr }))}
+                              margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
+                            >
+                              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                              <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
+                              <Tooltip formatter={(v: number) => fmt(v)} />
+                              <Legend />
+                              <Bar dataKey={fmtMonth(momCategoryData.prevMonth)} fill="#6B7280" radius={[3, 3, 0, 0]} />
+                              <Bar dataKey={fmtMonth(momCategoryData.currMonth)} fill="#EAB308" radius={[3, 3, 0, 0]} />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
 
                   {/* Combined Toast + Acuity Monthly Chart */}
                   <Card className="mt-4">

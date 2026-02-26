@@ -1338,3 +1338,54 @@ export const toastSyncLog = mysqlTable("toast_sync_log", {
   syncedAt: timestamp("synced_at").defaultNow().notNull(),
 });
 export type ToastSyncLog = typeof toastSyncLog.$inferSelect;
+
+// ---------------------------------------------------------------------------
+// Pro Member Sessions — tracks individual bay sessions for Pro (coach) members
+// Each session can be credited against the $500/mo base fee at $25/session
+// ---------------------------------------------------------------------------
+export const proMemberSessions = mysqlTable("pro_member_sessions", {
+  id: int("id").primaryKey().autoincrement(),
+  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
+  sessionDate: date("session_date").notNull(),
+  sessionType: mysqlEnum("session_type", ["bay_usage", "lesson", "clinic", "practice"]).notNull().default("bay_usage"),
+  bayNumber: varchar("bay_number", { length: 20 }),
+  durationHrs: decimal("duration_hrs", { precision: 4, scale: 2 }).notNull().default("1"),
+  creditApplied: decimal("credit_applied", { precision: 8, scale: 2 }).notNull().default("25"),
+  notes: text("notes"),
+  toastOrderId: varchar("toast_order_id", { length: 100 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  proSessMemberIdx: index("pro_sessions_member_idx").on(table.memberId),
+  proSessDateIdx: index("pro_sessions_date_idx").on(table.sessionDate),
+}));
+export type ProMemberSession = typeof proMemberSessions.$inferSelect;
+export type NewProMemberSession = typeof proMemberSessions.$inferInsert;
+
+// ---------------------------------------------------------------------------
+// Pro Member Billing — monthly billing records for Pro (coach) members
+// Base fee: $500/mo. Bay credits deducted at $25/session (up to 20 sessions).
+// Overage: $25/hr for sessions beyond 20/mo.
+// Stripe handles actual payment; this table tracks the billing calculation.
+// ---------------------------------------------------------------------------
+export const proMemberBilling = mysqlTable("pro_member_billing", {
+  id: int("id").primaryKey().autoincrement(),
+  memberId: int("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
+  billingMonth: varchar("billing_month", { length: 7 }).notNull(),
+  baseFee: decimal("base_fee", { precision: 8, scale: 2 }).notNull().default("500"),
+  sessionCount: int("session_count").notNull().default(0),
+  bayCreditTotal: decimal("bay_credit_total", { precision: 8, scale: 2 }).notNull().default("0"),
+  overageHrs: decimal("overage_hrs", { precision: 6, scale: 2 }).notNull().default("0"),
+  overageAmount: decimal("overage_amount", { precision: 8, scale: 2 }).notNull().default("0"),
+  netBill: decimal("net_bill", { precision: 8, scale: 2 }).notNull().default("500"),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id", { length: 255 }),
+  stripeStatus: mysqlEnum("stripe_status", ["pending", "paid", "failed", "refunded", "waived"]).notNull().default("pending"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  proBillMemberMonthIdx: index("pro_billing_member_month_idx").on(table.memberId, table.billingMonth),
+  proBillMemberIdx: index("pro_billing_member_idx").on(table.memberId),
+}));
+export type ProMemberBilling = typeof proMemberBilling.$inferSelect;
+export type NewProMemberBilling = typeof proMemberBilling.$inferInsert;

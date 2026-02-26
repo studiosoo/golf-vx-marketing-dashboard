@@ -25,7 +25,7 @@ import * as memberAppointmentSync from "./memberAppointmentSync";
 import * as toastTransactionSync from "./toastTransactionSync";
 import * as giveawaySync from "./giveawaySync";
 import { calculateCampaignPerformance, GOAL_TEMPLATES } from "./goalTemplates";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql, inArray } from "drizzle-orm";
 import { aiRecommendations, userActions, priorities } from "../drizzle/schema";
 import { emailCaptureRouter } from "./emailCaptureRouter";
 import { boomerangRouter } from "./boomerangRouter";
@@ -769,9 +769,134 @@ export const appRouter = router({
         
         return { success: true, mergedCount: duplicateIds.length };
       }),
-  }),
 
-  // Revenue Management
+    bulkReclassify: protectedProcedure
+      .input(z.object({
+        memberIds: z.array(z.number()).min(1),
+        newTier: z.enum(["trial", "monthly", "annual", "corporate", "none", "all_access_aces", "swing_savers", "golf_vx_pro"]),
+      }))
+      .mutation(async ({ input }) => {
+        const drizzleDb = await db.getDb();
+        if (!drizzleDb) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        const { members: membersTable } = await import('../drizzle/schema');
+        await drizzleDb
+          .update(membersTable)
+          .set({ membershipTier: input.newTier, updatedAt: new Date() })
+          .where(inArray(membersTable.id, input.memberIds));
+        return { success: true, updatedCount: input.memberIds.length };
+      }),
+  }),
+  // ---------------------------------------------------------------------------
+  // Pro Members — billing panel for coach members ($500/mo base + Bay credits)
+  // ---------------------------------------------------------------------------
+  proMembers: router({
+    getSessions: protectedProcedure
+      .input(z.object({
+        memberId: z.number().optional(),
+        billingMonth: z.string().optional(),
+      }))
+      .query(async ({ input }) => {
+        const drizzleDb = await db.getDb();
+        if (!drizzleDb) return [];
+        let query: ReturnType<typeof sql>;
+        if (input.memberId && input.billingMonth) {
+          query = sql`SELECT s.id, s.member_id, m.name as member_name, s.session_date, s.session_type, s.bay_number, s.duration_hrs, s.credit_applied, s.notes, s.toast_order_id, s.created_at FROM pro_member_sessions s JOIN members m ON m.id = s.member_id WHERE s.member_id = ${input.memberId} AND DATE_FORMAT(s.session_date, '%Y-%m') = ${input.billingMonth} ORDER BY s.session_date DESC`;
+        } else if (input.memberId) {
+          query = sql`SELECT s.id, s.member_id, m.name as member_name, s.session_date, s.session_type, s.bay_number, s.duration_hrs, s.credit_applied, s.notes, s.toast_order_id, s.created_at FROM pro_member_sessions s JOIN members m ON m.id = s.member_id WHERE s.member_id = ${input.memberId} ORDER BY s.session_date DESC`;
+        } else if (input.billingMonth) {
+          query = sql`SELECT s.id, s.member_id, m.name as member_name, s.session_date, s.session_type, s.bay_number, s.duration_hrs, s.credit_applied, s.notes, s.toast_order_id, s.created_at FROM pro_member_sessions s JOIN members m ON m.id = s.member_id WHERE DATE_FORMAT(s.session_date, '%Y-%m') = ${input.billingMonth} ORDER BY s.session_date DESC`;
+        } else {
+          query = sql`SELECT s.id, s.member_id, m.name as member_name, s.session_date, s.session_type, s.bay_number, s.duration_hrs, s.credit_applied, s.notes, s.toast_order_id, s.created_at FROM pro_member_sessions s JOIN members m ON m.id = s.member_id ORDER BY s.session_date DESC LIMIT 200`;
+        }
+        const rows = await drizzleDb.execute(query) as any;
+        const rowArr = Array.isArray(rows) ? rows[0] : rows;
+        return (Array.isArray(rowArr) ? rowArr : []).map((r: any) => ({
+          id: r.id, memberId: r.member_id, memberName: r.member_name,
+          sessionDate: r.session_date, sessionType: r.session_type, bayNumber: r.bay_number,
+          durationHrs: parseFloat(r.duration_hrs || '1'), creditApplied: parseFloat(r.credit_applied || '25'),
+          notes: r.notes, toastOrderId: r.toast_order_id, createdAt: r.created_at,
+        }));
+      }),
+
+    logSession: protectedProcedure
+      .input(z.object({
+        memberId: z.number(),
+        sessionDate: z.string(),
+        sessionType: z.enum(["bay_usage", "lesson", "clinic", "practice"]).default("bay_usage"),
+        bayNumber: z.string().optional(),
+        durationHrs: z.number().default(1),
+        notes: z.string().optional(),
+        toastOrderId: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const drizzleDb = await db.getDb();
+        if (!drizzleDb) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        await drizzleDb.execute(
+          sql`INSERT INTO pro_member_sessions (member_id, session_date, session_type, bay_number, duration_hrs, credit_applied, notes, toast_order_id) VALUES (${input.memberId}, ${input.sessionDate}, ${input.sessionType}, ${input.bayNumber ?? null}, ${input.durationHrs}, 25, ${input.notes ?? null}, ${input.toastOrderId ?? null})`
+        );
+        return { success: true };
+      }),
+
+    deleteSession: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const drizzleDb = await db.getDb();
+        if (!drizzleDb) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        await drizzleDb.execute(sql`DELETE FROM pro_member_sessions WHERE id = ${input.id}`);
+        return { success: true };
+      }),
+
+    getMonthlyBillSummary: protectedProcedure
+      .input(z.object({ billingMonth: z.string() }))
+      .query(async ({ input }) => {
+        const drizzleDb = await db.getDb();
+        if (!drizzleDb) return [];
+        const proRowsRaw = await drizzleDb.execute(sql`SELECT id, name, email FROM members WHERE membershipTier = 'golf_vx_pro' AND status = 'active'`) as any;
+        const proMembers = Array.isArray(proRowsRaw) ? (Array.isArray(proRowsRaw[0]) ? proRowsRaw[0] : proRowsRaw) : [];
+        const results = [];
+        for (const member of proMembers) {
+          const sessRaw = await drizzleDb.execute(sql`SELECT COUNT(*) as cnt, COALESCE(SUM(duration_hrs),0) as total_hrs FROM pro_member_sessions WHERE member_id = ${member.id} AND DATE_FORMAT(session_date, '%Y-%m') = ${input.billingMonth}`) as any;
+          const s = Array.isArray(sessRaw) ? (Array.isArray(sessRaw[0]) ? sessRaw[0][0] : sessRaw[0]) : sessRaw;
+          const sessionCount = Number(s?.cnt || 0);
+          const totalHrs = parseFloat(s?.total_hrs || '0');
+          const creditSessions = Math.min(sessionCount, 20);
+          const bayCreditTotal = creditSessions * 25;
+          const overageHrs = Math.max(0, totalHrs - 20);
+          const overageAmount = overageHrs * 25;
+          const netBill = 500 - bayCreditTotal + overageAmount;
+          const billRaw = await drizzleDb.execute(sql`SELECT * FROM pro_member_billing WHERE member_id = ${member.id} AND billing_month = ${input.billingMonth}`) as any;
+          const billArr = Array.isArray(billRaw) ? (Array.isArray(billRaw[0]) ? billRaw[0] : billRaw) : [];
+          const bill = billArr[0];
+          results.push({
+            memberId: member.id, memberName: member.name, memberEmail: member.email,
+            billingMonth: input.billingMonth, baseFee: 500, sessionCount, totalHrs,
+            bayCreditTotal, overageHrs, overageAmount, netBill,
+            stripeStatus: bill?.stripe_status || 'pending',
+            stripePaymentIntentId: bill?.stripe_payment_intent_id || null,
+            notes: bill?.notes || null,
+          });
+        }
+        return results;
+      }),
+
+    getBillingHistory: protectedProcedure
+      .input(z.object({ memberId: z.number() }))
+      .query(async ({ input }) => {
+        const drizzleDb = await db.getDb();
+        if (!drizzleDb) return [];
+        const raw = await drizzleDb.execute(sql`SELECT * FROM pro_member_billing WHERE member_id = ${input.memberId} ORDER BY billing_month DESC LIMIT 12`) as any;
+        const rows = Array.isArray(raw) ? (Array.isArray(raw[0]) ? raw[0] : raw) : [];
+        return (rows as any[]).map((r: any) => ({
+          id: r.id, memberId: r.member_id, billingMonth: r.billing_month,
+          baseFee: parseFloat(r.base_fee || '500'), sessionCount: Number(r.session_count),
+          bayCreditTotal: parseFloat(r.bay_credit_total || '0'), overageHrs: parseFloat(r.overage_hrs || '0'),
+          overageAmount: parseFloat(r.overage_amount || '0'), netBill: parseFloat(r.net_bill || '500'),
+          stripeStatus: r.stripe_status, stripePaymentIntentId: r.stripe_payment_intent_id,
+          notes: r.notes, createdAt: r.created_at,
+        }));
+      }),
+  }),
+  // Revenue Managementt
   revenue: router({
     getByDateRange: protectedProcedure
       .input(z.object({

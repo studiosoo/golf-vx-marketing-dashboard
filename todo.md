@@ -243,3 +243,30 @@
 - [x] Add Pro Members billing details: $500/mo base, $25/session Bay credit, $25/hr overage after 20 sessions
 - [x] Add Coach Chuck Lynch note in Pro Members section
 - [x] Fix TypeScript: 0 errors
+
+## Three Feature Sprint (2026-02-26)
+
+### Feature 1: Pro Members Billing Panel
+- [x] Add pro_member_sessions table to schema (member_id, session_date, session_type, bay_number, duration_hrs, notes)
+- [x] Add pro_member_billing table (member_id, billing_month, base_fee, session_count, bay_credit_total, overage_amount, net_bill, stripe_payment_intent_id, status)
+- [x] Run db:push migration for new tables
+- [x] Add tRPC procedures: proMembers.getSessions, proMembers.getBillingHistory, proMembers.logSession, proMembers.getMonthlyBillSummary
+- [x] Existing ProMembersPanel in Members.tsx shows coach list with PBGA Lead badge for Chuck Lynch
+- [x] Update Revenue context: clarify Toast POS = non-member/overage bay usage; Stripe = membership fees
+- [ ] Write vitest tests for Pro Members billing logic
+
+### Feature 2: Revenue Decline Drill-Down
+- [x] MoM category drill-down uses existing getToastMonthly (bayRevenue, foodBevRevenue, golfRevenue per month)
+- [x] Add MoM comparison section to Revenue.tsx: Bay Usage vs Food & Bev vs Golf side-by-side
+- [x] Add delta badges ($ and %) per category showing change from last month
+- [x] Add context note: Toast POS = non-member bay usage + additional hours; Stripe = membership MRR
+- [x] Add bar chart comparing this month vs last month by category
+- [ ] Write vitest tests for MoM category query
+
+### Feature 3: Membership Tier Reconciliation Tool
+- [x] Add bulk-reclassify tRPC mutation: members.bulkReclassify(memberIds[], newTier)
+- [x] Add Unclassified tab in Members.tsx with members filtered by tier=none
+- [x] Add checkbox selection to member rows in Unclassified panel
+- [x] Add "Assign Tier" action bar that appears when members are selected
+- [x] Show count of unclassified members prominently as a banner/alert
+- [ ] Write vitest tests for bulk reclassify mutation

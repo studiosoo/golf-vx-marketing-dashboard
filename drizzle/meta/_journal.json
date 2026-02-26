@@ -43,6 +43,13 @@
       "when": 1772060974913,
       "tag": "0005_flaky_sinister_six",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1772067975677,
+      "tag": "0006_smooth_lester",
+      "breakpoints": true
     }
   ]
 }

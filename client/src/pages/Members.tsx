@@ -140,6 +140,10 @@ export default function Members() {
             <Award className="mr-2 h-4 w-4" />
             Pro Members
           </TabsTrigger>
+          <TabsTrigger value="unclassified">
+            <Activity className="mr-2 h-4 w-4" />
+            Unclassified
+          </TabsTrigger>
           <TabsTrigger value="duplicates">
             <Users className="mr-2 h-4 w-4" />
             Duplicates
@@ -392,6 +396,10 @@ export default function Members() {
 
         <TabsContent value="pro-members">
           <ProMembersPanel />
+        </TabsContent>
+
+        <TabsContent value="unclassified">
+          <UnclassifiedMembersPanel />
         </TabsContent>
 
         <TabsContent value="duplicates">
@@ -761,6 +769,163 @@ function TierMembersList({
                       </div>
                     </TableCell>
                     <TableCell>${parseFloat(member.lifetimeValue).toLocaleString()}</TableCell>
+                    <TableCell className="text-right">
+                      <Link href={`/members/${member.id}`}>
+                        <Button variant="ghost" size="sm">View</Button>
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// ─── Unclassified Members Panel ─────────────────────────────────────────────
+function UnclassifiedMembersPanel() {
+  const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [targetTier, setTargetTier] = useState<string>("");
+  const [search, setSearch] = useState("");
+  const utils = trpc.useUtils();
+
+  const { data: members, isLoading } = trpc.members.list.useQuery({ membershipTier: "none" as any });
+  const bulkReclassify = trpc.members.bulkReclassify.useMutation({
+    onSuccess: (res) => {
+      toast.success(`${res.updatedCount} member${res.updatedCount !== 1 ? 's' : ''} reclassified to ${getTierLabel(targetTier)}`);
+      setSelected(new Set());
+      setTargetTier("");
+      utils.members.list.invalidate();
+      utils.members.getStats.invalidate();
+    },
+    onError: (err) => toast.error(`Reclassify failed: ${err.message}`),
+  });
+
+  const getTierLabel = (t: string) => ({
+    all_access_aces: "All-Access Aces",
+    swing_savers: "Swing Savers",
+    golf_vx_pro: "Golf VX Pro (Coach)",
+    none: "Unclassified",
+  }[t] || t);
+
+  const filtered = (members || []).filter(m =>
+    !search || m.name?.toLowerCase().includes(search.toLowerCase()) || m.email?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const allSelected = filtered.length > 0 && filtered.every(m => selected.has(m.id));
+  const toggleAll = () => {
+    if (allSelected) setSelected(new Set());
+    else setSelected(new Set(filtered.map(m => m.id)));
+  };
+  const toggle = (id: number) => {
+    const s = new Set(selected);
+    if (s.has(id)) s.delete(id); else s.add(id);
+    setSelected(s);
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="rounded-xl p-6 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800">
+        <div className="flex items-center gap-3 mb-1">
+          <Activity className="h-6 w-6 text-orange-500" />
+          <h2 className="text-2xl font-bold">Unclassified Members</h2>
+          <Badge variant="outline" className="text-orange-500 border-orange-400">
+            {members?.length ?? "—"} members
+          </Badge>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Members with no assigned tier. Select one or more and assign them to All-Access Aces, Swing Savers, or Pro Members in bulk. Use this panel during the Wednesday HQ review.
+        </p>
+      </div>
+
+      {/* Bulk action bar */}
+      <Card className="border-dashed">
+        <CardContent className="pt-4 pb-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-sm font-medium">
+              {selected.size > 0 ? `${selected.size} selected` : "Select members below to reclassify"}
+            </span>
+            <Select value={targetTier} onValueChange={setTargetTier} disabled={selected.size === 0}>
+              <SelectTrigger className="w-[220px]">
+                <SelectValue placeholder="Assign tier..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all_access_aces">All-Access Aces ($325/mo)</SelectItem>
+                <SelectItem value="swing_savers">Swing Savers ($225/mo)</SelectItem>
+                <SelectItem value="golf_vx_pro">Golf VX Pro — Coach ($500/mo)</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              disabled={selected.size === 0 || !targetTier || bulkReclassify.isPending}
+              onClick={() => bulkReclassify.mutate({ memberIds: Array.from(selected), newTier: targetTier as any })}
+              className="bg-orange-500 hover:bg-orange-600 text-white"
+            >
+              {bulkReclassify.isPending ? "Saving..." : `Reclassify ${selected.size > 0 ? selected.size : ''}`}
+            </Button>
+            {selected.size > 0 && (
+              <Button variant="ghost" size="sm" onClick={() => setSelected(new Set())}>Clear</Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <Input placeholder="Search unclassified members..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10 max-w-md" />
+      </div>
+
+      {/* Table */}
+      <Card>
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="p-8 text-center text-muted-foreground">Loading...</div>
+          ) : filtered.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground">
+              <Activity className="h-12 w-12 mx-auto mb-4 opacity-20" />
+              <p className="font-medium">No unclassified members found.</p>
+              <p className="text-xs mt-1">All members have been assigned to a tier.</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-10">
+                    <input type="checkbox" checked={allSelected} onChange={toggleAll} className="cursor-pointer" />
+                  </TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Join Date</TableHead>
+                  <TableHead>LTV</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map(member => (
+                  <TableRow key={member.id} className={selected.has(member.id) ? "bg-orange-50/50 dark:bg-orange-950/10" : ""}>
+                    <TableCell>
+                      <input type="checkbox" checked={selected.has(member.id)} onChange={() => toggle(member.id)} className="cursor-pointer" />
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      <Link href={`/members/${member.id}`}>
+                        <span className="hover:underline cursor-pointer">{member.name}</span>
+                      </Link>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{member.email || "—"}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{member.phone || "—"}</TableCell>
+                    <TableCell>
+                      <Badge variant={member.status === "active" ? "default" : "secondary"}>{member.status}</Badge>
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {format(new Date(member.joinDate), "MMM d, yyyy")}
+                    </TableCell>
+                    <TableCell className="text-sm">${parseFloat(member.lifetimeValue).toLocaleString()}</TableCell>
                     <TableCell className="text-right">
                       <Link href={`/members/${member.id}`}>
                         <Button variant="ghost" size="sm">View</Button>
