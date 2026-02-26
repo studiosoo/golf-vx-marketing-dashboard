@@ -375,3 +375,26 @@
 ### Issue 6: Email Sending Strategy (Analysis - no code changes needed)
 - [x] Analyzed 3 scenarios: Encharge API, Encharge UI, Dashboard direct send
 - [x] Recommendation documented in final result message
+
+## Sprint: Meta Ads Status Sync + Drill-Down Lists + SMS/Email from Lists (2026-02-26)
+
+### Issue 1: Meta Ads Campaign Status Sync
+- [x] Fetch live campaign status from Meta Ads API (effective_status field)
+- [x] Map Meta API status to dashboard display: COMPLETED→Completed, ACTIVE→Active, PAUSED→Paused
+- [x] Update MetaAds.tsx Campaign Performance table to use live status from API
+- [x] Fix Superbowl Watch Party_Feb2026 showing "Paused" instead of "Completed"
+- [x] Fix IG_$100 Giveaway_Feb2026 showing "Paused" instead of "Completed"
+
+### Issue 2: Clickable Drill-Down Lists
+- [x] SundayClinicDetail: Acquisition Source numbers (Golf VX: 16, PBGA: 12, etc.) → click → contact list modal
+- [x] SundayClinicDetail: Event Breakdown booking numbers (19, 11, 14, etc.) → click → contact list modal
+- [x] Source badge chips in event breakdown also clickable
+- [x] Backend: getSundayClinicAttendeesBySource(source) endpoint
+- [x] Backend: getSundayClinicAttendeesByEvent(eventDate) endpoint
+
+### Issue 3: SMS/Email Actions in Attendee Modals
+- [x] Add "Send SMS" button in all attendee list modals (bulk or per-contact)
+- [x] Add "Send Email" button in all attendee list modals (bulk or per-contact)
+- [x] Wire to existing Communication tRPC router (sendSMS, sendEmail)
+- [x] SundayClinicDetail: Members/NewVisitors modal + Source modal + Event modal all have SMS/Email All buttons
+- [x] WinterClinicDetail: Registration modal has SMS/Email All buttons

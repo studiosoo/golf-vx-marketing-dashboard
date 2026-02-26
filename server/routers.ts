@@ -304,6 +304,61 @@ export const appRouter = router({
         }));
       }),
 
+    // Get Sunday Clinic attendees filtered by acquisition source
+    getSundayClinicAttendeesBySource: protectedProcedure
+      .input(z.object({
+        minDate: z.string().optional(),
+        maxDate: z.string().optional(),
+        source: z.string(),
+      }))
+      .query(async ({ input }) => {
+        const { getSundayClinicData, extractAcquisitionSource } = await import("./acuity");
+        const data = await getSundayClinicData({ minDate: input.minDate, maxDate: input.maxDate });
+        const allAppts = data.events.flatMap(e => e.appointments);
+        const filtered = allAppts.filter(apt => {
+          const src = extractAcquisitionSource(apt);
+          return src.toLowerCase() === input.source.toLowerCase();
+        });
+        const seen = new Set<string>();
+        return filtered
+          .filter(apt => { const k = apt.email.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; })
+          .map(apt => ({
+            id: apt.id,
+            firstName: apt.firstName,
+            lastName: apt.lastName,
+            email: apt.email,
+            phone: apt.phone,
+            date: apt.date,
+            type: apt.type,
+            source: extractAcquisitionSource(apt),
+          }));
+      }),
+    // Get Sunday Clinic attendees for a specific event date
+    getSundayClinicAttendeesByEvent: protectedProcedure
+      .input(z.object({
+        minDate: z.string().optional(),
+        maxDate: z.string().optional(),
+        eventDate: z.string(),
+      }))
+      .query(async ({ input }) => {
+        const { getSundayClinicData, extractAcquisitionSource } = await import("./acuity");
+        const members = await db.getAllMembers();
+        const memberEmailSet = new Set(members.map(m => m.email.toLowerCase()));
+        const data = await getSundayClinicData({ minDate: input.minDate, maxDate: input.maxDate });
+        const event = data.events.find(e => e.date === input.eventDate);
+        if (!event) return [];
+        return event.appointments.map(apt => ({
+          id: apt.id,
+          firstName: apt.firstName,
+          lastName: apt.lastName,
+          email: apt.email,
+          phone: apt.phone,
+          date: apt.date,
+          type: apt.type,
+          source: extractAcquisitionSource(apt),
+          isMember: memberEmailSet.has(apt.email.toLowerCase()),
+        }));
+      }),
     // Get Winter Clinic attendee list per clinic type
     getWinterClinicAttendeeList: protectedProcedure
       .input(z.object({

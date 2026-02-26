@@ -197,7 +197,7 @@ export async function getAllRevenueByType(minDate?: string, maxDate?: string) {
 /**
  * Extract acquisition source from appointment forms
  */
-function extractAcquisitionSource(appointment: AcuityAppointment): string {
+export function extractAcquisitionSource(appointment: AcuityAppointment): string {
   // Check forms array for "How did you hear about us?" field
   if (appointment.forms && Array.isArray(appointment.forms)) {
     for (const form of appointment.forms) {

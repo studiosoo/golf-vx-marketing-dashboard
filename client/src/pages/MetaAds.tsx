@@ -64,14 +64,16 @@ export default function MetaAds() {
   };
 
   const getStatusBadge = (status: string) => {
-    const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-      ACTIVE: { label: "Active", variant: "default" },
-      PAUSED: { label: "Paused", variant: "secondary" },
-      ARCHIVED: { label: "Archived", variant: "outline" },
-      DELETED: { label: "Deleted", variant: "destructive" },
+    const statusMap: Record<string, { label: string; className: string }> = {
+      ACTIVE: { label: "Active", className: "bg-green-500/15 text-green-400 border-green-500/30" },
+      PAUSED: { label: "Paused", className: "bg-muted/60 text-muted-foreground border-border" },
+      COMPLETED: { label: "Completed", className: "bg-blue-500/15 text-blue-400 border-blue-500/30" },
+      ARCHIVED: { label: "Archived", className: "bg-muted/60 text-muted-foreground border-border" },
+      DELETED: { label: "Deleted", className: "bg-red-500/15 text-red-400 border-red-500/30" },
+      IN_PROCESS: { label: "In Draft", className: "bg-amber-500/15 text-amber-400 border-amber-500/30" },
     };
-    const config = statusMap[status] || { label: status, variant: "outline" as const };
-    return <Badge variant={config.variant}>{config.label}</Badge>;
+    const config = statusMap[status] || { label: status, className: "" };
+    return <Badge variant="outline" className={`border ${config.className}`}>{config.label}</Badge>;
   };
 
   return (

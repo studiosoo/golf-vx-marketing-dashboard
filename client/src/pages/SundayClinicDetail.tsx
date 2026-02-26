@@ -10,6 +10,8 @@ import { trpc } from "@/lib/trpc";
 import { Loader2, Users, UserPlus, TrendingUp, Calendar, Share2, Mail, Phone, X } from "lucide-react";
 
 type AttendeeType = "members" | "new_visitors";
+type SourceModal = { source: string } | null;
+type EventModal = { eventDate: string; label: string } | null;
 
 function AttendeeListModal({
   open,
@@ -28,6 +30,8 @@ function AttendeeListModal({
     { type, minDate, maxDate },
     { enabled: open }
   );
+  const sendSms = trpc.communication.sendSMS.useMutation();
+  const sendEmail = trpc.communication.sendEmail.useMutation();
 
   const title = type === "members" ? "Members Attended" : "New Visitors";
   const description = type === "members"
@@ -76,16 +80,16 @@ function AttendeeListModal({
                   </div>
                   <div className="flex items-center gap-3 shrink-0 ml-4">
                     {a.email && (
-                      <a href={`mailto:${a.email}`} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors">
+                      <button onClick={() => sendEmail.mutate({ recipientId: a.id, recipientType: type === 'members' ? 'member' : 'lead', recipientName: `${a.firstName} ${a.lastName}`, email: a.email, subject: `Golf VX - Follow Up`, htmlBody: `<p>Hi ${a.firstName}, thanks for joining us at Golf VX!</p>` })} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors" title="Send email">
                         <Mail className="h-3 w-3" />
                         <span className="hidden sm:inline truncate max-w-[160px]">{a.email}</span>
-                      </a>
+                      </button>
                     )}
                     {a.phone && (
-                      <a href={`tel:${a.phone}`} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors">
+                      <button onClick={() => sendSms.mutate({ recipientId: a.id, recipientType: type === 'members' ? 'member' : 'lead', recipientName: `${a.firstName} ${a.lastName}`, phone: a.phone, body: `Hi ${a.firstName}! Thanks for joining us at Golf VX Drive Day. Book your next session at playgolfvx.com!` })} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors" title="Send SMS">
                         <Phone className="h-3 w-3" />
                         <span className="hidden sm:inline">{a.phone}</span>
-                      </a>
+                      </button>
                     )}
                     <span className="text-xs text-muted-foreground">
                       {a.date ? new Date(a.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : ""}
@@ -97,7 +101,17 @@ function AttendeeListModal({
           )}
         </div>
 
-        <div className="pt-3 border-t border-border flex justify-end">
+        <div className="pt-3 border-t border-border flex items-center justify-between">
+          {attendees && attendees.length > 0 ? (
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => attendees.forEach(a => a.email && sendEmail.mutate({ recipientId: a.id, recipientType: type === 'members' ? 'member' : 'lead', recipientName: `${a.firstName} ${a.lastName}`, email: a.email, subject: `Golf VX - Follow Up`, htmlBody: `<p>Hi ${a.firstName}, thanks for joining us at Golf VX!</p>` }))} disabled={sendEmail.isPending}>
+                <Mail className="h-3 w-3 mr-1" /> Email All ({attendees.length})
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => attendees.forEach(a => a.phone && sendSms.mutate({ recipientId: a.id, recipientType: type === 'members' ? 'member' : 'lead', recipientName: `${a.firstName} ${a.lastName}`, phone: a.phone, body: `Hi ${a.firstName}! Thanks for joining us at Golf VX Drive Day!` }))} disabled={sendSms.isPending}>
+                <Phone className="h-3 w-3 mr-1" /> SMS All ({attendees.filter(a => a.phone).length})
+              </Button>
+            </div>
+          ) : <div />}
           <Button variant="outline" size="sm" onClick={onClose}>
             <X className="h-4 w-4 mr-1" /> Close
           </Button>
@@ -107,8 +121,167 @@ function AttendeeListModal({
   );
 }
 
+// Modal for attendees filtered by acquisition source
+function SourceAttendeeModal({
+  open, onClose, source, minDate, maxDate,
+}: { open: boolean; onClose: () => void; source: string; minDate: string; maxDate: string }) {
+  const { data: attendees, isLoading } = trpc.campaigns.getSundayClinicAttendeesBySource.useQuery(
+    { source, minDate, maxDate }, { enabled: open }
+  );
+  const sendSms = trpc.communication.sendSMS.useMutation();
+  const sendEmail = trpc.communication.sendEmail.useMutation();
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Share2 className="h-5 w-5 text-primary" />
+            Source: {source}
+            {attendees && <Badge variant="secondary" className="ml-2">{attendees.length}</Badge>}
+          </DialogTitle>
+          <DialogDescription>Attendees who found Golf VX via {source}</DialogDescription>
+        </DialogHeader>
+        <div className="overflow-y-auto flex-1 mt-2">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+          ) : !attendees?.length ? (
+            <div className="text-center py-12 text-muted-foreground">No attendees found for this source.</div>
+          ) : (
+            <div className="space-y-2">
+              {attendees.map((a) => (
+                <div key={`${a.email}-${a.date}`} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <span className="text-xs font-bold text-primary">{(a.firstName?.[0] || "?").toUpperCase()}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm text-foreground truncate">{a.firstName} {a.lastName}</p>
+                      <p className="text-xs text-muted-foreground truncate">{a.type}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0 ml-4">
+                    {a.email && (
+                      <button onClick={() => sendEmail.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, email: a.email, subject: `Golf VX - Follow Up`, htmlBody: `<p>Hi ${a.firstName}, thanks for visiting Golf VX!</p>` })} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors" title="Send email">
+                        <Mail className="h-3 w-3" /><span className="hidden sm:inline truncate max-w-[140px]">{a.email}</span>
+                      </button>
+                    )}
+                    {a.phone && (
+                      <button onClick={() => sendSms.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, phone: a.phone, body: `Hi ${a.firstName}! Thanks for joining us at Golf VX Drive Day. Book your next session at playgolfvx.com!` })} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors" title="Send SMS">
+                        <Phone className="h-3 w-3" /><span className="hidden sm:inline">{a.phone}</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        {attendees && attendees.length > 0 && (
+          <div className="pt-3 border-t border-border flex items-center justify-between">
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => attendees.forEach(a => a.email && sendEmail.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, email: a.email, subject: `Golf VX - Follow Up`, htmlBody: `<p>Hi ${a.firstName}, thanks for visiting Golf VX!</p>` }))} disabled={sendEmail.isPending}>
+                <Mail className="h-3 w-3 mr-1" /> Email All ({attendees.length})
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => attendees.forEach(a => a.phone && sendSms.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, phone: a.phone, body: `Hi ${a.firstName}! Thanks for joining us at Golf VX Drive Day!` }))} disabled={sendSms.isPending}>
+                <Phone className="h-3 w-3 mr-1" /> SMS All ({attendees.filter(a => a.phone).length})
+              </Button>
+            </div>
+            <Button variant="outline" size="sm" onClick={onClose}><X className="h-4 w-4 mr-1" /> Close</Button>
+          </div>
+        )}
+        {(!attendees || attendees.length === 0) && (
+          <div className="pt-3 border-t border-border flex justify-end">
+            <Button variant="outline" size="sm" onClick={onClose}><X className="h-4 w-4 mr-1" /> Close</Button>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// Modal for attendees at a specific event date
+function EventAttendeeModal({
+  open, onClose, eventDate, label, minDate, maxDate,
+}: { open: boolean; onClose: () => void; eventDate: string; label: string; minDate: string; maxDate: string }) {
+  const { data: attendees, isLoading } = trpc.campaigns.getSundayClinicAttendeesByEvent.useQuery(
+    { eventDate, minDate, maxDate }, { enabled: open }
+  );
+  const sendSms = trpc.communication.sendSMS.useMutation();
+  const sendEmail = trpc.communication.sendEmail.useMutation();
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-primary" />
+            Event: {label}
+            {attendees && <Badge variant="secondary" className="ml-2">{attendees.length}</Badge>}
+          </DialogTitle>
+          <DialogDescription>All attendees at this event</DialogDescription>
+        </DialogHeader>
+        <div className="overflow-y-auto flex-1 mt-2">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+          ) : !attendees?.length ? (
+            <div className="text-center py-12 text-muted-foreground">No attendees found for this event.</div>
+          ) : (
+            <div className="space-y-2">
+              {attendees.map((a) => (
+                <div key={`${a.email}-${a.date}`} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <span className="text-xs font-bold text-primary">{(a.firstName?.[0] || "?").toUpperCase()}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm text-foreground truncate">{a.firstName} {a.lastName}</p>
+                      <p className="text-xs text-muted-foreground truncate">{a.type} • {a.source}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0 ml-4">
+                    {a.isMember && <Badge variant="default" className="text-xs">Member</Badge>}
+                    {a.email && (
+                      <button onClick={() => sendEmail.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, email: a.email, subject: `Golf VX - Follow Up`, htmlBody: `<p>Hi ${a.firstName}, thanks for visiting Golf VX!</p>` })} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors" title="Send email">
+                        <Mail className="h-3 w-3" /><span className="hidden sm:inline truncate max-w-[120px]">{a.email}</span>
+                      </button>
+                    )}
+                    {a.phone && (
+                      <button onClick={() => sendSms.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, phone: a.phone, body: `Hi ${a.firstName}! Thanks for joining us at Golf VX Drive Day!` })} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors" title="Send SMS">
+                        <Phone className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        {attendees && attendees.length > 0 && (
+          <div className="pt-3 border-t border-border flex items-center justify-between">
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => attendees.forEach(a => a.email && sendEmail.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, email: a.email, subject: `Golf VX - Follow Up`, htmlBody: `<p>Hi ${a.firstName}, thanks for attending our Drive Day!</p>` }))} disabled={sendEmail.isPending}>
+                <Mail className="h-3 w-3 mr-1" /> Email All ({attendees.length})
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => attendees.forEach(a => a.phone && sendSms.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, phone: a.phone, body: `Hi ${a.firstName}! Thanks for joining us at Golf VX Drive Day!` }))} disabled={sendSms.isPending}>
+                <Phone className="h-3 w-3 mr-1" /> SMS All ({attendees.filter(a => a.phone).length})
+              </Button>
+            </div>
+            <Button variant="outline" size="sm" onClick={onClose}><X className="h-4 w-4 mr-1" /> Close</Button>
+          </div>
+        )}
+        {(!attendees || attendees.length === 0) && (
+          <div className="pt-3 border-t border-border flex justify-end">
+            <Button variant="outline" size="sm" onClick={onClose}><X className="h-4 w-4 mr-1" /> Close</Button>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function SundayClinicDetail() {
   const [attendeeModal, setAttendeeModal] = useState<AttendeeType | null>(null);
+  const [sourceModal, setSourceModal] = useState<SourceModal>(null);
+  const [eventModal, setEventModal] = useState<EventModal>(null);
 
   const { data: metrics, isLoading } = trpc.campaigns.getSundayClinicMetrics.useQuery({
     minDate: "2026-01-25",
@@ -286,7 +459,11 @@ export default function SundayClinicDetail() {
                             <span className="font-medium text-foreground">{source}</span>
                           </div>
                           <div className="text-right">
-                            <span className="font-bold text-foreground">{count}</span>
+                            <button
+                              onClick={() => setSourceModal({ source })}
+                              className="font-bold text-primary hover:underline cursor-pointer transition-colors"
+                              title="Click to see attendee list"
+                            >{count}</button>
                             <span className="text-sm text-muted-foreground ml-2">({percentage.toFixed(1)}%)</span>
                           </div>
                         </div>
@@ -341,8 +518,12 @@ export default function SundayClinicDetail() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-bold text-foreground">{event.totalBookings}</p>
-                      <p className="text-xs text-muted-foreground">bookings</p>
+                      <button
+                        onClick={() => setEventModal({ eventDate: event.date, label: new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) })}
+                        className="text-lg font-bold text-primary hover:underline cursor-pointer transition-colors block"
+                        title="Click to see attendee list"
+                      >{event.totalBookings}</button>
+                      <p className="text-xs text-muted-foreground">bookings ↑ click</p>
                     </div>
                   </div>
 
@@ -352,7 +533,13 @@ export default function SundayClinicDetail() {
                         {Object.entries(event.sourceBreakdown)
                           .sort(([, a], [, b]) => (b as number) - (a as number))
                           .map(([source, count]) => (
-                            <Badge key={source} variant="outline" className="text-xs">
+                            <Badge
+                              key={source}
+                              variant="outline"
+                              className="text-xs cursor-pointer hover:bg-primary/10 hover:border-primary transition-colors"
+                              onClick={() => setSourceModal({ source })}
+                              title={`Click to see ${source} attendees`}
+                            >
                               {source}: {count}
                             </Badge>
                           ))}
@@ -421,6 +608,27 @@ export default function SundayClinicDetail() {
           open={true}
           onClose={() => setAttendeeModal(null)}
           type={attendeeModal}
+          minDate="2026-01-25"
+          maxDate="2026-03-29"
+        />
+      )}
+      {/* Source Attendee Modal */}
+      {sourceModal && (
+        <SourceAttendeeModal
+          open={true}
+          onClose={() => setSourceModal(null)}
+          source={sourceModal.source}
+          minDate="2026-01-25"
+          maxDate="2026-03-29"
+        />
+      )}
+      {/* Event Attendee Modal */}
+      {eventModal && (
+        <EventAttendeeModal
+          open={true}
+          onClose={() => setEventModal(null)}
+          eventDate={eventModal.eventDate}
+          label={eventModal.label}
           minDate="2026-01-25"
           maxDate="2026-03-29"
         />

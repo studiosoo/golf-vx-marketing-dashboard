@@ -37,6 +37,8 @@ function WinterClinicAttendeeModal({
     { minDate: "2026-01-01", maxDate: "2026-03-31", clinicShortName },
     { enabled: open }
   );
+  const sendSms = trpc.communication.sendSMS.useMutation();
+  const sendEmail = trpc.communication.sendEmail.useMutation();
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -73,16 +75,16 @@ function WinterClinicAttendeeModal({
                   </div>
                   <div className="flex items-center gap-3 shrink-0 ml-4">
                     {a.email && (
-                      <a href={`mailto:${a.email}`} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors">
+                      <button onClick={() => sendEmail.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, email: a.email, subject: `Golf VX Winter Clinic - Follow Up`, htmlBody: `<p>Hi ${a.firstName}, thanks for registering for Golf VX Winter Clinic!</p>` })} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors" title="Send email">
                         <Mail className="h-3 w-3" />
                         <span className="hidden sm:inline truncate max-w-[140px]">{a.email}</span>
-                      </a>
+                      </button>
                     )}
                     {a.phone && (
-                      <a href={`tel:${a.phone}`} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors">
+                      <button onClick={() => sendSms.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, phone: a.phone, body: `Hi ${a.firstName}! Thanks for registering for Golf VX Winter Clinic. See you on the course!` })} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors" title="Send SMS">
                         <Phone className="h-3 w-3" />
                         <span className="hidden sm:inline">{a.phone}</span>
-                      </a>
+                      </button>
                     )}
                     {parseFloat(a.amountPaid || '0') > 0 && (
                       <span className="text-xs font-medium text-green-600">${parseFloat(a.amountPaid || '0').toFixed(0)}</span>
@@ -93,7 +95,17 @@ function WinterClinicAttendeeModal({
             </div>
           )}
         </div>
-        <div className="pt-3 border-t border-border flex justify-end">
+        <div className="pt-3 border-t border-border flex items-center justify-between">
+          {attendees && attendees.length > 0 ? (
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => attendees.forEach(a => a.email && sendEmail.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, email: a.email, subject: `Golf VX Winter Clinic - Follow Up`, htmlBody: `<p>Hi ${a.firstName}, thanks for registering for Golf VX Winter Clinic!</p>` }))} disabled={sendEmail.isPending}>
+                <Mail className="h-3 w-3 mr-1" /> Email All ({attendees.length})
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => attendees.forEach(a => a.phone && sendSms.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, phone: a.phone, body: `Hi ${a.firstName}! Thanks for registering for Golf VX Winter Clinic!` }))} disabled={sendSms.isPending}>
+                <Phone className="h-3 w-3 mr-1" /> SMS All ({attendees.filter(a => a.phone).length})
+              </Button>
+            </div>
+          ) : <div />}
           <Button variant="outline" size="sm" onClick={onClose}>
             <X className="h-4 w-4 mr-1" /> Close
           </Button>
