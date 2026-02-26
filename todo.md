@@ -466,3 +466,9 @@
 - [ ] Revenue.tsx: clicking appointment type row shows attendee list modal
 - [ ] Add getAcuityRevenueAttendees(appointmentTypeId, minDate, maxDate) endpoint
 - [ ] Fix Acuity Clinic showing $0 - investigate data source
+
+## Bug Fixes: Drive Day Key Errors + SendGrid (2026-02-26)
+- [x] Fix duplicate React keys in SundayClinicDetail EventAttendeeModal (use id+index instead of email+date)
+- [x] Fix duplicate React keys in SundayClinicDetail SourceAttendeeModal
+- [x] Fix duplicate React keys in SundayClinicDetail AttendeeListModal
+- [x] Fix SendGrid not-configured error: show user-friendly toast instead of crashing DB insert

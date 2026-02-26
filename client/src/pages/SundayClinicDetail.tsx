@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { trpc } from "@/lib/trpc";
 import { Loader2, Users, UserPlus, TrendingUp, Calendar, Share2, Mail, Phone, X } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 type AttendeeType = "members" | "new_visitors";
 type SourceModal = { source: string } | null;
@@ -30,8 +31,14 @@ function AttendeeListModal({
     { type, minDate, maxDate },
     { enabled: open }
   );
-  const sendSms = trpc.communication.sendSMS.useMutation();
-  const sendEmail = trpc.communication.sendEmail.useMutation();
+  const sendSms = trpc.communication.sendSMS.useMutation({
+    onSuccess: (r) => r.success ? toast({ title: "SMS sent!" }) : toast({ title: "SMS failed", description: r.error ?? "Twilio not configured", variant: "destructive" }),
+    onError: (e) => toast({ title: "SMS error", description: e.message, variant: "destructive" }),
+  });
+  const sendEmail = trpc.communication.sendEmail.useMutation({
+    onSuccess: (r) => r.success ? toast({ title: "Email sent!" }) : toast({ title: "Email failed", description: r.error ?? "SendGrid not configured — add SENDGRID_API_KEY in Settings → Secrets", variant: "destructive" }),
+    onError: (e) => toast({ title: "Email error", description: e.message, variant: "destructive" }),
+  });
 
   const title = type === "members" ? "Members Attended" : "New Visitors";
   const description = type === "members"
@@ -63,8 +70,8 @@ function AttendeeListModal({
             </div>
           ) : (
             <div className="space-y-2">
-              {attendees.map((a) => (
-                <div key={`${a.email}-${a.date}`} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+              {attendees.map((a, idx) => (
+                <div key={`${a.id ?? idx}-${idx}`} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                       <span className="text-xs font-bold text-primary">
@@ -128,8 +135,14 @@ function SourceAttendeeModal({
   const { data: attendees, isLoading } = trpc.campaigns.getSundayClinicAttendeesBySource.useQuery(
     { source, minDate, maxDate }, { enabled: open }
   );
-  const sendSms = trpc.communication.sendSMS.useMutation();
-  const sendEmail = trpc.communication.sendEmail.useMutation();
+  const sendSms = trpc.communication.sendSMS.useMutation({
+    onSuccess: (r) => r.success ? toast({ title: "SMS sent!" }) : toast({ title: "SMS failed", description: r.error ?? "Twilio not configured", variant: "destructive" }),
+    onError: (e) => toast({ title: "SMS error", description: e.message, variant: "destructive" }),
+  });
+  const sendEmail = trpc.communication.sendEmail.useMutation({
+    onSuccess: (r) => r.success ? toast({ title: "Email sent!" }) : toast({ title: "Email failed", description: r.error ?? "SendGrid not configured — add SENDGRID_API_KEY in Settings → Secrets", variant: "destructive" }),
+    onError: (e) => toast({ title: "Email error", description: e.message, variant: "destructive" }),
+  });
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
@@ -148,8 +161,8 @@ function SourceAttendeeModal({
             <div className="text-center py-12 text-muted-foreground">No attendees found for this source.</div>
           ) : (
             <div className="space-y-2">
-              {attendees.map((a) => (
-                <div key={`${a.email}-${a.date}`} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+              {attendees.map((a, idx) => (
+                <div key={`src-${a.id ?? idx}-${idx}`} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                       <span className="text-xs font-bold text-primary">{(a.firstName?.[0] || "?").toUpperCase()}</span>
@@ -206,8 +219,14 @@ function EventAttendeeModal({
   const { data: attendees, isLoading } = trpc.campaigns.getSundayClinicAttendeesByEvent.useQuery(
     { eventDate, minDate, maxDate }, { enabled: open }
   );
-  const sendSms = trpc.communication.sendSMS.useMutation();
-  const sendEmail = trpc.communication.sendEmail.useMutation();
+  const sendSms = trpc.communication.sendSMS.useMutation({
+    onSuccess: (r) => r.success ? toast({ title: "SMS sent!" }) : toast({ title: "SMS failed", description: r.error ?? "Twilio not configured", variant: "destructive" }),
+    onError: (e) => toast({ title: "SMS error", description: e.message, variant: "destructive" }),
+  });
+  const sendEmail = trpc.communication.sendEmail.useMutation({
+    onSuccess: (r) => r.success ? toast({ title: "Email sent!" }) : toast({ title: "Email failed", description: r.error ?? "SendGrid not configured — add SENDGRID_API_KEY in Settings → Secrets", variant: "destructive" }),
+    onError: (e) => toast({ title: "Email error", description: e.message, variant: "destructive" }),
+  });
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
@@ -226,8 +245,8 @@ function EventAttendeeModal({
             <div className="text-center py-12 text-muted-foreground">No attendees found for this event.</div>
           ) : (
             <div className="space-y-2">
-              {attendees.map((a) => (
-                <div key={`${a.email}-${a.date}`} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+              {attendees.map((a, idx) => (
+                <div key={`evt-${a.id ?? idx}-${idx}`} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                       <span className="text-xs font-bold text-primary">{(a.firstName?.[0] || "?").toUpperCase()}</span>
