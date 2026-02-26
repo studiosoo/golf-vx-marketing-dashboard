@@ -306,10 +306,29 @@
 - [x] TypeScript 0 errors 확인 후 체크포인트 저장
 
 ## 사이드바 컬러 + Recharts 통일 + Stripe 준비 (2026-02-26)
-- [ ] DashboardLayout 사이드바 active/hover 컬러 정비 (bg-primary/10, text-primary 가시성 확인)
-- [ ] Recharts 차트 컬러를 CSS 변수(var(--color-*))로 통일 — Revenue.tsx, Performance.tsx, Home.tsx
-- [ ] Stripe webhook endpoint POST /api/webhooks/stripe 등록 (server/_core/index.ts)
-- [ ] Stripe 이벤트 핸들러 작성 (customer.subscription.*, invoice.payment_succeeded/failed)
-- [ ] pro_member_billing 테이블에 Stripe payment_intent_id 자동 업데이트 로직
-- [ ] Stripe webhook secret 환경변수 등록 (STRIPE_WEBHOOK_SECRET)
-- [ ] TypeScript 0 errors 확인 후 체크포인트 저장
+- [x] DashboardLayout 사이드바 active/hover 컬러 정비 — sidebar-accent를 #ffcb00 기반 연한 노란색으로 교체
+- [x] Recharts 차트 컬러를 CSS 변수(var(--color-*))로 통일 — Revenue.tsx, InstagramAnalytics.tsx
+- [x] Stripe webhook endpoint POST /api/webhooks/stripe 등록 (server/_core/index.ts)
+- [x] Stripe 이벤트 핸들러 작성 (invoice.payment_succeeded/failed)
+- [x] pro_member_billing 테이블에 Stripe invoice_id 자동 업데이트 로직
+- [x] Stripe 환경변수 등록 (STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET)
+- [x] TypeScript 0 errors 확인 후 체크포인트 저장
+
+## 모바일 뷰 + KPI 네비게이션 + Giveaway→Drive Day 자동화 (2026-02-26)
+### Task 1: 모바일 뷰 Revenue 카드 텍스트 겹침 수정
+- [x] Revenue 카드 모바일 반응형 수정 — flex → grid grid-cols-2 md:grid-cols-4
+- [x] 모바일에서 2x2 그리드로 변경, 글씨 크기 축소 (text-lg sm:text-2xl)
+
+### Task 2: KPI 카드 클릭 → 상세 페이지 이동
+- [x] Membership Growth 카드 클릭 → /members 이동
+- [x] Trial Conversion 카드 클릭 → /intelligence/performance 이동
+- [x] Member Retention 카드 클릭 → /intelligence/performance 이동
+- [x] B2B Events 카드 클릭 → /intelligence/campaign-timeline 이동
+- [x] Revenue 카드 클릭 → /revenue 이동
+
+### Task 3: Anniversary Giveaway → Drive Day 이메일 마케팅 자동화
+- [x] Giveaway 지원자 중 Drive Day 관심 가능성 높은 사람 필터링 로직 구현 (score 기반: golf exp, IL resident, indoor familiarity)
+- [x] Encharge API 연동 — syncToEncharge mutation (tags: giveaway-2026, drive-day-prospect)
+- [x] Drive Day Targeting 탭 — 체크박스 선택 + 원클릭 Encharge 동기화
+- [x] CTA 정보 표시: $9 1시간 베이이용 예약 / Drive Day $20 for 90 min session
+- [x] 상태 관리: pending → contacted → scheduled → completed → declined

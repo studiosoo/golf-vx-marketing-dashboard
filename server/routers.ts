@@ -1710,6 +1710,93 @@ export const appRouter = router({
       
       return result[0]?.lastSync || null;
     }),
+
+    // Get Drive Day prospects from giveaway applicants
+    getDriveDayProspects: protectedProcedure.query(async () => {
+      const database = await (await import("./db")).getDb();
+      if (!database) return { prospects: [], total: 0, synced: 0 };
+      const { giveawayApplications } = await import("../drizzle/schema");
+      const { eq: eqOp } = await import("drizzle-orm");
+      const allApplicants = await database
+        .select()
+        .from(giveawayApplications)
+        .where(eqOp(giveawayApplications.isTestEntry, false))
+        .orderBy(giveawayApplications.submissionTimestamp);
+      const prospects = allApplicants.map(app => {
+        let score = 50;
+        const reasons: string[] = [];
+        if (app.golfExperienceLevel?.toLowerCase().includes('beginner') || app.golfExperienceLevel?.toLowerCase().includes('new')) {
+          score += 20; reasons.push('Beginner — high coaching potential');
+        } else if (app.golfExperienceLevel?.toLowerCase().includes('intermediate')) {
+          score += 15; reasons.push('Intermediate — skill improvement');
+        }
+        if (app.visitedBefore?.toLowerCase() === 'yes') {
+          score += 10; reasons.push('Previous visitor');
+        } else if (app.visitedBefore?.toLowerCase() === 'no' || app.visitedBefore?.toLowerCase() === 'new') {
+          score += 5; reasons.push('New prospect — intro opportunity');
+        }
+        if (app.illinoisResident) { score += 10; reasons.push('Illinois resident'); }
+        if (app.indoorGolfFamiliarity?.toLowerCase().includes('never')) {
+          score += 15; reasons.push('Never tried indoor golf');
+        } else if (app.indoorGolfFamiliarity?.toLowerCase().includes('once')) {
+          score += 10; reasons.push('Tried indoor golf once');
+        }
+        return { id: app.id, name: app.name, email: app.email, phone: app.phone, city: app.city, ageRange: app.ageRange, golfExperience: app.golfExperienceLevel, visitedBefore: app.visitedBefore, indoorGolfFamiliarity: app.indoorGolfFamiliarity, status: app.status, score, reasons };
+      }).sort((a, b) => b.score - a.score);
+      return { prospects, total: prospects.length, synced: 0 };
+    }),
+
+    // Sync giveaway applicants to Encharge with Drive Day tags
+    syncToEncharge: protectedProcedure
+      .input(z.object({
+        applicantIds: z.array(z.number()),
+        tags: z.array(z.string()).default(['giveaway-2026', 'drive-day-prospect']),
+      }))
+      .mutation(async ({ input }) => {
+        const database = await (await import("./db")).getDb();
+        if (!database) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database unavailable' });
+        const { giveawayApplications } = await import("../drizzle/schema");
+        const applicants = await database
+          .select()
+          .from(giveawayApplications)
+          .where(inArray(giveawayApplications.id, input.applicantIds));
+        let successCount = 0;
+        let failCount = 0;
+        const errors: string[] = [];
+        for (const app of applicants) {
+          const nameParts = app.name.split(' ');
+          const result = await encharge.upsertEnchargePerson({
+            email: app.email,
+            firstName: nameParts[0] || '',
+            lastName: nameParts.slice(1).join(' ') || '',
+            phone: app.phone || undefined,
+            tags: input.tags,
+            fields: { city: app.city || '', golfExperience: app.golfExperienceLevel || '', source: 'giveaway-2026', driveDayProspect: true },
+          });
+          if (result.success) { successCount++; } else { failCount++; errors.push(`${app.email}: ${result.error}`); }
+        }
+        return { successCount, failCount, errors, total: applicants.length };
+      }),
+
+    // Update applicant status
+    updateStatus: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        status: z.enum(['pending', 'contacted', 'scheduled', 'completed', 'declined']),
+      }))
+      .mutation(async ({ input }) => {
+        const database = await (await import("./db")).getDb();
+        if (!database) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database unavailable' });
+        const { giveawayApplications } = await import("../drizzle/schema");
+        const { eq: eqOp } = await import("drizzle-orm");
+        const now = new Date();
+        const updates: Record<string, any> = { status: input.status };
+        if (input.status === 'contacted') updates.contactedAt = now;
+        if (input.status === 'scheduled') updates.scheduledAt = now;
+        if (input.status === 'completed') updates.completedAt = now;
+        await database.update(giveawayApplications).set(updates).where(eqOp(giveawayApplications.id, input.id));
+        return { success: true };
+      }),
   }),
 
   // Reports

@@ -22,6 +22,7 @@ const KPI_BARS = [
     badge: "+305 synced",
     badgeColor: "text-[#ef9253]",
     goal: "Goal: 600",
+    href: "/audience/members",
   },
   {
     label: "Trial Conversion",
@@ -31,6 +32,7 @@ const KPI_BARS = [
     badge: "+2.1% vs last month",
     badgeColor: "text-[#5daf68]",
     goal: "Goal: 25%",
+    href: "/intelligence/performance",
   },
   {
     label: "Member Retention",
@@ -40,6 +42,7 @@ const KPI_BARS = [
     badge: "Stable",
     badgeColor: "text-muted-foreground",
     goal: "Goal: 95%",
+    href: "/intelligence/performance",
   },
   {
     label: "B2B Events",
@@ -49,6 +52,7 @@ const KPI_BARS = [
     badge: "+1 new this week",
     badgeColor: "text-[#76addc]",
     goal: "Goal: 4",
+    href: "/campaigns",
   },
 ];
 
@@ -257,7 +261,8 @@ export default function Home() {
           <Link href="/revenue">
             <Card className="border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer">
               <CardContent className="pt-4 pb-4">
-                <div className="flex items-center justify-between">
+                {/* Mobile: stacked, Desktop: side-by-side */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-primary/20">
                       <DollarSign className="h-5 w-5 text-primary" />
@@ -267,18 +272,19 @@ export default function Home() {
                       <p className="text-2xl font-bold text-foreground">{formatCurrency(toastSummary.thisMonthRevenue)}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-6 text-sm">
-                    <div className="text-right">
+                  {/* Mobile: 3-col grid, Desktop: inline flex */}
+                  <div className="grid grid-cols-3 gap-3 sm:flex sm:items-center sm:gap-6 text-sm">
+                    <div className="sm:text-right">
                       <p className="text-xs text-muted-foreground">Last Month</p>
-                      <p className="font-semibold text-foreground">{formatCurrency(toastSummary.lastMonthRevenue)}</p>
+                      <p className="font-semibold text-foreground text-sm">{formatCurrency(toastSummary.lastMonthRevenue)}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs text-muted-foreground">This Month Orders</p>
-                      <p className="font-semibold text-foreground">{toastSummary.thisMonthOrders.toLocaleString()}</p>
+                    <div className="sm:text-right">
+                      <p className="text-xs text-muted-foreground">Orders</p>
+                      <p className="font-semibold text-foreground text-sm">{toastSummary.thisMonthOrders.toLocaleString()}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs text-muted-foreground">MoM Change</p>
-                      <p className={`font-semibold ${
+                    <div className="sm:text-right">
+                      <p className="text-xs text-muted-foreground">MoM</p>
+                      <p className={`font-semibold text-sm ${
                         toastSummary.lastMonthRevenue > 0
                           ? toastSummary.thisMonthRevenue >= toastSummary.lastMonthRevenue
                             ? 'text-green-400'
@@ -291,7 +297,7 @@ export default function Home() {
                         }
                       </p>
                     </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                    <ChevronRight className="hidden sm:block h-5 w-5 text-muted-foreground" />
                   </div>
                 </div>
               </CardContent>
@@ -302,25 +308,27 @@ export default function Home() {
         {/* ── Section 1: KPI Progress Bars ── */}
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {KPI_BARS.map((kpi) => (
-            <Card key={kpi.label}>
-              <CardContent className="pt-5 pb-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground font-medium">{kpi.label}</p>
-                  <span className={`text-xs font-semibold ${kpi.badgeColor}`}>{kpi.badge}</span>
-                </div>
-                <p className="text-2xl font-bold text-foreground">{kpi.value}</p>
-                <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
-                  <div
-                    className={`h-full rounded-full ${kpi.color} transition-all duration-500`}
-                    style={{ width: `${kpi.progress}%` }}
-                  />
-                </div>
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>{kpi.progress}%</span>
-                  <span>{kpi.goal}</span>
-                </div>
-              </CardContent>
-            </Card>
+            <Link key={kpi.label} href={kpi.href}>
+              <Card className="hover:bg-muted/40 transition-colors cursor-pointer h-full">
+                <CardContent className="pt-5 pb-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground font-medium">{kpi.label}</p>
+                    <span className={`text-xs font-semibold ${kpi.badgeColor}`}>{kpi.badge}</span>
+                  </div>
+                  <p className="text-2xl font-bold text-foreground">{kpi.value}</p>
+                  <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${kpi.color} transition-all duration-500`}
+                      style={{ width: `${kpi.progress}%` }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>{kpi.progress}%</span>
+                    <span>{kpi.goal}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
 
