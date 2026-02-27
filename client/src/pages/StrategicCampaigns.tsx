@@ -247,9 +247,9 @@ export default function StrategicCampaigns() {
               <TrendingUp className="h-4 w-4 text-blue-500" />
               <span className="text-xs text-muted-foreground font-medium">Member Retention</span>
             </div>
-            <p className="text-2xl font-bold">{kpiData.memberRetention.current.toFixed(0)}%</p>
-            <p className="text-xs text-muted-foreground">Goal: {kpiData.memberRetention.target}%</p>
-            <Progress value={(kpiData.memberRetention.current / kpiData.memberRetention.target) * 100} className="mt-2 h-1.5" />
+            <p className="text-2xl font-bold">{kpiData.memberRetention.current} <span className="text-sm font-normal text-muted-foreground">/ 300</span></p>
+            <p className="text-xs text-muted-foreground">All Access: {kpiData.memberRetention.breakdown?.allAccess ?? 0} · Swing Saver: {kpiData.memberRetention.breakdown?.swingSaver ?? 0}</p>
+            <Progress value={(kpiData.memberRetention.current / 300) * 100} className="mt-2 h-1.5" />
           </Card>
           <Card className="p-4">
             <div className="flex items-center gap-2 mb-1">
@@ -295,12 +295,15 @@ export default function StrategicCampaigns() {
                   <div className="p-4 rounded-lg bg-muted/50">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium">Membership Goal</span>
-                      <span className="text-sm font-bold">{kpiData.membershipAcquisition.current} / {kpiData.membershipAcquisition.target} members</span>
+                      <span className="text-sm font-bold">{kpiData.membershipAcquisition.current} / 300 members</span>
                     </div>
-                    <Progress value={(kpiData.membershipAcquisition.current / kpiData.membershipAcquisition.target) * 100} className="h-2" />
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {((kpiData.membershipAcquisition.current / kpiData.membershipAcquisition.target) * 100).toFixed(1)}% to year-end target •{' '}
-                      Need {Math.max(0, kpiData.membershipAcquisition.target - kpiData.membershipAcquisition.current)} more members
+                    <Progress value={(kpiData.membershipAcquisition.current / 300) * 100} className="h-2" />
+                    <div className="flex gap-4 mt-2">
+                      <p className="text-xs text-muted-foreground">All Access: <span className="font-semibold text-foreground">{kpiData.membershipAcquisition.breakdown?.allAccess ?? 0}</span></p>
+                      <p className="text-xs text-muted-foreground">Swing Saver: <span className="font-semibold text-foreground">{kpiData.membershipAcquisition.breakdown?.swingSaver ?? 0}</span></p>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Acquisition goal: <span className="font-semibold text-foreground">{Math.max(0, 300 - kpiData.membershipAcquisition.current)} more members</span> to reach 300 • 2-year target
                     </p>
                   </div>
                 )}
@@ -324,13 +327,17 @@ export default function StrategicCampaigns() {
                 {campaign.id === 'member_retention' && kpiData && (
                   <div className="p-4 rounded-lg bg-muted/50">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">Retention Rate</span>
-                      <span className="text-sm font-bold">{kpiData.memberRetention.current.toFixed(0)}%</span>
+                      <span className="text-sm font-medium">Active Customer Members</span>
+                      <span className="text-sm font-bold">{kpiData.memberRetention.current} / 300</span>
                     </div>
-                    <Progress value={(kpiData.memberRetention.current / kpiData.memberRetention.target) * 100} className="h-2" />
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Target: {kpiData.memberRetention.target}% •{' '}
-                      {kpiData.memberRetention.current >= kpiData.memberRetention.target ? 'Goal met!' : 'Below target'}
+                    <Progress value={(kpiData.memberRetention.current / 300) * 100} className="h-2" />
+                    <div className="flex gap-4 mt-2">
+                      <p className="text-xs text-muted-foreground">All Access: <span className="font-semibold text-foreground">{kpiData.memberRetention.breakdown?.allAccess ?? 0}</span></p>
+                      <p className="text-xs text-muted-foreground">Swing Saver: <span className="font-semibold text-foreground">{kpiData.memberRetention.breakdown?.swingSaver ?? 0}</span></p>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Goal: retain 300 customer members •{' '}
+                      {kpiData.memberRetention.current >= 300 ? 'Goal met! ✓' : `${300 - kpiData.memberRetention.current} more to retain`}
                     </p>
                   </div>
                 )}

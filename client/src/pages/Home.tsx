@@ -250,14 +250,14 @@ export default function Home() {
       };
     }
     if (kpi.label === "Member Retention" && customerMembers !== null) {
-      const progress = Math.min((customerMembers / memberGoal) * 100, 100);
+      const progress = Math.min((customerMembers / 300) * 100, 100);
       return {
         ...kpi,
-        value: `${customerMembers} / ${memberGoal}`,
+        value: `${customerMembers} / 300`,
         progress,
         badge: progress >= 100 ? "Goal reached! ✓" : `${(progress).toFixed(0)}% to goal`,
         badgeColor: progress >= 100 ? "text-green-500" : "text-[#a87fbe]",
-        goal: `Retain ${memberGoal} customer members`,
+        goal: `All Access: ${allAccess}, Swing Saver: ${swingSaver}`,
       };
     }
     return kpi;
