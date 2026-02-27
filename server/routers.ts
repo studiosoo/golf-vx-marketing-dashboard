@@ -3597,5 +3597,86 @@ Return a JSON object with:
         return { success: true };
       }),
   }),
+// ─── Public Preview (no auth required) ────────────────────────────────────
+  preview: router({
+    getSnapshot: publicProcedure.query(async () => {
+      const database = await db.getDb();
+      if (!database) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+
+      // Member counts
+      const memberResult = await database.execute(`
+        SELECT
+          COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers') AND status = 'active' THEN 1 END) as customerMembers,
+          COUNT(CASE WHEN membershipTier = 'all_access_aces' AND status = 'active' THEN 1 END) as allAccessCount,
+          COUNT(CASE WHEN membershipTier = 'swing_savers' AND status = 'active' THEN 1 END) as swingSaverCount,
+          COUNT(CASE WHEN membershipTier = 'golf_vx_pro' AND status = 'active' THEN 1 END) as proCount,
+          COALESCE(SUM(CASE WHEN status = 'active' THEN COALESCE(monthlyAmount, 0) ELSE 0 END), 0) as totalMRR,
+          COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers') AND status = 'active'
+            AND joinDate >= DATE_FORMAT(NOW(), '%Y-%m-01') THEN 1 END) as newThisMonth
+        FROM members
+      `);
+      const m = (memberResult as any)[0] || {};
+
+      // Revenue this month
+      const revenueResult = await database.execute(`
+        SELECT COALESCE(SUM(amount), 0) as thisMonth
+        FROM revenue
+        WHERE date >= DATE_FORMAT(NOW(), '%Y-%m-01')
+      `);
+      const revenueLastMonthResult = await database.execute(`
+        SELECT COALESCE(SUM(amount), 0) as lastMonth
+        FROM revenue
+        WHERE date >= DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 1 MONTH), '%Y-%m-01')
+          AND date < DATE_FORMAT(NOW(), '%Y-%m-01')
+      `);
+      const thisMonthRevenue = parseFloat((revenueResult as any)[0]?.thisMonth || '0');
+      const lastMonthRevenue = parseFloat((revenueLastMonthResult as any)[0]?.lastMonth || '0');
+
+      // Budget summary (active campaigns)
+      const budgetResult = await database.execute(`
+        SELECT
+          COALESCE(SUM(CAST(budget AS DECIMAL(10,2))), 0) as totalBudget,
+          COALESCE(SUM(CAST(actualSpend AS DECIMAL(10,2))), 0) as totalSpent
+        FROM campaigns
+        WHERE status = 'active'
+      `);
+      const b = (budgetResult as any)[0] || {};
+      const totalBudget = parseFloat(b.totalBudget || '0');
+      const totalSpent = parseFloat(b.totalSpent || '0');
+
+      // Active campaigns count
+      const campaignResult = await database.execute(`
+        SELECT COUNT(*) as activeCampaigns FROM campaigns WHERE status = 'active'
+      `);
+      const activeCampaigns = Number((campaignResult as any)[0]?.activeCampaigns || 0);
+
+      return {
+        generatedAt: new Date().toISOString(),
+        members: {
+          total: Number(m.customerMembers || 0),
+          allAccessAce: Number(m.allAccessCount || 0),
+          swingSaver: Number(m.swingSaverCount || 0),
+          pro: Number(m.proCount || 0),
+          goal: 300,
+          newThisMonth: Number(m.newThisMonth || 0),
+          mrr: parseFloat(m.totalMRR || '0'),
+        },
+        revenue: {
+          thisMonth: thisMonthRevenue,
+          lastMonth: lastMonthRevenue,
+          mom: lastMonthRevenue > 0 ? ((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 : 0,
+        },
+        budget: {
+          total: totalBudget,
+          spent: totalSpent,
+          remaining: totalBudget - totalSpent,
+          utilization: totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0,
+        },
+        campaigns: {
+          active: activeCampaigns,
+        },
+      };
+    }),
+  }),
 });
 export type AppRouter = typeof appRouter;

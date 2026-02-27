@@ -562,3 +562,10 @@
 - [x] Members.tsx: Event History tab with 4 views (Member Timeline, Event Summary, Churned Members, Win-Back 90d)
 - [x] Backfilled existing active members as "joined" events in DB
 - [x] 15/15 vitest tests passing for membershipWebhook handler
+
+## Public Preview Page (2026-02-27)
+
+- [x] Add publicProcedure `preview.getSnapshot` in routers.ts returning key KPIs
+- [x] Build /preview page (no auth required) with member counts, revenue, budget, campaign metrics
+- [x] Register /preview route in App.tsx
+- [x] Save checkpoint and deliver shareable link

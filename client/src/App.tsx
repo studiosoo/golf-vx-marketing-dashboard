@@ -67,6 +67,9 @@ import NewsManager from "./pages/NewsManager";
 import Integrations from "./pages/Integrations";
 import AccountSettings from "./pages/AccountSettings";
 
+// ── Public preview (no auth) ──
+import Preview from "./pages/Preview";
+
 // ── Special / Legacy public pages ──
 import TrialSession from "./pages/TrialSession";
 import AnniversaryGiveaway from "./pages/AnniversaryGiveaway";
@@ -173,6 +176,9 @@ function Router() {
       <Route path="/anniversary-giveaway" component={AnniversaryGiveaway} />
       <Route path="/anniversary-giveaway-application" component={AnniversaryGiveawayApplication} />
       <Route path="/anniversary-giveaway-thank-you" component={AnniversaryGiveawayThankYou} />
+
+      {/* ── Public preview (no auth required) ── */}
+      <Route path="/preview" component={Preview} />
 
       {/* ── 404 ── */}
       <Route path="/404" component={NotFound} />
