@@ -569,3 +569,14 @@
 - [x] Build /preview page (no auth required) with member counts, revenue, budget, campaign metrics
 - [x] Register /preview route in App.tsx
 - [x] Save checkpoint and deliver shareable link
+
+## Encharge Email Activity Auto-Sync (2026-02-27)
+
+- [x] Add encharge_broadcasts table to drizzle/schema.ts and push migration
+- [x] Add DB helpers for upsert/query broadcasts in server/db.ts
+- [x] Build enchargeSync service: poll broadcasts API, upsert metrics to DB
+- [x] Add tRPC procedures: getEmailCampaigns, syncNow (protected), getEmailSummary
+- [x] Build Email Campaigns tab/section in Communication or Overview page
+- [x] Wire auto-sync cron job (every 30 min) in scheduledJobs.ts
+- [x] Write vitest tests for sync service (17 tests pass)
+- [x] Save checkpoint and deliver

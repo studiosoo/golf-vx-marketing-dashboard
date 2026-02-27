@@ -3678,5 +3678,26 @@ Return a JSON object with:
       };
     }),
   }),
+// ─── Encharge Email Campaigns ─────────────────────────────────────────────
+  emailCampaigns: router({
+    // Get all synced broadcasts from DB
+    list: protectedProcedure.query(async () => {
+      const { getSyncedBroadcasts } = await import("./enchargeBroadcastSync");
+      return await getSyncedBroadcasts();
+    }),
+
+    // Get performance summary
+    summary: protectedProcedure.query(async () => {
+      const { getEmailPerformanceSummary } = await import("./enchargeBroadcastSync");
+      return await getEmailPerformanceSummary();
+    }),
+
+    // Manually trigger a sync now
+    syncNow: protectedProcedure.mutation(async () => {
+      const { syncEnchargeBroadcasts } = await import("./enchargeBroadcastSync");
+      const result = await syncEnchargeBroadcasts();
+      return result;
+    }),
+  }),
 });
 export type AppRouter = typeof appRouter;

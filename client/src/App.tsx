@@ -70,6 +70,9 @@ import AccountSettings from "./pages/AccountSettings";
 // ── Public preview (no auth) ──
 import Preview from "./pages/Preview";
 
+// ── Email Campaigns (Encharge sync) ──
+import EmailCampaigns from "./pages/EmailCampaigns";
+
 // ── Special / Legacy public pages ──
 import TrialSession from "./pages/TrialSession";
 import AnniversaryGiveaway from "./pages/AnniversaryGiveaway";
@@ -179,6 +182,10 @@ function Router() {
 
       {/* ── Public preview (no auth required) ── */}
       <Route path="/preview" component={Preview} />
+
+      {/* ── Email Campaigns (Encharge sync) ── */}
+      <Route path="/email-campaigns" component={EmailCampaigns} />
+      <Route path="/communication/email-campaigns" component={EmailCampaigns} />
 
       {/* ── 404 ── */}
       <Route path="/404" component={NotFound} />

@@ -1469,3 +1469,37 @@ export const membershipEvents = mysqlTable("membership_events", {
 
 export type MembershipEvent = typeof membershipEvents.$inferSelect;
 export type NewMembershipEvent = typeof membershipEvents.$inferInsert;
+
+// ─── Encharge Broadcast Metrics ───────────────────────────────────────────────
+export const enchargeBroadcasts = mysqlTable("encharge_broadcasts", {
+  id: int("id").primaryKey().autoincrement(),
+  broadcastId: int("broadcast_id").notNull().unique(),
+  name: varchar("name", { length: 255 }).notNull(),
+  status: varchar("status", { length: 50 }).notNull().default("draft"),
+  emailId: int("email_id"),
+  subject: varchar("subject", { length: 500 }),
+  fromEmail: varchar("from_email", { length: 255 }),
+  fromName: varchar("from_name", { length: 255 }),
+  segmentId: int("segment_id"),
+  segmentName: varchar("segment_name", { length: 255 }),
+  sendAt: timestamp("send_at"),
+  delivered: int("delivered").default(0),
+  opens: int("opens").default(0),
+  clicks: int("clicks").default(0),
+  bounces: int("bounces").default(0),
+  unsubscribes: int("unsubscribes").default(0),
+  spam: int("spam").default(0),
+  openRate: decimal("open_rate", { precision: 5, scale: 2 }),
+  clickRate: decimal("click_rate", { precision: 5, scale: 2 }),
+  clickToOpenRate: decimal("click_to_open_rate", { precision: 5, scale: 2 }),
+  lastSyncedAt: timestamp("last_synced_at").defaultNow(),
+  metricsStale: boolean("metrics_stale").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  broadcastIdIdx: index("encharge_broadcasts_broadcast_id_idx").on(table.broadcastId),
+  statusIdx: index("encharge_broadcasts_status_idx").on(table.status),
+  sendAtIdx: index("encharge_broadcasts_send_at_idx").on(table.sendAt),
+}));
+export type EnchargeBroadcast = typeof enchargeBroadcasts.$inferSelect;
+export type NewEnchargeBroadcast = typeof enchargeBroadcasts.$inferInsert;

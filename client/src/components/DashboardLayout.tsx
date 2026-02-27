@@ -160,6 +160,7 @@ const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
         icon: Mail,
         children: [
           { label: "Hub (Email & SMS)", path: "/communication", icon: MessageSquare },
+          { label: "Email Campaigns", path: "/email-campaigns", icon: Mail },
           { label: "Email Marketing", path: "/communication/email-marketing", icon: Mail },
           { label: "Announcements", path: "/communication/announcements", icon: Bell },
           { label: "Automations", path: "/communication/automations", icon: Workflow },

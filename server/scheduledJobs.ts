@@ -3,6 +3,7 @@ import { syncGiveawayApplications } from "./giveawaySync";
 import { runDailySnapshot } from "./jobs/dailySnapshot";
 import { runWeeklyEmailReport } from "./jobs/weeklyEmailReport";
 import { runToastDailySync } from "./jobs/toastDailySync";
+import { syncEnchargeBroadcasts } from "./enchargeBroadcastSync";
 
 /**
  * Initialize all scheduled jobs
@@ -68,9 +69,20 @@ export function initializeScheduledJobs() {
     timezone: "America/Chicago" // 4:30 AM CST = 5:30 AM EST
   });
 
+  // Encharge broadcast sync every 30 minutes
+  cron.schedule("0 */30 * * * *", async () => {
+    try {
+      const result = await syncEnchargeBroadcasts();
+      console.log(`[ScheduledJobs] Encharge sync: ${result.synced} new, ${result.updated} updated`);
+    } catch (error) {
+      console.error("[ScheduledJobs] Error in Encharge broadcast sync:", error);
+    }
+  });
+
   console.log("[ScheduledJobs] Scheduled jobs initialized:");
   console.log("  - Annual Giveaway sync: Daily at 12:00 AM CST");
   console.log("  - Campaign metrics snapshot: Daily at 2:00 AM CST");
   console.log("  - Weekly email report: Every Monday at 8:00 AM CST");
   console.log("  - Toast SFTP daily sync: Daily at 4:30 AM CST (5:30 AM EST)");
+  console.log("  - Encharge broadcast sync: Every 30 minutes");
 }
