@@ -147,6 +147,7 @@ export default function StrategicCampaigns() {
   const { data: campaigns, isLoading } = trpc.strategicCampaigns.getOverview.useQuery();
   const { data: kpiData } = trpc.intelligence.getStrategicKPIs.useQuery();
   const { data: latestB2BResearch } = trpc.research.getLatestByCategory.useQuery({ category: "b2b_corporate_events" });
+  const { data: funnelData } = trpc.campaigns.getDriveDayFunnel.useQuery({});
 
   const generateOutreachMutation = trpc.research.generateB2BOutreachEmail.useMutation({
     onSuccess: (result) => {
@@ -309,18 +310,58 @@ export default function StrategicCampaigns() {
                 )}
 
                 {campaign.id === 'trial_conversion' && kpiData && (
-                  <div className="p-4 rounded-lg bg-muted/50">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">Trial Conversion Rate</span>
-                      <span className="text-sm font-bold">{kpiData.trialConversion.current.toFixed(1)}%</span>
+                  <div className="space-y-3">
+                    <div className="p-4 rounded-lg bg-muted/50">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">Trial Conversion Rate</span>
+                        <span className="text-sm font-bold">{kpiData.trialConversion.current.toFixed(1)}%</span>
+                      </div>
+                      <Progress value={(kpiData.trialConversion.current / kpiData.trialConversion.target) * 100} className="h-2" />
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Target: {kpiData.trialConversion.target}% •{' '}
+                        {kpiData.trialConversion.current >= kpiData.trialConversion.target
+                          ? 'Goal met!'
+                          : `${(kpiData.trialConversion.target - kpiData.trialConversion.current).toFixed(1)}% below target`}
+                      </p>
                     </div>
-                    <Progress value={(kpiData.trialConversion.current / kpiData.trialConversion.target) * 100} className="h-2" />
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Target: {kpiData.trialConversion.target}% •{' '}
-                      {kpiData.trialConversion.current >= kpiData.trialConversion.target
-                        ? 'Goal met!'
-                        : `${(kpiData.trialConversion.target - kpiData.trialConversion.current).toFixed(1)}% below target`}
-                    </p>
+                    {funnelData && (
+                      <div className="p-4 rounded-lg bg-muted/50">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Target className="h-4 w-4 text-emerald-600" />
+                          <span className="text-sm font-semibold">Drive Day → Member Funnel</span>
+                          <Badge variant="outline" className="text-xs ml-auto">
+                            {funnelData.conversionRate}% converted
+                          </Badge>
+                        </div>
+                        <div className="space-y-2">
+                          {funnelData.steps.map((step, i) => (
+                            <div key={i} className="flex items-center gap-3">
+                              <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex items-center justify-center flex-shrink-0">{i + 1}</div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs font-medium truncate">{step.label}</span>
+                                  <span className="text-xs font-bold text-foreground ml-2 flex-shrink-0">{step.count}</span>
+                                </div>
+                                {i < funnelData.steps.length - 1 && (
+                                  <div className="h-1 bg-muted rounded-full mt-1">
+                                    <div
+                                      className="h-1 bg-emerald-500 rounded-full transition-all"
+                                      style={{ width: funnelData.steps[i + 1].count > 0 && step.count > 0 ? `${Math.min(100, (funnelData.steps[i + 1].count / step.count) * 100)}%` : '0%' }}
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-3">
+                          Target: {funnelData.targetConversionRate ?? 20}% conversion •{' '}
+                          {funnelData.conversionRate >= (funnelData.targetConversionRate ?? 20)
+                            ? '✓ Goal met!'
+                            : `${((funnelData.targetConversionRate ?? 20) - funnelData.conversionRate).toFixed(1)}% below target`}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
 

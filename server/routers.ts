@@ -26,7 +26,7 @@ import * as memberAppointmentSync from "./memberAppointmentSync";
 import * as toastTransactionSync from "./toastTransactionSync";
 import * as giveawaySync from "./giveawaySync";
 import { calculateCampaignPerformance, GOAL_TEMPLATES } from "./goalTemplates";
-import { eq, desc, sql, inArray } from "drizzle-orm";
+import { eq, desc, sql, inArray, and, gte } from "drizzle-orm";
 import { aiRecommendations, userActions, priorities } from "../drizzle/schema";
 import { emailCaptureRouter } from "./emailCaptureRouter";
 import { boomerangRouter } from "./boomerangRouter";
@@ -505,6 +505,90 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
       .input(z.object({ category: z.enum(["trial_conversion", "membership_acquisition", "member_retention", "corporate_events"]) }))
       .query(async ({ input }) => {
         return await db.getCampaignsByCategory(input.category);
+      }),
+
+    // Drive Day → Trial → Member conversion funnel
+    getDriveDayFunnel: protectedProcedure
+      .input(z.object({
+        minDate: z.string().optional(),
+        maxDate: z.string().optional(),
+      }))
+      .query(async ({ input }) => {
+        const database = await (await import("./db")).getDb();
+        if (!database) return { steps: [], conversionRate: 0, totalAttendees: 0, convertedMembers: 0 };
+        // Step 1: Get Drive Day attendees from Acuity
+        let driveDayAttendees: string[] = [];
+        let totalDriveDayBookings = 0;
+        try {
+          const { getSundayClinicData } = await import("./acuity");
+          const now = new Date();
+          const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
+          const data = await getSundayClinicData({
+            minDate: input.minDate || sixMonthsAgo.toISOString().split('T')[0],
+            maxDate: input.maxDate || now.toISOString().split('T')[0],
+          });
+          totalDriveDayBookings = data.totalBookings || 0;
+          // Collect all unique non-member emails
+          const allEmails = new Set<string>();
+          data.events.forEach((event: any) => {
+            event.appointments.forEach((apt: any) => {
+              if (apt.email) allEmails.add(apt.email.toLowerCase());
+            });
+          });
+          driveDayAttendees = Array.from(allEmails);
+        } catch { driveDayAttendees = []; }
+
+        // Step 2: Check which Drive Day attendees became members
+        let convertedCount = 0;
+        let recentConvertedCount = 0;
+        if (driveDayAttendees.length > 0) {
+          const { members } = await import("../drizzle/schema");
+          const { inArray: inArrayOp, and, eq: eqOp } = await import("drizzle-orm");
+          // Check in batches of 100
+          const BATCH = 100;
+          for (let i = 0; i < driveDayAttendees.length; i += BATCH) {
+            const batch = driveDayAttendees.slice(i, i + BATCH);
+            const converted = await database
+              .select({ email: members.email })
+              .from(members)
+              .where(inArrayOp(members.email, batch));
+            convertedCount += converted.length;
+          }
+          // Recent conversions (last 30 days)
+          const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+          for (let i = 0; i < driveDayAttendees.length; i += BATCH) {
+            const batch = driveDayAttendees.slice(i, i + BATCH);
+            // Use Drizzle ORM to count recently converted members from this batch
+            const recentConvertedRows = await database
+              .select({ cnt: sql<number>`COUNT(*)` })
+              .from(members)
+              .where(
+                and(
+                  inArray(members.email, batch),
+                  gte(members.joinDate, thirtyDaysAgo)
+                )
+              );
+            recentConvertedCount += Number(recentConvertedRows[0]?.cnt || 0);
+          }
+        }
+
+        const totalUniqueAttendees = driveDayAttendees.length;
+        const conversionRate = totalUniqueAttendees > 0 ? (convertedCount / totalUniqueAttendees) * 100 : 0;
+        const targetConversionRate = 20; // 20% target
+
+        return {
+          steps: [
+            { label: "Drive Day Bookings", count: totalDriveDayBookings, description: "Total clinic bookings (incl. repeat)" },
+            { label: "Unique Attendees", count: totalUniqueAttendees, description: "Unique individuals who attended" },
+            { label: "Converted to Members", count: convertedCount, description: "Attendees who later joined as members" },
+            { label: "Converted (Last 30 Days)", count: recentConvertedCount, description: "Recent conversions from Drive Day" },
+          ],
+          conversionRate: Math.round(conversionRate * 10) / 10,
+          targetConversionRate,
+          totalAttendees: totalUniqueAttendees,
+          convertedMembers: convertedCount,
+          recentConversions: recentConvertedCount,
+        };
       }),
     
     getCategorySummary: protectedProcedure
@@ -2455,6 +2539,18 @@ Respond in JSON with this exact structure:
         const proMemberCount = Number((memberCountResult as any)[0]?.proMembers || 0);
         const allAccessCount = Number((memberCountResult as any)[0]?.allAccessCount || 0);
         const swingSaverCount = Number((memberCountResult as any)[0]?.swingSaverCount || 0);
+        // New members this month vs last month (All Access + Swing Saver only)
+        const newMembersResult = await database.execute(`
+          SELECT
+            COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers')
+              AND joinDate >= DATE_FORMAT(NOW(), '%Y-%m-01') THEN 1 END) as thisMonth,
+            COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers')
+              AND joinDate >= DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 1 MONTH), '%Y-%m-01')
+              AND joinDate < DATE_FORMAT(NOW(), '%Y-%m-01') THEN 1 END) as lastMonth
+          FROM members WHERE status = 'active'
+        `);
+        const newMembersThisMonth = Number((newMembersResult as any)[0]?.thisMonth || 0);
+        const newMembersLastMonth = Number((newMembersResult as any)[0]?.lastMonth || 0);
         // Acquisition goal: 300 total customer members over 2 years
         // Retention goal: retain all current customer members (target = 300)
         const MEMBERSHIP_GOAL = 300;
@@ -2526,6 +2622,8 @@ Respond in JSON with this exact structure:
             remaining: Math.max(0, MEMBERSHIP_GOAL - customerMemberCount),
             progress: Math.min((customerMemberCount / MEMBERSHIP_GOAL) * 100, 100),
             breakdown: { allAccess: allAccessCount, swingSaver: swingSaverCount },
+            newThisMonth: newMembersThisMonth,
+            newLastMonth: newMembersLastMonth,
           },
           memberRetention: {
             // Goal: retain all 300 customer members

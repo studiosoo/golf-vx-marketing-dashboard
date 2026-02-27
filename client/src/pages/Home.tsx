@@ -239,14 +239,17 @@ export default function Home() {
       };
     }
     if (kpi.label === "Membership Acquisition" && customerMembers !== null) {
-      const progress = Math.min((customerMembers / memberGoal) * 100, 100);
+      const progress = Math.min((customerMembers / 300) * 100, 100);
+      const newThisMonth = strategicKPIs?.membershipAcquisition?.newThisMonth ?? 0;
+      const newLastMonth = strategicKPIs?.membershipAcquisition?.newLastMonth ?? 0;
+      const momDiff = newThisMonth - newLastMonth;
       return {
         ...kpi,
-        value: `${customerMembers} members`,
+        value: `${customerMembers} / 300`,
         progress,
-        badge: memberRemaining !== null ? `${memberRemaining} more needed` : `Goal: ${memberGoal}`,
-        badgeColor: progress >= 100 ? "text-green-500" : "text-[#ef9253]",
-        goal: `Goal: ${memberGoal} (All Access: ${allAccess}, Swing Saver: ${swingSaver})`,
+        badge: newThisMonth > 0 ? `+${newThisMonth} this month${momDiff >= 0 ? ` (↑${momDiff} vs last)` : ` (↓${Math.abs(momDiff)} vs last)`}` : `${Math.max(0, 300 - customerMembers)} more needed`,
+        badgeColor: newThisMonth > 0 ? "text-green-500" : "text-[#ef9253]",
+        goal: `All Access: ${allAccess} · Swing Saver: ${swingSaver}`,
       };
     }
     if (kpi.label === "Member Retention" && customerMembers !== null) {
