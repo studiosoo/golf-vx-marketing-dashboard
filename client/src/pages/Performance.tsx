@@ -136,22 +136,22 @@ export default function Performance() {
                   <div className="space-y-1">
                     <p className="text-xs text-muted-foreground">All-Access Aces</p>
                     <p className="text-xl font-bold text-primary">{overview.memberStats.allAccessCount}</p>
-                    <p className="text-xs text-muted-foreground">{fmt(overview.memberStats.allAccessCount * 325)} MRR · $325/mo</p>
+                    <p className="text-xs text-muted-foreground">{fmt(parseFloat((overview.memberStats as any).allAccessMRR || overview.memberStats.allAccessCount * 325))} MRR</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs text-muted-foreground">Swing Savers</p>
                     <p className="text-xl font-bold text-[#76addc]">{overview.memberStats.swingSaversCount}</p>
-                    <p className="text-xs text-muted-foreground">{fmt(overview.memberStats.swingSaversCount * 225)} MRR · $225/mo</p>
+                    <p className="text-xs text-muted-foreground">{fmt(parseFloat((overview.memberStats as any).swingSaversMRR || overview.memberStats.swingSaversCount * 225))} MRR</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">Trial</p>
-                    <p className="text-xl font-bold text-[#ef9253]">{overview.memberStats.activeMembers - overview.memberStats.allAccessCount - overview.memberStats.swingSaversCount - overview.memberStats.golfVxProCount}</p>
-                    <p className="text-xs text-muted-foreground">Trial / Unclassified</p>
+                    <p className="text-xs text-muted-foreground">Trial / Other</p>
+                    <p className="text-xl font-bold text-[#ef9253]">{Math.max(0, overview.memberStats.activeMembers - overview.memberStats.allAccessCount - overview.memberStats.swingSaversCount - overview.memberStats.golfVxProCount)}</p>
+                    <p className="text-xs text-muted-foreground">Unclassified</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">Regular MRR</p>
-                    <p className="text-xl font-bold text-[#5daf68]">{fmt(overview.memberStats.allAccessCount * 325 + overview.memberStats.swingSaversCount * 225)}</p>
-                    <p className="text-xs text-muted-foreground">Combined</p>
+                    <p className="text-xs text-muted-foreground">Customer MRR</p>
+                    <p className="text-xl font-bold text-[#5daf68]">{fmt(parseFloat((overview.memberStats as any).allAccessMRR || overview.memberStats.allAccessCount * 325) + parseFloat((overview.memberStats as any).swingSaversMRR || overview.memberStats.swingSaversCount * 225))}</p>
+                    <p className="text-xs text-muted-foreground">AA + SS combined</p>
                   </div>
                 </div>
               </div>
@@ -166,7 +166,7 @@ export default function Performance() {
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs text-muted-foreground">Base MRR</p>
-                    <p className="text-xl font-bold text-[#a87fbe]">{fmt(overview.memberStats.golfVxProCount * 500)}</p>
+                    <p className="text-xl font-bold text-[#a87fbe]">{fmt(parseFloat((overview.memberStats as any).golfVxProMRR || overview.memberStats.golfVxProCount * 500))}</p>
                     <p className="text-xs text-muted-foreground">$500/mo · via Stripe</p>
                   </div>
                   <div className="space-y-1">

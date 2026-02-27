@@ -528,3 +528,18 @@
 - [ ] Fix membership KPIs: All Access + Swing Saver = customer members, goal 300; Pro members tracked separately
 - [ ] Add Pro member Stripe payment tracking schema + placeholder UI
 - [ ] Build Giveaway daily dashboard with AI daily action recommendations (goal: 500 applications)
+
+## Boomerang MRR Data Sync (2026-02-27)
+- [x] Parse ArlingtonHeights_ActiveMembers(Venuecopy).csv from Boomerang export
+- [x] Add monthlyAmount and paymentInterval columns to members table schema
+- [x] Run DB migration for new columns
+- [x] Sync 87 active customer members from CSV (54 AA + 33 SS) with actual payment amounts
+- [x] Sync 5 Pro members from CSV
+- [x] Calculate actual MRR: AA $14,006 + SS $4,642 + Pro $2,000 = $20,648/mo total
+- [x] Update getStrategicKPIs to return actual MRR from DB (allAccessMRR, swingSaverMRR, proMRR, totalMRR)
+- [x] Update getStrategicKPIs to return paymentBreakdown (monthly vs annual count)
+- [x] Update StrategicCampaigns.tsx membership card to show MRR breakdown from Boomerang
+- [x] Update Performance.tsx member stats to show actual MRR instead of flat rates
+- [x] Update Members.tsx stats cards to show Customer MRR, Total MRR from Boomerang
+- [x] Update Home.tsx KPI bar to show MRR inline with member count
+- [x] Write 7 unit tests for MRR calculation logic (all passing)

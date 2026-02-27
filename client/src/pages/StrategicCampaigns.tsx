@@ -293,19 +293,47 @@ export default function StrategicCampaigns() {
               <CardContent className="space-y-6">
                 {/* Goal/KPI Progress Section */}
                 {campaign.id === 'membership_acquisition' && kpiData && (
-                  <div className="p-4 rounded-lg bg-muted/50">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">Membership Goal</span>
-                      <span className="text-sm font-bold">{kpiData.membershipAcquisition.current} / 300 members</span>
+                  <div className="p-4 rounded-lg bg-muted/50 space-y-3">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">Membership Goal</span>
+                        <span className="text-sm font-bold">{kpiData.membershipAcquisition.current} / 300 members</span>
+                      </div>
+                      <Progress value={(kpiData.membershipAcquisition.current / 300) * 100} className="h-2" />
+                      <div className="flex gap-4 mt-2">
+                        <p className="text-xs text-muted-foreground">All Access: <span className="font-semibold text-foreground">{kpiData.membershipAcquisition.breakdown?.allAccess ?? 0}</span></p>
+                        <p className="text-xs text-muted-foreground">Swing Saver: <span className="font-semibold text-foreground">{kpiData.membershipAcquisition.breakdown?.swingSaver ?? 0}</span></p>
+                        {(kpiData.membershipAcquisition as any).paymentBreakdown && (
+                          <>
+                            <p className="text-xs text-muted-foreground">Monthly: <span className="font-semibold text-foreground">{(kpiData.membershipAcquisition as any).paymentBreakdown.monthly}</span></p>
+                            <p className="text-xs text-muted-foreground">Annual: <span className="font-semibold text-foreground">{(kpiData.membershipAcquisition as any).paymentBreakdown.annual}</span></p>
+                          </>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Acquisition goal: <span className="font-semibold text-foreground">{Math.max(0, 300 - kpiData.membershipAcquisition.current)} more members</span> to reach 300 • 2-year target
+                      </p>
                     </div>
-                    <Progress value={(kpiData.membershipAcquisition.current / 300) * 100} className="h-2" />
-                    <div className="flex gap-4 mt-2">
-                      <p className="text-xs text-muted-foreground">All Access: <span className="font-semibold text-foreground">{kpiData.membershipAcquisition.breakdown?.allAccess ?? 0}</span></p>
-                      <p className="text-xs text-muted-foreground">Swing Saver: <span className="font-semibold text-foreground">{kpiData.membershipAcquisition.breakdown?.swingSaver ?? 0}</span></p>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Acquisition goal: <span className="font-semibold text-foreground">{Math.max(0, 300 - kpiData.membershipAcquisition.current)} more members</span> to reach 300 • 2-year target
-                    </p>
+                    {(kpiData.membershipAcquisition as any).mrr && (
+                      <div className="border-t pt-3">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">MRR from Boomerang</p>
+                        <div className="grid grid-cols-3 gap-2">
+                          <div>
+                            <p className="text-xs text-muted-foreground">All Access</p>
+                            <p className="text-sm font-bold text-primary">${((kpiData.membershipAcquisition as any).mrr.allAccess || 0).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Swing Saver</p>
+                            <p className="text-sm font-bold text-[#76addc]">${((kpiData.membershipAcquisition as any).mrr.swingSaver || 0).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Total MRR</p>
+                            <p className="text-sm font-bold text-[#5daf68]">${((kpiData as any).totalMRR || 0).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</p>
+                          </div>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">Source: Boomerang active member payments</p>
+                      </div>
+                    )}
                   </div>
                 )}
 

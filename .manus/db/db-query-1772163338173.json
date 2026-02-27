@@ -1,0 +1,25 @@
+{
+  "query": "SHOW TABLES LIKE '%boomerang%'; SHOW TABLES LIKE '%member%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2R3ugynrRDzjYQU.e9d0c4c091a8 --database A5GjFitCrpqWQ2wnoTJiWm --execute SHOW TABLES LIKE '%boomerang%'; SHOW TABLES LIKE '%member%';",
+  "rows": [
+    {
+      "Tables_in_A5GjFitCrpqWQ2wnoTJiWm (%member%)": "memberAppointments"
+    },
+    {
+      "Tables_in_A5GjFitCrpqWQ2wnoTJiWm (%member%)": "memberTransactions"
+    },
+    {
+      "Tables_in_A5GjFitCrpqWQ2wnoTJiWm (%member%)": "members"
+    },
+    {
+      "Tables_in_A5GjFitCrpqWQ2wnoTJiWm (%member%)": "pro_member_billing"
+    },
+    {
+      "Tables_in_A5GjFitCrpqWQ2wnoTJiWm (%member%)": "pro_member_sessions"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_A5GjFitCrpqWQ2wnoTJiWm (%member%)\nmemberAppointments\nmemberTransactions\nmembers\npro_member_billing\npro_member_sessions\n",
+  "stderr": "",
+  "execution_time_ms": 405
+}

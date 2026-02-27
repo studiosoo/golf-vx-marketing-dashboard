@@ -228,32 +228,34 @@ export default function Members() {
         <div className="grid gap-4 md:grid-cols-4 mb-8">
           <Card>
             <CardHeader className="pb-3">
-              <CardDescription>Total Members</CardDescription>
-              <CardTitle className="text-3xl">{stats.totalMembers}</CardTitle>
+              <CardDescription>Customer Members</CardDescription>
+              <CardTitle className="text-3xl">{(stats.allAccessCount || 0) + (stats.swingSaversCount || 0)}</CardTitle>
+              <p className="text-xs text-muted-foreground">AA: {stats.allAccessCount} · SS: {stats.swingSaversCount}</p>
             </CardHeader>
           </Card>
           <Card>
             <CardHeader className="pb-3">
-              <CardDescription>Active Members</CardDescription>
-              <CardTitle className="text-3xl">{stats.activeMembers}</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-3">
-              <CardDescription>Lifetime Value</CardDescription>
+              <CardDescription>Monthly MRR</CardDescription>
               <CardTitle className="text-3xl">
-                ${parseFloat(stats.totalLifetimeValue || "0").toLocaleString()}
+                ${(parseFloat((stats as any).allAccessMRR || '0') + parseFloat((stats as any).swingSaversMRR || '0')).toLocaleString('en-US', {maximumFractionDigits: 0})}
               </CardTitle>
+              <p className="text-xs text-muted-foreground">From Boomerang payments</p>
             </CardHeader>
           </Card>
           <Card>
             <CardHeader className="pb-3">
-              <CardDescription>Avg. LTV</CardDescription>
+              <CardDescription>Pro Members</CardDescription>
+              <CardTitle className="text-3xl">{stats.golfVxProCount}</CardTitle>
+              <p className="text-xs text-muted-foreground">${parseFloat((stats as any).golfVxProMRR || (stats.golfVxProCount * 500).toString()).toLocaleString('en-US', {maximumFractionDigits: 0})} MRR</p>
+            </CardHeader>
+          </Card>
+          <Card>
+            <CardHeader className="pb-3">
+              <CardDescription>Total MRR (All Tiers)</CardDescription>
               <CardTitle className="text-3xl">
-                ${stats.totalMembers > 0
-                  ? (parseFloat(stats.totalLifetimeValue || "0") / stats.totalMembers).toFixed(0)
-                  : "0"}
+                ${(parseFloat((stats as any).allAccessMRR || '0') + parseFloat((stats as any).swingSaversMRR || '0') + parseFloat((stats as any).golfVxProMRR || (stats.golfVxProCount * 500).toString())).toLocaleString('en-US', {maximumFractionDigits: 0})}
               </CardTitle>
+              <p className="text-xs text-muted-foreground">AA + SS + Pro</p>
             </CardHeader>
           </Card>
         </div>

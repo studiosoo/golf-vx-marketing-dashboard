@@ -1547,10 +1547,10 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
         const totalCampaignRevenue = activeCampaigns.reduce((sum, c) => sum + parseFloat(c.actualRevenue), 0);
         const roi = totalSpend > 0 ? ((totalCampaignRevenue - totalSpend) / totalSpend) * 100 : 0;
 
-        // Calculate MRR based on membership tiers
-        const allAccessMRR = (memberStats?.allAccessCount || 0) * 325;
-        const swingSaversMRR = (memberStats?.swingSaversCount || 0) * 225;
-        const golfVxProMRR = (memberStats?.golfVxProCount || 0) * 500;
+        // Use actual MRR from Boomerang payment data (monthlyAmount field)
+        const allAccessMRR = parseFloat(memberStats?.allAccessMRR as string || '0') || (memberStats?.allAccessCount || 0) * 325;
+        const swingSaversMRR = parseFloat(memberStats?.swingSaversMRR as string || '0') || (memberStats?.swingSaversCount || 0) * 225;
+        const golfVxProMRR = parseFloat(memberStats?.golfVxProMRR as string || '0') || (memberStats?.golfVxProCount || 0) * 500;
         const totalMRR = allAccessMRR + swingSaversMRR + golfVxProMRR;
 
         return {
@@ -2532,13 +2532,24 @@ Respond in JSON with this exact structure:
             COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers') THEN 1 END) as customerMembers,
             COUNT(CASE WHEN membershipTier = 'golf_vx_pro' THEN 1 END) as proMembers,
             COUNT(CASE WHEN membershipTier = 'all_access_aces' THEN 1 END) as allAccessCount,
-            COUNT(CASE WHEN membershipTier = 'swing_savers' THEN 1 END) as swingSaverCount
+            COUNT(CASE WHEN membershipTier = 'swing_savers' THEN 1 END) as swingSaverCount,
+            SUM(CASE WHEN membershipTier = 'all_access_aces' THEN COALESCE(monthlyAmount, 0) ELSE 0 END) as allAccessMRR,
+            SUM(CASE WHEN membershipTier = 'swing_savers' THEN COALESCE(monthlyAmount, 0) ELSE 0 END) as swingSaverMRR,
+            SUM(CASE WHEN membershipTier = 'golf_vx_pro' THEN COALESCE(monthlyAmount, 0) ELSE 0 END) as proMRR,
+            COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers') AND paymentInterval = 'annual' THEN 1 END) as annualCount,
+            COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers') AND paymentInterval = 'monthly' THEN 1 END) as monthlyCount
           FROM members WHERE status = 'active'`
         );
         const customerMemberCount = Number((memberCountResult as any)[0]?.customerMembers || 0);
         const proMemberCount = Number((memberCountResult as any)[0]?.proMembers || 0);
         const allAccessCount = Number((memberCountResult as any)[0]?.allAccessCount || 0);
         const swingSaverCount = Number((memberCountResult as any)[0]?.swingSaverCount || 0);
+        const allAccessMRR = parseFloat((memberCountResult as any)[0]?.allAccessMRR || '0');
+        const swingSaverMRR = parseFloat((memberCountResult as any)[0]?.swingSaverMRR || '0');
+        const proMRR = parseFloat((memberCountResult as any)[0]?.proMRR || '0');
+        const totalMRR = allAccessMRR + swingSaverMRR + proMRR;
+        const annualMemberCount = Number((memberCountResult as any)[0]?.annualCount || 0);
+        const monthlyMemberCount = Number((memberCountResult as any)[0]?.monthlyCount || 0);
         // New members this month vs last month (All Access + Swing Saver only)
         const newMembersResult = await database.execute(`
           SELECT
@@ -2624,6 +2635,9 @@ Respond in JSON with this exact structure:
             breakdown: { allAccess: allAccessCount, swingSaver: swingSaverCount },
             newThisMonth: newMembersThisMonth,
             newLastMonth: newMembersLastMonth,
+            // MRR data from Boomerang
+            mrr: { allAccess: allAccessMRR, swingSaver: swingSaverMRR, total: allAccessMRR + swingSaverMRR },
+            paymentBreakdown: { monthly: monthlyMemberCount, annual: annualMemberCount },
           },
           memberRetention: {
             // Goal: retain all 300 customer members
@@ -2637,7 +2651,9 @@ Respond in JSON with this exact structure:
             // Pro members tracked separately — NOT part of the 300 goal
             current: proMemberCount,
             label: "Golf VX Pro (Coaches)",
+            mrr: proMRR,
           },
+          totalMRR: totalMRR,
           trialConversion: {
             current: conversionRate,
             target: 20,

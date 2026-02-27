@@ -203,6 +203,11 @@ export const members = mysqlTable("members", {
   notes: text("notes"),
   tags: json("tags").$type<string[]>(),
   
+  // Billing fields (from Boomerang)
+  monthlyAmount: decimal("monthlyAmount", { precision: 10, scale: 2 }).default("0"),
+  paymentInterval: mysqlEnum("paymentInterval", ["monthly", "annual"]).default("monthly"),
+  boomerangMembership: varchar("boomerangMembership", { length: 100 }), // raw membership label from Boomerang
+  
   // Boomerangme integration fields
   boomerangCustomerId: varchar("boomerangCustomerId", { length: 100 }),
   loyaltyPoints: int("loyaltyPoints").default(0).notNull(),
