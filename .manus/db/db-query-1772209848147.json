@@ -1,0 +1,30 @@
+{
+  "query": "SELECT COUNT(*) as total, event_type, source FROM membership_events GROUP BY event_type, source;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2R3ugynrRDzjYQU.e9d0c4c091a8 --database A5GjFitCrpqWQ2wnoTJiWm --execute SELECT COUNT(*) as total, event_type, source FROM membership_events GROUP BY event_type, source;",
+  "rows": [
+    {
+      "total": "1",
+      "event_type": "cancelled",
+      "source": "make_com"
+    },
+    {
+      "total": "1",
+      "event_type": "upgraded",
+      "source": "make_com"
+    },
+    {
+      "total": "326",
+      "event_type": "joined",
+      "source": "backfill"
+    },
+    {
+      "total": "1",
+      "event_type": "joined",
+      "source": "make_com"
+    }
+  ],
+  "messages": [],
+  "stdout": "total\tevent_type\tsource\n1\tcancelled\tmake_com\n1\tupgraded\tmake_com\n326\tjoined\tbackfill\n1\tjoined\tmake_com\n",
+  "stderr": "",
+  "execution_time_ms": 115
+}

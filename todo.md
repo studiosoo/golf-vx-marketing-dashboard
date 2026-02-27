@@ -551,3 +551,14 @@
 - [x] Dismiss stale Trial Session targeting recommendations (4 dismissed — campaign not in live Meta Ads)
 - [x] Update dashboard to show execution results for all 12 actions (Marketing Intelligence page reflects all statuses)
 - [x] Save checkpoint after all actions applied
+
+## Membership Event History Tracking (2026-02-27)
+
+- [x] membership_events table created in DB (10 event types: joined/cancelled/upgraded/downgraded/paused/resumed/tier_changed/payment_failed/payment_recovered/renewed)
+- [x] server/membershipWebhook.ts — POST /api/webhooks/boomerang-membership handler with secret validation
+- [x] Encharge tag sync on all event types (addEnchargeTag/removeEnchargeTag)
+- [x] DB helpers: logMembershipEvent, getMemberIdByEmail, getMemberHistoryByEmail, getChurnedMembers, getWinbackOpportunities, getMembershipEventSummary
+- [x] tRPC procedures: members.getHistory, members.getHistoryByEmail, members.getChurnedMembers, members.getWinbackOpportunities, members.getEventSummary, members.logEvent
+- [x] Members.tsx: Event History tab with 4 views (Member Timeline, Event Summary, Churned Members, Win-Back 90d)
+- [x] Backfilled existing active members as "joined" events in DB
+- [x] 15/15 vitest tests passing for membershipWebhook handler

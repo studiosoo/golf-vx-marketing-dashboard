@@ -10,6 +10,7 @@ import { serveStatic, setupVite } from "./vite";
 import { startScheduler } from "../scheduler";
 import { handleBoomerangWebhookRoute } from "../boomerangWebhook";
 import { handleStripeWebhookRoute } from "../stripeWebhook";
+import { handleMembershipWebhookRoute } from "../membershipWebhook";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -43,6 +44,8 @@ async function startServer() {
   app.post("/api/webhooks/stripe", express.raw({ type: "application/json" }), handleStripeWebhookRoute);
   // Boomerang loyalty card webhook (Make.com → Golf VX)
   app.post("/api/webhooks/boomerang", handleBoomerangWebhookRoute);
+  // Membership lifecycle events webhook (Make.com → Golf VX — logs full history + Encharge tags)
+  app.post("/api/webhooks/boomerang-membership", handleMembershipWebhookRoute);
   // tRPC API
   app.use(
     "/api/trpc",

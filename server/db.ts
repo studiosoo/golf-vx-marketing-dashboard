@@ -37,6 +37,9 @@ import {
   InsertPageAnalytics,
   PageAnalytics,
   anniversaryGiveawayEntries,
+  membershipEvents,
+  MembershipEvent,
+  NewMembershipEvent,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -1001,4 +1004,182 @@ export async function getGiveawayEntryByEmail(email: string) {
     .where(eq(anniversaryGiveawayEntries.email, email))
     .limit(1);
   return entry;
+}
+
+
+// ---------------------------------------------------------------------------
+// Membership Event History DB helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Log a membership lifecycle event.
+ * Returns the inserted row ID.
+ */
+export async function logMembershipEvent(event: {
+  email: string;
+  memberId?: number;
+  name?: string;
+  eventType: "joined" | "cancelled" | "upgraded" | "downgraded" | "paused" | "resumed" | "tier_changed" | "payment_failed" | "payment_recovered" | "renewed";
+  tier?: "all_access_aces" | "swing_savers" | "golf_vx_pro" | "trial" | "none";
+  plan?: "monthly" | "annual";
+  amount?: string;
+  previousTier?: "all_access_aces" | "swing_savers" | "golf_vx_pro" | "trial" | "none";
+  previousPlan?: "monthly" | "annual";
+  previousAmount?: string;
+  eventTimestamp: Date;
+  source?: "make_com" | "manual" | "backfill" | "api";
+  webhookPayload?: Record<string, any>;
+  enchargeTagged?: boolean;
+  enchargeTaggedAt?: Date;
+  notes?: string;
+}): Promise<number | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.insert(membershipEvents).values({
+    email: event.email.toLowerCase().trim(),
+    memberId: event.memberId,
+    name: event.name,
+    eventType: event.eventType,
+    tier: event.tier,
+    plan: event.plan,
+    amount: event.amount,
+    previousTier: event.previousTier,
+    previousPlan: event.previousPlan,
+    previousAmount: event.previousAmount,
+    eventTimestamp: event.eventTimestamp,
+    processedAt: new Date(),
+    source: event.source ?? "make_com",
+    webhookPayload: event.webhookPayload,
+    enchargeTagged: event.enchargeTagged ?? false,
+    enchargeTaggedAt: event.enchargeTaggedAt,
+    notes: event.notes,
+  });
+
+  return (result as any).insertId;
+}
+
+/**
+ * Return full event history for a member by their DB id.
+ */
+export async function getMemberHistory(memberId: number): Promise<MembershipEvent[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db
+    .select()
+    .from(membershipEvents)
+    .where(eq(membershipEvents.memberId, memberId))
+    .orderBy(desc(membershipEvents.eventTimestamp));
+}
+
+/**
+ * Return full event history for a member by email.
+ */
+export async function getMemberHistoryByEmail(email: string): Promise<MembershipEvent[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db
+    .select()
+    .from(membershipEvents)
+    .where(eq(membershipEvents.email, email.toLowerCase().trim()))
+    .orderBy(desc(membershipEvents.eventTimestamp));
+}
+
+/**
+ * Return all members whose most recent event is a cancellation.
+ */
+export async function getChurnedMembers(): Promise<Array<{
+  email: string;
+  name: string | null;
+  tier: string | null;
+  plan: string | null;
+  cancelledAt: Date;
+  daysSinceCancellation: number;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+
+  const rows = await db.execute(sql`
+    SELECT
+      e.email,
+      e.name,
+      e.tier,
+      e.plan,
+      e.event_timestamp AS cancelledAt,
+      DATEDIFF(NOW(), e.event_timestamp) AS daysSinceCancellation
+    FROM membership_events e
+    INNER JOIN (
+      SELECT email, MAX(event_timestamp) AS latest
+      FROM membership_events
+      GROUP BY email
+    ) latest_events ON e.email = latest_events.email AND e.event_timestamp = latest_events.latest
+    WHERE e.event_type = 'cancelled'
+    ORDER BY e.event_timestamp DESC
+  `);
+
+  return ((rows[0] as unknown) as any[]).map((r: any) => ({
+    email: r.email,
+    name: r.name,
+    tier: r.tier,
+    plan: r.plan,
+    cancelledAt: new Date(r.cancelledAt),
+    daysSinceCancellation: Number(r.daysSinceCancellation),
+  }));
+}
+
+/**
+ * Return members who cancelled within the last N days — prime win-back targets.
+ */
+export async function getWinbackOpportunities(withinDays = 90): Promise<Array<{
+  email: string;
+  name: string | null;
+  tier: string | null;
+  plan: string | null;
+  cancelledAt: Date;
+  daysSinceCancellation: number;
+}>> {
+  const all = await getChurnedMembers();
+  return all.filter(m => m.daysSinceCancellation <= withinDays);
+}
+
+/**
+ * Return a summary count of events by type over the last N days.
+ */
+export async function getMembershipEventSummary(days = 30): Promise<Array<{
+  eventType: string;
+  count: number;
+}>> {
+  const db = await getDb();
+  if (!db) return [];
+
+  const rows = await db.execute(sql`
+    SELECT event_type AS eventType, COUNT(*) AS count
+    FROM membership_events
+    WHERE event_timestamp >= DATE_SUB(NOW(), INTERVAL ${days} DAY)
+    GROUP BY event_type
+    ORDER BY count DESC
+  `);
+
+  return ((rows[0] as unknown) as any[]).map((r: any) => ({
+    eventType: r.eventType,
+    count: Number(r.count),
+  }));
+}
+
+/**
+ * Find a member record by email and return their ID (for webhook linkage).
+ */
+export async function getMemberIdByEmail(email: string): Promise<number | null> {
+  const db = await getDb();
+  if (!db) return null;
+
+  const [row] = await db
+    .select({ id: members.id })
+    .from(members)
+    .where(eq(members.email, email.toLowerCase()))
+    .limit(1);
+
+  return row?.id ?? null;
 }

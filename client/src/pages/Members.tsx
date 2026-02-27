@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Mail, Phone, Calendar, Upload, Users, CreditCard, MessageSquare, Trophy, Star, Award, DollarSign, Activity } from "lucide-react";
+import { Plus, Search, Mail, Phone, Calendar, Upload, Users, CreditCard, MessageSquare, Trophy, Star, Award, DollarSign, Activity, History, TrendingDown, RotateCcw, BarChart3, AlertCircle, CheckCircle2, XCircle, PauseCircle, ArrowUpCircle, ArrowDownCircle, RefreshCw, CreditCard as CardIcon } from "lucide-react";
 import { BoomerangMembersTab } from "@/components/tabs/BoomerangMembersTab";
 import { EmailCapturesTab } from "@/components/tabs/EmailCapturesTab";
 
@@ -163,6 +163,10 @@ export default function Members() {
           <TabsTrigger value="communications">
             <MessageSquare className="mr-2 h-4 w-4" />
             Communications
+          </TabsTrigger>
+          <TabsTrigger value="history">
+            <History className="mr-2 h-4 w-4" />
+            Event History
           </TabsTrigger>
         </TabsList>
 
@@ -419,6 +423,9 @@ export default function Members() {
         </TabsContent>
         <TabsContent value="communications">
           <CommunicationsHistoryTab />
+        </TabsContent>
+        <TabsContent value="history">
+          <MembershipHistoryTab />
         </TabsContent>
       </Tabs>
     </div>
@@ -1212,6 +1219,317 @@ function ProMemberBillingSection() {
 
       <div className="rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800 p-4 text-sm text-blue-800 dark:text-blue-300">
         <strong>Stripe Integration:</strong> Once Stripe is connected next week, payment status will update automatically. Each coach pays $500/mo base minus $25 per coaching session (up to 20 sessions), plus $25/hr overage beyond 20 sessions.
+      </div>
+    </div>
+  );
+}
+
+
+// ---------------------------------------------------------------------------
+// Membership Event History Tab
+// ---------------------------------------------------------------------------
+function MembershipHistoryTab() {
+  const [activeView, setActiveView] = useState<"timeline" | "churned" | "winback" | "summary">("timeline");
+  const [searchEmail, setSearchEmail] = useState("");
+  const [debouncedEmail, setDebouncedEmail] = useState("");
+
+  const summaryQuery = trpc.members.getEventSummary.useQuery({ days: 30 });
+  const churnedQuery = trpc.members.getChurnedMembers.useQuery();
+  const winbackQuery = trpc.members.getWinbackOpportunities.useQuery({ withinDays: 90 });
+  const historyQuery = trpc.members.getHistoryByEmail.useQuery(
+    { email: debouncedEmail },
+    { enabled: !!debouncedEmail && debouncedEmail.includes("@") }
+  );
+
+  function handleSearch() {
+    setDebouncedEmail(searchEmail.trim());
+  }
+
+  const EVENT_CONFIG: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
+    joined:            { label: "Joined",            color: "bg-green-500/10 text-green-600 border-green-200",    icon: <CheckCircle2 className="h-4 w-4 text-green-500" /> },
+    cancelled:         { label: "Cancelled",         color: "bg-red-500/10 text-red-600 border-red-200",          icon: <XCircle className="h-4 w-4 text-red-500" /> },
+    upgraded:          { label: "Upgraded",          color: "bg-blue-500/10 text-blue-600 border-blue-200",       icon: <ArrowUpCircle className="h-4 w-4 text-blue-500" /> },
+    downgraded:        { label: "Downgraded",        color: "bg-orange-500/10 text-orange-600 border-orange-200", icon: <ArrowDownCircle className="h-4 w-4 text-orange-500" /> },
+    paused:            { label: "Paused",            color: "bg-yellow-500/10 text-yellow-600 border-yellow-200", icon: <PauseCircle className="h-4 w-4 text-yellow-500" /> },
+    resumed:           { label: "Resumed",           color: "bg-teal-500/10 text-teal-600 border-teal-200",       icon: <RefreshCw className="h-4 w-4 text-teal-500" /> },
+    tier_changed:      { label: "Tier Changed",      color: "bg-purple-500/10 text-purple-600 border-purple-200", icon: <RotateCcw className="h-4 w-4 text-purple-500" /> },
+    payment_failed:    { label: "Payment Failed",    color: "bg-red-500/10 text-red-600 border-red-200",          icon: <AlertCircle className="h-4 w-4 text-red-500" /> },
+    payment_recovered: { label: "Payment Recovered", color: "bg-green-500/10 text-green-600 border-green-200",    icon: <CheckCircle2 className="h-4 w-4 text-green-500" /> },
+    renewed:           { label: "Renewed",           color: "bg-emerald-500/10 text-emerald-600 border-emerald-200", icon: <RefreshCw className="h-4 w-4 text-emerald-500" /> },
+  };
+
+  const TIER_LABELS: Record<string, string> = {
+    all_access_aces: "All Access Ace",
+    swing_savers: "Swing Saver",
+    golf_vx_pro: "Pro Member",
+    trial: "Trial",
+    none: "None",
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">Membership Event History</h2>
+          <p className="text-muted-foreground text-sm mt-1">
+            Full lifecycle tracking — joined, cancelled, upgraded, churned, and win-back opportunities
+          </p>
+        </div>
+        <Badge variant="outline" className="text-xs">
+          Webhook: /api/webhooks/boomerang-membership
+        </Badge>
+      </div>
+
+      <div className="flex gap-2 flex-wrap">
+        {[
+          { key: "timeline", label: "Member Timeline", icon: <History className="h-4 w-4" /> },
+          { key: "summary",  label: "Event Summary",   icon: <BarChart3 className="h-4 w-4" /> },
+          { key: "churned",  label: "Churned Members", icon: <TrendingDown className="h-4 w-4" /> },
+          { key: "winback",  label: "Win-Back (90d)",  icon: <RotateCcw className="h-4 w-4" /> },
+        ].map(v => (
+          <Button
+            key={v.key}
+            variant={activeView === v.key ? "default" : "outline"}
+            size="sm"
+            onClick={() => setActiveView(v.key as any)}
+            className="flex items-center gap-1.5"
+          >
+            {v.icon}
+            {v.label}
+          </Button>
+        ))}
+      </div>
+
+      {activeView === "timeline" && (
+        <div className="space-y-4">
+          <div className="flex gap-2">
+            <Input
+              placeholder="Enter member email to view their history..."
+              value={searchEmail}
+              onChange={e => setSearchEmail(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && handleSearch()}
+              className="max-w-md"
+            />
+            <Button onClick={handleSearch} size="sm">
+              <Search className="h-4 w-4 mr-1" /> Search
+            </Button>
+          </div>
+          {!debouncedEmail && (
+            <div className="text-center py-16 text-muted-foreground border rounded-lg">
+              <History className="h-10 w-10 mx-auto mb-3 opacity-30" />
+              <p className="font-medium">Enter a member email to view their full event timeline</p>
+              <p className="text-sm mt-1">All membership lifecycle events are tracked here</p>
+            </div>
+          )}
+          {debouncedEmail && historyQuery.isLoading && (
+            <div className="text-center py-12 text-muted-foreground">Loading history...</div>
+          )}
+          {debouncedEmail && !historyQuery.isLoading && historyQuery.data && historyQuery.data.length === 0 && (
+            <div className="text-center py-12 text-muted-foreground border rounded-lg">
+              <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-30" />
+              <p>No events found for <strong>{debouncedEmail}</strong></p>
+              <p className="text-sm mt-1">Events are logged automatically when Make.com sends a webhook</p>
+            </div>
+          )}
+          {historyQuery.data && historyQuery.data.length > 0 && (
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                {historyQuery.data.length} event{historyQuery.data.length !== 1 ? "s" : ""} for <strong>{debouncedEmail}</strong>
+              </p>
+              <div className="relative">
+                <div className="absolute left-5 top-0 bottom-0 w-px bg-border" />
+                <div className="space-y-4">
+                  {historyQuery.data.map((event: any) => {
+                    const cfg = EVENT_CONFIG[event.eventType] ?? { label: event.eventType, color: "bg-muted", icon: <Activity className="h-4 w-4" /> };
+                    return (
+                      <div key={event.id} className="relative flex gap-4 pl-10">
+                        <div className="absolute left-3 top-2 w-4 h-4 rounded-full bg-background border-2 border-border flex items-center justify-center">
+                          {cfg.icon}
+                        </div>
+                        <div className={`flex-1 rounded-lg border p-3 ${cfg.color}`}>
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <span className="font-semibold text-sm">{cfg.label}</span>
+                              {event.tier && (
+                                <span className="ml-2 text-xs opacity-70">
+                                  to {TIER_LABELS[event.tier] ?? event.tier}
+                                  {event.plan && ` (${event.plan})`}
+                                  {event.amount && ` - $${event.amount}/mo`}
+                                </span>
+                              )}
+                              {event.previousTier && (
+                                <span className="ml-2 text-xs opacity-60">
+                                  from {TIER_LABELS[event.previousTier] ?? event.previousTier}
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-right text-xs opacity-60 shrink-0">
+                              <div>{new Date(event.eventTimestamp).toLocaleDateString()}</div>
+                              <div>{new Date(event.eventTimestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
+                            </div>
+                          </div>
+                          {event.notes && <p className="text-xs mt-1 opacity-70">{event.notes}</p>}
+                          <div className="flex items-center gap-3 mt-1.5 text-xs opacity-50">
+                            <span>Source: {event.source}</span>
+                            {event.enchargeTagged && <span className="text-green-600">Encharge synced</span>}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeView === "summary" && (
+        <div className="space-y-4">
+          <h3 className="font-semibold">Last 30 Days - Event Breakdown</h3>
+          {summaryQuery.isLoading && <div className="text-muted-foreground">Loading...</div>}
+          {summaryQuery.data && summaryQuery.data.length === 0 && (
+            <div className="text-center py-12 text-muted-foreground border rounded-lg">
+              <BarChart3 className="h-8 w-8 mx-auto mb-2 opacity-30" />
+              <p>No events logged yet. Events will appear once Make.com starts sending webhooks.</p>
+            </div>
+          )}
+          {summaryQuery.data && summaryQuery.data.length > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {summaryQuery.data.map((row: any) => {
+                const cfg = EVENT_CONFIG[row.eventType] ?? { label: row.eventType, color: "bg-muted border-border", icon: <Activity className="h-5 w-5" /> };
+                return (
+                  <div key={row.eventType} className={`rounded-lg border p-4 ${cfg.color}`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      {cfg.icon}
+                      <span className="text-sm font-medium">{cfg.label}</span>
+                    </div>
+                    <div className="text-2xl font-bold">{row.count}</div>
+                    <div className="text-xs opacity-60">events this month</div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeView === "churned" && (
+        <div className="space-y-4">
+          <h3 className="font-semibold">All Churned Members</h3>
+          {churnedQuery.isLoading && <div className="text-muted-foreground">Loading...</div>}
+          {churnedQuery.data && churnedQuery.data.length === 0 && (
+            <div className="text-center py-12 text-muted-foreground border rounded-lg">
+              <TrendingDown className="h-8 w-8 mx-auto mb-2 opacity-30" />
+              <p>No churned members on record</p>
+            </div>
+          )}
+          {churnedQuery.data && churnedQuery.data.length > 0 && (
+            <div className="rounded-lg border overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="text-left p-3 font-medium">Member</th>
+                    <th className="text-left p-3 font-medium">Tier</th>
+                    <th className="text-left p-3 font-medium">Plan</th>
+                    <th className="text-left p-3 font-medium">Cancelled</th>
+                    <th className="text-left p-3 font-medium">Days Ago</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {churnedQuery.data.map((m: any, i: number) => (
+                    <tr key={m.email} className={i % 2 === 0 ? "bg-background" : "bg-muted/20"}>
+                      <td className="p-3">
+                        <div className="font-medium">{m.name ?? "-"}</div>
+                        <div className="text-xs text-muted-foreground">{m.email}</div>
+                      </td>
+                      <td className="p-3">{m.tier ? (TIER_LABELS[m.tier] ?? m.tier) : "-"}</td>
+                      <td className="p-3 capitalize">{m.plan ?? "-"}</td>
+                      <td className="p-3">{new Date(m.cancelledAt).toLocaleDateString()}</td>
+                      <td className="p-3">
+                        <Badge variant={m.daysSinceCancellation <= 30 ? "destructive" : "secondary"} className="text-xs">
+                          {m.daysSinceCancellation}d
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeView === "winback" && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <h3 className="font-semibold">Win-Back Opportunities</h3>
+            <Badge variant="outline" className="text-xs">Cancelled within 90 days</Badge>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Members who cancelled recently are the highest-probability targets for re-engagement campaigns.
+          </p>
+          {winbackQuery.isLoading && <div className="text-muted-foreground">Loading...</div>}
+          {winbackQuery.data && winbackQuery.data.length === 0 && (
+            <div className="text-center py-12 text-muted-foreground border rounded-lg">
+              <RotateCcw className="h-8 w-8 mx-auto mb-2 opacity-30" />
+              <p>No win-back opportunities in the last 90 days</p>
+            </div>
+          )}
+          {winbackQuery.data && winbackQuery.data.length > 0 && (
+            <div className="rounded-lg border overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="text-left p-3 font-medium">Member</th>
+                    <th className="text-left p-3 font-medium">Former Tier</th>
+                    <th className="text-left p-3 font-medium">Plan</th>
+                    <th className="text-left p-3 font-medium">Cancelled</th>
+                    <th className="text-left p-3 font-medium">Days Ago</th>
+                    <th className="text-left p-3 font-medium">Priority</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {winbackQuery.data.map((m: any, i: number) => {
+                    const priority = m.daysSinceCancellation <= 14 ? "High" : m.daysSinceCancellation <= 45 ? "Medium" : "Low";
+                    const priorityColor = priority === "High" ? "destructive" : priority === "Medium" ? "default" : "secondary";
+                    return (
+                      <tr key={m.email} className={i % 2 === 0 ? "bg-background" : "bg-muted/20"}>
+                        <td className="p-3">
+                          <div className="font-medium">{m.name ?? "-"}</div>
+                          <div className="text-xs text-muted-foreground">{m.email}</div>
+                        </td>
+                        <td className="p-3">{m.tier ? (TIER_LABELS[m.tier] ?? m.tier) : "-"}</td>
+                        <td className="p-3 capitalize">{m.plan ?? "-"}</td>
+                        <td className="p-3">{new Date(m.cancelledAt).toLocaleDateString()}</td>
+                        <td className="p-3">{m.daysSinceCancellation}d</td>
+                        <td className="p-3">
+                          <Badge variant={priorityColor as any} className="text-xs">{priority}</Badge>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="rounded-lg border border-dashed p-4 bg-muted/30">
+        <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+          <Activity className="h-4 w-4" />
+          Make.com Webhook Configuration
+        </h4>
+        <div className="text-xs text-muted-foreground space-y-1 font-mono">
+          <div><span className="text-foreground font-semibold">URL:</span> https://golfvx-dash-a5gjfitc.manus.space/api/webhooks/boomerang-membership</div>
+          <div><span className="text-foreground font-semibold">Method:</span> POST</div>
+          <div><span className="text-foreground font-semibold">Header:</span> x-webhook-secret: golfvx_boomerang_2026</div>
+          <div><span className="text-foreground font-semibold">Required:</span> email, eventType</div>
+          <div><span className="text-foreground font-semibold">Optional:</span> name, tier, plan, amount, previousTier, previousPlan, timestamp, notes</div>
+          <div><span className="text-foreground font-semibold">Event types:</span> joined | cancelled | upgraded | downgraded | paused | resumed | tier_changed | payment_failed | payment_recovered | renewed</div>
+          <div><span className="text-foreground font-semibold">Tier values:</span> all_access_aces | swing_savers | golf_vx_pro | trial | none</div>
+        </div>
       </div>
     </div>
   );

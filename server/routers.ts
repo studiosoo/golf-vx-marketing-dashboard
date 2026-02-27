@@ -1121,6 +1121,71 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
           .where(inArray(membersTable.id, input.memberIds));
         return { success: true, updatedCount: input.memberIds.length };
       }),
+
+    // ── Membership Event History ──────────────────────────────────────────────
+    getHistory: protectedProcedure
+      .input(z.object({ memberId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getMemberHistory(input.memberId);
+      }),
+
+    getHistoryByEmail: protectedProcedure
+      .input(z.object({ email: z.string().email() }))
+      .query(async ({ input }) => {
+        return await db.getMemberHistoryByEmail(input.email);
+      }),
+
+    getChurnedMembers: protectedProcedure.query(async () => {
+      return await db.getChurnedMembers();
+    }),
+
+    getWinbackOpportunities: protectedProcedure
+      .input(z.object({ withinDays: z.number().default(90) }))
+      .query(async ({ input }) => {
+        return await db.getWinbackOpportunities(input.withinDays);
+      }),
+
+    getEventSummary: protectedProcedure
+      .input(z.object({ days: z.number().default(30) }))
+      .query(async ({ input }) => {
+        return await db.getMembershipEventSummary(input.days);
+      }),
+
+    logEvent: protectedProcedure
+      .input(z.object({
+        email: z.string().email(),
+        memberId: z.number().optional(),
+        name: z.string().optional(),
+        eventType: z.enum(["joined", "cancelled", "upgraded", "downgraded", "paused", "resumed", "tier_changed", "payment_failed", "payment_recovered", "renewed"]),
+        tier: z.enum(["all_access_aces", "swing_savers", "golf_vx_pro", "trial", "none"]).optional(),
+        plan: z.enum(["monthly", "annual"]).optional(),
+        amount: z.number().optional(),
+        previousTier: z.enum(["all_access_aces", "swing_savers", "golf_vx_pro", "trial", "none"]).optional(),
+        previousPlan: z.enum(["monthly", "annual"]).optional(),
+        previousAmount: z.number().optional(),
+        eventTimestamp: z.date().optional(),
+        notes: z.string().optional(),
+        source: z.enum(["make_com", "manual", "backfill", "api"]).default("manual"),
+      }))
+      .mutation(async ({ input }) => {
+        const eventId = await db.logMembershipEvent({
+          email: input.email,
+          memberId: input.memberId,
+          name: input.name,
+          eventType: input.eventType,
+          tier: input.tier,
+          plan: input.plan,
+          amount: input.amount != null ? String(input.amount) : undefined,
+          previousTier: input.previousTier,
+          previousPlan: input.previousPlan,
+          previousAmount: input.previousAmount != null ? String(input.previousAmount) : undefined,
+          eventTimestamp: input.eventTimestamp ?? new Date(),
+          source: input.source,
+          enchargeTagged: false,
+          notes: input.notes,
+        });
+        return { success: true, eventId };
+      }),
   }),
   // ---------------------------------------------------------------------------
   // Pro Members — billing panel for coach members ($500/mo base + Bay credits)

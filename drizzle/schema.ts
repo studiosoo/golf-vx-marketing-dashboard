@@ -1432,3 +1432,40 @@ export const marketResearchReports = mysqlTable("market_research_reports", {
 }));
 export type MarketResearchReport = typeof marketResearchReports.$inferSelect;
 export type NewMarketResearchReport = typeof marketResearchReports.$inferInsert;
+
+// ---------------------------------------------------------------------------
+// Membership Event History — full lifecycle tracking for Boomerang/Make.com
+// ---------------------------------------------------------------------------
+export const membershipEvents = mysqlTable("membership_events", {
+  id: int("id").autoincrement().primaryKey(),
+  email: varchar("email", { length: 255 }).notNull(),
+  memberId: int("member_id"),
+  name: varchar("name", { length: 255 }),
+  eventType: mysqlEnum("event_type", [
+    "joined", "cancelled", "upgraded", "downgraded",
+    "paused", "resumed", "tier_changed",
+    "payment_failed", "payment_recovered", "renewed",
+  ]).notNull(),
+  tier: mysqlEnum("tier", ["all_access_aces", "swing_savers", "golf_vx_pro", "trial", "none"]),
+  plan: mysqlEnum("plan", ["monthly", "annual"]),
+  amount: decimal("amount", { precision: 10, scale: 2 }),
+  previousTier: mysqlEnum("previous_tier", ["all_access_aces", "swing_savers", "golf_vx_pro", "trial", "none"]),
+  previousPlan: mysqlEnum("previous_plan", ["monthly", "annual"]),
+  previousAmount: decimal("previous_amount", { precision: 10, scale: 2 }),
+  eventTimestamp: timestamp("event_timestamp").notNull(),
+  processedAt: timestamp("processed_at").defaultNow(),
+  source: mysqlEnum("source", ["make_com", "manual", "backfill", "api"]).default("make_com"),
+  webhookPayload: json("webhook_payload"),
+  enchargeTagged: boolean("encharge_tagged").default(false),
+  enchargeTaggedAt: timestamp("encharge_tagged_at"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  emailIdx: index("membership_events_email_idx").on(table.email),
+  memberIdIdx: index("membership_events_member_id_idx").on(table.memberId),
+  eventTypeIdx: index("membership_events_event_type_idx").on(table.eventType),
+  eventTimestampIdx: index("membership_events_event_timestamp_idx").on(table.eventTimestamp),
+}));
+
+export type MembershipEvent = typeof membershipEvents.$inferSelect;
+export type NewMembershipEvent = typeof membershipEvents.$inferInsert;
