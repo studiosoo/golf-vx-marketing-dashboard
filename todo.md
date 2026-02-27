@@ -580,3 +580,7 @@
 - [x] Wire auto-sync cron job (every 30 min) in scheduledJobs.ts
 - [x] Write vitest tests for sync service (17 tests pass)
 - [x] Save checkpoint and deliver
+
+## UI Cleanup (2026-02-27)
+
+- [x] Remove email subscription status filter dropdown from Members list (keep data field, remove filter UI)

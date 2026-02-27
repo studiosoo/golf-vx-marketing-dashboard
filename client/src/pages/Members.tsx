@@ -39,7 +39,6 @@ export default function Members() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [tierFilter, setTierFilter] = useState<string>("all");
-  const [emailFilter, setEmailFilter] = useState<string>("all");
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [importing, setImporting] = useState(false);
   const utils = trpc.useUtils();
@@ -305,16 +304,7 @@ export default function Members() {
                 <SelectItem value="golf_vx_pro">Golf VX Pro</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={emailFilter} onValueChange={setEmailFilter}>
-              <SelectTrigger className="w-full md:w-[180px]">
-                <SelectValue placeholder="Email Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Email Status</SelectItem>
-                <SelectItem value="subscribed">Subscribed</SelectItem>
-                <SelectItem value="unsubscribed">Unsubscribed</SelectItem>
-              </SelectContent>
-            </Select>
+
           </div>
         </CardContent>
       </Card>
