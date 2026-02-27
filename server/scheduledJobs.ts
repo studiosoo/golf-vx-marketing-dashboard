@@ -4,6 +4,7 @@ import { runDailySnapshot } from "./jobs/dailySnapshot";
 import { runWeeklyEmailReport } from "./jobs/weeklyEmailReport";
 import { runToastDailySync } from "./jobs/toastDailySync";
 import { syncEnchargeBroadcasts } from "./enchargeBroadcastSync";
+import { syncClickFunnels } from "./clickfunnelsSyncService";
 
 /**
  * Initialize all scheduled jobs
@@ -79,10 +80,21 @@ export function initializeScheduledJobs() {
     }
   });
 
+  // ClickFunnels funnel + form submission sync every 30 minutes
+  cron.schedule("0 */30 * * * *", async () => {
+    try {
+      const result = await syncClickFunnels();
+      console.log(`[ScheduledJobs] ClickFunnels sync: ${result.funnels.synced} funnels, ${result.submissions.synced} submissions`);
+    } catch (error) {
+      console.error("[ScheduledJobs] Error in ClickFunnels sync:", error);
+    }
+  });
+
   console.log("[ScheduledJobs] Scheduled jobs initialized:");
   console.log("  - Annual Giveaway sync: Daily at 12:00 AM CST");
   console.log("  - Campaign metrics snapshot: Daily at 2:00 AM CST");
   console.log("  - Weekly email report: Every Monday at 8:00 AM CST");
   console.log("  - Toast SFTP daily sync: Daily at 4:30 AM CST (5:30 AM EST)");
   console.log("  - Encharge broadcast sync: Every 30 minutes");
+  console.log("  - ClickFunnels funnel sync: Every 30 minutes");
 }

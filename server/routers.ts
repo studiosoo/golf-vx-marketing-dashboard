@@ -3699,5 +3699,36 @@ Return a JSON object with:
       return result;
     }),
   }),
+  // ─── ClickFunnels Funnels ──────────────────────────────────────────────────
+  funnels: router({
+    // Get all funnels (active by default)
+    list: protectedProcedure
+      .input(z.object({ includeArchived: z.boolean().optional().default(false) }).optional())
+      .query(async ({ input }) => {
+        const { getCfFunnels } = await import("./db");
+        return await getCfFunnels(input?.includeArchived ?? false);
+      }),
+
+    // Get form submissions for a specific funnel
+    submissions: protectedProcedure
+      .input(z.object({ funnelId: z.number().optional(), limit: z.number().optional().default(100) }))
+      .query(async ({ input }) => {
+        const { getCfSubmissions } = await import("./db");
+        return await getCfSubmissions(input.funnelId, input.limit);
+      }),
+
+    // Get submission summary grouped by funnel
+    summary: protectedProcedure.query(async () => {
+      const { getCfFunnelSummary } = await import("./db");
+      return await getCfFunnelSummary();
+    }),
+
+    // Manually trigger a full sync
+    syncNow: protectedProcedure.mutation(async () => {
+      const { syncClickFunnels } = await import("./clickfunnelsSyncService");
+      const result = await syncClickFunnels();
+      return result;
+    }),
+  }),
 });
 export type AppRouter = typeof appRouter;

@@ -73,6 +73,9 @@ import Preview from "./pages/Preview";
 // ── Email Campaigns (Encharge sync) ──
 import EmailCampaigns from "./pages/EmailCampaigns";
 
+// ── Funnels / Landing Pages (ClickFunnels sync) ──
+import Funnels from "./pages/Funnels";
+
 // ── Special / Legacy public pages ──
 import TrialSession from "./pages/TrialSession";
 import AnniversaryGiveaway from "./pages/AnniversaryGiveaway";
@@ -186,6 +189,10 @@ function Router() {
       {/* ── Email Campaigns (Encharge sync) ── */}
       <Route path="/email-campaigns" component={EmailCampaigns} />
       <Route path="/communication/email-campaigns" component={EmailCampaigns} />
+
+      {/* ── Funnels / Landing Pages (ClickFunnels sync) ── */}
+      <Route path="/funnels" component={Funnels} />
+      <Route path="/website/funnels" component={Funnels} />
 
       {/* ── 404 ── */}
       <Route path="/404" component={NotFound} />

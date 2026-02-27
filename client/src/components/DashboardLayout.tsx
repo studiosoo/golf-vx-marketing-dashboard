@@ -48,6 +48,7 @@ import {
   Mail,
   Globe,
   Newspaper,
+  LayoutTemplate,
   Plug,
   Settings,
   ChevronDown,
@@ -175,6 +176,7 @@ const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
     heading: "Website",
     items: [
       { label: "Site Control", path: "/website/site-control", icon: Globe },
+      { label: "Funnels", path: "/funnels", icon: LayoutTemplate },
       { label: "Instagram", path: "/website/instagram", icon: Instagram },
       { label: "News / Blog", path: "/website/news", icon: Newspaper },
     ],

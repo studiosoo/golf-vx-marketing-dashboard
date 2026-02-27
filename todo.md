@@ -584,3 +584,15 @@
 ## UI Cleanup (2026-02-27)
 
 - [x] Remove email subscription status filter dropdown from Members list (keep data field, remove filter UI)
+
+## ClickFunnels Funnel Analytics Integration (2026-02-28)
+
+- [x] Add cf_funnels and cf_form_submissions tables to drizzle/schema.ts
+- [x] Create clickfunnelsSyncService.ts to fetch and upsert funnel + submission data
+- [x] Add tRPC procedures: getFunnels, getFunnelSubmissions, syncNow
+- [x] Build Funnels page UI with funnel cards, opt-in counts, step breakdown, contact list
+- [x] Add Funnels link to sidebar under Marketing & Programs
+- [x] Wire auto-sync cron job (every 30 min) in scheduledJobs.ts
+- [x] Write vitest tests for sync service (7 tests pass)
+- [x] Seed initial funnel data (8 active funnels from CF API)
+- [ ] Save checkpoint and deliver

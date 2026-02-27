@@ -40,6 +40,8 @@ import {
   membershipEvents,
   MembershipEvent,
   NewMembershipEvent,
+  cfFunnels,
+  cfFormSubmissions,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -1182,4 +1184,64 @@ export async function getMemberIdByEmail(email: string): Promise<number | null> 
     .limit(1);
 
   return row?.id ?? null;
+}
+
+
+// ─── ClickFunnels DB Helpers ──────────────────────────────────────────────
+
+export async function getCfFunnels(includeArchived = false) {
+  const db = await getDb();
+  if (!db) return [];
+  const query = db.select().from(cfFunnels);
+  if (!includeArchived) {
+    return await query.where(eq(cfFunnels.archived, false)).orderBy(desc(cfFunnels.optInCount));
+  }
+  return await query.orderBy(desc(cfFunnels.optInCount));
+}
+
+export async function getCfSubmissions(funnelId?: number, limit = 100) {
+  const db = await getDb();
+  if (!db) return [];
+  if (funnelId) {
+    return await db
+      .select()
+      .from(cfFormSubmissions)
+      .where(eq(cfFormSubmissions.funnelId, funnelId))
+      .orderBy(desc(cfFormSubmissions.submittedAt))
+      .limit(limit);
+  }
+  return await db
+    .select()
+    .from(cfFormSubmissions)
+    .orderBy(desc(cfFormSubmissions.submittedAt))
+    .limit(limit);
+}
+
+export async function getCfFunnelSummary() {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db.execute(sql`
+    SELECT
+      f.cf_id AS funnelId,
+      f.name AS funnelName,
+      f.archived,
+      f.opt_in_count AS optInCount,
+      f.last_synced_at AS lastSyncedAt,
+      COUNT(DISTINCT s.id) AS submissionCount,
+      MAX(s.submitted_at) AS lastSubmission
+    FROM cf_funnels f
+    LEFT JOIN cf_form_submissions s ON s.funnel_id = f.cf_id
+    WHERE f.archived = 0
+    GROUP BY f.cf_id, f.name, f.archived, f.opt_in_count, f.last_synced_at
+    ORDER BY submissionCount DESC
+  `);
+  return rows[0] as unknown as Array<{
+    funnelId: number;
+    funnelName: string;
+    archived: boolean;
+    optInCount: number;
+    lastSyncedAt: Date;
+    submissionCount: number;
+    lastSubmission: Date | null;
+  }>;
 }

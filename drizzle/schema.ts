@@ -1503,3 +1503,58 @@ export const enchargeBroadcasts = mysqlTable("encharge_broadcasts", {
 }));
 export type EnchargeBroadcast = typeof enchargeBroadcasts.$inferSelect;
 export type NewEnchargeBroadcast = typeof enchargeBroadcasts.$inferInsert;
+
+
+// ─── ClickFunnels Funnels ──────────────────────────────────────────────────
+export const cfFunnels = mysqlTable("cf_funnels", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  cfId: bigint("cf_id", { mode: "number" }).notNull().unique(),
+  cfPublicId: varchar("cf_public_id", { length: 32 }).notNull(),
+  workspaceId: bigint("workspace_id", { mode: "number" }).notNull(),
+  name: varchar("name", { length: 512 }).notNull(),
+  currentPath: varchar("current_path", { length: 512 }),
+  archived: boolean("archived").default(false),
+  liveMode: boolean("live_mode").default(false),
+  tags: json("tags"),
+  optInCount: int("opt_in_count").default(0),
+  orderCount: int("order_count").default(0),
+  lastSyncedAt: timestamp("last_synced_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  cfIdIdx: index("cf_funnels_cf_id_idx").on(table.cfId),
+  archivedIdx: index("cf_funnels_archived_idx").on(table.archived),
+}));
+export type CfFunnel = typeof cfFunnels.$inferSelect;
+export type NewCfFunnel = typeof cfFunnels.$inferInsert;
+
+// ─── ClickFunnels Form Submissions (Opt-ins) ───────────────────────────────
+export const cfFormSubmissions = mysqlTable("cf_form_submissions", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  cfId: bigint("cf_id", { mode: "number" }).notNull().unique(),
+  cfPublicId: varchar("cf_public_id", { length: 32 }).notNull(),
+  contactId: bigint("contact_id", { mode: "number" }),
+  workspaceId: bigint("workspace_id", { mode: "number" }).notNull(),
+  pageId: bigint("page_id", { mode: "number" }),
+  pageName: varchar("page_name", { length: 512 }),
+  pageStep: varchar("page_step", { length: 512 }),
+  funnelId: bigint("funnel_id", { mode: "number" }),
+  funnelName: varchar("funnel_name", { length: 512 }),
+  email: varchar("email", { length: 512 }),
+  firstName: varchar("first_name", { length: 256 }),
+  lastName: varchar("last_name", { length: 256 }),
+  phone: varchar("phone", { length: 64 }),
+  city: varchar("city", { length: 256 }),
+  state: varchar("state", { length: 64 }),
+  golfLevel: varchar("golf_level", { length: 128 }),
+  formData: json("form_data"),
+  submittedAt: timestamp("submitted_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  cfIdIdx: index("cf_form_submissions_cf_id_idx").on(table.cfId),
+  funnelIdIdx: index("cf_form_submissions_funnel_id_idx").on(table.funnelId),
+  pageIdIdx: index("cf_form_submissions_page_id_idx").on(table.pageId),
+  submittedAtIdx: index("cf_form_submissions_submitted_at_idx").on(table.submittedAt),
+}));
+export type CfFormSubmission = typeof cfFormSubmissions.$inferSelect;
+export type NewCfFormSubmission = typeof cfFormSubmissions.$inferInsert;
