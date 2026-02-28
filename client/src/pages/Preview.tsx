@@ -24,15 +24,15 @@ function StatCard({
   accent?: boolean;
 }) {
   return (
-    <div className={`rounded-xl p-6 border ${accent ? "bg-primary/5 border-primary/20" : "bg-white/5 border-white/10"}`}>
+    <div className={`rounded-xl p-6 border ${accent ? "bg-amber-50 border-amber-200" : "bg-card border-border"}`}>
       <div className="flex items-center justify-between mb-4">
-        <span className="text-sm font-medium text-white/60">{title}</span>
-        <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${accent ? "bg-primary/20" : "bg-white/10"}`}>
-          <span className={accent ? "text-primary" : "text-white/60"}>{icon}</span>
+        <span className="text-sm font-medium text-muted-foreground">{title}</span>
+        <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${accent ? "bg-amber-100" : "bg-muted"}`}>
+          <span className={accent ? "text-amber-700" : "text-muted-foreground"}>{icon}</span>
         </div>
       </div>
-      <div className={`text-3xl font-bold mb-1 ${accent ? "text-primary" : "text-white"}`}>{value}</div>
-      {subtitle && <div className="text-sm text-white/50">{subtitle}</div>}
+      <div className="text-3xl font-bold text-foreground mb-1">{value}</div>
+      {subtitle && <div className="text-sm text-muted-foreground">{subtitle}</div>}
     </div>
   );
 }
@@ -48,9 +48,9 @@ export default function Preview() {
   const memberProgress = members ? Math.min((members.total / members.goal) * 100, 100) : 0;
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <div className="border-b border-white/10 px-6 py-4">
+      <div className="border-b border-border px-6 py-4">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
@@ -60,10 +60,10 @@ export default function Preview() {
               <div className="font-bold text-lg leading-tight" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                 GOLF VX
               </div>
-              <div className="text-xs text-white/50 leading-tight">Arlington Heights</div>
+              <div className="text-xs text-muted-foreground leading-tight">Arlington Heights</div>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-xs text-white/40">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Clock size={12} />
             {snapshot?.generatedAt
               ? `Last synced: ${new Date(snapshot.generatedAt).toLocaleString("en-US", {
@@ -83,10 +83,10 @@ export default function Preview() {
       <div className="max-w-5xl mx-auto px-6 py-10 space-y-8">
         {/* Title */}
         <div className="text-center">
-          <h1 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+          <h1 className="text-4xl font-bold text-foreground mb-2">
             Marketing Dashboard
           </h1>
-          <p className="text-white/50">Live performance overview</p>
+          <p className="text-muted-foreground">Live performance overview</p>
         </div>
 
         {isLoading ? (
@@ -126,43 +126,43 @@ export default function Preview() {
 
             {/* Member breakdown */}
             {members && (
-              <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                <h2 className="font-semibold text-lg mb-4" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+              <div className="bg-card border border-border rounded-xl p-6">
+                <h2 className="font-semibold text-lg text-foreground mb-4">
                   Member Breakdown
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                  <div className="text-center p-4 bg-primary/10 rounded-lg border border-primary/20">
-                    <div className="text-3xl font-bold text-primary">{members.allAccessAce}</div>
-                    <div className="text-sm text-white/60 mt-1">All Access Ace</div>
-                    <div className="text-xs text-white/40">$325/mo</div>
+                  <div className="text-center p-4 bg-amber-50 rounded-lg border border-amber-200">
+                    <div className="text-3xl font-bold text-foreground">{members.allAccessAce}</div>
+                    <div className="text-sm text-muted-foreground mt-1">All Access Ace</div>
+                    <div className="text-xs text-muted-foreground">$325/mo</div>
                   </div>
-                  <div className="text-center p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                    <div className="text-3xl font-bold text-blue-400">{members.swingSaver}</div>
-                    <div className="text-sm text-white/60 mt-1">Swing Saver</div>
-                    <div className="text-xs text-white/40">$225/mo</div>
+                  <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="text-3xl font-bold text-blue-700">{members.swingSaver}</div>
+                    <div className="text-sm text-muted-foreground mt-1">Swing Saver</div>
+                    <div className="text-xs text-muted-foreground">$225/mo</div>
                   </div>
-                  <div className="text-center p-4 bg-purple-500/10 rounded-lg border border-purple-500/20">
-                    <div className="text-3xl font-bold text-purple-400">{members.pro}</div>
-                    <div className="text-sm text-white/60 mt-1">Golf VX Pro</div>
-                    <div className="text-xs text-white/40">$500/mo</div>
+                  <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <div className="text-3xl font-bold text-purple-700">{members.pro}</div>
+                    <div className="text-sm text-muted-foreground mt-1">Golf VX Pro</div>
+                    <div className="text-xs text-muted-foreground">$500/mo</div>
                   </div>
                 </div>
 
                 {/* Progress bar */}
                 <div>
                   <div className="flex justify-between text-sm mb-2">
-                    <span className="text-white/60">Member Goal Progress</span>
-                    <span className="font-medium">{members.total} / {members.goal}</span>
+                    <span className="text-muted-foreground">Member Goal Progress</span>
+                    <span className="font-medium text-foreground">{members.total} / {members.goal}</span>
                   </div>
-                  <div className="w-full bg-white/10 rounded-full h-3">
+                  <div className="w-full bg-muted rounded-full h-3">
                     <div
                       className="bg-primary h-3 rounded-full transition-all duration-700"
                       style={{ width: `${memberProgress}%` }}
                     />
                   </div>
-                  <div className="flex justify-between text-xs text-white/40 mt-1">
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
                     <span>0</span>
-                    <span className="text-primary font-medium">{memberProgress.toFixed(0)}%</span>
+                    <span className="text-foreground font-medium">{memberProgress.toFixed(0)}%</span>
                     <span>{members.goal}</span>
                   </div>
                 </div>
@@ -171,16 +171,16 @@ export default function Preview() {
 
             {/* MRR */}
             {members && (
-              <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                <h2 className="font-semibold text-lg mb-4" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+              <div className="bg-card border border-border rounded-xl p-6">
+                <h2 className="font-semibold text-lg text-foreground mb-4">
                   Monthly Recurring Revenue
                 </h2>
-                <div className="text-5xl font-bold text-primary mb-2">
+                <div className="text-5xl font-bold text-foreground mb-2">
                   ${members.mrr.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                 </div>
-                <div className="text-white/50 text-sm">
+                <div className="text-muted-foreground text-sm">
                   {members.newThisMonth > 0 && (
-                    <span className="text-green-400">+{members.newThisMonth} new members this month</span>
+                    <span className="text-green-700">+{members.newThisMonth} new members this month</span>
                   )}
                 </div>
               </div>
@@ -190,8 +190,8 @@ export default function Preview() {
       </div>
 
       {/* Footer */}
-      <div className="border-t border-white/10 px-6 py-4 mt-10">
-        <div className="max-w-5xl mx-auto text-center text-xs text-white/30">
+      <div className="border-t border-border px-6 py-4 mt-10">
+        <div className="max-w-5xl mx-auto text-center text-xs text-muted-foreground">
           Golf VX Arlington Heights — Marketing Intelligence Dashboard
         </div>
       </div>
