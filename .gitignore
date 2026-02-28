@@ -108,9 +108,3 @@ temp/
 
 # Webdev artifacts (checkpoint zips, migrations, etc.)
 .webdev/
-.git_broken_backup/
-.git_broken_backup2/
-sync-data.mjs
-.manus/
-.manus-logs/
-.meta-ads-cache/
