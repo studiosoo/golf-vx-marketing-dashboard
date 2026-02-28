@@ -1,0 +1,281 @@
+import { storagePut } from "./storage";
+import { getDb } from "./db";
+import { mediaFiles, mediaCategories, mediaTags, mediaFileTags, mediaUsage } from "../drizzle/schema";
+import { eq, and, like, or, inArray, desc } from "drizzle-orm";
+import { randomBytes } from "crypto";
+
+/**
+ * Generate unique file key for S3 storage
+ */
+export function generateFileKey(filename: string, userId: number): string {
+  const timestamp = Date.now();
+  const random = randomBytes(8).toString("hex");
+  const ext = filename.split(".").pop();
+  return `golf-vx-media/${userId}/${timestamp}-${random}.${ext}`;
+}
+
+/**
+ * Upload file to S3 and create database record
+ */
+export async function uploadMediaFile(params: {
+  file: Buffer;
+  filename: string;
+  mimeType: string;
+  fileSize: number;
+  userId: number;
+  categoryId?: number;
+  title?: string;
+  description?: string;
+  altText?: string;
+}) {
+  const { file, filename, mimeType, fileSize, userId, categoryId, title, description, altText } = params;
+
+  // Upload to S3
+  const fileKey = generateFileKey(filename, userId);
+  const { url: fileUrl } = await storagePut(fileKey, file, mimeType);
+
+  // Create database record
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [mediaFile] = await db.insert(mediaFiles).values({
+    filename: filename.toLowerCase().replace(/\s+/g, "-"),
+    originalFilename: filename,
+    fileKey,
+    fileUrl,
+    mimeType,
+    fileSize,
+    uploadedBy: userId,
+    categoryId: categoryId || null,
+    title: title || filename,
+    description,
+    altText,
+    status: "active",
+    isPublic: true,
+  }).returning();
+
+  return mediaFile;
+}
+
+/**
+ * Get all media files with optional filters
+ */
+export async function getMediaFiles(params: {
+  categoryId?: number;
+  tagIds?: number[];
+  search?: string;
+  status?: "active" | "archived" | "deleted";
+  limit?: number;
+  offset?: number;
+}) {
+  const { categoryId, tagIds, search, status = "active", limit = 50, offset = 0 } = params;
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  let query = db.select().from(mediaFiles).where(eq(mediaFiles.status, status));
+
+  if (categoryId) {
+    query = query.where(eq(mediaFiles.categoryId, categoryId));
+  }
+
+  if (search) {
+    query = query.where(
+      or(
+        like(mediaFiles.filename, `%${search}%`),
+        like(mediaFiles.title, `%${search}%`),
+        like(mediaFiles.description, `%${search}%`)
+      )
+    );
+  }
+
+  const files = await query.orderBy(desc(mediaFiles.createdAt)).limit(limit).offset(offset);
+
+  // Filter by tags if provided
+  if (tagIds && tagIds.length > 0) {
+    const fileIds = files.map((f: any) => f.id);
+    const fileTags = await db.select().from(mediaFileTags)
+      .where(and(
+        inArray(mediaFileTags.mediaFileId, fileIds),
+        inArray(mediaFileTags.tagId, tagIds)
+      ));
+
+    const fileIdsWithTags = new Set(fileTags.map((ft: any) => ft.mediaFileId));
+    return files.filter((f: any) => fileIdsWithTags.has(f.id));
+  }
+
+  return files;
+}
+
+/**
+ * Get media file by ID
+ */
+export async function getMediaFileById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [file] = await db.select().from(mediaFiles).where(eq(mediaFiles.id, id));
+  return file;
+}
+
+/**
+ * Update media file metadata
+ */
+export async function updateMediaFile(id: number, updates: {
+  title?: string;
+  description?: string;
+  altText?: string;
+  caption?: string;
+  categoryId?: number;
+  status?: "active" | "archived" | "deleted";
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [updated] = await db.update(mediaFiles)
+    .set({ ...updates, updatedAt: new Date() })
+    .where(eq(mediaFiles.id, id))
+    .returning();
+  return updated;
+}
+
+/**
+ * Delete media file (soft delete)
+ */
+export async function deleteMediaFile(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [deleted] = await db.update(mediaFiles)
+    .set({ status: "deleted", updatedAt: new Date() })
+    .where(eq(mediaFiles.id, id))
+    .returning();
+  return deleted;
+}
+
+/**
+ * Get all categories
+ */
+export async function getMediaCategories() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(mediaCategories).orderBy(mediaCategories.sortOrder);
+}
+
+/**
+ * Create media category
+ */
+export async function createMediaCategory(params: {
+  name: string;
+  slug: string;
+  description?: string;
+  parentId?: number;
+  color?: string;
+  icon?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [category] = await db.insert(mediaCategories).values(params).returning();
+  return category;
+}
+
+/**
+ * Get all tags
+ */
+export async function getMediaTags() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(mediaTags).orderBy(desc(mediaTags.usageCount));
+}
+
+/**
+ * Create or get existing tag
+ */
+export async function createOrGetTag(name: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const slug = name.toLowerCase().replace(/\s+/g, "-");
+  
+  // Check if tag exists
+  const [existing] = await db.select().from(mediaTags).where(eq(mediaTags.slug, slug));
+  if (existing) return existing;
+
+  // Create new tag
+  const [tag] = await db.insert(mediaTags).values({ name, slug }).returning();
+  return tag;
+}
+
+/**
+ * Add tags to media file
+ */
+export async function addTagsToMediaFile(mediaFileId: number, tagNames: string[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const tags = await Promise.all(tagNames.map(name => createOrGetTag(name)));
+  
+  const tagLinks = await Promise.all(
+    tags.map((tag: any) => 
+      db.insert(mediaFileTags)
+        .values({ mediaFileId, tagId: tag.id })
+        .onDuplicateKeyUpdate({ set: { mediaFileId } })
+        .returning()
+    )
+  );
+
+  // Update tag usage counts
+  await Promise.all(
+    tags.map((tag: any) => 
+      db.update(mediaTags)
+        .set({ usageCount: tag.usageCount + 1 })
+        .where(eq(mediaTags.id, tag.id))
+    )
+  );
+
+  return tagLinks.flat();
+}
+
+/**
+ * Get tags for a media file
+ */
+export async function getMediaFileTags(mediaFileId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const tagLinks = await db.select().from(mediaFileTags)
+    .where(eq(mediaFileTags.mediaFileId, mediaFileId));
+  
+  const tagIds = tagLinks.map((tl: any) => tl.tagId);
+  if (tagIds.length === 0) return [];
+
+  return await db.select().from(mediaTags).where(inArray(mediaTags.id, tagIds));
+}
+
+/**
+ * Track media usage
+ */
+export async function trackMediaUsage(params: {
+  mediaFileId: number;
+  usageType: "landing_page" | "campaign_poster" | "campaign_reel" | "blog_post" | "email_template" | "social_media" | "other";
+  usageId?: number;
+  usageUrl?: string;
+  usageContext?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [usage] = await db.insert(mediaUsage).values(params);
+
+  // Update usage count and last used timestamp
+  await db.update(mediaFiles)
+    .set({ 
+      usageCount: (db as any).raw("usageCount + 1"),
+      lastUsedAt: new Date()
+    })
+    .where(eq(mediaFiles.id, params.mediaFileId));
+
+  return usage;
+}
+
+/**
+ * Get usage records for a media file
+ */
+export async function getMediaFileUsage(mediaFileId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(mediaUsage)
+    .where(eq(mediaUsage.mediaFileId, mediaFileId))
+    .orderBy(desc(mediaUsage.createdAt));
+}

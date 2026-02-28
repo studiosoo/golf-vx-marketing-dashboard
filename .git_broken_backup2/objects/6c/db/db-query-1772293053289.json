@@ -1,0 +1,18 @@
+{
+  "query": "SELECT\n  COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers') AND status = 'active' THEN 1 END) as customerMembers,\n  COUNT(CASE WHEN membershipTier = 'all_access_aces' AND status = 'active' THEN 1 END) as allAccessCount,\n  COUNT(CASE WHEN membershipTier = 'swing_savers' AND status = 'active' THEN 1 END) as swingSaverCount,\n  COUNT(CASE WHEN membershipTier = 'golf_vx_pro' AND status = 'active' THEN 1 END) as proCount,\n  COALESCE(SUM(CASE WHEN status = 'active' THEN COALESCE(monthlyAmount, 0) ELSE 0 END), 0) as totalMRR,\n  COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers') AND status = 'active' AND joinDate >= DATE_FORMAT(NOW(), '%Y-%m-01') THEN 1 END) as newThisMonth\nFROM members;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2R3ugynrRDzjYQU.e9d0c4c091a8 --database A5GjFitCrpqWQ2wnoTJiWm --execute SELECT\n  COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers') AND status = 'active' THEN 1 END) as customerMembers,\n  COUNT(CASE WHEN membershipTier = 'all_access_aces' AND status = 'active' THEN 1 END) as allAccessCount,\n  COUNT(CASE WHEN membershipTier = 'swing_savers' AND status = 'active' THEN 1 END) as swingSaverCount,\n  COUNT(CASE WHEN membershipTier = 'golf_vx_pro' AND status = 'active' THEN 1 END) as proCount,\n  COALESCE(SUM(CASE WHEN status = 'active' THEN COALESCE(monthlyAmount, 0) ELSE 0 END), 0) as totalMRR,\n  COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers') AND status = 'active' AND joinDate >= DATE_FORMAT(NOW(), '%Y-%m-01') THEN 1 END) as newThisMonth\nFROM members;",
+  "rows": [
+    {
+      "customerMembers": "87",
+      "allAccessCount": "54",
+      "swingSaverCount": "33",
+      "proCount": "4",
+      "totalMRR": "20647.91",
+      "newThisMonth": "3"
+    }
+  ],
+  "messages": [],
+  "stdout": "customerMembers\tallAccessCount\tswingSaverCount\tproCount\ttotalMRR\tnewThisMonth\n87\t54\t33\t4\t20647.91\t3\n",
+  "stderr": "",
+  "execution_time_ms": 61
+}
