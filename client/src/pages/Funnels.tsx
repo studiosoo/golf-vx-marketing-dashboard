@@ -46,12 +46,12 @@ function SubmissionsModal({
   });
 
   return (
-    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
       <div className="bg-card border border-border rounded-xl w-full max-w-3xl max-h-[80vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-border">
           <div>
-            <h2 className="font-bold text-lg" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+            <h2 className="font-bold text-lg text-foreground">
               {funnelName}
             </h2>
             <p className="text-sm text-muted-foreground">
@@ -158,7 +158,7 @@ function FunnelCard({ funnel }: { funnel: FunnelSummary }) {
               <span className={`text-xs px-2 py-0.5 rounded-full ${
                 funnel.archived
                   ? "bg-muted text-muted-foreground"
-                  : "bg-green-500/10 text-green-400"
+                  : "bg-green-50 text-green-700"
               }`}>
                 {funnel.archived ? "Archived" : "Active"}
               </span>
@@ -242,7 +242,7 @@ export default function Funnels() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+          <h1 className="text-2xl font-bold text-foreground">
             Funnels
           </h1>
           <p className="text-sm text-muted-foreground">ClickFunnels opt-in pages and submissions</p>

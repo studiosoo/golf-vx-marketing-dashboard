@@ -42,9 +42,9 @@ interface AutonomousAction {
 
 function RiskBadge({ level }: { level: string }) {
   const colors: Record<string, string> = {
-    low: "bg-green-500/10 text-green-400 border-green-500/20",
-    medium: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-    high: "bg-red-500/10 text-red-400 border-red-500/20",
+    low: "bg-green-50 text-green-700 border-green-200",
+    medium: "bg-amber-50 text-amber-700 border-amber-200",
+    high: "bg-red-50 text-red-600 border-red-200",
   };
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${colors[level] || colors.medium}`}>
@@ -106,7 +106,7 @@ function ActionCard({
                 <button
                   onClick={() => onApprove(action.id)}
                   disabled={isLoading}
-                  className="flex items-center gap-1 px-2.5 py-1.5 bg-green-500/10 text-green-400 hover:bg-green-500/20 rounded text-xs font-medium transition-colors"
+                  className="flex items-center gap-1 px-2.5 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 rounded text-xs font-medium transition-colors"
                 >
                   {isLoading ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={12} />}
                   Approve
@@ -116,7 +116,7 @@ function ActionCard({
                 <button
                   onClick={() => onReject(action.id)}
                   disabled={isLoading}
-                  className="flex items-center gap-1 px-2.5 py-1.5 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded text-xs font-medium transition-colors"
+                  className="flex items-center gap-1 px-2.5 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded text-xs font-medium transition-colors"
                 >
                   <XCircle size={12} />
                   Reject
@@ -147,7 +147,7 @@ function ActionCard({
       {(action.previousValue || action.newValue) && (
         <div className="flex items-center gap-2 text-xs">
           {action.previousValue && (
-            <span className="px-2 py-1 bg-red-500/10 text-red-400 rounded font-mono">
+            <span className="px-2 py-1 bg-red-50 text-red-600 rounded font-mono">
               {action.previousValue}
             </span>
           )}
@@ -155,7 +155,7 @@ function ActionCard({
             <TrendingUp size={12} className="text-muted-foreground" />
           )}
           {action.newValue && (
-            <span className="px-2 py-1 bg-green-500/10 text-green-400 rounded font-mono">
+            <span className="px-2 py-1 bg-green-50 text-green-700 rounded font-mono">
               {action.newValue}
             </span>
           )}
@@ -164,16 +164,16 @@ function ActionCard({
 
       {/* Error message */}
       {hasMetaAdsError && (
-        <div className="flex items-start gap-2 p-2.5 bg-amber-500/10 border border-amber-500/20 rounded text-xs">
-          <AlertTriangle size={14} className="text-amber-400 shrink-0 mt-0.5" />
+        <div className="flex items-start gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded text-xs">
+          <AlertTriangle size={14} className="text-amber-700 shrink-0 mt-0.5" />
           <div>
-            <span className="text-amber-400 font-medium">Meta Ads API Error — </span>
+            <span className="text-amber-700 font-medium">Meta Ads API Error — </span>
             <span className="text-muted-foreground">Apply manually in </span>
             <a
               href="https://www.facebook.com/adsmanager"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-amber-400 hover:underline inline-flex items-center gap-0.5"
+              className="text-amber-700 hover:underline inline-flex items-center gap-0.5"
             >
               Meta Ads Manager <ExternalLink size={10} />
             </a>
@@ -226,7 +226,7 @@ function SectionHeader({
       </div>
       <div>
         <div className="flex items-center gap-2">
-          <h2 className="font-semibold text-foreground" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+          <h2 className="font-semibold text-foreground">
             {title}
           </h2>
           <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
@@ -338,7 +338,7 @@ export default function MarketingIntelligence() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+          <h1 className="text-2xl font-bold text-foreground">
             Marketing Intelligence
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -368,9 +368,9 @@ export default function MarketingIntelligence() {
                 {key.replace(/([A-Z])/g, " $1").trim()}
               </div>
               <div className={`text-xs font-medium ${
-                status?.status === "ok" ? "text-green-400" :
-                status?.status === "error" ? "text-red-400" :
-                "text-yellow-400"
+                status?.status === "ok" ? "text-green-700" :
+                status?.status === "error" ? "text-red-600" :
+                "text-amber-700"
               }`}>
                 {status?.status || "unknown"}
               </div>
@@ -395,8 +395,8 @@ export default function MarketingIntelligence() {
             <SectionHeader
               title="Auto-Executed"
               count={autoExecuted.length}
-              icon={<Zap size={16} className="text-green-400" />}
-              color="bg-green-500/10"
+              icon={<Zap size={16} className="text-green-700" />}
+              color="bg-green-50"
               description="Low-risk actions taken automatically"
             />
             <div className="space-y-3">
@@ -423,8 +423,8 @@ export default function MarketingIntelligence() {
             <SectionHeader
               title="Awaiting Approval"
               count={approvalCards.length}
-              icon={<Clock size={16} className="text-yellow-400" />}
-              color="bg-yellow-500/10"
+              icon={<Clock size={16} className="text-amber-700" />}
+              color="bg-amber-50"
               description="Medium/high-risk actions needing review"
             />
             <div className="space-y-3">
@@ -452,8 +452,8 @@ export default function MarketingIntelligence() {
             <SectionHeader
               title="Monitoring"
               count={monitoring.length}
-              icon={<Eye size={16} className="text-blue-400" />}
-              color="bg-blue-500/10"
+              icon={<Eye size={16} className="text-blue-600" />}
+              color="bg-blue-50"
               description="Campaigns with insufficient data"
             />
             <div className="space-y-3">
