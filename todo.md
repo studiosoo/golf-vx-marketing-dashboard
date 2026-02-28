@@ -595,4 +595,22 @@
 - [x] Wire auto-sync cron job (every 30 min) in scheduledJobs.ts
 - [x] Write vitest tests for sync service (7 tests pass)
 - [x] Seed initial funnel data (8 active funnels from CF API)
+- [x] Save checkpoint and deliver
+
+## AI Actions Tab Fix (2026-02-27)
+
+- [ ] Fix "Execution failed: Request failed with status code 400" on Approve for Anniversary Giveaway budget recommendation
+- [ ] Investigate Meta Ads budget update API call (400 = bad request, likely invalid adset_id or budget format)
+- [ ] Update Actions tab UX: better error messaging, show what failed and why
 - [ ] Save checkpoint and deliver
+
+## Priority 3 Enhancements (2026-02-28)
+- [x] Fix Marketing Intelligence error UX — improved error display for Meta Ads API 400 errors
+- [x] Added "Apply manually in Meta Ads Manager" link when budget action fails due to unlinked campaign
+- [x] Added ExternalLink icon to AIActions.tsx imports
+- [x] Added "Last Email Sent" card to Home page (links to Email Campaigns page)
+- [x] Added "Top Funnel This Month" card to Home page (links to Funnels page)
+- [x] Added lastEmailSent and topFunnel data to preview.getSnapshot backend endpoint
+- [x] Added "Last synced" timestamp to Preview page footer
+- [x] Added clickable opt-in count on Funnels page (opens contact list modal with name/email/phone/date)
+- [x] Opt-in contact modal shows up to 500 contacts per funnel with full details

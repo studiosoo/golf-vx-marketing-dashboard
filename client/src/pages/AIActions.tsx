@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { trpc } from "@/lib/trpc";
 import {
   Sparkles, CheckCircle2, XCircle, RotateCcw, Loader2,
-  AlertTriangle, TrendingUp, Eye, Zap, Clock, Mail, ChevronDown, ChevronUp, Copy, Check,
+  AlertTriangle, TrendingUp, Eye, Zap, Clock, Mail, ChevronDown, ChevronUp, Copy, Check, ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -277,10 +277,29 @@ function ActionCard({
                 </p>
               )}
               {result && (
-                <div className={`mt-2 text-xs flex items-center gap-1 ${result.success ? "text-green-400" : "text-red-400"}`}>
-                  {result.success
-                    ? <><CheckCircle2 className="h-3 w-3" /> Executed successfully</>
-                    : <><AlertTriangle className="h-3 w-3" /> {(result as any).error ?? "Execution failed"}</>}
+                <div className="mt-2">
+                  {result.success ? (
+                    <div className="text-xs flex items-center gap-1 text-green-400">
+                      <CheckCircle2 className="h-3 w-3" /> Executed successfully
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="text-xs flex items-start gap-1 text-amber-400">
+                        <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5" />
+                        <span>{(result as any).error ?? "Execution failed"}</span>
+                      </div>
+                      {(action.actionType === "budget_increase" || action.actionType === "budget_decrease") && (
+                        <a
+                          href="https://www.facebook.com/adsmanager"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 underline underline-offset-2"
+                        >
+                          <ExternalLink className="h-3 w-3" /> Apply manually in Meta Ads Manager
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
               <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">

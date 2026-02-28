@@ -3650,6 +3650,31 @@ Return a JSON object with:
       `);
       const activeCampaigns = Number((campaignResult as any)[0]?.activeCampaigns || 0);
 
+      // Last email sent
+      const lastEmailResult = await database.execute(`
+        SELECT name, subject, send_at, delivered, open_rate
+        FROM encharge_broadcasts
+        WHERE status = 'sent'
+        ORDER BY send_at DESC
+        LIMIT 1
+      `);
+      const lastEmail = (lastEmailResult as any)[0] || null;
+
+      // Top funnel this month
+      const topFunnelResult = await database.execute(`
+        SELECT f.name, f.opt_in_count,
+               COUNT(s.id) AS submissionsThisMonth
+        FROM cf_funnels f
+        LEFT JOIN cf_form_submissions s
+          ON s.funnel_id = f.cf_id
+          AND s.submitted_at >= DATE_FORMAT(NOW(), '%Y-%m-01')
+        WHERE f.archived = 0
+        GROUP BY f.cf_id, f.name, f.opt_in_count
+        ORDER BY submissionsThisMonth DESC, f.opt_in_count DESC
+        LIMIT 1
+      `);
+      const topFunnel = (topFunnelResult as any)[0] || null;
+
       return {
         generatedAt: new Date().toISOString(),
         members: {
@@ -3675,6 +3700,18 @@ Return a JSON object with:
         campaigns: {
           active: activeCampaigns,
         },
+        lastEmailSent: lastEmail ? {
+          name: lastEmail.name as string,
+          subject: lastEmail.subject as string | null,
+          sentAt: lastEmail.send_at ? new Date(lastEmail.send_at).toISOString() : null,
+          delivered: Number(lastEmail.delivered || 0),
+          openRate: parseFloat(lastEmail.open_rate || '0'),
+        } : null,
+        topFunnel: topFunnel ? {
+          name: topFunnel.name as string,
+          optInCount: Number(topFunnel.opt_in_count || 0),
+          submissionsThisMonth: Number(topFunnel.submissionsThisMonth || 0),
+        } : null,
       };
     }),
   }),

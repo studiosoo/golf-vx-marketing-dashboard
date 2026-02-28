@@ -21,6 +21,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 function formatDate(d: Date | string | null | undefined) {
   if (!d) return "—";
@@ -42,6 +43,7 @@ export default function Funnels() {
   const [search, setSearch] = useState("");
   const [expandedFunnel, setExpandedFunnel] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
+  const [optInModalFunnel, setOptInModalFunnel] = useState<{ id: number; name: string } | null>(null);
 
   const { data: funnels = [], isLoading: funnelsLoading, refetch: refetchFunnels } =
     trpc.funnels.list.useQuery({ includeArchived: false });
@@ -50,6 +52,11 @@ export default function Funnels() {
 
   const { data: allSubmissions = [], isLoading: submissionsLoading } =
     trpc.funnels.submissions.useQuery({ limit: 200 });
+
+  const { data: modalSubmissions = [], isLoading: modalLoading } = trpc.funnels.submissions.useQuery(
+    { funnelId: optInModalFunnel?.id, limit: 500 },
+    { enabled: !!optInModalFunnel }
+  );
 
   const syncMutation = trpc.funnels.syncNow.useMutation({
     onSuccess: (result) => {
@@ -240,8 +247,15 @@ export default function Funnels() {
                             ))}
                           </div>
                         )}
-                        <div className="text-right">
-                          <p className="text-lg font-bold text-yellow-500">
+                        <div
+                          className="text-right cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOptInModalFunnel({ id: funnel.cfId, name: funnel.name });
+                          }}
+                          title="Click to view contact list"
+                        >
+                          <p className="text-lg font-bold text-yellow-500 underline decoration-dotted underline-offset-2">
                             {(funnel.optInCount ?? 0).toLocaleString()}
                           </p>
                           <p className="text-xs text-muted-foreground">opt-ins</p>
@@ -473,6 +487,79 @@ export default function Funnels() {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Opt-In Contact List Modal */}
+      <Dialog open={!!optInModalFunnel} onOpenChange={(open) => !open && setOptInModalFunnel(null)}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="text-base">
+              Opt-In Contacts — {optInModalFunnel?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="overflow-y-auto flex-1">
+            {modalLoading ? (
+              <div className="text-center py-8 text-muted-foreground">Loading contacts...</div>
+            ) : modalSubmissions.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">No submissions found for this funnel.</div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Golf Level</TableHead>
+                    <TableHead>Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {modalSubmissions.map((sub) => (
+                    <TableRow key={sub.id}>
+                      <TableCell className="font-medium text-sm">
+                        {[sub.firstName, sub.lastName].filter(Boolean).join(" ") || "—"}
+                      </TableCell>
+                      <TableCell>
+                        {sub.email ? (
+                          <a
+                            href={`mailto:${sub.email}`}
+                            className="flex items-center gap-1 text-blue-500 hover:underline text-xs"
+                          >
+                            <Mail className="h-3 w-3" />
+                            {sub.email}
+                          </a>
+                        ) : "—"}
+                      </TableCell>
+                      <TableCell className="text-xs">
+                        {sub.phone ? (
+                          <span className="flex items-center gap-1">
+                            <Phone className="h-3 w-3" />
+                            {sub.phone}
+                          </span>
+                        ) : "—"}
+                      </TableCell>
+                      <TableCell className="text-xs">
+                        {[sub.city, sub.state].filter(Boolean).join(", ") || "—"}
+                      </TableCell>
+                      <TableCell>
+                        {sub.golfLevel ? (
+                          <Badge variant="outline" className="text-xs">{sub.golfLevel}</Badge>
+                        ) : "—"}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {formatDate(sub.submittedAt)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
+          <div className="pt-2 border-t border-border text-xs text-muted-foreground">
+            {modalSubmissions.length} contact{modalSubmissions.length !== 1 ? "s" : ""} in database
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

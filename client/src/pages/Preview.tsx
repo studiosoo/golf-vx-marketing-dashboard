@@ -180,8 +180,18 @@ export default function Preview() {
         </section>
 
         {/* Footer */}
-        <div className="text-center text-xs text-zinc-700 pb-6">
-          Golf VX Arlington Heights · Internal Marketing Dashboard · Read-Only View
+        <div className="text-center text-xs text-zinc-700 pb-6 space-y-1">
+          <div>Golf VX Arlington Heights · Internal Marketing Dashboard · Read-Only View</div>
+          <div className="text-zinc-800">
+            Last synced: {new Date(data.generatedAt).toLocaleString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+              hour: "numeric",
+              minute: "2-digit",
+              timeZoneName: "short",
+            })}
+          </div>
         </div>
       </div>
     </div>

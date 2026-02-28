@@ -2,7 +2,7 @@ import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
-import { Target, DollarSign, BarChart3, Loader2, ChevronRight, RefreshCw, Users, Sparkles, Share2, Wallet, CheckCircle2, XCircle, ArrowRight, Clock, Plus, Trash2, Check } from "lucide-react";
+import { Target, DollarSign, BarChart3, Loader2, ChevronRight, RefreshCw, Users, Sparkles, Share2, Wallet, CheckCircle2, XCircle, ArrowRight, Clock, Plus, Trash2, Check, Mail, TrendingUp, MousePointerClick } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -85,6 +85,7 @@ export default function Home() {
   const { data: pendingActions } = trpc.autonomous.getApprovalCards.useQuery();
   const { data: toastSummary } = trpc.revenue.getToastSummary.useQuery();
   const { data: strategicKPIs } = trpc.intelligence.getStrategicKPIs.useQuery();
+  const { data: previewSnapshot } = trpc.preview.getSnapshot.useQuery();
   const syncMutation = trpc.autonomous.syncAllData.useMutation();
   const utils = trpc.useUtils();
   const [approvingId, setApprovingId] = useState<number | null>(null);
@@ -507,6 +508,69 @@ export default function Home() {
             </CardContent>
           </Card>
         </div>
+
+        {/* ── Section 2b: Last Email Sent + Top Funnel ── */}
+        {(previewSnapshot?.lastEmailSent || previewSnapshot?.topFunnel) && (
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+            {previewSnapshot?.lastEmailSent && (
+              <Link href="/email-campaigns">
+                <Card className="hover:bg-muted/40 transition-colors cursor-pointer h-full">
+                  <CardContent className="pt-5 pb-4">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-blue-500/10 rounded-lg shrink-0">
+                        <Mail className="h-4 w-4 text-blue-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-muted-foreground font-medium mb-1">Last Email Sent</p>
+                        <p className="font-semibold text-foreground text-sm leading-snug truncate">
+                          {previewSnapshot.lastEmailSent.subject || previewSnapshot.lastEmailSent.name}
+                        </p>
+                        <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                          {previewSnapshot.lastEmailSent.sentAt && (
+                            <span>{new Date(previewSnapshot.lastEmailSent.sentAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                          )}
+                          {previewSnapshot.lastEmailSent.delivered > 0 && (
+                            <span>{previewSnapshot.lastEmailSent.delivered.toLocaleString()} delivered</span>
+                          )}
+                          {previewSnapshot.lastEmailSent.openRate > 0 && (
+                            <span className="text-green-400">{previewSnapshot.lastEmailSent.openRate.toFixed(1)}% open rate</span>
+                          )}
+                        </div>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 mt-1" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            )}
+            {previewSnapshot?.topFunnel && (
+              <Link href="/funnels">
+                <Card className="hover:bg-muted/40 transition-colors cursor-pointer h-full">
+                  <CardContent className="pt-5 pb-4">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-yellow-500/10 rounded-lg shrink-0">
+                        <MousePointerClick className="h-4 w-4 text-yellow-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-muted-foreground font-medium mb-1">Top Funnel This Month</p>
+                        <p className="font-semibold text-foreground text-sm leading-snug truncate">
+                          {previewSnapshot.topFunnel.name}
+                        </p>
+                        <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                          <span className="text-yellow-500 font-medium">
+                            {previewSnapshot.topFunnel.submissionsThisMonth} opt-ins this month
+                          </span>
+                          <span>{previewSnapshot.topFunnel.optInCount.toLocaleString()} total</span>
+                        </div>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 mt-1" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            )}
+          </div>
+        )}
 
         {/* ── Section 3: Today's Priorities (DB-backed) ── */}
         <Card>
