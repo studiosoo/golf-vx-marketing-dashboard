@@ -612,3 +612,23 @@
 - [x] client/src/pages/Members.tsx — member management table
 - [x] client/src/pages/Preview.tsx — public read-only dashboard
 - [x] TypeScript: 0 errors
+
+## Guest Preview Mode (2026-03-01)
+- [ ] Add GuestModeContext (React context to track guest mode state)
+- [ ] Add guestProcedure to server/_core/trpc.ts (bypasses auth for read-only queries)
+- [ ] Add guest-accessible read-only endpoints in routers.ts
+- [ ] Create GuestDashboardLayout with "Guest Preview" banner and disabled action buttons
+- [ ] Add /guest/* routes in App.tsx mirroring all 25 pages
+- [ ] Create useGuestMode hook
+- [ ] Disable mutation buttons in guest mode (show "Login required" tooltip)
+- [ ] Add "Login to access full features" CTA in guest layout
+- [ ] Save checkpoint and deliver
+
+## Guest Preview Mode
+- [x] Create GuestModeContext with isGuest flag
+- [x] Create GuestDashboardLayout with guest banner and disabled action buttons
+- [x] Add trpc.guest.* public router with all read-only endpoints
+- [x] Create guest pages for all 23 dashboard pages
+- [x] Add /guest/* routes to App.tsx
+- [x] Update DashboardLayout with Guest Preview link
+- [x] Verify guest API endpoints work without authentication

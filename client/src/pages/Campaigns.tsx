@@ -42,7 +42,6 @@ export default function Campaigns() {
           Manage and monitor all marketing campaigns across channels
         </p>
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {sections.map((section) => (
           <Link key={section.href} href={section.href}>
@@ -64,9 +63,7 @@ export default function Campaigns() {
                 <p className="text-sm text-muted-foreground">
                   {section.description}
                 </p>
-                <p className="text-xs text-yellow-400 mt-2">
-                  View details →
-                </p>
+                <p className="text-xs text-yellow-400 mt-2">View details →</p>
               </CardContent>
             </Card>
           </Link>

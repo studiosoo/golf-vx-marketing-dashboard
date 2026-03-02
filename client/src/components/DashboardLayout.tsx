@@ -112,13 +112,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             );
           })}
 
-          <div className="pt-2 border-t border-sidebar-border mt-2">
+          <div className="pt-2 border-t border-sidebar-border mt-2 space-y-1">
             <Link
-              href="/preview"
+              href="/guest"
               className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
             >
               <Eye size={18} />
-              <span>Public Preview</span>
+              <span>Guest Preview</span>
             </Link>
           </div>
         </nav>

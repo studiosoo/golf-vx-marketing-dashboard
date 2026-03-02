@@ -1,6 +1,7 @@
 import { Route, Switch } from "wouter";
 import { Toaster } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
+import GuestDashboardLayout from "@/components/GuestDashboardLayout";
 
 // Core pages
 import Home from "@/pages/Home";
@@ -38,12 +39,82 @@ import SiteControl from "@/pages/SiteControl";
 import Integrations from "@/pages/Integrations";
 import AccountSettings from "@/pages/AccountSettings";
 
+// ─── Guest Preview Pages ───────────────────────────────────────────────────
+import GuestHome from "@/pages/guest/GuestHome";
+import GuestOverview from "@/pages/guest/GuestOverview";
+import GuestPerformance from "@/pages/guest/GuestPerformance";
+import GuestRevenue from "@/pages/guest/GuestRevenue";
+import GuestMarketingIntelligence from "@/pages/guest/GuestMarketingIntelligence";
+import GuestAIActions from "@/pages/guest/GuestAIActions";
+import GuestNewsManager from "@/pages/guest/GuestNewsManager";
+import GuestMembers from "@/pages/guest/GuestMembers";
+import GuestGuests from "@/pages/guest/GuestGuests";
+import GuestLeads from "@/pages/guest/GuestLeads";
+import GuestCampaigns from "@/pages/guest/GuestCampaigns";
+import GuestMetaAds from "@/pages/guest/GuestMetaAds";
+import GuestEmailCampaigns from "@/pages/guest/GuestEmailCampaigns";
+import GuestFunnels from "@/pages/guest/GuestFunnels";
+import GuestAutomations from "@/pages/guest/GuestAutomations";
+import GuestDripCampaigns from "@/pages/guest/GuestDripCampaigns";
+import GuestAnnouncements from "@/pages/guest/GuestAnnouncements";
+import GuestPrograms from "@/pages/guest/GuestPrograms";
+import GuestLeagues from "@/pages/guest/GuestLeagues";
+import GuestPrivateEvents from "@/pages/guest/GuestPrivateEvents";
+import GuestSiteControl from "@/pages/guest/GuestSiteControl";
+import GuestIntegrations from "@/pages/guest/GuestIntegrations";
+import GuestAccountSettings from "@/pages/guest/GuestAccountSettings";
+
 export default function App() {
   return (
     <>
       <Switch>
         {/* Public preview - no auth required */}
         <Route path="/preview" component={Preview} />
+
+        {/* ─── Guest Preview Routes (no auth required) ─── */}
+        <Route path="/guest/:rest*">
+          <GuestDashboardLayout>
+            <Switch>
+              <Route path="/guest" component={GuestHome} />
+              <Route path="/guest/overview" component={GuestOverview} />
+              <Route path="/guest/performance" component={GuestPerformance} />
+              <Route path="/guest/revenue" component={GuestRevenue} />
+              {/* Intelligence */}
+              <Route path="/guest/intelligence" component={GuestMarketingIntelligence} />
+              <Route path="/guest/intelligence/ai-actions" component={GuestAIActions} />
+              <Route path="/guest/intelligence/news" component={GuestNewsManager} />
+              {/* Members */}
+              <Route path="/guest/members" component={GuestMembers} />
+              <Route path="/guest/guests" component={GuestGuests} />
+              <Route path="/guest/leads" component={GuestLeads} />
+              {/* Campaigns */}
+              <Route path="/guest/campaigns" component={GuestCampaigns} />
+              <Route path="/guest/campaigns/meta-ads" component={GuestMetaAds} />
+              <Route path="/guest/campaigns/email" component={GuestEmailCampaigns} />
+              <Route path="/guest/campaigns/funnels" component={GuestFunnels} />
+              <Route path="/guest/campaigns/automations" component={GuestAutomations} />
+              <Route path="/guest/campaigns/drip" component={GuestDripCampaigns} />
+              <Route path="/guest/announcements" component={GuestAnnouncements} />
+              {/* Programs */}
+              <Route path="/guest/programs" component={GuestPrograms} />
+              <Route path="/guest/programs/leagues" component={GuestLeagues} />
+              <Route path="/guest/programs/events" component={GuestPrivateEvents} />
+              {/* Tools */}
+              <Route path="/guest/site-control" component={GuestSiteControl} />
+              <Route path="/guest/integrations" component={GuestIntegrations} />
+              <Route path="/guest/settings" component={GuestAccountSettings} />
+              {/* Fallback to guest home */}
+              <Route component={GuestHome} />
+            </Switch>
+          </GuestDashboardLayout>
+        </Route>
+
+        {/* Also handle exact /guest path */}
+        <Route path="/guest">
+          <GuestDashboardLayout>
+            <GuestHome />
+          </GuestDashboardLayout>
+        </Route>
 
         {/* All dashboard routes wrapped in DashboardLayout */}
         <Route>
