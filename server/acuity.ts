@@ -259,17 +259,18 @@ export async function getSundayClinicData(params?: {
     max: 200,
   });
 
-  // Filter for Sunday Clinic / Drive Day appointments
-  // These typically have "Drive Day" or "Sunday Clinic" in the type name
+  // Filter for Drive Day / Sunday Clinic appointments
+  // Match the same filter as guest.getDriveDaySessions for consistency
   const clinicAppointments = appointments.filter(apt => 
-    apt.type.toLowerCase().includes('drive day') || 
-    apt.type.toLowerCase().includes('sunday clinic') ||
-    apt.type.toLowerCase().includes('public drive')
+    apt.type.toLowerCase().includes('drive day')
   );
 
   // Group appointments by date (event) and track sources
+  // Use apt.datetime (ISO: "2026-01-25T14:00:00-0600") not apt.date (human: "January 25, 2026")
   const eventsByDate = clinicAppointments.reduce((acc, apt) => {
-    const eventDate = apt.date;
+    // Extract YYYY-MM-DD from datetime field
+    const eventDate = (apt.datetime || apt.date || '').slice(0, 10);
+    if (!eventDate) return acc;
     if (!acc[eventDate]) {
       acc[eventDate] = [];
     }

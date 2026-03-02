@@ -701,3 +701,8 @@
 - [x] SundayClinicDetail: Event Breakdown now shows all 6 scheduled dates (including Mar 29 with 0 bookings)
 - [x] SundayClinicDetail: Per-date attendee breakdown grid (Paid / Members / Unique with revenue)
 - [x] SundayClinicDetail: Upcoming events shown with dashed border and "Upcoming" badge
+
+## Event Breakdown Date Fix (2026-03-01)
+- [x] Fixed getSundayClinicData to use apt.datetime (ISO format) instead of apt.date (human-readable "January 25, 2026")
+- [x] Fixed clinicAppointments filter to match guest endpoint (drive day only)
+- [x] Event Breakdown now shows correct registration counts per date matching Acuity
