@@ -44,21 +44,21 @@ const TIER_LABELS: Record<MembershipTier, string> = {
 };
 
 const TIER_COLORS: Record<MembershipTier, string> = {
-  all_access_aces: "bg-primary/10 text-primary border-primary/20",
-  swing_savers: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  golf_vx_pro: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-  trial: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-  monthly: "bg-green-500/10 text-green-400 border-green-500/20",
-  annual: "bg-green-500/10 text-green-400 border-green-500/20",
-  corporate: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
+  all_access_aces: "bg-amber-50 text-amber-800 border-amber-300",
+  swing_savers: "bg-blue-50 text-blue-700 border-blue-200",
+  golf_vx_pro: "bg-purple-50 text-purple-700 border-purple-200",
+  trial: "bg-amber-50 text-amber-700 border-amber-200",
+  monthly: "bg-green-50 text-green-700 border-green-200",
+  annual: "bg-green-50 text-green-700 border-green-200",
+  corporate: "bg-indigo-50 text-indigo-700 border-indigo-200",
   none: "bg-muted text-muted-foreground border-border",
 };
 
 const STATUS_COLORS: Record<MemberStatus, string> = {
-  active: "bg-green-500/10 text-green-400",
+  active: "bg-green-50 text-green-700",
   inactive: "bg-muted text-muted-foreground",
-  cancelled: "bg-red-500/10 text-red-400",
-  trial: "bg-yellow-500/10 text-yellow-400",
+  cancelled: "bg-red-50 text-red-600",
+  trial: "bg-amber-50 text-amber-700",
 };
 
 function MemberRow({ member }: { member: Member }) {
@@ -136,7 +136,7 @@ export default function Members() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+          <h1 className="text-2xl font-bold text-foreground">
             Members
           </h1>
           <p className="text-sm text-muted-foreground">Member management and analytics</p>
@@ -151,7 +151,7 @@ export default function Members() {
         </div>
         <div className="bg-card border border-border rounded-lg p-4">
           <div className="text-sm text-muted-foreground mb-1">Active</div>
-          <div className="text-3xl font-bold text-green-400">{activeMembers.length}</div>
+          <div className="text-3xl font-bold text-green-700">{activeMembers.length}</div>
         </div>
         <div className="bg-card border border-border rounded-lg p-4">
           <div className="text-sm text-muted-foreground mb-1">All Access Ace</div>
@@ -159,7 +159,7 @@ export default function Members() {
         </div>
         <div className="bg-card border border-border rounded-lg p-4">
           <div className="text-sm text-muted-foreground mb-1">Swing Saver</div>
-          <div className="text-3xl font-bold text-blue-400">{swingSaverCount}</div>
+          <div className="text-3xl font-bold text-blue-700">{swingSaverCount}</div>
         </div>
       </div>
 

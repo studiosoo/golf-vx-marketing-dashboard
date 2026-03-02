@@ -39,9 +39,9 @@ function KpiCard({
           <div
             className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${
               trend === "up"
-                ? "bg-green-500/10 text-green-400"
+                ? "bg-green-50 text-green-700"
                 : trend === "down"
-                ? "bg-red-500/10 text-red-400"
+                ? "bg-red-50 text-red-600"
                 : "bg-muted text-muted-foreground"
             }`}
           >
@@ -96,7 +96,7 @@ export default function Home() {
           <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <BarChart3 size={32} className="text-primary" />
           </div>
-          <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+          <h1 className="text-2xl font-bold text-foreground mb-2">
             Golf VX Marketing Dashboard
           </h1>
           <p className="text-muted-foreground mb-6">
@@ -129,7 +129,7 @@ export default function Home() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+          <h1 className="text-2xl font-bold text-foreground">
             Dashboard
           </h1>
           <p className="text-sm text-muted-foreground">Golf VX Arlington Heights — Marketing Overview</p>
@@ -238,7 +238,7 @@ export default function Home() {
                 })}
               </div>
               {emailSummary.avgOpenRate != null && (
-                <div className="mt-2 text-xs text-green-400">
+                <div className="mt-2 text-xs text-green-700">
                   {(emailSummary.avgOpenRate * 100).toFixed(1)}% avg open rate
                 </div>
               )}

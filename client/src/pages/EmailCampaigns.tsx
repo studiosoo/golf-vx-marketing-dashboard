@@ -43,17 +43,17 @@ function StatusBadge({ status }: { status: BroadcastStatus }) {
   const config: Record<BroadcastStatus, { label: string; className: string; icon: React.ReactNode }> = {
     sent: {
       label: "Sent",
-      className: "bg-green-500/10 text-green-400 border-green-500/20",
+      className: "bg-green-50 text-green-700 border-green-200",
       icon: <CheckCircle size={10} />,
     },
     sending: {
       label: "Sending",
-      className: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+      className: "bg-blue-50 text-blue-700 border-blue-200",
       icon: <Loader2 size={10} className="animate-spin" />,
     },
     scheduled: {
       label: "Scheduled",
-      className: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
+      className: "bg-amber-50 text-amber-700 border-amber-200",
       icon: <Clock size={10} />,
     },
     draft: {
@@ -63,7 +63,7 @@ function StatusBadge({ status }: { status: BroadcastStatus }) {
     },
     failed: {
       label: "Failed",
-      className: "bg-red-500/10 text-red-400 border-red-500/20",
+      className: "bg-red-50 text-red-600 border-red-200",
       icon: <XCircle size={10} />,
     },
   };
@@ -90,10 +90,10 @@ function MetricPill({
   highlight?: boolean;
 }) {
   return (
-    <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md ${highlight ? "bg-primary/10" : "bg-muted"}`}>
-      <span className={highlight ? "text-primary" : "text-muted-foreground"}>{icon}</span>
+    <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md ${highlight ? "bg-amber-50" : "bg-muted"}`}>
+      <span className={highlight ? "text-amber-700" : "text-muted-foreground"}>{icon}</span>
       <div>
-        <div className={`text-sm font-semibold leading-none ${highlight ? "text-primary" : "text-foreground"}`}>
+        <div className={`text-sm font-semibold leading-none ${highlight ? "text-amber-800" : "text-foreground"}`}>
           {value}
         </div>
         <div className="text-xs text-muted-foreground leading-none mt-0.5">{label}</div>
@@ -113,7 +113,7 @@ function BroadcastCard({ broadcast }: { broadcast: Broadcast }) {
           <div className="flex items-center gap-2 mb-1">
             <StatusBadge status={broadcast.status} />
             {broadcast.metricsStale && (
-              <span className="text-xs text-yellow-400 flex items-center gap-1">
+              <span className="text-xs text-amber-700 flex items-center gap-1">
                 <AlertCircle size={10} />
                 Stale
               </span>
@@ -215,7 +215,7 @@ export default function EmailCampaigns() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+          <h1 className="text-2xl font-bold text-foreground">
             Email Campaigns
           </h1>
           <p className="text-sm text-muted-foreground">Encharge broadcast performance</p>
