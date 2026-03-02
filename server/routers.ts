@@ -609,6 +609,107 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
         await db.updateCampaignVisuals(id, visuals);
         return { success: true };
       }),
+
+    // Drive Day session breakdown with live Acuity data
+    getDriveDaySessions: protectedProcedure.query(async () => {
+      try {
+        const { getAppointments } = await import("./acuity");
+        const appts = await getAppointments({
+          minDate: "2026-01-25",
+          maxDate: "2026-03-29",
+          canceled: false,
+        });
+
+        const driveDayAppts = (appts as any[]).filter((a) =>
+          (a.type || "").toLowerCase().includes("drive day")
+        );
+
+        const sessionDefs = [
+          {
+            name: "Driving to the Ball",
+            label: "Day 1 \u2014 Driving to the Ball",
+            day: "Day 1",
+            dates: ["2026-01-25", "2026-02-01"],
+            keywords: ["driving", "driving to the ball"],
+            color: "yellow",
+            description: "Tee-shot fundamentals: setup, posture, alignment, grip, and generating effortless power.",
+          },
+          {
+            name: "Putting",
+            label: "Day 2 \u2014 Putting: Score Low",
+            day: "Day 2",
+            dates: ["2026-02-22", "2026-03-01"],
+            keywords: ["putting", "putt"],
+            color: "blue",
+            description: "Core putting elements: proper ball roll, distance control, eye line, face angle, and path.",
+          },
+          {
+            name: "Short Game",
+            label: "Day 3 \u2014 Short Game",
+            day: "Day 3",
+            dates: ["2026-03-22", "2026-03-29"],
+            keywords: ["short game", "swing below"],
+            color: "green",
+            description: "Short game technique: grip, stance, shaft lean, backswing path, and clubhead control.",
+          },
+        ];
+
+        const sessions = sessionDefs.map((def) => {
+          const sessionAppts = driveDayAppts.filter((a: any) => {
+            const typeName = (a.type || "").toLowerCase();
+            return def.keywords.some((kw) => typeName.includes(kw));
+          });
+
+          const byDate = def.dates.reduce((acc: Record<string, any>, date: string) => {
+            const dateAppts = sessionAppts.filter((a: any) => a.date === date);
+            const paidCount = dateAppts.filter((a: any) => parseFloat(a.price || "0") > 0).length;
+            const memberCount = dateAppts.filter((a: any) => parseFloat(a.price || "0") === 0).length;
+            const revenue = dateAppts
+              .filter((a: any) => a.paid === "yes")
+              .reduce((s: number, a: any) => s + parseFloat(a.price || "0"), 0);
+            acc[date] = { registrations: dateAppts.length, paid: paidCount, members: memberCount, revenue };
+            return acc;
+          }, {});
+
+          const totalRegistrations = sessionAppts.length;
+          const paidAttendees = sessionAppts.filter((a: any) => parseFloat(a.price || "0") > 0).length;
+          const memberAttendees = sessionAppts.filter((a: any) => parseFloat(a.price || "0") === 0).length;
+          const revenueCollected = sessionAppts
+            .filter((a: any) => a.paid === "yes")
+            .reduce((s: number, a: any) => s + parseFloat(a.price || "0"), 0);
+
+          return {
+            name: def.name,
+            label: def.label,
+            day: def.day,
+            dates: def.dates,
+            color: def.color,
+            description: def.description,
+            totalRegistrations,
+            paidAttendees,
+            memberAttendees,
+            revenueCollected,
+            byDate,
+          };
+        });
+
+        const overall = {
+          totalRegistrations: driveDayAppts.length,
+          paidAttendees: driveDayAppts.filter((a: any) => parseFloat(a.price || "0") > 0).length,
+          memberAttendees: driveDayAppts.filter((a: any) => parseFloat(a.price || "0") === 0).length,
+          revenueCollected: driveDayAppts
+            .filter((a: any) => a.paid === "yes")
+            .reduce((s: number, a: any) => s + parseFloat(a.price || "0"), 0),
+        };
+
+        return { sessions, overall };
+      } catch {
+        return {
+          sessions: [],
+          overall: { totalRegistrations: 0, paidAttendees: 0, memberAttendees: 0, revenueCollected: 0 },
+        };
+      }
+    }),
   }),
 
   // Strategic Campaigns Overview

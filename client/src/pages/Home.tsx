@@ -2,7 +2,7 @@ import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
-import { Target, DollarSign, BarChart3, Loader2, ChevronRight, RefreshCw, Users, Sparkles, Share2, Wallet, CheckCircle2, XCircle, ArrowRight, Clock, Plus, Trash2, Check, Mail, TrendingUp, MousePointerClick } from "lucide-react";
+import { Target, DollarSign, BarChart3, Loader2, ChevronRight, RefreshCw, Users, Sparkles, Share2, Wallet, CheckCircle2, XCircle, ArrowRight, Clock, Plus, Trash2, Check, Mail, TrendingUp, MousePointerClick, Trophy, Calendar } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -86,6 +86,7 @@ export default function Home() {
   const { data: toastSummary } = trpc.revenue.getToastSummary.useQuery();
   const { data: strategicKPIs } = trpc.intelligence.getStrategicKPIs.useQuery();
   const { data: previewSnapshot } = trpc.preview.getSnapshot.useQuery();
+  const { data: driveDayData } = trpc.campaigns.getDriveDaySessions.useQuery();
   const syncMutation = trpc.autonomous.syncAllData.useMutation();
   const utils = trpc.useUtils();
   const [approvingId, setApprovingId] = useState<number | null>(null);
@@ -570,6 +571,52 @@ export default function Home() {
               </Link>
             )}
           </div>
+        )}
+
+        {/* ── Section 2c: Drive Day Clinic KPI ── */}
+        {driveDayData && driveDayData.overall.totalRegistrations > 0 && (
+          <Link href="/programs">
+            <Card className="border border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10 transition-colors cursor-pointer">
+              <CardContent className="pt-4 pb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-amber-500/20">
+                      <Trophy className="h-5 w-5 text-amber-500" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground font-medium">Drive Day Clinic Series</p>
+                      <p className="text-2xl font-bold text-foreground">{driveDayData.overall.totalRegistrations} Registered</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3 sm:flex sm:items-center sm:gap-6 text-sm">
+                    <div className="sm:text-right">
+                      <p className="text-xs text-muted-foreground">Paid</p>
+                      <p className="font-semibold text-foreground text-sm">{driveDayData.overall.paidAttendees}</p>
+                    </div>
+                    <div className="sm:text-right">
+                      <p className="text-xs text-muted-foreground">Members</p>
+                      <p className="font-semibold text-foreground text-sm">{driveDayData.overall.memberAttendees}</p>
+                    </div>
+                    <div className="sm:text-right">
+                      <p className="text-xs text-muted-foreground">Revenue</p>
+                      <p className="font-semibold text-amber-400 text-sm">${driveDayData.overall.revenueCollected.toLocaleString()}</p>
+                    </div>
+                    <ChevronRight className="hidden sm:block h-5 w-5 text-muted-foreground" />
+                  </div>
+                </div>
+                {/* Session mini-breakdown */}
+                <div className="mt-3 pt-3 border-t border-amber-500/20 grid grid-cols-3 gap-2">
+                  {driveDayData.sessions.map((s) => (
+                    <div key={s.name} className="text-center">
+                      <p className="text-xs text-muted-foreground truncate">{s.day}</p>
+                      <p className="text-sm font-semibold text-foreground">{s.totalRegistrations}</p>
+                      <p className="text-xs text-amber-400">${s.revenueCollected}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
         )}
 
         {/* ── Section 3: Today's Priorities (DB-backed) ── */}

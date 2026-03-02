@@ -4,7 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { CampaignKPI } from "@/components/CampaignKPI";
 import { TrendChart } from "@/components/TrendChart";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Target, DollarSign, TrendingUp, ChevronRight, Layers } from "lucide-react";
+import { Loader2, Target, DollarSign, TrendingUp, ChevronRight, Layers, Users, Calendar, Trophy } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
 
@@ -12,46 +12,76 @@ import { useLocation } from "wouter";
 const STRATEGIC_CAMPAIGNS = {
   trial_conversion: {
     name: "Trial Conversion",
-    color: "oklch(0.65 0.25 142)", // Green
+    color: "oklch(0.65 0.25 142)",
     badgeClass: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
   },
   membership_acquisition: {
     name: "Membership Acquisition",
-    color: "oklch(0.70 0.20 30)", // Pink/Red
+    color: "oklch(0.70 0.20 30)",
     badgeClass: "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400",
   },
   member_retention: {
     name: "Member Retention",
-    color: "oklch(0.60 0.20 250)", // Blue
+    color: "oklch(0.60 0.20 250)",
     badgeClass: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
   },
   corporate_events: {
     name: "B2B Sales",
-    color: "oklch(0.65 0.20 60)", // Yellow/Gold
+    color: "oklch(0.65 0.20 60)",
     badgeClass: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
   },
 } as const;
 
-// Detail page routes for programs that have drill-down pages
 const PROGRAM_DETAIL_ROUTES: Record<string, string> = {
   "Sunday Clinic": "/sunday-clinic",
   "PBGA Winter Clinic": "/winter-clinic",
   "Annual Membership Giveaway": "/annual-giveaway",
 };
 
+const SESSION_COLORS: Record<string, { bg: string; border: string; badge: string; dot: string }> = {
+  yellow: {
+    bg: "bg-amber-50 dark:bg-amber-950/20",
+    border: "border-amber-200 dark:border-amber-800",
+    badge: "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
+    dot: "bg-amber-400",
+  },
+  blue: {
+    bg: "bg-blue-50 dark:bg-blue-950/20",
+    border: "border-blue-200 dark:border-blue-800",
+    badge: "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300",
+    dot: "bg-blue-400",
+  },
+  green: {
+    bg: "bg-emerald-50 dark:bg-emerald-950/20",
+    border: "border-emerald-200 dark:border-emerald-800",
+    badge: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
+    dot: "bg-emerald-400",
+  },
+};
+
+const DATE_LABELS: Record<string, string> = {
+  "2026-01-25": "Jan 25",
+  "2026-02-01": "Feb 1",
+  "2026-02-22": "Feb 22",
+  "2026-03-01": "Mar 1",
+  "2026-03-22": "Mar 22",
+  "2026-03-29": "Mar 29",
+};
+
 export default function Programs() {
   const { data: programs, isLoading: programsLoading } = trpc.campaigns.list.useQuery();
+  const { data: driveDayData, isLoading: driveDayLoading } = trpc.campaigns.getDriveDaySessions.useQuery();
   const [, setLocation] = useLocation();
   const [expandedCampaign, setExpandedCampaign] = useState<number | null>(null);
-  
-  // Fetch historical data for expanded campaign
+
   const { data: historicalData } = trpc.intelligence.getCampaignHistory.useQuery(
     { campaignId: expandedCampaign!, days: 30 },
     { enabled: expandedCampaign !== null }
   );
 
-  const formatCurrency = (value: string) => {
-    return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 }).format(parseFloat(value));
+  const formatCurrency = (value: string | number) => {
+    const num = typeof value === "string" ? parseFloat(value) : value;
+    return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 }).format(num);
   };
 
   const calculateROI = (revenue: string, spend: string) => {
@@ -70,38 +100,31 @@ export default function Programs() {
     };
   }, [programs]);
 
-  // Load campaign mappings from database for all programs
   const programCampaignQueries = useMemo(() => {
     if (!programs) return [];
     return programs.map(program => program.id);
   }, [programs]);
 
-  // Fetch campaign mappings for all programs
-  const campaignMappings = trpc.useQueries((t) => 
-    programCampaignQueries.map(programId => 
+  const campaignMappings = trpc.useQueries((t) =>
+    programCampaignQueries.map(programId =>
       t.strategicCampaigns.getProgramCampaigns({ programId })
     )
   );
 
   const isLoading = programsLoading || campaignMappings.some(q => q.isLoading);
 
-  // Build a map of program ID to strategic campaigns
   const programCampaignMap = useMemo(() => {
     if (!programs || campaignMappings.some(q => !q.data)) return new Map<number, string[]>();
-    
     const map = new Map<number, string[]>();
     programs.forEach((program, index) => {
       const mappings = campaignMappings[index]?.data || [];
       const strategicCampaigns = mappings.map(m => m.strategicCampaign);
-      
-      // Fallback to database category if no explicit mappings
       if (strategicCampaigns.length === 0) {
         map.set(program.id, [program.category]);
       } else {
         map.set(program.id, strategicCampaigns);
       }
     });
-    
     return map;
   }, [programs, campaignMappings]);
 
@@ -113,12 +136,15 @@ export default function Programs() {
     );
   }
 
-  const avgROI = programStats.totalSpend > 0 
-    ? ((programStats.totalRevenue - programStats.totalSpend) / programStats.totalSpend) * 100 
+  const avgROI = programStats.totalSpend > 0
+    ? ((programStats.totalRevenue - programStats.totalSpend) / programStats.totalSpend) * 100
     : 0;
 
+  const overall = driveDayData?.overall;
+  const sessions = driveDayData?.sessions || [];
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">All Programs</h1>
@@ -126,6 +152,190 @@ export default function Programs() {
           Tactical marketing programs organized by strategic campaign objectives
         </p>
       </div>
+
+      {/* ── Drive Day Section ── */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-bold tracking-tight flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-amber-500" />
+              Drive Day Golf Clinic
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              3-session Sunday clinic series · $20/person · Members attend free · Led by PGA Professionals
+            </p>
+          </div>
+          <Badge className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">
+            Active Series
+          </Badge>
+        </div>
+
+        {/* Drive Day Overall KPIs */}
+        {driveDayLoading ? (
+          <div className="flex items-center gap-2 text-muted-foreground text-sm py-4">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Loading Drive Day data from Acuity...
+          </div>
+        ) : overall ? (
+          <>
+            <div className="grid gap-4 md:grid-cols-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Registrations</CardTitle>
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{overall.totalRegistrations}</div>
+                  <p className="text-xs text-muted-foreground mt-1">Across all sessions</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Paid Attendees</CardTitle>
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{overall.paidAttendees}</div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {overall.memberAttendees} members (free)
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Revenue Collected</CardTitle>
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{formatCurrency(overall.revenueCollected)}</div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {overall.paidAttendees > 0 ? `$${(overall.revenueCollected / overall.paidAttendees).toFixed(0)} avg/paid attendee` : "—"}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Member Rate</CardTitle>
+                  <Target className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {overall.totalRegistrations > 0
+                      ? `${Math.round((overall.memberAttendees / overall.totalRegistrations) * 100)}%`
+                      : "—"}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">Members vs total</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Session Breakdown Cards */}
+            <div className="grid gap-4 md:grid-cols-3">
+              {sessions.map((session) => {
+                const colors = SESSION_COLORS[session.color] || SESSION_COLORS.yellow;
+                const completedDates = session.dates.filter(
+                  d => new Date(d) <= new Date()
+                );
+                const upcomingDates = session.dates.filter(
+                  d => new Date(d) > new Date()
+                );
+
+                return (
+                  <Card
+                    key={session.name}
+                    className={`border-2 ${colors.border} ${colors.bg}`}
+                  >
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <Badge className={`${colors.badge} text-xs mb-2`}>
+                            {session.day}
+                          </Badge>
+                          <CardTitle className="text-base leading-tight">
+                            {session.name}
+                          </CardTitle>
+                          <CardDescription className="text-xs mt-1 leading-snug">
+                            {session.description}
+                          </CardDescription>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {/* Session KPIs */}
+                      <div className="grid grid-cols-3 gap-2 text-center">
+                        <div>
+                          <div className="text-xl font-bold">{session.totalRegistrations}</div>
+                          <div className="text-xs text-muted-foreground">Registered</div>
+                        </div>
+                        <div>
+                          <div className="text-xl font-bold">{session.paidAttendees}</div>
+                          <div className="text-xs text-muted-foreground">Paid</div>
+                        </div>
+                        <div>
+                          <div className="text-xl font-bold">{formatCurrency(session.revenueCollected)}</div>
+                          <div className="text-xs text-muted-foreground">Revenue</div>
+                        </div>
+                      </div>
+
+                      {/* Per-Date Breakdown */}
+                      <div className="space-y-2 pt-2 border-t">
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          Date Breakdown
+                        </p>
+                        {session.dates.map((date) => {
+                          const dateData = session.byDate[date] || { registrations: 0, paid: 0, members: 0, revenue: 0 };
+                          const isPast = new Date(date) <= new Date();
+                          const dateLabel = DATE_LABELS[date] || date;
+                          return (
+                            <div key={date} className="flex items-center justify-between text-sm">
+                              <div className="flex items-center gap-2">
+                                <div className={`w-2 h-2 rounded-full ${isPast ? colors.dot : "bg-muted-foreground/30"}`} />
+                                <span className={isPast ? "font-medium" : "text-muted-foreground"}>
+                                  {dateLabel}
+                                </span>
+                                {!isPast && (
+                                  <span className="text-xs text-muted-foreground">(upcoming)</span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-3 text-xs">
+                                <span className="text-muted-foreground">
+                                  {dateData.registrations} reg
+                                </span>
+                                <span className="font-medium">
+                                  {formatCurrency(dateData.revenue)}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Member vs Paid breakdown bar */}
+                      {session.totalRegistrations > 0 && (
+                        <div className="pt-2 border-t">
+                          <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                            <span>Paid ({session.paidAttendees})</span>
+                            <span>Members ({session.memberAttendees})</span>
+                          </div>
+                          <div className="flex h-2 rounded-full overflow-hidden bg-muted">
+                            <div
+                              className={`${colors.dot} transition-all`}
+                              style={{ width: `${(session.paidAttendees / session.totalRegistrations) * 100}%` }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </>
+        ) : null}
+      </div>
+
+      {/* Divider */}
+      <div className="border-t" />
 
       {/* Strategic Campaigns Legend */}
       <Card>
@@ -155,12 +365,9 @@ export default function Programs() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{programStats.total}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {programStats.active} active
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">{programStats.active} active</p>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Spend</CardTitle>
@@ -170,7 +377,6 @@ export default function Programs() {
             <div className="text-2xl font-bold">${programStats.totalSpend.toFixed(2)}</div>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
@@ -180,7 +386,6 @@ export default function Programs() {
             <div className="text-2xl font-bold">${programStats.totalRevenue.toFixed(2)}</div>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Avg ROI</CardTitle>
@@ -200,7 +405,6 @@ export default function Programs() {
         <p className="text-sm text-muted-foreground mb-4">
           Each program supports one or more strategic campaigns
         </p>
-        
         <div className="grid gap-4">
           {programs?.map((program) => {
             const roi = calculateROI(program.actualRevenue, program.actualSpend);
@@ -208,8 +412,8 @@ export default function Programs() {
             const strategicCampaigns = programCampaignMap.get(program.id) || [program.category];
 
             return (
-              <Card 
-                key={program.id} 
+              <Card
+                key={program.id}
                 className={`transition-all ${hasDetailPage ? "hover:shadow-lg cursor-pointer" : ""}`}
                 onClick={() => hasDetailPage && setLocation(PROGRAM_DETAIL_ROUTES[program.name])}
               >
@@ -218,9 +422,7 @@ export default function Programs() {
                     <div className="space-y-1 flex-1">
                       <div className="flex items-center gap-2">
                         <CardTitle className="text-xl">{program.name}</CardTitle>
-                        {hasDetailPage && (
-                          <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                        )}
+                        {hasDetailPage && <ChevronRight className="h-5 w-5 text-muted-foreground" />}
                       </div>
                       <CardDescription>{program.description}</CardDescription>
                     </div>
@@ -228,8 +430,6 @@ export default function Programs() {
                       {program.status}
                     </Badge>
                   </div>
-
-                  {/* Strategic Campaign Tags */}
                   <div className="flex flex-wrap gap-2 mt-3">
                     <span className="text-xs text-muted-foreground font-medium">Supports:</span>
                     {strategicCampaigns.map((campaignKey) => {
@@ -242,9 +442,7 @@ export default function Programs() {
                     })}
                   </div>
                 </CardHeader>
-
                 <CardContent className="space-y-4">
-                  {/* Metrics Grid */}
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     <div>
                       <p className="text-sm text-muted-foreground">Budget</p>
@@ -259,13 +457,9 @@ export default function Programs() {
                       <p className="text-lg font-semibold">{formatCurrency(program.actualRevenue)}</p>
                     </div>
                   </div>
-
-                  {/* Goal-Based KPI */}
                   <div className="pt-4 border-t">
                     <CampaignKPI campaign={program} />
                   </div>
-
-                  {/* Trend Chart Toggle */}
                   <div className="pt-4 border-t">
                     <button
                       onClick={(e) => {
@@ -276,25 +470,18 @@ export default function Programs() {
                     >
                       {expandedCampaign === program.id ? "Hide" : "Show"} 30-Day Trend
                     </button>
-                    
                     {expandedCampaign === program.id && (
                       <div className="mt-4 space-y-4">
                         {historicalData && historicalData.length > 0 ? (
                           <>
                             <TrendChart
-                              data={historicalData.map(d => ({
-                                date: d.snapshotDate.toString(),
-                                value: Number(d.roi),
-                              }))}
+                              data={historicalData.map(d => ({ date: d.snapshotDate.toString(), value: Number(d.roi) }))}
                               title="ROI Trend"
                               valueLabel="ROI %"
                               color="#10b981"
                             />
                             <TrendChart
-                              data={historicalData.map(d => ({
-                                date: d.snapshotDate.toString(),
-                                value: Number(d.spend),
-                              }))}
+                              data={historicalData.map(d => ({ date: d.snapshotDate.toString(), value: Number(d.spend) }))}
                               title="Spend Trend"
                               valueLabel="Spend $"
                               color="#f59e0b"
