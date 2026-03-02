@@ -124,6 +124,66 @@ function vitePluginManusDebugCollector(): Plugin {
     },
 
     configureServer(server: ViteDevServer) {
+      // GET /__manus__/debug-collector.js: Serve the browser-side log collector script.
+      // MUST be registered BEFORE the /__manus__/logs handler so Vite doesn't fall through
+      // to the SPA HTML fallback and return <!doctype html> as JavaScript (SyntaxError: Unexpected token '<').
+      server.middlewares.use("/__manus__/debug-collector.js", (req, res, next) => {
+        if (req.method !== "GET" && req.method !== "HEAD") return next();
+        const script = `
+(function() {
+  'use strict';
+  const ENDPOINT = '/__manus__/logs';
+  const BATCH_INTERVAL = 2000;
+  let consoleLogs = [], networkRequests = [], sessionEvents = [];
+
+  // Console capture
+  ['log','warn','error','info','debug'].forEach(function(level) {
+    const orig = console[level].bind(console);
+    console[level] = function() {
+      const args = Array.from(arguments);
+      consoleLogs.push({ level: level, message: args.map(function(a) { try { return typeof a === 'object' ? JSON.stringify(a) : String(a); } catch(e) { return String(a); } }).join(' '), stack: level === 'error' && args[0] instanceof Error ? args[0].stack : undefined });
+      orig.apply(console, args);
+    };
+  });
+
+  // Network capture (fetch)
+  const origFetch = window.fetch;
+  window.fetch = function(input, init) {
+    const url = typeof input === 'string' ? input : (input instanceof Request ? input.url : String(input));
+    const method = (init && init.method) || 'GET';
+    const start = Date.now();
+    return origFetch.apply(this, arguments).then(function(res) {
+      networkRequests.push({ url: url, method: method, status: res.status, duration: Date.now() - start });
+      return res;
+    }, function(err) {
+      networkRequests.push({ url: url, method: method, status: 0, error: String(err), duration: Date.now() - start });
+      throw err;
+    });
+  };
+
+  // Session events
+  ['click','focus','blur'].forEach(function(evt) {
+    document.addEventListener(evt, function(e) {
+      const t = e.target;
+      sessionEvents.push({ type: evt, tag: t && t.tagName, id: t && t.id, text: t && (t.innerText || '').slice(0, 50) });
+    }, true);
+  });
+  window.addEventListener('popstate', function() { sessionEvents.push({ type: 'navigation', url: location.href }); });
+
+  // Batch flush
+  function flush() {
+    if (!consoleLogs.length && !networkRequests.length && !sessionEvents.length) return;
+    const payload = { consoleLogs: consoleLogs.splice(0), networkRequests: networkRequests.splice(0), sessionEvents: sessionEvents.splice(0) };
+    fetch(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).catch(function() {});
+  }
+  setInterval(flush, BATCH_INTERVAL);
+  window.addEventListener('beforeunload', flush);
+})();
+`;
+        res.writeHead(200, { 'Content-Type': 'text/javascript; charset=utf-8', 'Cache-Control': 'no-cache' });
+        res.end(script);
+      });
+
       // POST /__manus__/logs: Browser sends logs (written directly to files)
       server.middlewares.use("/__manus__/logs", (req, res, next) => {
         if (req.method !== "POST") {
