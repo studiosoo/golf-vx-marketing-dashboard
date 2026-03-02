@@ -1,5 +1,6 @@
 import cron from "node-cron";
 import { syncGiveawayApplications } from "./giveawaySync";
+import { syncGiveawayFromSheets } from "./googleSheetsSync";
 import { runDailySnapshot } from "./jobs/dailySnapshot";
 import { runWeeklyEmailReport } from "./jobs/weeklyEmailReport";
 import { runToastDailySync } from "./jobs/toastDailySync";
@@ -12,22 +13,32 @@ import { syncClickFunnels } from "./clickfunnelsSyncService";
 export function initializeScheduledJobs() {
   console.log("[ScheduledJobs] Initializing scheduled jobs...");
 
-  // Sync Annual Giveaway applications daily at midnight CST (6 AM UTC)
+  // Sync Annual Giveaway applications from Google Sheets 3x daily: 8am, 2pm, 8pm CST
   // Cron format: second minute hour day month weekday
-  cron.schedule("0 0 6 * * *", async () => {
+  cron.schedule("0 0 8,14,20 * * *", async () => {
     try {
-      console.log("[ScheduledJobs] Running daily giveaway sync at midnight CST...");
-      const result = await syncGiveawayApplications();
-      console.log(`[ScheduledJobs] Daily giveaway sync completed: ${result.synced} applications synced`);
+      const hour = new Date().toLocaleString("en-US", {
+        hour: "numeric",
+        hour12: true,
+        timeZone: "America/Chicago",
+      });
+      console.log(`[ScheduledJobs] Running Google Sheets giveaway sync at ${hour} CST...`);
+      const result = await syncGiveawayFromSheets();
+      console.log(
+        `[ScheduledJobs] Google Sheets sync completed: ${result.inserted} inserted, ${result.updated} updated, ${result.skipped} skipped, ${result.errors.length} errors`
+      );
+      if (result.errors.length > 0) {
+        console.error("[ScheduledJobs] Sync errors:", result.errors.slice(0, 5));
+      }
     } catch (error) {
-      console.error("[ScheduledJobs] Error in daily giveaway sync:", error);
+      console.error("[ScheduledJobs] Error in Google Sheets giveaway sync:", error);
     }
   }, {
-    timezone: "America/Chicago" // CST/CDT timezone
+    timezone: "America/Chicago", // CST/CDT timezone
   });
 
   // Daily campaign metrics snapshot at 2 AM CST (8 AM UTC)
-  cron.schedule("0 0 8 * * *", async () => {
+  cron.schedule("0 0 2 * * *", async () => {
     try {
       console.log("[ScheduledJobs] Running daily campaign metrics snapshot at 2 AM CST...");
       const result = await runDailySnapshot();
@@ -36,11 +47,11 @@ export function initializeScheduledJobs() {
       console.error("[ScheduledJobs] Error in daily snapshot:", error);
     }
   }, {
-    timezone: "America/Chicago"
+    timezone: "America/Chicago",
   });
 
-  // Weekly email report every Monday at 8 AM CST (14:00 UTC)
-  cron.schedule("0 0 14 * * 1", async () => {
+  // Weekly email report every Monday at 8 AM CST
+  cron.schedule("0 0 8 * * 1", async () => {
     try {
       console.log("[ScheduledJobs] Running weekly email report at Monday 8 AM CST...");
       const result = await runWeeklyEmailReport();
@@ -49,7 +60,7 @@ export function initializeScheduledJobs() {
       console.error("[ScheduledJobs] Error in weekly email report:", error);
     }
   }, {
-    timezone: "America/Chicago"
+    timezone: "America/Chicago",
   });
 
   // Toast SFTP daily sync at 5:30 AM EST (= 4:30 AM CST)
@@ -67,7 +78,7 @@ export function initializeScheduledJobs() {
       console.error("[ScheduledJobs] Error in Toast daily sync:", error);
     }
   }, {
-    timezone: "America/Chicago" // 4:30 AM CST = 5:30 AM EST
+    timezone: "America/Chicago", // 4:30 AM CST = 5:30 AM EST
   });
 
   // Encharge broadcast sync every 30 minutes
@@ -91,7 +102,7 @@ export function initializeScheduledJobs() {
   });
 
   console.log("[ScheduledJobs] Scheduled jobs initialized:");
-  console.log("  - Annual Giveaway sync: Daily at 12:00 AM CST");
+  console.log("  - Annual Giveaway sync (Google Sheets): 8:00 AM, 2:00 PM, 8:00 PM CST");
   console.log("  - Campaign metrics snapshot: Daily at 2:00 AM CST");
   console.log("  - Weekly email report: Every Monday at 8:00 AM CST");
   console.log("  - Toast SFTP daily sync: Daily at 4:30 AM CST (5:30 AM EST)");

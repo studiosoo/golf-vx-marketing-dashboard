@@ -612,3 +612,24 @@
 - [x] client/src/pages/Members.tsx — member management table
 - [x] client/src/pages/Preview.tsx — public read-only dashboard
 - [x] TypeScript: 0 errors
+
+## Google Sheets Giveaway Auto-Sync (2026-03-02)
+- [ ] Create server/googleSheetsSync.ts with sync function using Google Sheets API
+- [ ] Add syncGiveawayFromSheets tRPC endpoint (protectedProcedure)
+- [ ] Schedule automatic sync 3x daily (8am, 2pm, 8pm CST) via scheduler.ts
+- [ ] Update Home.tsx Giveaway card to show real-time count from DB
+- [ ] Write vitest tests for sync function
+
+## Google Sheets Auto-Sync (2026-03-02)
+- [x] Rewrite googleSheetsSync.ts with CSV-based approach (no auth required)
+- [x] Parse 69-row CSV with 72-column structure from Google Sheets
+- [x] Implement duplicate detection via googleSheetRowId (primary) + email (legacy fallback)
+- [x] Update scheduledJobs.ts: giveaway sync runs 3x daily (8am, 2pm, 8pm CST)
+- [x] Update giveaway.sync tRPC endpoint to use syncGiveawayFromSheets
+- [x] Update giveaway.getLastSyncInfo to return lastSyncedAt from DB
+- [x] Add Annual Membership Giveaway card to Home.tsx dashboard
+- [x] Giveaway card: progress bar, demographics, sync status, last sync time
+- [x] "Sync Now" button with loading/success/error states
+- [x] Migrate 27 legacy entries to link with googleSheetRowId via email matching
+- [x] Write 10 vitest tests for googleSheetsSync.ts (all passing)
+- [x] End-to-end test: 69 rows from sheet, 22 updated, 0 errors

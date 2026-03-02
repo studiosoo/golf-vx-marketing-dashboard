@@ -1,6 +1,7 @@
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/hooks/useAuth";
 import { getLoginUrl } from "@/const";
+import { useState } from "react";
 import {
   Users,
   DollarSign,
@@ -12,6 +13,10 @@ import {
   ArrowDownRight,
   Mail,
   Zap,
+  Gift,
+  CheckCircle,
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
 
 function KpiCard({
@@ -80,6 +85,32 @@ export default function Home() {
   const { data: funnelSummary, isLoading: funnelLoading } = trpc.funnels.summary.useQuery(undefined, {
     enabled: isAuthenticated,
   });
+  const { data: giveawayStats, isLoading: giveawayLoading, refetch: refetchGiveaway } = trpc.giveaway.getStats.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const { data: lastSyncInfo } = trpc.giveaway.getLastSyncInfo.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  const utils = trpc.useUtils();
+  const [syncStatus, setSyncStatus] = useState<{ type: "idle" | "loading" | "success" | "error"; message?: string }>({ type: "idle" });
+
+  const syncMutation = trpc.giveaway.sync.useMutation({
+    onMutate: () => setSyncStatus({ type: "loading" }),
+    onSuccess: (data) => {
+      setSyncStatus({
+        type: "success",
+        message: `${data.message}`,
+      });
+      utils.giveaway.getStats.invalidate();
+      utils.giveaway.getLastSyncInfo.invalidate();
+      setTimeout(() => setSyncStatus({ type: "idle" }), 5000);
+    },
+    onError: (err) => {
+      setSyncStatus({ type: "error", message: err.message });
+      setTimeout(() => setSyncStatus({ type: "idle" }), 8000);
+    },
+  });
 
   if (authLoading) {
     return (
@@ -123,6 +154,25 @@ export default function Home() {
   const topFunnel = funnelSummary
     ? [...funnelSummary].sort((a, b) => (b.submissionCount || 0) - (a.submissionCount || 0))[0]
     : null;
+
+  const totalApplications = giveawayStats?.totalApplications ?? 0;
+  const GIVEAWAY_GOAL = 500;
+  const giveawayProgress = Math.min((totalApplications / GIVEAWAY_GOAL) * 100, 100);
+
+  const formatLastSync = (ts: unknown) => {
+    if (!ts) return "Never synced";
+    try {
+      return new Date(ts as string).toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      });
+    } catch {
+      return "Unknown";
+    }
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -304,6 +354,96 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* Annual Membership Giveaway Card */}
+      <div className="bg-card border border-border rounded-lg p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Gift size={18} className="text-primary" />
+            <h3 className="font-semibold">Annual Membership Giveaway</h3>
+            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
+              2026
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            {/* Sync status indicator */}
+            {syncStatus.type === "success" && (
+              <div className="flex items-center gap-1 text-xs text-green-400">
+                <CheckCircle size={12} />
+                <span className="hidden sm:inline">{syncStatus.message}</span>
+              </div>
+            )}
+            {syncStatus.type === "error" && (
+              <div className="flex items-center gap-1 text-xs text-red-400">
+                <AlertCircle size={12} />
+                <span className="hidden sm:inline">Sync failed</span>
+              </div>
+            )}
+            <button
+              onClick={() => syncMutation.mutate()}
+              disabled={syncStatus.type === "loading"}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground border border-border rounded-md hover:bg-muted/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Sync from Google Sheets"
+            >
+              {syncStatus.type === "loading" ? (
+                <Loader2 size={12} className="animate-spin" />
+              ) : (
+                <RefreshCw size={12} />
+              )}
+              {syncStatus.type === "loading" ? "Syncing..." : "Sync Now"}
+            </button>
+          </div>
+        </div>
+
+        {giveawayLoading ? (
+          <div className="space-y-3">
+            <div className="h-8 bg-muted rounded animate-pulse w-24" />
+            <div className="h-3 bg-muted rounded animate-pulse w-full" />
+          </div>
+        ) : (
+          <>
+            <div className="flex items-end gap-3 mb-3">
+              <div className="text-3xl font-bold text-foreground">{totalApplications}</div>
+              <div className="text-sm text-muted-foreground mb-1">
+                of {GIVEAWAY_GOAL} goal applications
+              </div>
+            </div>
+
+            {/* Progress bar */}
+            <div className="w-full bg-muted rounded-full h-2.5 mb-2">
+              <div
+                className="bg-primary h-2.5 rounded-full transition-all duration-500"
+                style={{ width: `${giveawayProgress}%` }}
+              />
+            </div>
+            <div className="flex justify-between text-xs text-muted-foreground mb-3">
+              <span>{giveawayProgress.toFixed(1)}% of goal</span>
+              <span>{GIVEAWAY_GOAL - totalApplications} remaining</span>
+            </div>
+
+            {/* Demographics breakdown */}
+            {giveawayStats && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-3 pt-3 border-t border-border">
+                {Object.entries(giveawayStats.genderDistribution || {})
+                  .filter(([k]) => k !== "Unknown")
+                  .slice(0, 3)
+                  .map(([gender, count]) => (
+                    <div key={gender} className="text-xs">
+                      <div className="font-medium text-foreground">{count as number}</div>
+                      <div className="text-muted-foreground">{gender}</div>
+                    </div>
+                  ))}
+              </div>
+            )}
+
+            {/* Last sync info */}
+            <div className="mt-3 pt-3 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
+              <span>Auto-syncs at 8am, 2pm, 8pm CST</span>
+              <span>Last sync: {formatLastSync(lastSyncInfo)}</span>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

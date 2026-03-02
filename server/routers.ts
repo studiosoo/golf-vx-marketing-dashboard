@@ -25,6 +25,7 @@ import * as conversionTracking from "./conversionTracking";
 import * as memberAppointmentSync from "./memberAppointmentSync";
 import * as toastTransactionSync from "./toastTransactionSync";
 import * as giveawaySync from "./giveawaySync";
+import { syncGiveawayFromSheets } from "./googleSheetsSync";
 import { calculateCampaignPerformance, GOAL_TEMPLATES } from "./goalTemplates";
 import { eq, desc, sql, inArray, and, gte } from "drizzle-orm";
 import { aiRecommendations, userActions, priorities } from "../drizzle/schema";
@@ -2166,7 +2167,18 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
     }),
     
     sync: protectedProcedure.mutation(async () => {
-      return await giveawaySync.syncGiveawayApplications();
+      // Sync from Google Sheets CSV (no auth needed — sheet is public)
+      const result = await syncGiveawayFromSheets();
+      return {
+        synced: result.inserted + result.updated,
+        inserted: result.inserted,
+        updated: result.updated,
+        skipped: result.skipped,
+        errors: result.errors,
+        totalRows: result.totalRows,
+        lastSyncTime: result.lastSyncTime,
+        message: `Synced ${result.inserted + result.updated} applications (${result.inserted} new, ${result.updated} updated) from Google Sheets`,
+      };
     }),
     
     // Get last sync info
@@ -2178,7 +2190,7 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
       const { sql } = await import("drizzle-orm");
       
       const result = await db
-        .select({ lastSync: sql`MAX(createdAt)` })
+        .select({ lastSync: sql`MAX(lastSyncedAt)` })
         .from(giveawayApplications);
       
       return result[0]?.lastSync || null;
