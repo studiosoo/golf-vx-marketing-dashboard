@@ -1,110 +1,121 @@
+import { execSync } from 'child_process';
 import { writeMetaAdsCache, readMetaAdsCache } from './metaAdsCache';
-import { getCampaigns, getCampaignInsights } from './metaAds';
 
 /**
- * Refresh Meta Ads cache by fetching latest data from the Meta Ads API.
- * Falls back to keeping existing cache if API is unreachable.
+ * Refresh Meta Ads cache using the MCP server (manus-mcp-cli).
+ * The direct Meta Ads API token returns "API access blocked" (code 200),
+ * so we use the MCP connector which has valid OAuth credentials.
+ * Falls back to keeping existing cache if MCP is unavailable.
  */
 export async function refreshMetaAdsCache(): Promise<{ success: boolean; message: string; campaignCount?: number }> {
+  const accountId = process.env.META_ADS_ACCOUNT_ID || '';
+
+  if (!accountId) {
+    return { success: false, message: 'META_ADS_ACCOUNT_ID not set' };
+  }
+
+  console.log('[Meta Ads Cache Refresh] Starting MCP-based refresh...');
+
   try {
-    console.log('[Meta Ads Cache Refresh] Starting refresh...');
-    
-    // Step 1: Fetch all campaigns
-    const campaigns = await getCampaigns();
-    console.log(`[Meta Ads Cache Refresh] Found ${campaigns.length} campaigns`);
-    
+    // Step 1: Fetch campaigns via MCP
+    const campaignsInput = JSON.stringify({ ad_account_id: `act_${accountId}`, limit: 50 });
+    const campaignsCmd = `manus-mcp-cli tool call meta_marketing_get_campaigns --server meta-marketing --input '${campaignsInput}'`;
+    const campaignsOut = execSync(campaignsCmd, { encoding: 'utf-8', maxBuffer: 10 * 1024 * 1024, timeout: 30000 });
+
+    const campaignsMatch = campaignsOut.match(/\/tmp\/manus-mcp\/mcp_result_[a-f0-9]+\.json/);
+    if (!campaignsMatch) throw new Error('Failed to get MCP campaigns result file path');
+
+    const campaignsJson = execSync(`cat ${campaignsMatch[0]}`, { encoding: 'utf-8' });
+    const campaignsResult = JSON.parse(campaignsJson);
+    const campaigns: any[] = campaignsResult?.result?.campaigns || [];
+
+    console.log(`[Meta Ads Cache Refresh] Found ${campaigns.length} campaigns via MCP`);
+
     if (campaigns.length === 0) {
-      // If no campaigns returned but we have cache, keep it
       const existingCache = readMetaAdsCache();
       if (existingCache.length > 0) {
         return {
           success: true,
-          message: `No campaigns returned from API, keeping existing cache with ${existingCache.length} campaigns`,
+          message: `No campaigns returned from MCP, keeping existing cache with ${existingCache.length} campaigns`,
           campaignCount: existingCache.length,
         };
       }
+      return { success: true, message: 'No campaigns found in the ad account', campaignCount: 0 };
+    }
+
+    // Step 2: Fetch account-level insights at campaign level via MCP
+    const insightsInput = JSON.stringify({
+      object_id: `act_${accountId}`,
+      object_type: 'ad_account',
+      date_preset: 'maximum',
+      level: 'campaign',
+    });
+    const insightsCmd = `manus-mcp-cli tool call meta_marketing_get_insights --server meta-marketing --input '${insightsInput}'`;
+    const insightsOut = execSync(insightsCmd, { encoding: 'utf-8', maxBuffer: 10 * 1024 * 1024, timeout: 30000 });
+
+    const insightsMatch = insightsOut.match(/\/tmp\/manus-mcp\/mcp_result_[a-f0-9]+\.json/);
+    if (!insightsMatch) throw new Error('Failed to get MCP insights result file path');
+
+    const insightsJson = execSync(`cat ${insightsMatch[0]}`, { encoding: 'utf-8' });
+    const insightsResult = JSON.parse(insightsJson);
+    const insights: any[] = insightsResult?.result?.insights || [];
+
+    console.log(`[Meta Ads Cache Refresh] Got insights for ${insights.length} campaigns via MCP`);
+
+    // Step 3: Build a map of campaign name → metadata
+    const campaignMeta: Record<string, any> = {};
+    for (const c of campaigns) {
+      campaignMeta[c.name] = c;
+    }
+
+    // Step 4: Merge insights with campaign metadata
+    const allInsights = insights.map((ins: any) => {
+      const meta = campaignMeta[ins.campaign_name] || {};
       return {
-        success: true,
-        message: 'No campaigns found in the ad account',
-        campaignCount: 0,
+        campaign_id: meta.id || ins.campaign_id || '',
+        campaign_name: ins.campaign_name || '',
+        status: meta.status || meta.effective_status || 'ACTIVE',
+        effective_status: meta.effective_status || meta.status || 'ACTIVE',
+        objective: meta.objective || '',
+        daily_budget: meta.daily_budget || null,
+        created_time: meta.created_time || '',
+        updated_time: meta.updated_time || '',
+        impressions: ins.impressions || '0',
+        clicks: ins.clicks || '0',
+        spend: ins.spend || '0',
+        reach: ins.reach || '0',
+        cpc: ins.cpc || '0',
+        cpm: ins.cpm || '0',
+        ctr: ins.ctr || '0',
+        date_start: ins.date_start || '',
+        date_stop: ins.date_stop || '',
       };
-    }
-    
-    // Step 2: Fetch insights for each campaign
-    const allInsights: any[] = [];
-    
-    for (const campaign of campaigns) {
-      try {
-        const insights = await getCampaignInsights(campaign.id, 'maximum');
-        
-        allInsights.push({
-          campaign_id: campaign.id,
-          campaign_name: campaign.name,
-          status: campaign.status,
-          objective: campaign.objective,
-          created_time: campaign.created_time,
-          updated_time: campaign.updated_time,
-          impressions: insights.impressions || '0',
-          clicks: insights.clicks || '0',
-          spend: insights.spend || '0',
-          reach: insights.reach || '0',
-          cpc: insights.cpc || '0',
-          cpm: insights.cpm || '0',
-          ctr: insights.ctr || '0',
-          conversions: insights.conversions,
-          cost_per_conversion: insights.cost_per_conversion,
-          date_start: insights.date_start || '',
-          date_stop: insights.date_stop || '',
-        });
-        
-        console.log(`[Meta Ads Cache Refresh] Fetched insights for: ${campaign.name} ($${insights.spend})`);
-      } catch (error) {
-        console.warn(`[Meta Ads Cache Refresh] Failed to fetch insights for ${campaign.name}:`, error);
-        // Add campaign with zero metrics
-        allInsights.push({
-          campaign_id: campaign.id,
-          campaign_name: campaign.name,
-          status: campaign.status,
-          objective: campaign.objective,
-          created_time: campaign.created_time,
-          updated_time: campaign.updated_time,
-          impressions: '0',
-          clicks: '0',
-          spend: '0',
-          reach: '0',
-          cpc: '0',
-          cpm: '0',
-          ctr: '0',
-          date_start: '',
-          date_stop: '',
-        });
-      }
-    }
-    
-    // Step 3: Write to cache
+    });
+
+    // Step 5: Write to cache
     writeMetaAdsCache(allInsights);
-    
-    const totalSpend = allInsights.reduce((sum, c) => sum + parseFloat(c.spend || '0'), 0);
+
+    const totalSpend = allInsights.reduce((sum: number, c: any) => sum + parseFloat(c.spend || '0'), 0);
     console.log(`[Meta Ads Cache Refresh] Successfully refreshed ${allInsights.length} campaigns (Total spend: $${totalSpend.toFixed(2)})`);
-    
+
     return {
       success: true,
       message: `Successfully refreshed Meta Ads data for ${allInsights.length} campaigns (Total spend: $${totalSpend.toFixed(2)})`,
       campaignCount: allInsights.length,
     };
   } catch (error) {
-    console.error('[Meta Ads Cache Refresh] Failed:', error);
-    
-    // Check if we have existing cache data
+    console.error('[Meta Ads Cache Refresh] MCP refresh failed:', error);
+
+    // Fall back to existing cache
     const existingCache = readMetaAdsCache();
     if (existingCache.length > 0) {
       return {
         success: false,
-        message: `API refresh failed (${error instanceof Error ? error.message : 'Unknown error'}). Keeping existing cache with ${existingCache.length} campaigns.`,
+        message: `MCP refresh failed (${error instanceof Error ? error.message : 'Unknown error'}). Keeping existing cache with ${existingCache.length} campaigns.`,
         campaignCount: existingCache.length,
       };
     }
-    
+
     return {
       success: false,
       message: error instanceof Error ? error.message : 'Unknown error occurred',

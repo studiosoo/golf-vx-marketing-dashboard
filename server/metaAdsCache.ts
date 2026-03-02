@@ -42,7 +42,8 @@ interface CachedInsight {
   account_id?: string;
 }
 
-const CACHE_FILE_PATH = path.join(process.cwd(), '.meta-ads-cache', 'insights.json');
+// Use /tmp to avoid the corrupted .meta-ads-cache sandbox directory (errno -117)
+const CACHE_FILE_PATH = '/tmp/golf-vx-meta-ads-insights.json';
 
 /**
  * Read Meta Ads insights from cache file

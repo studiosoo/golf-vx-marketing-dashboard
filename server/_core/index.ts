@@ -93,6 +93,20 @@ async function startServer() {
     console.log(`Server running on http://localhost:${port}/`);
     // Start autonomous marketing intelligence scheduler (8am/6pm CST)
     startScheduler();
+    // Ensure Meta Ads cache is populated on startup (cache lives in /tmp and is cleared on reboot)
+    import('../metaAdsCache').then(({ readMetaAdsCache }) => {
+      const existing = readMetaAdsCache();
+      if (existing.length === 0) {
+        console.log('[Startup] Meta Ads cache empty, triggering MCP refresh...');
+        import('../refreshMetaAdsCache').then(({ refreshMetaAdsCache }) => {
+          refreshMetaAdsCache()
+            .then(result => console.log('[Startup] Meta Ads cache refresh:', result.message))
+            .catch(err => console.warn('[Startup] Meta Ads cache refresh failed:', err));
+        }).catch(() => {});
+      } else {
+        console.log(`[Startup] Meta Ads cache ready: ${existing.length} campaigns`);
+      }
+    }).catch(() => {});
   });
 }
 

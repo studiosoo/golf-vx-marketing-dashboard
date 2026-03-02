@@ -668,10 +668,38 @@ async function fetchCampaignData(): Promise<CampaignMetrics[]> {
       console.log("[Autonomous] Fetching live data from Meta Ads API...");
       return await fetchFromMetaAdsReal();
     } catch (error) {
-      console.warn("[Autonomous] Meta Ads API failed, falling back to demo data:", error);
+      console.warn("[Autonomous] Meta Ads API failed, trying cache fallback:", error);
     }
   } else {
-    console.log("[Autonomous] Meta Ads credentials not configured, using demo data");
+    console.log("[Autonomous] Meta Ads credentials not configured, trying cache");
+  }
+
+  // Try cache fallback before demo data
+  try {
+    const { getAllCampaignsFromCache } = await import('./metaAdsCache');
+    const cached = getAllCampaignsFromCache();
+    if (cached.length > 0) {
+      console.log(`[Autonomous] Using cached Meta Ads data (${cached.length} campaigns)`);
+      return cached
+        .filter((c: any) => !((c.campaign_name || '').toLowerCase().includes('studio soo') || (c.campaign_name || '').toLowerCase().includes('portrait')))
+        .map((c: any) => ({
+          campaignId: c.campaign_id || '',
+          campaignName: c.campaign_name || '',
+          status: c.status || 'ACTIVE',
+          spend: parseFloat(c.spend || '0'),
+          impressions: parseInt(c.impressions || '0'),
+          clicks: parseInt(c.clicks || '0'),
+          conversions: parseInt(c.conversions || '0'),
+          ctr: parseFloat(c.ctr || '0'),
+          cpc: parseFloat(c.cpc || '0'),
+          cpm: parseFloat(c.cpm || '0'),
+          roas: 0,
+          dailyBudget: c.daily_budget ? parseInt(c.daily_budget) / 100 : 0,
+          lifetimeBudget: 0,
+        }));
+    }
+  } catch (cacheError) {
+    console.warn('[Autonomous] Cache fallback also failed:', cacheError);
   }
 
   return getDemoCampaignData();
