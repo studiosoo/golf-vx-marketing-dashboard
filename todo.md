@@ -632,3 +632,11 @@
 - [x] Add /guest/* routes to App.tsx
 - [x] Update DashboardLayout with Guest Preview link
 - [x] Verify guest API endpoints work without authentication
+
+## Guest Preview Mode
+- [x] GuestModeContext created
+- [x] GuestDashboardLayout with guest banner and disabled actions
+- [x] 23 guest pages created under /guest/* routes
+- [x] guest.* public tRPC endpoints added to server/routers.ts
+- [x] All TypeScript errors resolved (0 errors)
+- [x] App.tsx updated with all /guest/* routes

@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { UserPlus } from "lucide-react";
 
 export default function GuestLeads() {
-  const { data: members = [], isLoading } = trpc.guest.getMembers.useQuery({ status: "trial" });
+  const { data: members = [], isLoading } = trpc.guest.getMembers.useQuery();
   const { data: stats } = trpc.guest.getMemberStats.useQuery();
 
   return (

@@ -26,9 +26,7 @@ const statusColors: Record<string, string> = {
 
 export default function GuestMembers() {
   const [search, setSearch] = useState("");
-  const { data: members = [], isLoading } = trpc.guest.getMembers.useQuery(
-    search ? { search } : undefined
-  );
+  const { data: members = [], isLoading } = trpc.guest.getMembers.useQuery();
   const { data: stats } = trpc.guest.getMemberStats.useQuery();
 
   const filtered = members.filter((m: any) =>

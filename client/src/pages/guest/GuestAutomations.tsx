@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Settings, Users, Mail } from "lucide-react";
 
 export default function GuestAutomations() {
-  const { data: account } = trpc.guest.getEnchargeAccount.useQuery();
   const { data: segments = [] } = trpc.guest.getEnchargeSegments.useQuery();
   const { data: metrics } = trpc.guest.getEnchargeMetrics.useQuery();
 
@@ -39,9 +38,9 @@ export default function GuestAutomations() {
           <CardContent className="pt-3 pb-3">
             <div className="flex items-center gap-2 mb-1">
               <Mail size={14} className="text-green-400" />
-              <span className="text-xs text-muted-foreground">Account</span>
+              <span className="text-xs text-muted-foreground">Active Subscribers</span>
             </div>
-            <p className="text-sm font-medium truncate">{account?.name ?? "Encharge"}</p>
+            <p className="text-sm font-medium truncate">{metrics?.recentSubscribers?.toLocaleString() ?? "—"}</p>
           </CardContent>
         </Card>
       </div>

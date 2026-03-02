@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { UserCheck } from "lucide-react";
 
 export default function GuestGuests() {
-  const { data: members = [], isLoading } = trpc.guest.getMembers.useQuery({ status: "inactive" });
+  const { data: members = [], isLoading } = trpc.guest.getMembers.useQuery();
 
   return (
     <div className="p-6 space-y-6">

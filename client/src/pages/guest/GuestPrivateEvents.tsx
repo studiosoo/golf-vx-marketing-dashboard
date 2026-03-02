@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "lucide-react";
 
 export default function GuestPrivateEvents() {
-  const { data: campaigns = [], isLoading } = trpc.guest.getCampaignsByCategory.useQuery({ category: "corporate_events" });
+  const { data: campaigns = [], isLoading } = trpc.guest.getCampaigns.useQuery();
 
   return (
     <div className="p-6 space-y-6">

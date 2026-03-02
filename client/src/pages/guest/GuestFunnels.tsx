@@ -6,7 +6,7 @@ import { Target, Lock } from "lucide-react";
 
 export default function GuestFunnels() {
   const { data: funnelSummary = [], isLoading } = trpc.guest.getFunnelSummary.useQuery();
-  const { data: submissions = [] } = trpc.guest.getFunnelSubmissions.useQuery({ limit: 50 });
+  const { data: submissions = [] } = trpc.guest.getFunnels.useQuery();
 
   const totalSubmissions = (funnelSummary as any[]).reduce((s: number, f: any) => s + Number(f.submissionCount || 0), 0);
 

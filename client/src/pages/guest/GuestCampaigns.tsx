@@ -13,7 +13,6 @@ const statusColors: Record<string, string> = {
 
 export default function GuestCampaigns() {
   const { data: campaigns = [], isLoading } = trpc.guest.getCampaigns.useQuery();
-  const { data: summary } = trpc.guest.getCategorySummary.useQuery();
 
   return (
     <div className="p-6 space-y-6">
@@ -28,20 +27,7 @@ export default function GuestCampaigns() {
         </div>
       </div>
 
-      {/* Category Summary */}
-      {summary && summary.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {summary.map((cat: any) => (
-            <Card key={cat.category} className="bg-card border-border">
-              <CardContent className="pt-3 pb-3">
-                <p className="text-xs text-muted-foreground capitalize">{cat.category?.replace(/_/g, " ")}</p>
-                <p className="text-xl font-bold">{cat.totalCampaigns ?? 0}</p>
-                <p className="text-xs text-green-400">${parseFloat(cat.totalRevenue || "0").toLocaleString()} revenue</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+
 
       {/* Campaign list */}
       <Card className="bg-card border-border">

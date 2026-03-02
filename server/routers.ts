@@ -3767,5 +3767,115 @@ Return a JSON object with:
       return result;
     }),
   }),
+  // ─── Guest Router: public read-only endpoints (no auth required) ───
+  guest: router({
+    getMemberStats: publicProcedure.query(async () => {
+      return await db.getMemberStats();
+    }),
+    getMembers: publicProcedure.query(async () => {
+      return await db.getAllMembers();
+    }),
+    getCampaigns: publicProcedure.query(async () => {
+      return await db.getAllCampaigns();
+    }),
+    getDashboardOverview: publicProcedure
+      .input(z.object({ startDate: z.date(), endDate: z.date() }))
+      .query(async ({ input }) => {
+        const [memberStats, campaigns, channelPerformance] = await Promise.all([
+          db.getMemberStats(),
+          db.getAllCampaigns(),
+          db.getChannelPerformanceSummary(input.startDate, input.endDate),
+        ]);
+        const activeCampaigns = (campaigns as any[]).filter((c: any) => c.status === "active");
+        const totalSpend = activeCampaigns.reduce((sum: number, c: any) => sum + parseFloat(c.actualSpend || "0"), 0);
+        const totalCampaignRevenue = activeCampaigns.reduce((sum: number, c: any) => sum + parseFloat(c.actualRevenue || "0"), 0);
+        const roi = totalSpend > 0 ? ((totalCampaignRevenue - totalSpend) / totalSpend) * 100 : 0;
+        const allAccessMRR = parseFloat((memberStats as any)?.allAccessMRR || "0") || ((memberStats as any)?.allAccessCount || 0) * 325;
+        const swingSaversMRR = parseFloat((memberStats as any)?.swingSaversMRR || "0") || ((memberStats as any)?.swingSaversCount || 0) * 225;
+        const golfVxProMRR = parseFloat((memberStats as any)?.golfVxProMRR || "0") || ((memberStats as any)?.golfVxProCount || 0) * 500;
+        const totalMRR = allAccessMRR + swingSaversMRR + golfVxProMRR;
+        return {
+          activeMembers: (memberStats as any)?.activeMembers || 0,
+          totalMembers: (memberStats as any)?.totalMembers || 0,
+          monthlyRecurringRevenue: totalMRR,
+          marketingSpend: totalSpend.toFixed(2),
+          overallROI: roi.toFixed(2),
+          activeCampaignsCount: activeCampaigns.length,
+          memberStats, channelPerformance,
+        };
+      }),
+    getRevenueSummary: publicProcedure
+      .input(z.object({ startDate: z.date(), endDate: z.date() }))
+      .query(async ({ input }) => await db.getRevenueSummary(input.startDate, input.endDate)),
+    getToastSummary: publicProcedure.query(async () => {
+      const dbConn = await db.getDb();
+      if (!dbConn) return null;
+      const [rows] = await dbConn.execute(
+        "SELECT SUM(total_revenue) as all_time_revenue, SUM(bay_revenue) as all_time_bay, SUM(food_bev_revenue) as all_time_food_bev, SUM(golf_revenue) as all_time_golf, COUNT(*) as total_days FROM toast_daily_summary"
+      ) as any;
+      return (rows as any[])[0] || null;
+    }),
+    getToastDaily: publicProcedure.query(async () => {
+      const dbConn = await db.getDb();
+      if (!dbConn) return [];
+      const [rows] = await dbConn.execute(
+        "SELECT * FROM toast_daily_summary ORDER BY summary_date DESC LIMIT 30"
+      ) as any;
+      return rows || [];
+    }),
+    getAcuityRevenue: publicProcedure
+      .input(z.object({ minDate: z.string().optional(), maxDate: z.string().optional() }))
+      .query(async () => {
+        const dbConn = await db.getDb();
+        if (!dbConn) return [];
+        const [rows] = await dbConn.execute(
+          "SELECT * FROM acuity_appointments WHERE status = 'paid' ORDER BY datetime DESC LIMIT 100"
+        ) as any;
+        return rows || [];
+      }),
+    getMetaAdsCampaigns: publicProcedure
+      .input(z.object({ datePreset: z.enum(["today","yesterday","last_7d","last_14d","last_30d","last_90d","lifetime"]).default("last_30d") }))
+      .query(async ({ input }) => {
+        try { return await metaAds.getAllCampaignsWithInsights(input.datePreset); }
+        catch {
+          const cachedData = metaAdsCache.getAllCampaignsFromCache();
+          if (cachedData && cachedData.length > 0) {
+            return cachedData.map((c: any) => ({
+              id: c.campaign_id, name: c.campaign_name, status: c.status || "UNKNOWN",
+              objective: c.objective || "UNKNOWN", created_time: c.date_start || "", updated_time: c.date_stop || "",
+              insights: { campaign_name: c.campaign_name, campaign_id: c.campaign_id,
+                impressions: c.impressions, clicks: c.clicks, spend: c.spend,
+                reach: c.reach, cpc: c.cpc, cpm: c.cpm, ctr: c.ctr },
+            }));
+          }
+          return [];
+        }
+      }),
+    getEmailCampaigns: publicProcedure.query(async () => {
+      const { getSyncedBroadcasts } = await import("./enchargeBroadcastSync");
+      return await getSyncedBroadcasts();
+    }),
+    getEmailSummary: publicProcedure.query(async () => {
+      const { getEmailPerformanceSummary } = await import("./enchargeBroadcastSync");
+      return await getEmailPerformanceSummary();
+    }),
+    getFunnels: publicProcedure.query(async () => {
+      const { getCfFunnels } = await import("./db");
+      return await getCfFunnels();
+    }),
+    getFunnelSummary: publicProcedure.query(async () => {
+      const { getCfFunnelSummary } = await import("./db");
+      return await getCfFunnelSummary();
+    }),
+    getEnchargeMetrics: publicProcedure.query(async () => {
+      return await encharge.getSubscriberMetrics();
+    }),
+    getEnchargeSegments: publicProcedure.query(async () => {
+      return await encharge.getEnchargeSegments();
+    }),
+    getChannelPerformance: publicProcedure
+      .input(z.object({ startDate: z.date(), endDate: z.date() }))
+      .query(async ({ input }) => await db.getChannelPerformanceSummary(input.startDate, input.endDate)),
+  }),
 });
 export type AppRouter = typeof appRouter;

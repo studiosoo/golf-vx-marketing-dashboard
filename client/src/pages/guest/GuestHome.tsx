@@ -25,7 +25,7 @@ export default function GuestHome() {
     },
     {
       label: "Monthly Revenue",
-      value: overviewLoading ? "..." : `$${parseFloat(overview?.totalRevenue ?? "0").toLocaleString()}`,
+      value: overviewLoading ? "..." : `$${parseFloat(overview?.marketingSpend ?? "0").toLocaleString()}`,
       sub: "This month",
       icon: <DollarSign size={20} className="text-green-400" />,
       color: "border-green-500/30",
