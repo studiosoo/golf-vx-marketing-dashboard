@@ -652,5 +652,7 @@
 - [ ] Ensure sidebar is always visible on every page
 
 ## Bug Fix: SyntaxError on /campaigns/meta-ads (2026-03-02)
-- [x] Diagnose: Same root cause as before - Vite FSWatcher crashing on corrupted .manus/.meta-ads-cache dirs
-- [x] Fix: Added vitePluginSuppressFsWatcherErrors plugin to intercept and suppress errno -117 errors before they propagate to crash the server
+- [x] Diagnose: Crash happens when tsx watch restarts server on vite.config.ts change - chokidar _handleError only ignores ENOENT/ENOTDIR, not errno -117
+- [x] Fix 1: Added process.on('uncaughtException') handler in server/_core/index.ts to suppress errno -117
+- [x] Fix 2: Patched Vite bundle's chokidar _handleError to also ignore errno -117 at the source
+- [x] Fix 3: Added scripts/patch-vite-chokidar.sh + postinstall script to re-apply patch after pnpm install

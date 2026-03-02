@@ -1,5 +1,26 @@
 import "dotenv/config";
 import express from "express";
+
+// Suppress corrupted sandbox filesystem errors (errno -117) that crash the Vite FSWatcher.
+// These errors come from chokidar trying to lstat .manus/.meta-ads-cache directories
+// which have corrupted inodes in the sandbox filesystem and cannot be removed.
+// Without this handler, the error propagates as an unhandled 'error' event and kills the process.
+process.on("uncaughtException", (err: NodeJS.ErrnoException) => {
+  if (err.errno === -117 || (err as any).code === "Unknown system error -117") {
+    // Silently ignore — this is a sandbox filesystem artifact, not a real error
+    return;
+  }
+  // Re-throw all other uncaught exceptions
+  console.error("Uncaught Exception:", err);
+  process.exit(1);
+});
+
+process.on("unhandledRejection", (reason: any) => {
+  if (reason?.errno === -117 || reason?.code === "Unknown system error -117") {
+    return;
+  }
+  console.error("Unhandled Rejection:", reason);
+});
 import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
