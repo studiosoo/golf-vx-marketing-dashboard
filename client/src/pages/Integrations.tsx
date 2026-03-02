@@ -1,171 +1,92 @@
-import DashboardLayout from "@/components/DashboardLayout";
+import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { trpc } from "@/lib/trpc";
-import { CheckCircle, XCircle, Clock, ExternalLink, Zap } from "lucide-react";
-
-const INTEGRATIONS = [
-  {
-    name: "Meta Ads",
-    description: "Facebook & Instagram advertising platform",
-    category: "Advertising",
-    status: "active",
-    docsUrl: "https://developers.facebook.com/docs/marketing-apis",
-    features: ["Campaign sync", "Ad performance metrics", "Audience insights"],
-  },
-  {
-    name: "Encharge",
-    description: "Email marketing automation and drip campaigns",
-    category: "Email",
-    status: "active",
-    docsUrl: "https://docs.encharge.io",
-    features: ["Subscriber sync", "Tag management", "Sequence triggers"],
-  },
-  {
-    name: "Acuity Scheduling",
-    description: "Appointment booking and scheduling management",
-    category: "Booking",
-    status: "active",
-    docsUrl: "https://developers.acuityscheduling.com",
-    features: ["Appointment sync", "Sunday Clinic metrics", "Winter Clinic data"],
-  },
-  {
-    name: "Boomerang",
-    description: "Digital loyalty card and wallet pass management",
-    category: "Loyalty",
-    status: "active",
-    docsUrl: "https://app.boomerangapp.com",
-    features: ["Card issued/installed/deleted events", "Member sync", "Webhook receiver"],
-  },
-  {
-    name: "ClickFunnels",
-    description: "Landing pages, funnels, and giveaway management",
-    category: "Funnels",
-    status: "active",
-    docsUrl: "https://developers.clickfunnels.com",
-    features: ["Giveaway applications", "Contact sync", "Form submissions"],
-  },
-  {
-    name: "Make.com (HQ)",
-    description: "Automation hub connecting Boomerang events to dashboard",
-    category: "Automation",
-    status: "active",
-    docsUrl: "https://www.make.com",
-    features: ["Boomerang webhook relay", "x-webhook-secret auth", "Event routing"],
-  },
-  {
-    name: "Asana",
-    description: "Project management and marketing timeline tracking",
-    category: "Project Mgmt",
-    status: "active",
-    docsUrl: "https://developers.asana.com",
-    features: ["Task sync", "Campaign timeline", "Team coordination"],
-  },
-  {
-    name: "Instagram",
-    description: "Instagram content performance and engagement metrics",
-    category: "Social",
-    status: "active",
-    docsUrl: "https://developers.facebook.com/docs/instagram-api",
-    features: ["Post metrics", "Engagement tracking", "Audience data"],
-  },
-  {
-    name: "Twilio",
-    description: "SMS messaging for member communications",
-    category: "SMS",
-    status: "pending",
-    docsUrl: "https://www.twilio.com/docs",
-    features: ["Bulk SMS", "Welcome messages", "Event notifications"],
-  },
-  {
-    name: "Google Analytics 4",
-    description: "Website traffic and conversion analytics",
-    category: "Analytics",
-    status: "active",
-    docsUrl: "https://developers.google.com/analytics",
-    features: ["Traffic metrics", "Conversion tracking", "Audience segments"],
-  },
-];
-
-const STATUS_CONFIG = {
-  active: { icon: CheckCircle, color: "text-green-400", label: "Active", badgeClass: "border-green-500/40 text-green-400" },
-  pending: { icon: Clock, color: "text-amber-400", label: "Pending Setup", badgeClass: "border-amber-500/40 text-amber-400" },
-  error: { icon: XCircle, color: "text-red-400", label: "Error", badgeClass: "border-red-500/40 text-red-400" },
-};
+import { Button } from "@/components/ui/button";
+import { RefreshCw, CheckCircle, AlertCircle, Clock } from "lucide-react";
 
 export default function Integrations() {
-  const { data: syncStatus } = trpc.autonomous.getSyncStatus.useQuery();
+  const { data: status, isLoading, refetch } = trpc.dashboard.getOverview.useQuery({ startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1), endDate: new Date() });
 
-  const activeCount = INTEGRATIONS.filter(i => i.status === "active").length;
-  const pendingCount = INTEGRATIONS.filter(i => i.status === "pending").length;
+  const integrations = [
+    { key: "metaAds", name: "Meta Ads", description: "Facebook & Instagram advertising" },
+    { key: "encharge", name: "Encharge", description: "Email marketing automation" },
+    { key: "acuity", name: "Acuity Scheduling", description: "Booking & appointment management" },
+    { key: "clickfunnels", name: "ClickFunnels", description: "Sales funnel management" },
+    { key: "boomerang", name: "Boomerang", description: "Membership management" },
+    { key: "toast", name: "Toast POS", description: "Point of sale system" },
+  ];
+
+  const getStatusBadge = (s: string) => {
+    if (s === "connected" || s === "ok") return <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">Connected</Badge>;
+    if (s === "error") return <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs">Error</Badge>;
+    if (s === "syncing") return <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">Syncing</Badge>;
+    return <Badge variant="secondary" className="text-xs">Unknown</Badge>;
+  };
+
+  const getStatusIcon = (s: string) => {
+    if (s === "connected" || s === "ok") return <CheckCircle size={16} className="text-green-400" />;
+    if (s === "error") return <AlertCircle size={16} className="text-red-400" />;
+    return <Clock size={16} className="text-muted-foreground" />;
+  };
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6 p-6">
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">Integrations</h1>
-            <p className="text-muted-foreground mt-1 text-sm">Connected services and third-party platform status</p>
-          </div>
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Integrations</h1>
+          <p className="text-muted-foreground text-sm mt-1">Third-party service connections</p>
         </div>
+        <Button variant="outline" size="sm" onClick={() => refetch()}>
+          <RefreshCw size={14} />
+          Refresh
+        </Button>
+      </div>
 
-        {/* Summary */}
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            { label: "Total Integrations", value: INTEGRATIONS.length, color: "text-foreground" },
-            { label: "Active", value: activeCount, color: "text-green-400" },
-            { label: "Pending Setup", value: pendingCount, color: "text-amber-400" },
-          ].map((s) => (
-            <Card key={s.label}>
-              <CardContent className="pt-4 pb-4">
-                <p className="text-xs text-muted-foreground">{s.label}</p>
-                <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
-              </CardContent>
-            </Card>
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-32 bg-card rounded-xl animate-pulse border border-border" />
           ))}
         </div>
-
-        {/* Integration Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-          {INTEGRATIONS.map((integration) => {
-            const cfg = STATUS_CONFIG[integration.status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.active;
-            const StatusIcon = cfg.icon;
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {integrations.map((integration) => {
+            const s = (status as any)?.[integration.key] || {};
+            const statusStr = s.status || "unknown";
             return (
-              <Card key={integration.name} className="hover:border-muted-foreground/30 transition-all">
-                <CardHeader className="pb-2">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                      <Zap className="h-4 w-4 text-primary" />
-                      <CardTitle className="text-sm font-semibold">{integration.name}</CardTitle>
+              <Card key={integration.key} className="bg-card border-border">
+                <CardContent className="p-5">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <div className="font-semibold text-foreground">{integration.name}</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">{integration.description}</div>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <StatusIcon className={`h-3.5 w-3.5 ${cfg.color}`} />
-                      <Badge variant="outline" className={`text-xs ${cfg.badgeClass}`}>{cfg.label}</Badge>
-                    </div>
+                    {getStatusIcon(statusStr)}
                   </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <p className="text-xs text-muted-foreground mb-2">{integration.description}</p>
                   <div className="flex items-center justify-between">
-                    <div className="flex flex-wrap gap-1">
-                      <Badge variant="secondary" className="text-xs">{integration.category}</Badge>
+                    {getStatusBadge(statusStr)}
+                    {s.lastSync && (
+                      <span className="text-xs text-muted-foreground">
+                        Last sync: {new Date(s.lastSync).toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                  {s.count !== undefined && (
+                    <div className="mt-2 text-xs text-muted-foreground">
+                      {s.count.toLocaleString()} records synced
                     </div>
-                    <a href={integration.docsUrl} target="_blank" rel="noopener noreferrer"
-                      className="text-xs text-primary hover:underline flex items-center gap-0.5">
-                      Docs <ExternalLink className="h-3 w-3" />
-                    </a>
-                  </div>
-                  <div className="mt-2 flex flex-wrap gap-1">
-                    {integration.features.map((f) => (
-                      <span key={f} className="text-xs bg-muted/40 rounded px-1.5 py-0.5 text-muted-foreground">{f}</span>
-                    ))}
-                  </div>
+                  )}
+                  {s.error && (
+                    <div className="mt-2 text-xs text-red-400 bg-red-500/10 rounded p-2">
+                      {s.error}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             );
           })}
         </div>
-      </div>
-    </DashboardLayout>
+      )}
+    </div>
   );
 }

@@ -1,123 +1,100 @@
 import { useState } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
-import { Loader2, FileText, Sparkles, RefreshCw, Plus, AlertCircle } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Newspaper, Plus, Search } from "lucide-react";
 
 export default function NewsManager() {
-  const { toast } = useToast();
-  const utils = trpc.useUtils();
-  const [generating, setGenerating] = useState(false);
+  const [search, setSearch] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [newItem, setNewItem] = useState({ title: "", content: "", category: "" });
 
-  const { data: reports, isLoading: reportsLoading } = trpc.reports.list.useQuery();
-  const { data: alerts, isLoading: alertsLoading } = trpc.intelligence.getAlerts.useQuery();
-
-  const generateReport = trpc.reports.generate.useMutation({
-    onSuccess: () => {
-      utils.reports.list.invalidate();
-      toast({ title: "Report generated", description: "Monthly summary report created successfully" });
-      setGenerating(false);
-    },
-    onError: (err) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
-      setGenerating(false);
-    },
-  });
-
-  const handleGenerateReport = () => {
-    setGenerating(true);
-    const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const end = new Date(now.getFullYear(), now.getMonth(), 0);
-    generateReport.mutate({ name: `Monthly Summary - ${start.toLocaleString("default", { month: "long", year: "numeric" })}`, type: "monthly_summary", startDate: start, endDate: end });
-  };
+  const { data: campaigns, isLoading } = trpc.campaigns.list.useQuery();
+  const filtered = (campaigns as any[])?.filter((c: any) =>
+    c.name?.toLowerCase().includes(search.toLowerCase())
+  ) || [];
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6 p-6">
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">News & Reports</h1>
-            <p className="text-muted-foreground mt-1 text-sm">Marketing intelligence alerts and generated reports</p>
-          </div>
-          <Button size="sm" className="gap-1.5 h-8 text-xs" onClick={handleGenerateReport} disabled={generating}>
-            {generating ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />} Generate Report
-          </Button>
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">News Manager</h1>
+          <p className="text-muted-foreground text-sm mt-1">Manage content and announcements</p>
         </div>
-
-        {/* Intelligence Alerts */}
-        <Card>
-          <CardHeader className="pb-3 flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-amber-400" /> AI Intelligence Alerts
-            </CardTitle>
-            <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => utils.intelligence.getAlerts.invalidate()}>
-              <RefreshCw className="h-3 w-3" />
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogTrigger asChild>
+            <Button size="sm" className="bg-yellow-400 text-black hover:bg-yellow-500">
+              <Plus size={14} />
+              Add News
             </Button>
-          </CardHeader>
-          <CardContent className="p-0">
-            {alertsLoading ? (
-              <div className="flex justify-center py-6"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div>
-            ) : !(alerts as any[])?.length ? (
-              <p className="text-sm text-muted-foreground text-center py-6">No active alerts</p>
-            ) : (
-              <div className="divide-y divide-border/50">
-                {(alerts as any[]).slice(0, 8).map((alert: any) => (
-                  <div key={alert.id} className="px-4 py-3">
-                    <div className="flex items-start gap-2">
-                      <AlertCircle className={`h-4 w-4 mt-0.5 shrink-0 ${
-                        alert.severity === "critical" ? "text-red-400" :
-                        alert.severity === "warning" ? "text-amber-400" : "text-blue-400"
-                      }`} />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className="text-sm font-medium text-foreground">{alert.title}</p>
-                          <Badge variant="outline" className="text-xs capitalize">{alert.severity ?? "info"}</Badge>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-0.5">{alert.message}</p>
-                        <p className="text-xs text-muted-foreground/60 mt-0.5">{alert.createdAt ? new Date(alert.createdAt).toLocaleDateString() : ""}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+          </DialogTrigger>
+          <DialogContent className="bg-card border-border">
+            <DialogHeader>
+              <DialogTitle>New News Item</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Title</Label>
+                <Input placeholder="News title..." value={newItem.title}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewItem({ ...newItem, title: e.target.value })}
+                  className="mt-1" />
               </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Reports */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <FileText className="h-4 w-4 text-blue-400" /> Generated Reports
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            {reportsLoading ? (
-              <div className="flex justify-center py-6"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div>
-            ) : !(reports as any[])?.length ? (
-              <p className="text-sm text-muted-foreground text-center py-6">No reports yet. Click "Generate Report" to create one.</p>
-            ) : (
-              <div className="divide-y divide-border/50">
-                {(reports as any[]).map((r: any) => (
-                  <div key={r.id} className="px-4 py-3 flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{r.name}</p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <Badge variant="outline" className="text-xs capitalize">{r.type?.replace(/_/g, " ")}</Badge>
-                        <span className="text-xs text-muted-foreground">{r.createdAt ? new Date(r.createdAt).toLocaleDateString() : ""}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              <div>
+                <Label>Content</Label>
+                <Textarea placeholder="News content..." value={newItem.content}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewItem({ ...newItem, content: e.target.value })}
+                  className="mt-1 min-h-[100px]" />
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
+              <Button className="bg-yellow-400 text-black hover:bg-yellow-500" onClick={() => setIsOpen(false)}>Publish</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
-    </DashboardLayout>
+      <div className="relative">
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <Input placeholder="Search..." value={search}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
+          className="pl-8" />
+      </div>
+      {isLoading ? (
+        <div className="space-y-3">{Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="h-16 bg-card rounded-xl animate-pulse border border-border" />
+        ))}</div>
+      ) : filtered.length > 0 ? (
+        <div className="space-y-2">
+          {filtered.map((item: any) => (
+            <Card key={item.id} className="bg-card border-border">
+              <CardContent className="p-4 flex items-center justify-between">
+                <div>
+                  <div className="font-medium text-foreground text-sm">{item.name}</div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Badge variant="secondary" className="text-xs capitalize">{item.type?.replace(/_/g, " ")}</Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {item.startDate ? new Date(item.startDate).toLocaleDateString() : "—"}
+                    </span>
+                  </div>
+                </div>
+                <Badge variant={item.status === "active" ? "default" : "secondary"} className="text-xs capitalize">
+                  {item.status}
+                </Badge>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-16 text-muted-foreground">
+          <Newspaper size={40} className="mx-auto mb-3 opacity-30" />
+          <p>No news items found</p>
+        </div>
+      )}
+    </div>
   );
 }

@@ -132,7 +132,6 @@ export async function getAppointments(params?: {
   appointmentTypeID?: number;
   calendarID?: number;
   canceled?: boolean;
-  max?: number;
 }): Promise<AcuityAppointment[]> {
   const client = createAcuityClient();
   const response = await client.get<AcuityAppointment[]>("/appointments", { params });
@@ -251,26 +250,23 @@ export async function getSundayClinicData(params?: {
   maxDate?: string;
 }) {
   // Get all appointments for the date range
-  // Use max:200 to ensure all Drive Day bookings are captured (default limit is too low)
   const appointments = await getAppointments({
     minDate: params?.minDate,
     maxDate: params?.maxDate,
     canceled: false,
-    max: 200,
   });
 
-  // Filter for Drive Day / Sunday Clinic appointments
-  // Match the same filter as guest.getDriveDaySessions for consistency
+  // Filter for Sunday Clinic / Drive Day appointments
+  // These typically have "Drive Day" or "Sunday Clinic" in the type name
   const clinicAppointments = appointments.filter(apt => 
-    apt.type.toLowerCase().includes('drive day')
+    apt.type.toLowerCase().includes('drive day') || 
+    apt.type.toLowerCase().includes('sunday clinic') ||
+    apt.type.toLowerCase().includes('public drive')
   );
 
   // Group appointments by date (event) and track sources
-  // Use apt.datetime (ISO: "2026-01-25T14:00:00-0600") not apt.date (human: "January 25, 2026")
   const eventsByDate = clinicAppointments.reduce((acc, apt) => {
-    // Extract YYYY-MM-DD from datetime field
-    const eventDate = (apt.datetime || apt.date || '').slice(0, 10);
-    if (!eventDate) return acc;
+    const eventDate = apt.date;
     if (!acc[eventDate]) {
       acc[eventDate] = [];
     }
@@ -283,15 +279,6 @@ export async function getSundayClinicData(params?: {
   clinicAppointments.forEach(apt => {
     const source = extractAcquisitionSource(apt);
     sourceBreakdown[source] = (sourceBreakdown[source] || 0) + 1;
-  });
-
-  // All 6 scheduled Drive Day / Sunday Clinic dates — include even if 0 bookings
-  const SCHEDULED_DATES = [
-    '2026-01-25', '2026-02-01', '2026-02-22', '2026-03-01', '2026-03-22', '2026-03-29'
-  ];
-  // Ensure all scheduled dates appear in eventsByDate (with empty array if no bookings)
-  SCHEDULED_DATES.forEach(d => {
-    if (!eventsByDate[d]) eventsByDate[d] = [];
   });
 
   // Calculate metrics for each event
@@ -307,30 +294,18 @@ export async function getSundayClinicData(params?: {
       eventSourceBreakdown[source] = (eventSourceBreakdown[source] || 0) + 1;
     });
 
-    // Calculate revenue for this event
-    const revenue = appts.reduce((sum, apt) => {
-      return sum + parseFloat(apt.amountPaid || apt.priceSold || apt.price || '0');
-    }, 0);
-    const paidCount = appts.filter(apt => parseFloat(apt.amountPaid || apt.priceSold || apt.price || '0') > 0).length;
-    const memberCount = appts.filter(apt => parseFloat(apt.amountPaid || apt.priceSold || apt.price || '0') === 0).length;
-
     return {
       date,
       totalBookings: totalAttendees,
       uniqueAttendees,
       sourceBreakdown: eventSourceBreakdown,
       appointments: appts,
-      revenue,
-      paidAttendees: paidCount,
-      memberAttendees: memberCount,
     };
   });
 
   // Calculate overall metrics
   const allEmails = new Set(clinicAppointments.map(a => a.email.toLowerCase()));
   const repeatAttendees = clinicAppointments.length - allEmails.size;
-
-  const totalRevenue = events.reduce((sum, e) => sum + e.revenue, 0);
 
   return {
     events: events.sort((a, b) => a.date.localeCompare(b.date)),
@@ -340,7 +315,6 @@ export async function getSundayClinicData(params?: {
     repeatAttendees,
     repeatRate: allEmails.size > 0 ? (repeatAttendees / allEmails.size) * 100 : 0,
     sourceBreakdown,
-    totalRevenue,
   };
 }
 

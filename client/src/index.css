@@ -23,7 +23,6 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -43,90 +42,40 @@
 }
 
 :root {
-  /* Golf VX Brand - Light Theme */
-  --primary: oklch(0.863 0.176 89.9); /* #ffcb00 Yellow */
-  --primary-foreground: oklch(0.20 0 0); /* Dark text on yellow */
-  --sidebar-primary: oklch(0.863 0.176 89.9);
-  --sidebar-primary-foreground: oklch(0.20 0 0);
-  --chart-1: oklch(0.863 0.176 89.9); /* #ffcb00 Primary Yellow */
-  --chart-2: oklch(0.745 0.137 53.1);  /* #ef9253 Membership Growth Orange */
-  --chart-3: oklch(0.684 0.131 146.9); /* #5daf68 Trial Conversion Green */
-  --chart-4: oklch(0.659 0.102 313.4); /* #a87fbe Member Retention Purple */
-  --chart-5: oklch(0.727 0.090 245.3); /* #76addc B2B Events Blue */
   --radius: 0.5rem;
-  --background: oklch(0.98 0 0); /* Off-white #FAFAFA */
-  --foreground: oklch(0.20 0 0); /* Dark gray #2D2D2D */
-  --card: oklch(1 0 0); /* White #FFFFFF */
-  --card-foreground: oklch(0.20 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.20 0 0);
-  --secondary: oklch(0.95 0 0); /* Light gray */
-  --secondary-foreground: oklch(0.20 0 0);
-  --muted: oklch(0.92 0 0);
-  --muted-foreground: oklch(0.50 0 0);
-  --accent: oklch(0.863 0.176 89.9); /* #ffcb00 Yellow accent */
-  --accent-foreground: oklch(0.20 0 0);
-  --destructive: oklch(0.55 0.25 25); /* Red */
-  --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.88 0 0); /* Light gray border */
-  --input: oklch(0.88 0 0);
-  --ring: oklch(0.863 0.176 89.9);
-  --sidebar: oklch(1 0 0); /* White sidebar */
-  --sidebar-foreground: oklch(0.20 0 0);
-  --sidebar-accent: oklch(0.963 0.060 89.9); /* #ffcb00 tinted — active/hover bg */
-  --sidebar-accent-foreground: oklch(0.20 0 0); /* dark text on yellow tint */
-  --sidebar-border: oklch(0.88 0 0);
-  --sidebar-ring: oklch(0.863 0.176 89.9);
-  /* Brand color tokens for Recharts / inline styles */
-  --color-brand-primary: #ffcb00;
-  --color-brand-orange: #ef9253;
-  --color-brand-green: #5daf68;
-  --color-brand-purple: #a87fbe;
-  --color-brand-blue: #76addc;
-  --color-brand-gray: #6B7280;
-}
 
-.dark {
-  /* Dark mode disabled - Golf VX uses light theme */
-  --primary: oklch(0.863 0.176 89.9);
-  --primary-foreground: oklch(0.20 0 0);
-  --sidebar-primary: oklch(0.863 0.176 89.9);
-  --sidebar-primary-foreground: oklch(0.20 0 0);
-  --background: oklch(0.98 0 0);
-  --foreground: oklch(0.20 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.20 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.20 0 0);
-  --secondary: oklch(0.95 0 0);
-  --secondary-foreground: oklch(0.20 0 0);
-  --muted: oklch(0.92 0 0);
-  --muted-foreground: oklch(0.50 0 0);
-  --accent: oklch(0.863 0.176 89.9);
-  --accent-foreground: oklch(0.20 0 0);
-  --destructive: oklch(0.55 0.25 25);
-  --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.88 0 0);
-  --input: oklch(0.88 0 0);
-  --ring: oklch(0.863 0.176 89.9);
-  --chart-1: oklch(0.863 0.176 89.9); /* #ffcb00 Primary Yellow */
-  --chart-2: oklch(0.745 0.137 53.1);  /* #ef9253 Membership Growth Orange */
-  --chart-3: oklch(0.684 0.131 146.9); /* #5daf68 Trial Conversion Green */
-  --chart-4: oklch(0.659 0.102 313.4); /* #a87fbe Member Retention Purple */
-  --chart-5: oklch(0.727 0.090 245.3); /* #76addc B2B Events Blue */
-  --sidebar: oklch(1 0 0);
-  --sidebar-foreground: oklch(0.20 0 0);
-  --sidebar-accent: oklch(0.963 0.060 89.9); /* #ffcb00 tinted — active/hover bg */
-  --sidebar-accent-foreground: oklch(0.20 0 0);
-  --sidebar-border: oklch(0.88 0 0);
-  --sidebar-ring: oklch(0.863 0.176 89.9);
-  /* Brand color tokens for Recharts / inline styles */
-  --color-brand-primary: #ffcb00;
-  --color-brand-orange: #ef9253;
-  --color-brand-green: #5daf68;
-  --color-brand-purple: #a87fbe;
-  --color-brand-blue: #76addc;
-  --color-brand-gray: #6B7280;
+  /* Golf VX Dark Theme - Black & Yellow */
+  --background: oklch(0.08 0 0);
+  --foreground: oklch(0.95 0 0);
+  --card: oklch(0.12 0 0);
+  --card-foreground: oklch(0.95 0 0);
+  --popover: oklch(0.12 0 0);
+  --popover-foreground: oklch(0.95 0 0);
+  --primary: oklch(0.85 0.18 90);
+  --primary-foreground: oklch(0.1 0 0);
+  --secondary: oklch(0.18 0 0);
+  --secondary-foreground: oklch(0.85 0 0);
+  --muted: oklch(0.18 0 0);
+  --muted-foreground: oklch(0.55 0 0);
+  --accent: oklch(0.85 0.18 90);
+  --accent-foreground: oklch(0.1 0 0);
+  --destructive: oklch(0.55 0.22 25);
+  --border: oklch(0.22 0 0);
+  --input: oklch(0.18 0 0);
+  --ring: oklch(0.85 0.18 90);
+  --chart-1: oklch(0.85 0.18 90);
+  --chart-2: oklch(0.65 0.15 200);
+  --chart-3: oklch(0.65 0.15 145);
+  --chart-4: oklch(0.65 0.15 280);
+  --chart-5: oklch(0.65 0.15 25);
+  --sidebar: oklch(0.1 0 0);
+  --sidebar-foreground: oklch(0.85 0 0);
+  --sidebar-primary: oklch(0.85 0.18 90);
+  --sidebar-primary-foreground: oklch(0.1 0 0);
+  --sidebar-accent: oklch(0.16 0 0);
+  --sidebar-accent-foreground: oklch(0.85 0 0);
+  --sidebar-border: oklch(0.2 0 0);
+  --sidebar-ring: oklch(0.85 0.18 90);
 }
 
 @layer base {
@@ -135,66 +84,49 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-  }
-  h1, h2, h3, h4, h5, h6 {
     font-family: 'Inter', sans-serif;
-    font-weight: 900; /* Inter Black for headings */
-    letter-spacing: -0.02em; /* Tighter tracking for display type */
   }
-  button:not(:disabled),
-  [role="button"]:not([aria-disabled="true"]),
-  [type="button"]:not(:disabled),
-  [type="submit"]:not(:disabled),
-  [type="reset"]:not(:disabled),
-  a[href],
-  select:not(:disabled),
-  input[type="checkbox"]:not(:disabled),
-  input[type="radio"]:not(:disabled) {
-    @apply cursor-pointer;
+  h1, h2, h3 {
+    font-family: 'Rajdhani', 'Inter', sans-serif;
+    font-weight: 600;
   }
 }
 
-@layer components {
-  /**
-   * Custom container utility that centers content and adds responsive padding.
-   *
-   * This overrides Tailwind's default container behavior to:
-   * - Auto-center content (mx-auto)
-   * - Add responsive horizontal padding
-   * - Set max-width for large screens
-   *
-   * Usage: <div className="container">...</div>
-   *
-   * For custom widths, use max-w-* utilities directly:
-   * <div className="max-w-6xl mx-auto px-4">...</div>
-   */
-  .container {
-    width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: 1rem; /* 16px - mobile padding */
-    padding-right: 1rem;
-  }
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: oklch(0.12 0 0);
+}
+::-webkit-scrollbar-thumb {
+  background: oklch(0.3 0 0);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.85 0.18 90);
+}
 
-  .flex {
-    min-height: 0;
-    min-width: 0;
-  }
+/* Container customization */
+.container {
+  @apply mx-auto px-4;
+  max-width: 1400px;
+}
 
-  @media (min-width: 640px) {
-    .container {
-      padding-left: 1.5rem; /* 24px - tablet padding */
-      padding-right: 1.5rem;
-    }
-  }
+/* Flex min-width fix */
+.flex {
+  min-width: 0;
+  min-height: 0;
+}
 
-  @media (min-width: 1024px) {
-    .container {
-      padding-left: 2rem; /* 32px - desktop padding */
-      padding-right: 2rem;
-      max-width: 1280px; /* Standard content width */
-    }
-  }
+/* Golf VX brand yellow */
+.text-brand {
+  color: oklch(0.85 0.18 90);
+}
+.bg-brand {
+  background-color: oklch(0.85 0.18 90);
+}
+.border-brand {
+  border-color: oklch(0.85 0.18 90);
 }

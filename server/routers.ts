@@ -609,104 +609,6 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
         await db.updateCampaignVisuals(id, visuals);
         return { success: true };
       }),
-
-    // Drive Day session breakdown with live Acuity data
-    getDriveDaySessions: protectedProcedure.query(async () => {
-      try {
-        const { getAppointments } = await import("./acuity");
-        const appts = await getAppointments({
-          minDate: "2026-01-25",
-          maxDate: "2026-03-29",
-          canceled: false,
-          max: 200,
-        });
-
-        const driveDayAppts = (appts as any[]).filter((a) =>
-          (a.type || "").toLowerCase().includes("drive day")
-        );
-
-        const getAmt = (a: any): number => parseFloat(a.amountPaid || "0");
-        const sessionDefs = [
-          {
-            name: "Driving to the Ball",
-            label: "Day 1 \u2014 Driving to the Ball",
-            day: "Day 1",
-            dates: ["2026-01-25", "2026-02-01"],
-            keywords: ["driving", "driving to the ball"],
-            color: "yellow",
-            description: "Tee-shot fundamentals: setup, posture, alignment, grip, and generating effortless power.",
-          },
-          {
-            name: "Putting",
-            label: "Day 2 \u2014 Putting: Score Low",
-            day: "Day 2",
-            dates: ["2026-02-22", "2026-03-01"],
-            keywords: ["putting", "putt"],
-            color: "blue",
-            description: "Core putting elements: proper ball roll, distance control, eye line, face angle, and path.",
-          },
-          {
-            name: "Short Game",
-            label: "Day 3 \u2014 Short Game",
-            day: "Day 3",
-            dates: ["2026-03-22", "2026-03-29"],
-            keywords: ["short game", "swing below"],
-            color: "green",
-            description: "Short game technique: grip, stance, shaft lean, backswing path, and clubhead control.",
-          },
-        ];
-
-        const sessions = sessionDefs.map((def) => {
-          const sessionAppts = driveDayAppts.filter((a: any) => {
-            const typeName = (a.type || "").toLowerCase();
-            return def.keywords.some((kw) => typeName.includes(kw));
-          });
-
-          const byDate = def.dates.reduce((acc: Record<string, any>, date: string) => {
-            // Acuity 'date' is human-readable ("January 25, 2026"), use 'datetime' ISO string
-            const dateAppts = sessionAppts.filter((a: any) => (a.datetime || '').startsWith(date));
-            const paidCount = dateAppts.filter((a: any) => getAmt(a) > 0).length;
-            const memberCount = dateAppts.filter((a: any) => getAmt(a) === 0).length;
-            const revenue = dateAppts.reduce((s: number, a: any) => s + getAmt(a), 0);
-            acc[date] = { registrations: dateAppts.length, paid: paidCount, members: memberCount, revenue };
-            return acc;
-          }, {});
-
-          const totalRegistrations = sessionAppts.length;
-          const paidAttendees = sessionAppts.filter((a: any) => getAmt(a) > 0).length;
-          const memberAttendees = sessionAppts.filter((a: any) => getAmt(a) === 0).length;
-          const revenueCollected = sessionAppts.reduce((s: number, a: any) => s + getAmt(a), 0);
-
-          return {
-            name: def.name,
-            label: def.label,
-            day: def.day,
-            dates: def.dates,
-            color: def.color,
-            description: def.description,
-            totalRegistrations,
-            paidAttendees,
-            memberAttendees,
-            revenueCollected,
-            byDate,
-          };
-        });
-
-        const overall = {
-          totalRegistrations: driveDayAppts.length,
-          paidAttendees: driveDayAppts.filter((a: any) => getAmt(a) > 0).length,
-          memberAttendees: driveDayAppts.filter((a: any) => getAmt(a) === 0).length,
-          revenueCollected: driveDayAppts.reduce((s: number, a: any) => s + getAmt(a), 0),
-        };
-
-        return { sessions, overall };
-      } catch {
-        return {
-          sessions: [],
-          overall: { totalRegistrations: 0, paidAttendees: 0, memberAttendees: 0, revenueCollected: 0 },
-        };
-      }
-    }),
   }),
 
   // Strategic Campaigns Overview
@@ -1503,23 +1405,6 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
       .query(async () => {
         const dbConn = await db.getDb();
         if (!dbConn) return null;
-
-        // First, find the latest month that has data
-        const [latestMonthRows] = await dbConn.execute(
-          `SELECT LEFT(date,6) as latest_month FROM toast_daily_summary ORDER BY date DESC LIMIT 1`
-        ) as any[];
-        const latestMonth = (latestMonthRows as any[])[0]?.latest_month || '';
-        // Determine previous month relative to latest available month
-        const prevMonth = latestMonth
-          ? (() => {
-              const y = parseInt(latestMonth.slice(0,4));
-              const m = parseInt(latestMonth.slice(4,6));
-              const prev = m === 1 ? `${y-1}12` : `${y}${String(m-1).padStart(2,'0')}`;
-              return prev;
-            })()
-          : '';
-
-        // Embed month values directly (server-generated, safe from injection)
         const [rows] = await dbConn.execute(
           `SELECT
             SUM(total_revenue) as all_time_revenue,
@@ -1531,27 +1416,13 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
             SUM(total_tips) as all_time_tips,
             MAX(CAST(date AS UNSIGNED)) as latest_date,
             COUNT(*) as days_with_data,
-            SUM(CASE WHEN LEFT(date,6)='${latestMonth}' THEN total_revenue ELSE 0 END) as this_month_revenue,
-            SUM(CASE WHEN LEFT(date,6)='${prevMonth}' THEN total_revenue ELSE 0 END) as last_month_revenue,
-            SUM(CASE WHEN LEFT(date,6)='${latestMonth}' THEN total_orders ELSE 0 END) as this_month_orders,
-            SUM(CASE WHEN STR_TO_DATE(date,'%Y%m%d') >= DATE_SUB(CURDATE(),INTERVAL 7 DAY) THEN total_revenue ELSE 0 END) as this_week_revenue,
-            SUM(CASE WHEN STR_TO_DATE(date,'%Y%m%d') >= DATE_SUB(CURDATE(),INTERVAL 7 DAY) THEN bay_revenue ELSE 0 END) as this_week_bay,
-            SUM(CASE WHEN STR_TO_DATE(date,'%Y%m%d') >= DATE_SUB(CURDATE(),INTERVAL 7 DAY) THEN food_bev_revenue ELSE 0 END) as this_week_food,
-            SUM(CASE WHEN LEFT(date,6)='${latestMonth}' THEN bay_revenue ELSE 0 END) as this_month_bay,
-            SUM(CASE WHEN LEFT(date,6)='${latestMonth}' THEN food_bev_revenue ELSE 0 END) as this_month_food
+            SUM(CASE WHEN LEFT(date,6)=DATE_FORMAT(NOW(),'%Y%m') THEN total_revenue ELSE 0 END) as this_month_revenue,
+            SUM(CASE WHEN LEFT(date,6)=DATE_FORMAT(DATE_SUB(NOW(),INTERVAL 1 MONTH),'%Y%m') THEN total_revenue ELSE 0 END) as last_month_revenue,
+            SUM(CASE WHEN LEFT(date,6)=DATE_FORMAT(NOW(),'%Y%m') THEN total_orders ELSE 0 END) as this_month_orders
            FROM toast_daily_summary`
         ) as any[];
         const r = (rows as any[])[0];
         if (!r) return null;
-        // Format latest month label e.g. "202602" -> "Feb 2026"
-        const monthLabel = latestMonth
-          ? (() => {
-              const y = latestMonth.slice(0,4);
-              const m = parseInt(latestMonth.slice(4,6));
-              const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-              return `${names[m-1]} ${y}`;
-            })()
-          : 'This Month';
         return {
           allTimeRevenue: parseFloat(r.all_time_revenue || '0'),
           allTimeBay: parseFloat(r.all_time_bay || '0'),
@@ -1565,13 +1436,6 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
           thisMonthRevenue: parseFloat(r.this_month_revenue || '0'),
           lastMonthRevenue: parseFloat(r.last_month_revenue || '0'),
           thisMonthOrders: Number(r.this_month_orders),
-          thisWeekRevenue: parseFloat(r.this_week_revenue || '0'),
-          thisWeekBay: parseFloat(r.this_week_bay || '0'),
-          thisWeekFood: parseFloat(r.this_week_food || '0'),
-          thisMonthBay: parseFloat(r.this_month_bay || '0'),
-          thisMonthFood: parseFloat(r.this_month_food || '0'),
-          currentMonthLabel: monthLabel,
-          latestMonth,
         };
       }),
 
@@ -2741,18 +2605,16 @@ Respond in JSON with this exact structure:
             COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers') AND paymentInterval = 'monthly' THEN 1 END) as monthlyCount
           FROM members WHERE status = 'active'`
         );
-        // Drizzle execute() returns [rows, fields] tuple; rows[0] is the first row
-        const memberRow = (memberCountResult as any)[0]?.[0];
-        const customerMemberCount = Number(memberRow?.customerMembers || 0);
-        const proMemberCount = Number(memberRow?.proMembers || 0);
-        const allAccessCount = Number(memberRow?.allAccessCount || 0);
-        const swingSaverCount = Number(memberRow?.swingSaverCount || 0);
-        const allAccessMRR = parseFloat(memberRow?.allAccessMRR || '0');
-        const swingSaverMRR = parseFloat(memberRow?.swingSaverMRR || '0');
-        const proMRR = parseFloat(memberRow?.proMRR || '0');
+        const customerMemberCount = Number((memberCountResult as any)[0]?.customerMembers || 0);
+        const proMemberCount = Number((memberCountResult as any)[0]?.proMembers || 0);
+        const allAccessCount = Number((memberCountResult as any)[0]?.allAccessCount || 0);
+        const swingSaverCount = Number((memberCountResult as any)[0]?.swingSaverCount || 0);
+        const allAccessMRR = parseFloat((memberCountResult as any)[0]?.allAccessMRR || '0');
+        const swingSaverMRR = parseFloat((memberCountResult as any)[0]?.swingSaverMRR || '0');
+        const proMRR = parseFloat((memberCountResult as any)[0]?.proMRR || '0');
         const totalMRR = allAccessMRR + swingSaverMRR + proMRR;
-        const annualMemberCount = Number(memberRow?.annualCount || 0);
-        const monthlyMemberCount = Number(memberRow?.monthlyCount || 0);
+        const annualMemberCount = Number((memberCountResult as any)[0]?.annualCount || 0);
+        const monthlyMemberCount = Number((memberCountResult as any)[0]?.monthlyCount || 0);
         // New members this month vs last month (All Access + Swing Saver only)
         const newMembersResult = await database.execute(`
           SELECT
@@ -2763,11 +2625,10 @@ Respond in JSON with this exact structure:
               AND joinDate < DATE_FORMAT(NOW(), '%Y-%m-01') THEN 1 END) as lastMonth
           FROM members WHERE status = 'active'
         `);
-        const newMembersRow = (newMembersResult as any)[0]?.[0];
-        const newMembersThisMonth = Number(newMembersRow?.thisMonth || 0);
-        const newMembersLastMonth = Number(newMembersRow?.lastMonth || 0);
-        // Acquisition goal: 300 total customer members (2-year goal)
-        // Current active members: ~106 (All Access + Swing Saver)
+        const newMembersThisMonth = Number((newMembersResult as any)[0]?.thisMonth || 0);
+        const newMembersLastMonth = Number((newMembersResult as any)[0]?.lastMonth || 0);
+        // Acquisition goal: 300 total customer members over 2 years
+        // Retention goal: retain all current customer members (target = 300)
         const MEMBERSHIP_GOAL = 300;
         const memberCount = customerMemberCount; // alias for downstream use
 
@@ -2782,7 +2643,7 @@ Respond in JSON with this exact structure:
           FROM members
           WHERE status = 'active' AND createdAt >= DATE_SUB(NOW(), INTERVAL 90 DAY)
         `);
-        const conversions = Number((conversionsResult as any)[0]?.[0]?.conversions || 0);
+        const conversions = Number((conversionsResult as any)[0]?.conversions || 0);
         const conversionRate = (conversions / trials) * 100;
 
         // 3. Member Retention: Calculate retention rate (active members / total members)
@@ -2792,9 +2653,8 @@ Respond in JSON with this exact structure:
             COUNT(CASE WHEN status = 'active' THEN 1 END) as active
           FROM members
         `);
-        const retentionRow = (retentionResult as any)[0]?.[0];
-        const totalMembers = Number(retentionRow?.total || 1);
-        const activeMembers = Number(retentionRow?.active || 0);
+        const totalMembers = Number((retentionResult as any)[0]?.total || 1);
+        const activeMembers = Number((retentionResult as any)[0]?.active || 0);
         const retentionRate = (activeMembers / totalMembers) * 100;
 
          // 4. B2B Corporate Events: Fetch real data from Acuity for current month
@@ -2826,9 +2686,8 @@ Respond in JSON with this exact structure:
           FROM members
           WHERE membershipTier IN ('all_access_aces', 'swing_savers')
         `);
-        const customerRetentionRow = (customerRetentionResult as any)[0]?.[0];
-        const totalCustomers = Number(customerRetentionRow?.total || 1);
-        const activeCustomers = Number(customerRetentionRow?.activeCustomers || 0);
+        const totalCustomers = Number((customerRetentionResult as any)[0]?.total || 1);
+        const activeCustomers = Number((customerRetentionResult as any)[0]?.activeCustomers || 0);
         const customerRetentionRate = totalCustomers > 0 ? (activeCustomers / totalCustomers) * 100 : 0;
 
         return {
@@ -2846,16 +2705,12 @@ Respond in JSON with this exact structure:
             paymentBreakdown: { monthly: monthlyMemberCount, annual: annualMemberCount },
           },
           memberRetention: {
-            // Goal: retain all current active members (106 as of now)
-            // Target = current active count (dynamic, not 300)
+            // Goal: retain all 300 customer members
             current: customerMemberCount,
-            target: customerMemberCount, // retention target = current base
+            target: MEMBERSHIP_GOAL,
             retentionRate: customerRetentionRate,
-            // Progress = retention rate % (how many of current members are still active)
-            progress: Math.min(customerRetentionRate, 100),
+            progress: Math.min((customerMemberCount / MEMBERSHIP_GOAL) * 100, 100),
             breakdown: { allAccess: allAccessCount, swingSaver: swingSaverCount },
-            activeCount: activeCustomers,
-            totalCount: totalCustomers,
           },
           proMembers: {
             // Pro members tracked separately — NOT part of the 300 goal
@@ -3744,6 +3599,81 @@ Return a JSON object with:
   }),
 // ─── Public Preview (no auth required) ────────────────────────────────────
   preview: router({
+    getDriveDaySessions: publicProcedure.query(async () => {
+      const { getSundayClinicData, extractAcquisitionSource } = await import("./acuity");
+      const data = await getSundayClinicData({ minDate: "2026-01-25", maxDate: "2026-03-29" });
+      
+      const SCHEDULED = [
+        { date: "2026-01-25", topic: "Drive Day", label: "Driving to the Ball" },
+        { date: "2026-02-01", topic: "Drive Day", label: "Driving to the Ball" },
+        { date: "2026-02-22", topic: "Putting", label: "Putting: Score Low" },
+        { date: "2026-03-01", topic: "Putting", label: "Putting: Score Low" },
+        { date: "2026-03-22", topic: "Short Game", label: "Hitting Below the Hips" },
+        { date: "2026-03-29", topic: "Short Game", label: "Hitting Below the Hips" },
+      ];
+      
+      type DateStat = { bookings: number; paid: number; members: number; revenue: number; uniqueEmails: Set<string>; sources: Record<string, number> };
+      const dateStats: Record<string, DateStat> = {};
+      for (const s of SCHEDULED) {
+        dateStats[s.date] = { bookings: 0, paid: 0, members: 0, revenue: 0, uniqueEmails: new Set(), sources: {} };
+      }
+      
+      // Flatten all appointments from all events
+      const allAppointments = data.events.flatMap(e => e.appointments);
+      for (const apt of allAppointments) {
+        const dateKey = apt.datetime ? (apt.datetime as string).substring(0, 10) : null;
+        if (!dateKey || !dateStats[dateKey]) continue;
+        const ds = dateStats[dateKey];
+        ds.bookings++;
+        if (apt.amountPaid && parseFloat(apt.amountPaid as string) > 0) ds.paid++;
+        if (apt.forms) {
+          const memberField = (apt.forms as any[]).flatMap((f: any) => f.values || []).find((v: any) => v.fieldID === 9836574 || v.name?.toLowerCase().includes('member'));
+          if (memberField?.value?.toLowerCase() === 'yes') ds.members++;
+        }
+        ds.revenue += parseFloat((apt.amountPaid as string) || '0');
+        if (apt.email) ds.uniqueEmails.add((apt.email as string).toLowerCase());
+        const src = extractAcquisitionSource(apt);
+        ds.sources[src] = (ds.sources[src] || 0) + 1;
+      }
+      
+      type TopicEntry = { name: string; label: string; description: string; dates: any[]; totalRegistrations: number; revenueCollected: number; uniqueAttendees: number };
+      const topicMap: Record<string, TopicEntry> = {};
+      for (const s of SCHEDULED) {
+        if (!topicMap[s.topic]) {
+          topicMap[s.topic] = { name: s.topic, label: s.label, description: s.label, dates: [], totalRegistrations: 0, revenueCollected: 0, uniqueAttendees: 0 };
+        }
+        const ds = dateStats[s.date];
+        topicMap[s.topic].dates.push({
+          date: s.date,
+          bookings: ds.bookings,
+          paid: ds.paid,
+          members: ds.members,
+          revenue: Math.round(ds.revenue),
+          uniqueAttendees: ds.uniqueEmails.size,
+          sources: ds.sources,
+        });
+        topicMap[s.topic].totalRegistrations += ds.bookings;
+        topicMap[s.topic].revenueCollected += Math.round(ds.revenue);
+        topicMap[s.topic].uniqueAttendees += ds.uniqueEmails.size;
+      }
+      
+      const sessions = Object.values(topicMap);
+      const totalRegistrations = sessions.reduce((s, t) => s + t.totalRegistrations, 0);
+      const totalRevenue = sessions.reduce((s, t) => s + t.revenueCollected, 0);
+      const totalPaid = Object.values(dateStats).reduce((s, d) => s + d.paid, 0);
+      const totalMembers = Object.values(dateStats).reduce((s, d) => s + d.members, 0);
+      
+      return {
+        sessions,
+        overall: {
+          totalRegistrations,
+          revenueCollected: totalRevenue,
+          paidAttendees: totalPaid,
+          memberAttendees: totalMembers,
+          totalEvents: SCHEDULED.length,
+        },
+      };
+    }),
     getSnapshot: publicProcedure.query(async () => {
       const database = await db.getDb();
       if (!database) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
@@ -3760,7 +3690,8 @@ Return a JSON object with:
             AND joinDate >= DATE_FORMAT(NOW(), '%Y-%m-01') THEN 1 END) as newThisMonth
         FROM members
       `);
-      const m = (memberResult as any)[0] || {};
+      const memberRows = Array.isArray((memberResult as any)[0]) ? (memberResult as any)[0] : (memberResult as any);
+      const m = (memberRows as any)[0] || {};
 
       // Revenue this month
       const revenueResult = await database.execute(`
@@ -3774,8 +3705,10 @@ Return a JSON object with:
         WHERE date >= DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 1 MONTH), '%Y-%m-01')
           AND date < DATE_FORMAT(NOW(), '%Y-%m-01')
       `);
-      const thisMonthRevenue = parseFloat((revenueResult as any)[0]?.thisMonth || '0');
-      const lastMonthRevenue = parseFloat((revenueLastMonthResult as any)[0]?.lastMonth || '0');
+      const revRows = Array.isArray((revenueResult as any)[0]) ? (revenueResult as any)[0] : (revenueResult as any);
+      const revLastRows = Array.isArray((revenueLastMonthResult as any)[0]) ? (revenueLastMonthResult as any)[0] : (revenueLastMonthResult as any);
+      const thisMonthRevenue = parseFloat((revRows as any)[0]?.thisMonth || '0');
+      const lastMonthRevenue = parseFloat((revLastRows as any)[0]?.lastMonth || '0');
 
       // Budget summary (active campaigns)
       const budgetResult = await database.execute(`
@@ -3785,7 +3718,8 @@ Return a JSON object with:
         FROM campaigns
         WHERE status = 'active'
       `);
-      const b = (budgetResult as any)[0] || {};
+      const budgetRows = Array.isArray((budgetResult as any)[0]) ? (budgetResult as any)[0] : (budgetResult as any);
+      const b = (budgetRows as any)[0] || {};
       const totalBudget = parseFloat(b.totalBudget || '0');
       const totalSpent = parseFloat(b.totalSpent || '0');
 
@@ -3793,32 +3727,8 @@ Return a JSON object with:
       const campaignResult = await database.execute(`
         SELECT COUNT(*) as activeCampaigns FROM campaigns WHERE status = 'active'
       `);
-      const activeCampaigns = Number((campaignResult as any)[0]?.activeCampaigns || 0);
-
-      // Last email sent
-      const lastEmailResult = await database.execute(`
-        SELECT name, subject, send_at, delivered, open_rate
-        FROM encharge_broadcasts
-        WHERE status = 'sent'
-        ORDER BY send_at DESC
-        LIMIT 1
-      `);
-      const lastEmail = (lastEmailResult as any)[0] || null;
-
-      // Top funnel this month
-      const topFunnelResult = await database.execute(`
-        SELECT f.name, f.opt_in_count,
-               COUNT(s.id) AS submissionsThisMonth
-        FROM cf_funnels f
-        LEFT JOIN cf_form_submissions s
-          ON s.funnel_id = f.cf_id
-          AND s.submitted_at >= DATE_FORMAT(NOW(), '%Y-%m-01')
-        WHERE f.archived = 0
-        GROUP BY f.cf_id, f.name, f.opt_in_count
-        ORDER BY submissionsThisMonth DESC, f.opt_in_count DESC
-        LIMIT 1
-      `);
-      const topFunnel = (topFunnelResult as any)[0] || null;
+      const campaignRows = Array.isArray((campaignResult as any)[0]) ? (campaignResult as any)[0] : (campaignResult as any);
+      const activeCampaigns = Number((campaignRows as any)[0]?.activeCampaigns || 0);
 
       return {
         generatedAt: new Date().toISOString(),
@@ -3845,18 +3755,6 @@ Return a JSON object with:
         campaigns: {
           active: activeCampaigns,
         },
-        lastEmailSent: lastEmail ? {
-          name: lastEmail.name as string,
-          subject: lastEmail.subject as string | null,
-          sentAt: lastEmail.send_at ? new Date(lastEmail.send_at).toISOString() : null,
-          delivered: Number(lastEmail.delivered || 0),
-          openRate: parseFloat(lastEmail.open_rate || '0'),
-        } : null,
-        topFunnel: topFunnel ? {
-          name: topFunnel.name as string,
-          optInCount: Number(topFunnel.opt_in_count || 0),
-          submissionsThisMonth: Number(topFunnel.submissionsThisMonth || 0),
-        } : null,
       };
     }),
   }),
@@ -3910,185 +3808,6 @@ Return a JSON object with:
       const { syncClickFunnels } = await import("./clickfunnelsSyncService");
       const result = await syncClickFunnels();
       return result;
-    }),
-  }),
-  guest: router({
-    getMemberStats: publicProcedure.query(async () => {
-      return await db.getMemberStats();
-    }),
-    getMembers: publicProcedure.query(async () => {
-      return await db.getAllMembers();
-    }),
-    getCampaigns: publicProcedure.query(async () => {
-      return await db.getAllCampaigns();
-    }),
-    getMetaAdsCampaigns: publicProcedure.input(z.object({ datePreset: z.string().optional() })).query(async () => {
-      try {
-        return await metaAdsCache.getAllCampaignsFromCache();
-      } catch { return []; }
-    }),
-    getEnchargeMetrics: publicProcedure.query(async () => {
-      try { return await encharge.getSubscriberMetrics(); } catch { return null; }
-    }),
-    getEnchargeSegments: publicProcedure.query(async () => {
-      try { return await encharge.getEnchargeSegments(); } catch { return []; }
-    }),
-    getDashboardOverview: publicProcedure.input(z.object({ startDate: z.date(), endDate: z.date() })).query(async ({ input }) => {
-      try {
-        const memberStats = await db.getMemberStats();
-        const channelPerformance = await db.getChannelPerformanceSummary(input.startDate, input.endDate);
-        return {
-          activeMembers: memberStats?.activeMembers ?? 0,
-          totalMembers: memberStats?.totalMembers ?? 0,
-          monthlyRecurringRevenue: memberStats ? parseFloat((memberStats as any).monthlyRecurringRevenue || "0") : 0,
-          marketingSpend: "0",
-          overallROI: "0",
-          activeCampaignsCount: 0,
-          memberStats,
-          channelPerformance,
-        };
-      } catch { return null; }
-    }),
-    getRevenueSummary: publicProcedure.input(z.object({ startDate: z.date(), endDate: z.date() })).query(async ({ input }) => {
-      try { return await db.getRevenueSummary(input.startDate, input.endDate); } catch { return null; }
-    }),
-    getFunnels: publicProcedure.query(async () => {
-      try { return await db.getCfFunnels(); } catch { return []; }
-    }),
-    getEmailCampaigns: publicProcedure.query(async () => {
-      try {
-        const { getSyncedBroadcasts } = await import("./enchargeBroadcastSync");
-        return await getSyncedBroadcasts();
-      } catch { return []; }
-    }),
-    getChannelPerformance: publicProcedure.input(z.object({ startDate: z.date(), endDate: z.date() })).query(async ({ input }) => {
-      try { return await db.getChannelPerformanceSummary(input.startDate, input.endDate); } catch { return []; }
-    }),
-    getDriveDaySessions: publicProcedure.query(async () => {
-      try {
-        const { getAppointments } = await import('./acuity');
-        const appts = await getAppointments({ minDate: '2026-01-01', maxDate: '2026-12-31', canceled: false, max: 200 });
-        const driveDayAppts = (appts as any[]).filter((a) =>
-          (a.type || '').toLowerCase().includes('drive day')
-        );
-        const getAmt = (a: any): number => parseFloat(a.amountPaid || '0');
-        const sessionDefs = [
-          {
-            name: 'Driving to the Ball',
-            label: 'Day 1 — Driving to the Ball',
-            day: 'Day 1',
-            dates: ['2026-01-25', '2026-02-01'],
-            keywords: ['driving', 'driving to the ball'],
-            color: 'yellow',
-            description: 'Tee-shot fundamentals: setup, posture, alignment, grip, and generating effortless power.',
-          },
-          {
-            name: 'Putting',
-            label: 'Day 2 — Putting: Score Low',
-            day: 'Day 2',
-            dates: ['2026-02-22', '2026-03-01'],
-            keywords: ['putting', 'score low'],
-            color: 'blue',
-            description: 'Green-reading, distance control, and the mental game of putting.',
-          },
-          {
-            name: 'Short Game',
-            label: 'Day 3 — Short Game',
-            day: 'Day 3',
-            dates: ['2026-03-22', '2026-03-29'],
-            keywords: ['short game', 'chipping', 'pitching'],
-            color: 'green',
-            description: 'Chipping, pitching, bunker play, and scoring from inside 100 yards.',
-          },
-        ];
-        const sessions = sessionDefs.map((sess) => {
-          const sessAppts = driveDayAppts.filter((a: any) => {
-            const t = (a.type || '').toLowerCase();
-            return sess.keywords.some((kw) => t.includes(kw));
-          });
-          const dateBreakdown = sess.dates.map((date) => {
-            const dateAppts = sessAppts.filter((a: any) => {
-              // Acuity 'datetime' is ISO format: "2026-01-25T14:00:00-0600"
-              // Acuity 'date' is human format: "January 25, 2026"
-              const dt = a.datetime || '';
-              return dt.startsWith(date);
-            });
-            const paidCount = dateAppts.filter((a: any) => getAmt(a) > 0).length;
-            const memberCount = dateAppts.filter((a: any) => getAmt(a) === 0).length;
-            const revenue = dateAppts.reduce((s: number, a: any) => s + getAmt(a), 0);
-            return { date, bookings: dateAppts.length, paid: paidCount, members: memberCount, revenue };
-          });
-          const paidAttendees = sessAppts.filter((a: any) => getAmt(a) > 0).length;
-          const memberAttendees = sessAppts.filter((a: any) => getAmt(a) === 0).length;
-          const revenueCollected = sessAppts.reduce((s: number, a: any) => s + getAmt(a), 0);
-          return {
-            ...sess,
-            totalRegistrations: sessAppts.length,
-            paidAttendees,
-            memberAttendees,
-            revenueCollected,
-            dates: dateBreakdown,
-          };
-        });
-        return {
-          sessions,
-          overall: {
-            totalRegistrations: driveDayAppts.length,
-            paidAttendees: driveDayAppts.filter((a: any) => getAmt(a) > 0).length,
-            memberAttendees: driveDayAppts.filter((a: any) => getAmt(a) === 0).length,
-            revenueCollected: driveDayAppts.reduce((s: number, a: any) => s + getAmt(a), 0),
-          },
-        };
-      } catch { return { sessions: [], overall: { totalRegistrations: 0, paidAttendees: 0, memberAttendees: 0, revenueCollected: 0 } }; }
-    }),
-
-    // Public version of strategic KPIs for guest preview mode
-    getStrategicKPIs: publicProcedure.query(async () => {
-      try {
-        const database = await db.getDb();
-        if (!database) return null;
-
-        const memberCountResult = await database.execute(
-          `SELECT 
-            COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers') THEN 1 END) as customerMembers,
-            COUNT(CASE WHEN membershipTier = 'all_access_aces' THEN 1 END) as allAccessCount,
-            COUNT(CASE WHEN membershipTier = 'swing_savers' THEN 1 END) as swingSaverCount
-          FROM members WHERE status = 'active'`
-        );
-        const memberRow = (memberCountResult as any)[0]?.[0];
-        const customerMemberCount = Number(memberRow?.customerMembers || 0);
-        const allAccessCount = Number(memberRow?.allAccessCount || 0);
-        const swingSaverCount = Number(memberRow?.swingSaverCount || 0);
-        const MEMBERSHIP_GOAL = 300;
-
-        // Customer retention rate
-        const customerRetentionResult = await database.execute(
-          `SELECT COUNT(*) as total,
-            COUNT(CASE WHEN status = 'active' THEN 1 END) as activeCustomers
-          FROM members WHERE membershipTier IN ('all_access_aces', 'swing_savers')`
-        );
-        const retRow = (customerRetentionResult as any)[0]?.[0];
-        const totalCustomers = Number(retRow?.total || 1);
-        const activeCustomers = Number(retRow?.activeCustomers || 0);
-        const customerRetentionRate = totalCustomers > 0 ? (activeCustomers / totalCustomers) * 100 : 0;
-
-        return {
-          membershipAcquisition: {
-            current: customerMemberCount,
-            target: MEMBERSHIP_GOAL,
-            remaining: Math.max(0, MEMBERSHIP_GOAL - customerMemberCount),
-            progress: Math.min((customerMemberCount / MEMBERSHIP_GOAL) * 100, 100),
-            breakdown: { allAccess: allAccessCount, swingSaver: swingSaverCount },
-          },
-          memberRetention: {
-            current: customerMemberCount,
-            retentionRate: customerRetentionRate,
-            progress: Math.min(customerRetentionRate, 100),
-            activeCount: activeCustomers,
-            totalCount: totalCustomers,
-          },
-        };
-      } catch { return null; }
     }),
   }),
 });

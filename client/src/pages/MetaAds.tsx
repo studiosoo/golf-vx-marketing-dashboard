@@ -1,457 +1,138 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
-import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, DollarSign, Eye, MousePointerClick, Target, ExternalLink, Lightbulb, Zap, AlertTriangle, CheckCircle2, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { Link } from "wouter";
-import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RefreshCw, TrendingUp, DollarSign, Eye, MousePointer } from "lucide-react";
 
 type DatePreset = "today" | "yesterday" | "last_7d" | "last_14d" | "last_30d" | "last_90d" | "lifetime";
 
 export default function MetaAds() {
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
 
-  const { data: accountData, isLoading: accountLoading } = trpc.metaAds.getAccount.useQuery();
-  const { data: insightsData, isLoading: insightsLoading } = trpc.metaAds.getAccountInsights.useQuery({ datePreset });
-  const { data: campaignsData, isLoading: campaignsLoading } = trpc.metaAds.getAllCampaignsWithInsights.useQuery({ datePreset });
-  const [showRecommendations, setShowRecommendations] = useState(false);
-  const { data: aiRecs, isLoading: recsLoading, refetch: refetchRecs } = trpc.metaAds.getAutoRecommendations.useQuery(undefined, {
-    enabled: showRecommendations,
-    staleTime: 5 * 60 * 1000,
-  });
-  const { toast } = useToast();
+  const { data: campaigns, isLoading, refetch } = trpc.metaAds.getAllCampaignsWithInsights.useQuery({ datePreset });
+  
 
-  const formatCurrency = (value: number | string) => {
-    const num = typeof value === 'string' ? parseFloat(value) : value;
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-    }).format(num);
-  };
+  const formatCurrency = (val: any) =>
+    `$${parseFloat(String(val || 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-  const formatNumber = (value: number | string) => {
-    const num = typeof value === 'string' ? parseFloat(value) : value;
-    return new Intl.NumberFormat("en-US").format(num);
-  };
+  const formatNum = (val: any) => parseInt(String(val || 0)).toLocaleString();
 
-  const formatPercentage = (value: number | string) => {
-    const num = typeof value === 'string' ? parseFloat(value) : value;
-    return `${num.toFixed(2)}%`;
-  };
-
-  const getDateRangeLabel = (preset: DatePreset) => {
-    const labels: Record<DatePreset, string> = {
-      today: "Today",
-      yesterday: "Yesterday",
-      last_7d: "Last 7 Days",
-      last_14d: "Last 14 Days",
-      last_30d: "Last 30 Days",
-      last_90d: "Last 90 Days",
-      lifetime: "Lifetime",
-    };
-    return labels[preset];
-  };
-
-  const getObjectiveBadge = (objective: string) => {
-    const objectiveMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-      OUTCOME_TRAFFIC: { label: "Traffic", variant: "default" },
-      OUTCOME_ENGAGEMENT: { label: "Engagement", variant: "secondary" },
-      OUTCOME_LEADS: { label: "Leads", variant: "outline" },
-      OUTCOME_SALES: { label: "Sales", variant: "destructive" },
-      OUTCOME_AWARENESS: { label: "Awareness", variant: "secondary" },
-    };
-    const config = objectiveMap[objective] || { label: objective, variant: "outline" as const };
-    return <Badge variant={config.variant}>{config.label}</Badge>;
-  };
-
-  const getStatusBadge = (status: string) => {
-    const statusMap: Record<string, { label: string; className: string }> = {
-      ACTIVE: { label: "Active", className: "bg-green-500/15 text-green-400 border-green-500/30" },
-      PAUSED: { label: "Paused", className: "bg-muted/60 text-muted-foreground border-border" },
-      COMPLETED: { label: "Completed", className: "bg-blue-500/15 text-blue-400 border-blue-500/30" },
-      ARCHIVED: { label: "Archived", className: "bg-muted/60 text-muted-foreground border-border" },
-      DELETED: { label: "Deleted", className: "bg-red-500/15 text-red-400 border-red-500/30" },
-      IN_PROCESS: { label: "In Draft", className: "bg-amber-500/15 text-amber-400 border-amber-500/30" },
-    };
-    const config = statusMap[status] || { label: status, className: "" };
-    return <Badge variant="outline" className={`border ${config.className}`}>{config.label}</Badge>;
-  };
+  const totalSpend = (campaigns as any[])?.reduce((sum: number, c: any) => sum + parseFloat(c.insights?.spend || 0), 0) || 0;
+  const totalReach = (campaigns as any[])?.reduce((sum: number, c: any) => sum + parseInt(c.insights?.reach || 0), 0) || 0;
+  const totalImpressions = (campaigns as any[])?.reduce((sum: number, c: any) => sum + parseInt(c.insights?.impressions || 0), 0) || 0;
+  const totalClicks = (campaigns as any[])?.reduce((sum: number, c: any) => sum + parseInt(c.insights?.clicks || 0), 0) || 0;
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Meta Ads Performance</h1>
-            <p className="text-muted-foreground mt-1">
-              Facebook and Instagram advertising campaign analytics
-            </p>
-          </div>
-          <Select value={datePreset} onValueChange={(value) => setDatePreset(value as DatePreset)}>
-            <SelectTrigger className="w-[180px]">
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Meta Ads</h1>
+          <p className="text-muted-foreground text-sm mt-1">Facebook & Instagram campaign performance</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Select value={datePreset} onValueChange={(v) => setDatePreset(v as DatePreset)}>
+            <SelectTrigger className="w-36">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="today">Today</SelectItem>
               <SelectItem value="yesterday">Yesterday</SelectItem>
-              <SelectItem value="last_7d">Last 7 Days</SelectItem>
-              <SelectItem value="last_14d">Last 14 Days</SelectItem>
-              <SelectItem value="last_30d">Last 30 Days</SelectItem>
-              <SelectItem value="last_90d">Last 90 Days</SelectItem>
+              <SelectItem value="last_7d">Last 7 days</SelectItem>
+              <SelectItem value="last_14d">Last 14 days</SelectItem>
+              <SelectItem value="last_30d">Last 30 days</SelectItem>
+              <SelectItem value="last_90d">Last 90 days</SelectItem>
               <SelectItem value="lifetime">Lifetime</SelectItem>
             </SelectContent>
           </Select>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            
+          >
+            <RefreshCw size={14} className={isLoading ? "animate-spin" : ""} />
+            Sync
+          </Button>
         </div>
-
-        {/* Account Info */}
-        {accountLoading ? (
-          <Card>
-            <CardHeader>
-              <Skeleton className="h-6 w-48" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-4 w-full" />
-            </CardContent>
-          </Card>
-        ) : accountData ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>{accountData.name}</CardTitle>
-              <CardDescription>Ad Account ID: {accountData.id}</CardDescription>
-            </CardHeader>
-          </Card>
-        ) : null}
-
-        {/* Key Metrics */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {insightsLoading ? (
-            <>
-              {[1, 2, 3, 4].map((i) => (
-                <Card key={i}>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <Skeleton className="h-4 w-24" />
-                  </CardHeader>
-                  <CardContent>
-                    <Skeleton className="h-8 w-32" />
-                  </CardContent>
-                </Card>
-              ))}
-            </>
-          ) : insightsData ? (
-            <>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Spend</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{formatCurrency(insightsData.spend)}</div>
-                  <p className="text-xs text-muted-foreground mt-1">{getDateRangeLabel(datePreset)}</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Impressions</CardTitle>
-                  <Eye className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{formatNumber(insightsData.impressions)}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    CPM: {formatCurrency(insightsData.cpm)}
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Clicks</CardTitle>
-                  <MousePointerClick className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{formatNumber(insightsData.clicks)}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    CPC: {formatCurrency(insightsData.cpc)}
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Click-Through Rate</CardTitle>
-                  <Target className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{formatPercentage(insightsData.ctr)}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {Number(insightsData.ctr) > 1.5 ? (
-                      <span className="text-green-600 flex items-center gap-1">
-                        <TrendingUp className="h-3 w-3" /> Above average
-                      </span>
-                    ) : (
-                      <span className="text-yellow-600 flex items-center gap-1">
-                        <TrendingDown className="h-3 w-3" /> Below average
-                      </span>
-                    )}
-                  </p>
-                </CardContent>
-              </Card>
-            </>
-          ) : null}
-        </div>
-
-        {/* Campaigns Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Campaign Performance</CardTitle>
-            <CardDescription>
-              Detailed metrics for all active campaigns ({getDateRangeLabel(datePreset)})
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {campaignsLoading ? (
-              <div className="space-y-2">
-                {[1, 2, 3].map((i) => (
-                  <Skeleton key={i} className="h-16 w-full" />
-                ))}
-              </div>
-            ) : campaignsData && campaignsData.length > 0 ? (
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Campaign Name</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Objective</TableHead>
-                      <TableHead className="text-right">Spend</TableHead>
-                      <TableHead className="text-right">Impressions</TableHead>
-                      <TableHead className="text-right">Clicks</TableHead>
-                      <TableHead className="text-right">CTR</TableHead>
-                      <TableHead className="text-right">CPC</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {campaignsData.map((campaign) => (
-                      <TableRow key={campaign.id} className="cursor-pointer hover:bg-muted/50">
-                        <TableCell className="font-medium">
-                          <Link href={`/meta-ads/campaign/${campaign.id}`} className="flex items-center gap-2 hover:text-primary">
-                            {campaign.name}
-                            <ExternalLink className="h-3 w-3" />
-                          </Link>
-                        </TableCell>
-                        <TableCell>{getStatusBadge(campaign.status)}</TableCell>
-                        <TableCell>{getObjectiveBadge(campaign.objective)}</TableCell>
-                        <TableCell className="text-right">
-                          {campaign.insights ? formatCurrency(Number(campaign.insights.spend)) : "-"}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {campaign.insights ? formatNumber(Number(campaign.insights.impressions)) : "-"}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {campaign.insights ? formatNumber(Number(campaign.insights.clicks)) : "-"}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {campaign.insights ? formatPercentage(Number(campaign.insights.ctr)) : "-"}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {campaign.insights ? formatCurrency(Number(campaign.insights.cpc)) : "-"}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                No campaign data available for the selected period
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Performance Charts */}
-        {campaignsData && campaignsData.length > 0 && (
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Spend by Campaign</CardTitle>
-                <CardDescription>Distribution of ad spend across campaigns</CardDescription>
-              </CardHeader>
-              <CardContent className="overflow-hidden">
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart
-                    data={campaignsData.filter(c => c.insights).map(c => ({
-                      ...c,
-                      shortName: c.name.length > 14 ? c.name.substring(0, 14) + '…' : c.name,
-                    }))}
-                    margin={{ top: 5, right: 10, left: 0, bottom: 60 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis
-                      dataKey="shortName"
-                      tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
-                      angle={-35}
-                      textAnchor="end"
-                      interval={0}
-                      height={70}
-                    />
-                    <YAxis
-                      tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
-                      width={55}
-                      tickFormatter={(v: number) => `$${v}`}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "var(--radius)",
-                        fontSize: 12,
-                        maxWidth: 200,
-                      }}
-                      formatter={(value: number) => [formatCurrency(value), "Spend"]}
-                      labelFormatter={(label: string, payload: any[]) => payload?.[0]?.payload?.name ?? label}
-                    />
-                    <Bar dataKey="insights.spend" fill="hsl(var(--primary))" name="Spend" radius={[3, 3, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Click Performance</CardTitle>
-                <CardDescription>Clicks and CTR by campaign</CardDescription>
-              </CardHeader>
-              <CardContent className="overflow-hidden">
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart
-                    data={campaignsData.filter(c => c.insights).map(c => ({
-                      ...c,
-                      shortName: c.name.length > 14 ? c.name.substring(0, 14) + '…' : c.name,
-                    }))}
-                    margin={{ top: 5, right: 10, left: 0, bottom: 60 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis
-                      dataKey="shortName"
-                      tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
-                      angle={-35}
-                      textAnchor="end"
-                      interval={0}
-                      height={70}
-                    />
-                    <YAxis
-                      tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
-                      width={45}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "var(--radius)",
-                        fontSize: 12,
-                        maxWidth: 200,
-                      }}
-                      formatter={(value: number, name: string) =>
-                        name === "CTR %" ? [formatPercentage(value), name] : [formatNumber(value), name]
-                      }
-                      labelFormatter={(label: string, payload: any[]) => payload?.[0]?.payload?.name ?? label}
-                    />
-                    <Legend wrapperStyle={{ fontSize: 11, paddingTop: 4 }} />
-                    <Bar dataKey="insights.clicks" fill="hsl(var(--chart-1))" name="Clicks" radius={[3, 3, 0, 0]} />
-                    <Bar dataKey="insights.ctr" fill="hsl(var(--chart-2))" name="CTR %" radius={[3, 3, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-        )}
       </div>
 
-      {/* AI Recommendations Panel */}
-      <div className="mt-6">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Lightbulb className="h-5 w-5 text-[#ffcb00]" />
-                <CardTitle>AI Ad Recommendations</CardTitle>
+      {/* Summary KPIs */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { label: "Total Spend", value: formatCurrency(totalSpend), icon: <DollarSign size={18} />, color: "text-red-400" },
+          { label: "Total Reach", value: formatNum(totalReach), icon: <Eye size={18} />, color: "text-blue-400" },
+          { label: "Impressions", value: formatNum(totalImpressions), icon: <TrendingUp size={18} />, color: "text-green-400" },
+          { label: "Clicks", value: formatNum(totalClicks), icon: <MousePointer size={18} />, color: "text-yellow-400" },
+        ].map((kpi) => (
+          <Card key={kpi.label} className="bg-card border-border">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-muted-foreground">{kpi.label}</span>
+                <span className={kpi.color}>{kpi.icon}</span>
               </div>
-              <Button
-                variant={showRecommendations ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => { if (!showRecommendations) setShowRecommendations(true); else refetchRecs(); }}
-                disabled={recsLoading}
-              >
-                {recsLoading ? (
-                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Analyzing...</>
-                ) : showRecommendations ? (
-                  <><RefreshCw className="h-4 w-4 mr-2" />Refresh Analysis</>
-                ) : (
-                  <><Zap className="h-4 w-4 mr-2" />Analyze Campaigns</>
-                )}
-              </Button>
-            </div>
-            <CardDescription>AI-powered recommendations. Auto-actionable items are flagged for automation.</CardDescription>
-          </CardHeader>
-          {showRecommendations && (
-            <CardContent>
-              {recsLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin text-[#ffcb00]" />
-                  <span className="ml-3 text-muted-foreground">Analyzing campaign performance...</span>
-                </div>
-              ) : aiRecs ? (
-                <div className="space-y-4">
-                  <div className="p-4 rounded-lg bg-muted/30 border">
-                    <p className="text-sm font-medium mb-1">Account Health Summary</p>
-                    <p className="text-sm text-muted-foreground">{aiRecs.summary}</p>
+              <div className="text-xl font-bold text-foreground">{kpi.value}</div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Campaign List */}
+      {isLoading ? (
+        <div className="space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-28 bg-card rounded-xl animate-pulse border border-border" />
+          ))}
+        </div>
+      ) : campaigns && (campaigns as any[]).length > 0 ? (
+        <div className="space-y-3">
+          {(campaigns as any[]).map((c: any) => (
+            <Card key={c.id} className="bg-card border-border">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <div className="font-medium text-foreground text-sm">{c.name}</div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge
+                        variant={c.status === "ACTIVE" ? "default" : "secondary"}
+                        className={`text-xs ${c.status === "ACTIVE" ? "bg-green-500/20 text-green-400 border-green-500/30" : ""}`}
+                      >
+                        {c.status}
+                      </Badge>
+                      {c.objective && (
+                        <span className="text-xs text-muted-foreground">{c.objective}</span>
+                      )}
+                    </div>
                   </div>
-                  <div className="space-y-3">
-                    {aiRecs.recommendations.map((rec: any, i: number) => (
-                      <div key={i} className="flex items-start gap-3 p-4 rounded-lg border">
-                        <div className="shrink-0 mt-0.5">
-                          {rec.priority === 'high' ? <AlertTriangle className="h-5 w-5 text-red-500" /> :
-                           rec.priority === 'medium' ? <Lightbulb className="h-5 w-5 text-[#ffcb00]" /> :
-                           <CheckCircle2 className="h-5 w-5 text-green-500" />}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap mb-1">
-                            <span className="font-medium text-sm">{rec.campaignName}</span>
-                            <Badge variant={rec.priority === 'high' ? 'destructive' : rec.priority === 'medium' ? 'secondary' : 'outline'} className="text-xs">{rec.priority}</Badge>
-                            {rec.canAutomate && (
-                              <Badge className="text-xs bg-green-500/10 text-green-600 border border-green-500/20">
-                                <Zap className="h-3 w-3 mr-1" /> Auto-actionable
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-sm">{rec.recommendation}</p>
-                          <p className="text-xs text-muted-foreground mt-1">Expected: {rec.expectedImpact}</p>
-                          {rec.canAutomate && <p className="text-xs text-green-600 mt-1">{rec.automationReason}</p>}
-                        </div>
-                        {rec.canAutomate && (
-                          <Button size="sm" variant="outline" className="shrink-0 text-xs h-8 border-green-500/30 text-green-600 hover:bg-green-500/10"
-                            onClick={() => toast({ title: 'Action Queued', description: `"${rec.campaignName}" optimization queued for review in AI Actions.` })}>
-                            <Zap className="h-3 w-3 mr-1" /> Apply
-                          </Button>
-                        )}
+                </div>
+                {c.insights ? (
+                  <div className="grid grid-cols-4 gap-3">
+                    {[
+                      { label: "Spend", value: formatCurrency(c.insights.spend || 0) },
+                      { label: "Reach", value: formatNum(c.insights.reach || 0) },
+                      { label: "Impressions", value: formatNum(c.insights.impressions || 0) },
+                      { label: "Clicks", value: formatNum(c.insights.clicks || 0) },
+                    ].map((m) => (
+                      <div key={m.label} className="bg-muted/30 rounded-lg p-2 text-center">
+                        <div className="text-sm font-semibold text-foreground">{m.value}</div>
+                        <div className="text-xs text-muted-foreground">{m.label}</div>
                       </div>
                     ))}
                   </div>
-                </div>
-              ) : null}
-            </CardContent>
-          )}
-        </Card>
-      </div>
-    </DashboardLayout>
+                ) : (
+                  <div className="text-xs text-muted-foreground">No insights data for this period</div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-16 text-muted-foreground">
+          <TrendingUp size={40} className="mx-auto mb-3 opacity-30" />
+          <p>No Meta Ads campaigns found</p>
+        </div>
+      )}
+    </div>
   );
 }
