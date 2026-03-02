@@ -170,6 +170,17 @@ export default defineConfig({
   },
   server: {
     host: true,
+    watch: {
+      // Exclude internal Manus runtime dirs that can cause FSWatcher errors
+      ignored: [
+        "**/.manus/**",
+        "**/.manus-logs/**",
+        "**/.meta-ads-cache/**",
+        "**/.git_broken_backup/**",
+        "**/.git_broken_backup2/**",
+        "**/node_modules/**",
+      ],
+    },
     allowedHosts: [
       ".manuspre.computer",
       ".manus.computer",

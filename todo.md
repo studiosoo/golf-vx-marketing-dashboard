@@ -650,3 +650,7 @@
 - [ ] Diagnose why sidebar is not showing on Home page
 - [ ] Fix DashboardLayout to wrap all dashboard routes
 - [ ] Ensure sidebar is always visible on every page
+
+## Bug Fix: SyntaxError Unexpected token '<' on Home page (2026-03-02)
+- [x] Diagnose root cause: Vite FSWatcher crashing on .manus/.meta-ads-cache dirs (error -117)
+- [x] Fix: Added watcher.ignored patterns in vite.config.ts to exclude internal dirs
