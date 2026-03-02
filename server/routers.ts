@@ -1503,6 +1503,23 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
       .query(async () => {
         const dbConn = await db.getDb();
         if (!dbConn) return null;
+
+        // First, find the latest month that has data
+        const [latestMonthRows] = await dbConn.execute(
+          `SELECT LEFT(date,6) as latest_month FROM toast_daily_summary ORDER BY date DESC LIMIT 1`
+        ) as any[];
+        const latestMonth = (latestMonthRows as any[])[0]?.latest_month || '';
+        // Determine previous month relative to latest available month
+        const prevMonth = latestMonth
+          ? (() => {
+              const y = parseInt(latestMonth.slice(0,4));
+              const m = parseInt(latestMonth.slice(4,6));
+              const prev = m === 1 ? `${y-1}12` : `${y}${String(m-1).padStart(2,'0')}`;
+              return prev;
+            })()
+          : '';
+
+        // Embed month values directly (server-generated, safe from injection)
         const [rows] = await dbConn.execute(
           `SELECT
             SUM(total_revenue) as all_time_revenue,
@@ -1514,18 +1531,27 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
             SUM(total_tips) as all_time_tips,
             MAX(CAST(date AS UNSIGNED)) as latest_date,
             COUNT(*) as days_with_data,
-            SUM(CASE WHEN LEFT(date,6)=DATE_FORMAT(NOW(),'%Y%m') THEN total_revenue ELSE 0 END) as this_month_revenue,
-            SUM(CASE WHEN LEFT(date,6)=DATE_FORMAT(DATE_SUB(NOW(),INTERVAL 1 MONTH),'%Y%m') THEN total_revenue ELSE 0 END) as last_month_revenue,
-            SUM(CASE WHEN LEFT(date,6)=DATE_FORMAT(NOW(),'%Y%m') THEN total_orders ELSE 0 END) as this_month_orders,
+            SUM(CASE WHEN LEFT(date,6)='${latestMonth}' THEN total_revenue ELSE 0 END) as this_month_revenue,
+            SUM(CASE WHEN LEFT(date,6)='${prevMonth}' THEN total_revenue ELSE 0 END) as last_month_revenue,
+            SUM(CASE WHEN LEFT(date,6)='${latestMonth}' THEN total_orders ELSE 0 END) as this_month_orders,
             SUM(CASE WHEN STR_TO_DATE(date,'%Y%m%d') >= DATE_SUB(CURDATE(),INTERVAL 7 DAY) THEN total_revenue ELSE 0 END) as this_week_revenue,
             SUM(CASE WHEN STR_TO_DATE(date,'%Y%m%d') >= DATE_SUB(CURDATE(),INTERVAL 7 DAY) THEN bay_revenue ELSE 0 END) as this_week_bay,
             SUM(CASE WHEN STR_TO_DATE(date,'%Y%m%d') >= DATE_SUB(CURDATE(),INTERVAL 7 DAY) THEN food_bev_revenue ELSE 0 END) as this_week_food,
-            SUM(CASE WHEN LEFT(date,6)=DATE_FORMAT(NOW(),'%Y%m') THEN bay_revenue ELSE 0 END) as this_month_bay,
-            SUM(CASE WHEN LEFT(date,6)=DATE_FORMAT(NOW(),'%Y%m') THEN food_bev_revenue ELSE 0 END) as this_month_food
+            SUM(CASE WHEN LEFT(date,6)='${latestMonth}' THEN bay_revenue ELSE 0 END) as this_month_bay,
+            SUM(CASE WHEN LEFT(date,6)='${latestMonth}' THEN food_bev_revenue ELSE 0 END) as this_month_food
            FROM toast_daily_summary`
         ) as any[];
         const r = (rows as any[])[0];
         if (!r) return null;
+        // Format latest month label e.g. "202602" -> "Feb 2026"
+        const monthLabel = latestMonth
+          ? (() => {
+              const y = latestMonth.slice(0,4);
+              const m = parseInt(latestMonth.slice(4,6));
+              const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+              return `${names[m-1]} ${y}`;
+            })()
+          : 'This Month';
         return {
           allTimeRevenue: parseFloat(r.all_time_revenue || '0'),
           allTimeBay: parseFloat(r.all_time_bay || '0'),
@@ -1544,6 +1570,8 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
           thisWeekFood: parseFloat(r.this_week_food || '0'),
           thisMonthBay: parseFloat(r.this_month_bay || '0'),
           thisMonthFood: parseFloat(r.this_month_food || '0'),
+          currentMonthLabel: monthLabel,
+          latestMonth,
         };
       }),
 

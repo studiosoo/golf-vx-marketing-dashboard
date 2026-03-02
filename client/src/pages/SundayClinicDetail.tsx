@@ -510,63 +510,93 @@ export default function SundayClinicDetail() {
                     </div>
 
                     <div className="space-y-3 pl-2">
-                      {topicEvents.map((event) => (
-                        <div key={event.date} className="space-y-2">
-                          <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <div className="flex items-center justify-center w-10 h-10 bg-primary/10 rounded-lg">
-                                <Calendar className="h-5 w-5 text-primary" />
-                              </div>
-                              <div>
-                                <p className="font-semibold text-foreground">
-                                  {formatEventDate(event.date)}
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                  {event.uniqueAttendees} unique attendees
-                                  {(event as any).revenue != null && (event as any).revenue > 0 && (
-                                    <span className="ml-2 text-green-600 font-medium">
-                                      · ${(event as any).revenue?.toFixed(0)} revenue
-                                    </span>
+                      {topicEvents.map((event) => {
+                        const paid = (event as any).paidAttendees ?? 0;
+                        const members = (event as any).memberAttendees ?? 0;
+                        const total = event.totalBookings;
+                        const revenue = (event as any).revenue ?? 0;
+                        const isPast = new Date(event.date + 'T12:00:00') < new Date();
+                        const isUpcoming = !isPast;
+                        return (
+                          <div key={event.date} className="space-y-2">
+                            <div className={`p-4 rounded-lg border ${isUpcoming && total === 0 ? 'border-dashed border-muted-foreground/30 bg-muted/10' : 'bg-muted/30 border-transparent'}`}>
+                              {/* Date header row */}
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-3">
+                                  <div className={`flex items-center justify-center w-10 h-10 rounded-lg ${isUpcoming && total === 0 ? 'bg-muted/40' : 'bg-primary/10'}`}>
+                                    <Calendar className={`h-5 w-5 ${isUpcoming && total === 0 ? 'text-muted-foreground' : 'text-primary'}`} />
+                                  </div>
+                                  <div>
+                                    <p className="font-semibold text-foreground flex items-center gap-2">
+                                      {formatEventDate(event.date)}
+                                      {isUpcoming && total === 0 && (
+                                        <Badge variant="outline" className="text-xs text-muted-foreground">Upcoming</Badge>
+                                      )}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {event.uniqueAttendees} unique · {total} total registrations
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  {total > 0 ? (
+                                    <>
+                                      <button
+                                        onClick={() => setEventModal({ eventDate: event.date, label: formatEventDate(event.date) })}
+                                        className="text-xl font-bold text-primary hover:underline cursor-pointer transition-colors block"
+                                        title="Click to see attendee list"
+                                      >{total}</button>
+                                      <p className="text-xs text-muted-foreground">registrations ↑</p>
+                                    </>
+                                  ) : (
+                                    <span className="text-sm text-muted-foreground">—</span>
                                   )}
-                                </p>
-                                {(event as any).paidAttendees != null && (
-                                  <p className="text-xs text-muted-foreground">
-                                    Paid: {(event as any).paidAttendees} · Members: {(event as any).memberAttendees}
-                                  </p>
-                                )}
+                                </div>
                               </div>
-                            </div>
-                            <div className="text-right">
-                              <button
-                                onClick={() => setEventModal({ eventDate: event.date, label: formatEventDate(event.date) })}
-                                className="text-lg font-bold text-primary hover:underline cursor-pointer transition-colors block"
-                                title="Click to see attendee list"
-                              >{event.totalBookings}</button>
-                              <p className="text-xs text-muted-foreground">bookings ↑ click</p>
+
+                              {/* Attendee breakdown grid */}
+                              {total > 0 && (
+                                <div className="grid grid-cols-3 gap-3 mb-3">
+                                  <div className="bg-background/60 rounded-md p-2 text-center">
+                                    <p className="text-lg font-bold text-foreground">{paid}</p>
+                                    <p className="text-xs text-muted-foreground">Paid</p>
+                                    <p className="text-xs text-green-600 font-medium">${revenue.toFixed(0)}</p>
+                                  </div>
+                                  <div className="bg-background/60 rounded-md p-2 text-center">
+                                    <p className="text-lg font-bold text-foreground">{members}</p>
+                                    <p className="text-xs text-muted-foreground">Members</p>
+                                    <p className="text-xs text-blue-500 font-medium">Free</p>
+                                  </div>
+                                  <div className="bg-background/60 rounded-md p-2 text-center">
+                                    <p className="text-lg font-bold text-foreground">{event.uniqueAttendees}</p>
+                                    <p className="text-xs text-muted-foreground">Unique</p>
+                                    <p className="text-xs text-muted-foreground">{total > 0 ? Math.round((event.uniqueAttendees / total) * 100) : 0}% unique rate</p>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Source breakdown tags */}
+                              {event.sourceBreakdown && Object.keys(event.sourceBreakdown).length > 0 && (
+                                <div className="flex flex-wrap gap-1.5">
+                                  {Object.entries(event.sourceBreakdown)
+                                    .sort(([, a], [, b]) => (b as number) - (a as number))
+                                    .map(([source, count]) => (
+                                      <Badge
+                                        key={source}
+                                        variant="outline"
+                                        className="text-xs cursor-pointer hover:bg-primary/10 hover:border-primary transition-colors"
+                                        onClick={() => setSourceModal({ source })}
+                                        title={`Click to see ${source} attendees`}
+                                      >
+                                        {source}: {count}
+                                      </Badge>
+                                    ))}
+                                </div>
+                              )}
                             </div>
                           </div>
-
-                          {event.sourceBreakdown && Object.keys(event.sourceBreakdown).length > 0 && (
-                            <div className="pl-14 pr-3 pb-1">
-                              <div className="flex flex-wrap gap-2">
-                                {Object.entries(event.sourceBreakdown)
-                                  .sort(([, a], [, b]) => (b as number) - (a as number))
-                                  .map(([source, count]) => (
-                                    <Badge
-                                      key={source}
-                                      variant="outline"
-                                      className="text-xs cursor-pointer hover:bg-primary/10 hover:border-primary transition-colors"
-                                      onClick={() => setSourceModal({ source })}
-                                      title={`Click to see ${source} attendees`}
-                                    >
-                                      {source}: {count}
-                                    </Badge>
-                                  ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 );

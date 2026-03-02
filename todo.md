@@ -694,3 +694,10 @@
 - [x] Home: Revenue banner - add Food & Bev and Bay category breakdown
 - [x] Server: getGiveawayStats - add statusBreakdown (pending/contacted counts)
 - [x] Server: getToastSummary - add weekly revenue + Food/Bay category fields
+
+## Revenue & Event Breakdown Fixes (2026-03-01)
+- [x] Home: Revenue banner shows latest available month (Feb 2026 $101,130) instead of $0
+- [x] Home: Revenue banner label dynamically shows month name (e.g. "Feb 2026's Revenue")
+- [x] SundayClinicDetail: Event Breakdown now shows all 6 scheduled dates (including Mar 29 with 0 bookings)
+- [x] SundayClinicDetail: Per-date attendee breakdown grid (Paid / Members / Unique with revenue)
+- [x] SundayClinicDetail: Upcoming events shown with dashed border and "Upcoming" badge

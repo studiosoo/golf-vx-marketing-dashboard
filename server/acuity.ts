@@ -284,6 +284,15 @@ export async function getSundayClinicData(params?: {
     sourceBreakdown[source] = (sourceBreakdown[source] || 0) + 1;
   });
 
+  // All 6 scheduled Drive Day / Sunday Clinic dates — include even if 0 bookings
+  const SCHEDULED_DATES = [
+    '2026-01-25', '2026-02-01', '2026-02-22', '2026-03-01', '2026-03-22', '2026-03-29'
+  ];
+  // Ensure all scheduled dates appear in eventsByDate (with empty array if no bookings)
+  SCHEDULED_DATES.forEach(d => {
+    if (!eventsByDate[d]) eventsByDate[d] = [];
+  });
+
   // Calculate metrics for each event
   const events = Object.entries(eventsByDate).map(([date, appts]) => {
     const totalAttendees = appts.length;

@@ -350,13 +350,13 @@ export default function Home() {
                       <DollarSign className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground font-medium">This Month's Revenue</p>
+                      <p className="text-xs text-muted-foreground font-medium">{(toastSummary as any).currentMonthLabel ?? 'This Month'}'s Revenue</p>
                       <p className="text-2xl font-bold text-foreground">{formatCurrency(toastSummary.thisMonthRevenue)}</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-3 sm:flex sm:items-center sm:gap-6 text-sm">
                     <div className="sm:text-right">
-                      <p className="text-xs text-muted-foreground">Last Month</p>
+                      <p className="text-xs text-muted-foreground">Prior Month</p>
                       <p className="font-semibold text-foreground text-sm">{formatCurrency(toastSummary.lastMonthRevenue)}</p>
                     </div>
                     <div className="sm:text-right">
