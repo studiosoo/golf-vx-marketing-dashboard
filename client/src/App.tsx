@@ -1,173 +1,217 @@
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
-import { Toaster } from "sonner";
-import DashboardLayout from "@/components/DashboardLayout";
-import GuestDashboardLayout from "@/components/GuestDashboardLayout";
+import ErrorBoundary from "./components/ErrorBoundary";
+import { ThemeProvider } from "./contexts/ThemeContext";
 
-// Core pages
-import Home from "@/pages/Home";
-import Overview from "@/pages/Overview";
-import Performance from "@/pages/Performance";
-import Revenue from "@/pages/Revenue";
-import Preview from "@/pages/Preview";
+// ── Core pages ──
+import Home from "./pages/Home";
+import Overview from "./pages/Overview";
 
-// Intelligence
-import MarketingIntelligence from "@/pages/MarketingIntelligence";
-import AIActions from "@/pages/AIActions";
-import NewsManager from "@/pages/NewsManager";
+// ── MARKETING & PROGRAMS / Campaigns ──
+import StrategicCampaigns from "./pages/StrategicCampaigns";
+import MetaAds from "./pages/MetaAds";
+import MetaAdsCampaignDetail from "./pages/MetaAdsCampaignDetail";
+import CampaignDetail from "./pages/CampaignDetail";
+import CategoryDetail from "./pages/CategoryDetail";
+import CampaignVisuals from "./pages/CampaignVisuals";
+import CalendarViewer from "./pages/CalendarViewer";
+import CampaignTimeline from "./pages/CampaignTimeline";
+import BudgetManager from "./pages/BudgetManager";
 
-// Members / Leads
-import Members from "@/pages/Members";
-import Guests from "@/pages/Guests";
-import Leads from "@/pages/Leads";
+// ── MARKETING & PROGRAMS / Intelligence ──
+import MarketingIntelligence from "./pages/MarketingIntelligence";
+import AIActions from "./pages/AIActions";
+import Performance from "./pages/Performance";
+import MarketResearch from "./pages/MarketResearch";
+import ROI from "./pages/ROI";
+import Revenue from "./pages/Revenue";
+import Reports from "./pages/Reports";
 
-// Campaigns
-import Campaigns from "@/pages/Campaigns";
-import MetaAds from "@/pages/MetaAds";
-import EmailCampaigns from "@/pages/EmailCampaigns";
-import Funnels from "@/pages/Funnels";
-import Automations from "@/pages/Automations";
-import DripCampaigns from "@/pages/DripCampaigns";
-import Announcements from "@/pages/Announcements";
+// ── MARKETING & PROGRAMS / Programs ──
+import Programs from "./pages/Programs";
+import DriveDay from "./pages/DriveDay";
+import SundayClinicDetail from "./pages/SundayClinicDetail";
+import WinterClinicDetail from "./pages/WinterClinicDetail";
+import JuniorSummerCamp from "./pages/JuniorSummerCamp";
+import JuniorCampDashboard from "./pages/JuniorCampDashboard";
+import SummerCamp from "./pages/SummerCamp";
+import Leagues from "./pages/Leagues";
+import PrivateEvents from "./pages/PrivateEvents";
 
-// Programs
-import Programs from "@/pages/Programs";
-import Leagues from "@/pages/Leagues";
-import PrivateEvents from "@/pages/PrivateEvents";
+// ── AUDIENCE / List ──
+import Members from "./pages/Members";
+import MemberProfile from "./pages/MemberProfile";
+import Duplicates from "./pages/Duplicates";
+import Leads from "./pages/Leads";
+import Guests from "./pages/Guests";
 
-// Tools
-import SiteControl from "@/pages/SiteControl";
-import Integrations from "@/pages/Integrations";
-import AccountSettings from "@/pages/AccountSettings";
+// ── AUDIENCE / Communication ──
+import Announcements from "./pages/Announcements";
+import Automations from "./pages/Automations";
+import DripCampaigns from "./pages/DripCampaigns";
+import EmailMarketing from "./pages/EmailMarketing";
+import Channels from "./pages/Channels";
+import CommunicationsHub from "./pages/CommunicationsHub";
 
-// ─── Guest Preview Pages ───────────────────────────────────────────────────
-import GuestHome from "@/pages/guest/GuestHome";
-import GuestOverview from "@/pages/guest/GuestOverview";
-import GuestPerformance from "@/pages/guest/GuestPerformance";
-import GuestRevenue from "@/pages/guest/GuestRevenue";
-import GuestMarketingIntelligence from "@/pages/guest/GuestMarketingIntelligence";
-import GuestAIActions from "@/pages/guest/GuestAIActions";
-import GuestNewsManager from "@/pages/guest/GuestNewsManager";
-import GuestMembers from "@/pages/guest/GuestMembers";
-import GuestGuests from "@/pages/guest/GuestGuests";
-import GuestLeads from "@/pages/guest/GuestLeads";
-import GuestCampaigns from "@/pages/guest/GuestCampaigns";
-import GuestMetaAds from "@/pages/guest/GuestMetaAds";
-import GuestEmailCampaigns from "@/pages/guest/GuestEmailCampaigns";
-import GuestFunnels from "@/pages/guest/GuestFunnels";
-import GuestAutomations from "@/pages/guest/GuestAutomations";
-import GuestDripCampaigns from "@/pages/guest/GuestDripCampaigns";
-import GuestAnnouncements from "@/pages/guest/GuestAnnouncements";
-import GuestPrograms from "@/pages/guest/GuestPrograms";
-import GuestLeagues from "@/pages/guest/GuestLeagues";
-import GuestPrivateEvents from "@/pages/guest/GuestPrivateEvents";
-import GuestSiteControl from "@/pages/guest/GuestSiteControl";
-import GuestIntegrations from "@/pages/guest/GuestIntegrations";
-import GuestAccountSettings from "@/pages/guest/GuestAccountSettings";
+// ── WEBSITE ──
+import SiteControl from "./pages/SiteControl";
+import InstagramViewer from "./pages/InstagramViewer";
+import InstagramSync from "./pages/InstagramSync";
+import InstagramAnalytics from "./pages/InstagramAnalytics";
+import WebsiteViewer from "./pages/WebsiteViewer";
+import NewsManager from "./pages/NewsManager";
 
-export default function App() {
+// ── SETTINGS ──
+import Integrations from "./pages/Integrations";
+import AccountSettings from "./pages/AccountSettings";
+
+// ── Public preview (no auth) ──
+import Preview from "./pages/Preview";
+
+// ── Email Campaigns (Encharge sync) ──
+import EmailCampaigns from "./pages/EmailCampaigns";
+
+// ── Funnels / Landing Pages (ClickFunnels sync) ──
+import Funnels from "./pages/Funnels";
+
+// ── Special / Legacy public pages ──
+import TrialSession from "./pages/TrialSession";
+import AnniversaryGiveaway from "./pages/AnniversaryGiveaway";
+import AnniversaryGiveawayApplication from "./pages/AnniversaryGiveawayApplication";
+import AnniversaryGiveawayThankYou from "./pages/AnniversaryGiveawayThankYou";
+import AnnualGiveaway from "./pages/AnnualGiveaway";
+import AnnualGiveawayActions from "./pages/AnnualGiveawayActions";
+import Tasks from "./pages/Tasks";
+
+function Router() {
   return (
-    <>
-      <Switch>
-        {/* Public preview - no auth required */}
-        <Route path="/preview" component={Preview} />
+    <Switch>
+      {/* ── Root → Overview ── */}
+      <Route path="/" component={Home} />
+      <Route path="/overview" component={Overview} />
 
-        {/* ─── Guest Preview Routes (no auth required) ─── */}
-        <Route path="/guest/:rest*">
-          <GuestDashboardLayout>
-            <Switch>
-              <Route path="/guest" component={GuestHome} />
-              <Route path="/guest/overview" component={GuestOverview} />
-              <Route path="/guest/performance" component={GuestPerformance} />
-              <Route path="/guest/revenue" component={GuestRevenue} />
-              {/* Intelligence */}
-              <Route path="/guest/intelligence" component={GuestMarketingIntelligence} />
-              <Route path="/guest/intelligence/ai-actions" component={GuestAIActions} />
-              <Route path="/guest/intelligence/news" component={GuestNewsManager} />
-              {/* Members */}
-              <Route path="/guest/members" component={GuestMembers} />
-              <Route path="/guest/guests" component={GuestGuests} />
-              <Route path="/guest/leads" component={GuestLeads} />
-              {/* Campaigns */}
-              <Route path="/guest/campaigns" component={GuestCampaigns} />
-              <Route path="/guest/campaigns/meta-ads" component={GuestMetaAds} />
-              <Route path="/guest/campaigns/email" component={GuestEmailCampaigns} />
-              <Route path="/guest/campaigns/funnels" component={GuestFunnels} />
-              <Route path="/guest/campaigns/automations" component={GuestAutomations} />
-              <Route path="/guest/campaigns/drip" component={GuestDripCampaigns} />
-              <Route path="/guest/announcements" component={GuestAnnouncements} />
-              {/* Programs */}
-              <Route path="/guest/programs" component={GuestPrograms} />
-              <Route path="/guest/programs/leagues" component={GuestLeagues} />
-              <Route path="/guest/programs/events" component={GuestPrivateEvents} />
-              {/* Tools */}
-              <Route path="/guest/site-control" component={GuestSiteControl} />
-              <Route path="/guest/integrations" component={GuestIntegrations} />
-              <Route path="/guest/settings" component={GuestAccountSettings} />
-              {/* Fallback to guest home */}
-              <Route component={GuestHome} />
-            </Switch>
-          </GuestDashboardLayout>
-        </Route>
+      {/* ── MARKETING & PROGRAMS / Campaigns ── */}
+      <Route path="/campaigns" component={StrategicCampaigns} />
+      <Route path="/campaigns/strategic" component={StrategicCampaigns} />
+      <Route path="/campaigns/meta-ads" component={MetaAds} />
+      <Route path="/campaigns/meta-ads/campaign/:id" component={MetaAdsCampaignDetail} />
+      <Route path="/campaign/:id" component={CampaignDetail} />
+      <Route path="/category/:id" component={CategoryDetail} />
+      <Route path="/campaign-visuals" component={CampaignVisuals} />
+      <Route path="/calendar" component={CalendarViewer} />
+      <Route path="/timeline" component={CampaignTimeline} />
+      <Route path="/budget" component={BudgetManager} />
 
-        {/* Also handle exact /guest path */}
-        <Route path="/guest">
-          <GuestDashboardLayout>
-            <GuestHome />
-          </GuestDashboardLayout>
-        </Route>
+      {/* ── MARKETING & PROGRAMS / Intelligence ── */}
+      <Route path="/intelligence" component={MarketingIntelligence} />
+      <Route path="/intelligence/ai-actions" component={AIActions} />
+      <Route path="/intelligence/performance" component={Performance} />
+      <Route path="/intelligence/research" component={MarketResearch} />
+      <Route path="/intelligence/revenue" component={Revenue} />
+      <Route path="/intelligence/reports" component={Reports} />
 
-        {/* All dashboard routes wrapped in DashboardLayout */}
-        <Route>
-          <DashboardLayout>
-            <Switch>
-              <Route path="/" component={Home} />
-              <Route path="/overview" component={Overview} />
-              <Route path="/performance" component={Performance} />
-              <Route path="/revenue" component={Revenue} />
+      {/* ── MARKETING & PROGRAMS / Programs ── */}
+      <Route path="/programs" component={Programs} />
+      <Route path="/programs/drive-day" component={SundayClinicDetail} />
+      <Route path="/programs/winter-clinics" component={WinterClinicDetail} />
+      <Route path="/programs/summer-camp" component={JuniorCampDashboard} />
+      <Route path="/programs/junior-summer-camp" component={JuniorCampDashboard} />
+      <Route path="/programs/leagues" component={Leagues} />
+      <Route path="/programs/annual-giveaway" component={AnnualGiveaway} />
 
-              {/* Intelligence */}
-              <Route path="/intelligence" component={MarketingIntelligence} />
-              <Route path="/intelligence/ai-actions" component={AIActions} />
-              <Route path="/intelligence/news" component={NewsManager} />
+      {/* ── PROMOTIONS ── */}
+      <Route path="/promotions/annual-giveaway" component={AnnualGiveaway} />
 
-              {/* Members */}
-              <Route path="/members" component={Members} />
-              <Route path="/guests" component={Guests} />
-              <Route path="/leads" component={Leads} />
+      {/* ── AUDIENCE / List ── */}
+      <Route path="/list" component={Members} />
+      <Route path="/list/members" component={Members} />
+      <Route path="/list/members/:id" component={MemberProfile} />
+      <Route path="/list/leads" component={Leads} />
+      <Route path="/list/guests" component={Guests} />
+      <Route path="/duplicates" component={Duplicates} />
 
-              {/* Campaigns */}
-              <Route path="/campaigns" component={Campaigns} />
-              <Route path="/campaigns/meta-ads" component={MetaAds} />
-              <Route path="/campaigns/email" component={EmailCampaigns} />
-              <Route path="/campaigns/funnels" component={Funnels} />
-              <Route path="/campaigns/automations" component={Automations} />
-              <Route path="/campaigns/drip" component={DripCampaigns} />
-              <Route path="/announcements" component={Announcements} />
+      {/* ── AUDIENCE / Communication ── */}
+      <Route path="/communication" component={CommunicationsHub} />
+      <Route path="/communication/hub" component={CommunicationsHub} />
+      <Route path="/communication/email-marketing" component={EmailMarketing} />
+      <Route path="/communication/announcements" component={Announcements} />
+      <Route path="/communication/automations" component={Automations} />
+      <Route path="/communication/drip" component={DripCampaigns} />
 
-              {/* Programs */}
-              <Route path="/programs" component={Programs} />
-              <Route path="/programs/leagues" component={Leagues} />
-              <Route path="/programs/events" component={PrivateEvents} />
+      {/* ── WEBSITE ── */}
+      <Route path="/website" component={WebsiteViewer} />
+      <Route path="/website/site-control" component={SiteControl} />
+      <Route path="/website/instagram" component={InstagramViewer} />
+      <Route path="/website/instagram/sync" component={InstagramSync} />
+      <Route path="/website/instagram/analytics" component={InstagramAnalytics} />
+      <Route path="/website/news" component={NewsManager} />
 
-              {/* Tools */}
-              <Route path="/site-control" component={SiteControl} />
-              <Route path="/integrations" component={Integrations} />
-              <Route path="/settings" component={AccountSettings} />
+      {/* ── SETTINGS ── */}
+      <Route path="/settings" component={AccountSettings} />
+      <Route path="/settings/integrations" component={Integrations} />
+      <Route path="/settings/account" component={AccountSettings} />
 
-              {/* Fallback 404 */}
-              <Route>
-                <div className="flex items-center justify-center h-full min-h-[60vh]">
-                  <div className="text-center">
-                    <h1 className="text-4xl font-bold text-primary mb-2">404</h1>
-                    <p className="text-muted-foreground">Page not found</p>
-                  </div>
-                </div>
-              </Route>
-            </Switch>
-          </DashboardLayout>
-        </Route>
-      </Switch>
-      <Toaster theme="dark" position="top-right" richColors />
-    </>
+      {/* ── Legacy / backward-compat routes (keep working) ── */}
+      <Route path="/strategic-campaigns" component={StrategicCampaigns} />
+      <Route path="/meta-ads" component={MetaAds} />
+      <Route path="/meta-ads/campaign/:id" component={MetaAdsCampaignDetail} />
+      <Route path="/roi" component={ROI} />
+      <Route path="/channels" component={Channels} />
+      <Route path="/members" component={Members} />
+      <Route path="/members/:id" component={MemberProfile} />
+      <Route path="/revenue" component={Revenue} />
+      <Route path="/tasks" component={Tasks} />
+      <Route path="/reports" component={Reports} />
+      <Route path="/instagram" component={InstagramViewer} />
+      <Route path="/instagram-sync" component={InstagramSync} />
+      <Route path="/instagram-analytics" component={InstagramAnalytics} />
+      <Route path="/email-marketing" component={EmailMarketing} />
+      <Route path="/marketing-intelligence" component={MarketingIntelligence} />
+      <Route path="/drive-day" component={DriveDay} />
+      <Route path="/junior-summer-camp" component={JuniorCampDashboard} />
+      <Route path="/summer-camp" component={SummerCamp} />
+      <Route path="/sunday-clinic" component={SundayClinicDetail} />
+      <Route path="/winter-clinic" component={WinterClinicDetail} />
+      <Route path="/annual-giveaway" component={AnnualGiveaway} />
+      <Route path="/annual-giveaway-actions" component={AnnualGiveawayActions} />
+      <Route path="/trial-session" component={TrialSession} />
+
+      {/* ── Special campaign pages ── */}
+      <Route path="/anniversary-giveaway" component={AnniversaryGiveaway} />
+      <Route path="/anniversary-giveaway-application" component={AnniversaryGiveawayApplication} />
+      <Route path="/anniversary-giveaway-thank-you" component={AnniversaryGiveawayThankYou} />
+
+      {/* ── Public preview (no auth required) ── */}
+      <Route path="/preview" component={Preview} />
+
+      {/* ── Email Campaigns (Encharge sync) ── */}
+      <Route path="/email-campaigns" component={EmailCampaigns} />
+      <Route path="/communication/email-campaigns" component={EmailCampaigns} />
+
+      {/* ── Funnels / Landing Pages (ClickFunnels sync) ── */}
+      <Route path="/funnels" component={Funnels} />
+      <Route path="/website/funnels" component={Funnels} />
+
+      {/* ── 404 ── */}
+      <Route path="/404" component={NotFound} />
+      <Route component={NotFound} />
+    </Switch>
   );
 }
+
+function App() {
+  return (
+    <ErrorBoundary>
+      <ThemeProvider defaultTheme="dark">
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
+  );
+}
+
+export default App;

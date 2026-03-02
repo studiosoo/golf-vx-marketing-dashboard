@@ -1,120 +1,142 @@
-import { trpc } from "@/lib/trpc";
+import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
-import { User, Bell, Key, Settings } from "lucide-react";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
+import { User, Shield, Bell, LogOut, Key, Building2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+
+const SYSTEM_INFO = [
+  { label: "Dashboard Version", value: "v2.0.0" },
+  { label: "Environment", value: "Production" },
+  { label: "Location", value: "Arlington Heights, IL" },
+  { label: "Brand", value: "Golf VX" },
+  { label: "Franchise", value: "Arlington Heights" },
+  { label: "Timezone", value: "America/Chicago (CST)" },
+];
+
+const WEBHOOK_INFO = [
+  { label: "Boomerang Webhook", value: "POST /api/webhooks/boomerang", status: "active" },
+  { label: "Webhook Secret", value: "golfvx_boomerang_2026", status: "active" },
+  { label: "Make.com Header", value: "x-webhook-secret", status: "active" },
+  { label: "Twilio SMS", value: "Not configured", status: "pending" },
+];
 
 export default function AccountSettings() {
-  const { data: user } = trpc.auth.me.useQuery();
+  const { user, logout } = useAuth();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    await logout();
+    toast({ title: "Signed out", description: "You have been signed out successfully" });
+  };
 
   return (
-    <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Account Settings</h1>
-        <p className="text-muted-foreground text-sm mt-1">Manage your account preferences and settings</p>
+    <DashboardLayout>
+      <div className="space-y-6 p-6 max-w-3xl">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Account Settings</h1>
+          <p className="text-muted-foreground mt-1 text-sm">Your profile, system configuration, and webhook settings</p>
+        </div>
+
+        {/* User Profile */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <User className="h-4 w-4 text-blue-400" /> Profile
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                <User className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-base font-semibold text-foreground">{user?.name ?? "—"}</p>
+                <p className="text-sm text-muted-foreground">{user?.email ?? "—"}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge variant="outline" className="text-xs capitalize">{user?.role ?? "user"}</Badge>
+                  <span className="text-xs text-muted-foreground">Last sign in: {user?.lastSignedIn ? new Date(user.lastSignedIn).toLocaleDateString() : "—"}</span>
+                </div>
+              </div>
+              <Button size="sm" variant="outline" className="gap-1.5 text-xs h-8 shrink-0" onClick={handleLogout}>
+                <LogOut className="h-3 w-3" /> Sign Out
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* System Info */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-purple-400" /> System Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {SYSTEM_INFO.map((item) => (
+                <div key={item.label} className="flex items-center justify-between py-1.5 border-b border-border/40 last:border-0">
+                  <span className="text-xs text-muted-foreground">{item.label}</span>
+                  <span className="text-xs font-medium text-foreground">{item.value}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Webhook & API Config */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <Key className="h-4 w-4 text-amber-400" /> Webhook & API Configuration
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {WEBHOOK_INFO.map((item) => (
+                <div key={item.label} className="flex items-center justify-between py-2 border-b border-border/40 last:border-0">
+                  <div>
+                    <p className="text-xs font-medium text-foreground">{item.label}</p>
+                    <p className="text-xs text-muted-foreground font-mono">{item.value}</p>
+                  </div>
+                  <Badge variant="outline" className={`text-xs ${
+                    item.status === "active" ? "border-green-500/40 text-green-400" : "border-amber-500/40 text-amber-400"
+                  }`}>{item.status === "active" ? "Active" : "Pending"}</Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Security */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <Shield className="h-4 w-4 text-green-400" /> Security
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-foreground">Manus OAuth</p>
+                  <p className="text-xs text-muted-foreground">Authenticated via Manus OAuth 2.0</p>
+                </div>
+                <Badge variant="outline" className="text-xs border-green-500/40 text-green-400">Active</Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-foreground">Session Cookie</p>
+                  <p className="text-xs text-muted-foreground">JWT-signed HTTP-only session cookie</p>
+                </div>
+                <Badge variant="outline" className="text-xs border-green-500/40 text-green-400">Secure</Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-      <Tabs defaultValue="profile">
-        <TabsList className="bg-muted">
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="api">API Keys</TabsTrigger>
-          <TabsTrigger value="preferences">Preferences</TabsTrigger>
-        </TabsList>
-        <TabsContent value="profile" className="mt-4">
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="text-sm font-medium flex items-center gap-2"><User size={16} />Profile Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-16 h-16 rounded-full bg-yellow-400/20 flex items-center justify-center">
-                  <User size={24} className="text-yellow-400" />
-                </div>
-                <div>
-                  <div className="font-semibold text-foreground">{(user as any)?.name || "Owner"}</div>
-                  <Badge variant="secondary" className="text-xs mt-1">{(user as any)?.role || "admin"}</Badge>
-                </div>
-              </div>
-              <Separator className="bg-border" />
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Display Name</Label>
-                  <Input defaultValue={(user as any)?.name || ""} className="mt-1" />
-                </div>
-                <div>
-                  <Label>Email</Label>
-                  <Input defaultValue={(user as any)?.email || ""} className="mt-1" disabled />
-                </div>
-              </div>
-              <Button className="bg-yellow-400 text-black hover:bg-yellow-500" size="sm">Save Profile</Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="notifications" className="mt-4">
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="text-sm font-medium flex items-center gap-2"><Bell size={16} />Notification Preferences</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {[
-                { label: "New member signups", description: "Get notified when a new member joins" },
-                { label: "Campaign performance alerts", description: "Weekly campaign performance summary" },
-                { label: "Revenue milestones", description: "Alert when revenue targets are hit" },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center justify-between py-2">
-                  <div>
-                    <div className="text-sm font-medium text-foreground">{item.label}</div>
-                    <div className="text-xs text-muted-foreground">{item.description}</div>
-                  </div>
-                  <div className="w-10 h-5 bg-yellow-400 rounded-full cursor-pointer relative">
-                    <div className="absolute right-0.5 top-0.5 w-4 h-4 bg-black rounded-full" />
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="api" className="mt-4">
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="text-sm font-medium flex items-center gap-2"><Key size={16} />API Keys</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {["Meta Ads API", "Encharge API", "Acuity API", "ClickFunnels API"].map((api) => (
-                <div key={api} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                  <div>
-                    <div className="text-sm font-medium text-foreground">{api}</div>
-                    <div className="text-xs text-muted-foreground font-mono mt-0.5">••••••••••••••••••••••••••••••••</div>
-                  </div>
-                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">Active</Badge>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="preferences" className="mt-4">
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="text-sm font-medium flex items-center gap-2"><Settings size={16} />Dashboard Preferences</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label>Default Date Range</Label>
-                <Input defaultValue="Last 30 days" className="mt-1" />
-              </div>
-              <div>
-                <Label>Timezone</Label>
-                <Input defaultValue="America/Chicago (CST)" className="mt-1" />
-              </div>
-              <Button className="bg-yellow-400 text-black hover:bg-yellow-500" size="sm">Save Preferences</Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
+    </DashboardLayout>
   );
 }

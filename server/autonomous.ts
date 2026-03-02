@@ -362,6 +362,21 @@ async function executeMetaAdsBudgetChange(
     };
   }
 
+  // Validate that campaignId is a real numeric Meta Ads ID
+  const isValidMetaId = /^\d{10,}$/.test(campaignId);
+  if (!isValidMetaId) {
+    const newBudget = currentBudget > 0 ? currentBudget * (1 + budgetChange) : null;
+    const budgetInstruction = newBudget
+      ? `Set daily budget to $${newBudget.toFixed(2)} (${(Math.abs(budgetChange) * 100).toFixed(0)}% ${direction} from $${currentBudget.toFixed(2)})`
+      : `${direction === "increase" ? "Increase" : "Decrease"} daily budget by ${(Math.abs(budgetChange) * 100).toFixed(0)}%`;
+    return {
+      success: false,
+      actionType: budgetChange > 0 ? "budget_increase" : "budget_decrease",
+      details: `Manual action required: "${campaignName}" is not linked to a Meta Ads campaign ID. To apply: Open Meta Ads Manager → Find "${campaignName}" → ${budgetInstruction}.`,
+      error: `Campaign not linked to Meta Ads. Manual action: ${budgetInstruction} for "${campaignName}" in Meta Ads Manager (facebook.com/adsmanager).`,
+    };
+  }
+
   try {
     // First get current budget from Meta Ads
     const { getCampaignBudget } = await import("./metaAds");

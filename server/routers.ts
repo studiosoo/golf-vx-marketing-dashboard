@@ -3615,8 +3615,7 @@ Return a JSON object with:
             AND joinDate >= DATE_FORMAT(NOW(), '%Y-%m-01') THEN 1 END) as newThisMonth
         FROM members
       `);
-      const memberRows = Array.isArray((memberResult as any)[0]) ? (memberResult as any)[0] : (memberResult as any);
-      const m = (memberRows as any)[0] || {};
+      const m = (memberResult as any)[0] || {};
 
       // Revenue this month
       const revenueResult = await database.execute(`
@@ -3630,10 +3629,8 @@ Return a JSON object with:
         WHERE date >= DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 1 MONTH), '%Y-%m-01')
           AND date < DATE_FORMAT(NOW(), '%Y-%m-01')
       `);
-      const revRows = Array.isArray((revenueResult as any)[0]) ? (revenueResult as any)[0] : (revenueResult as any);
-      const revLastRows = Array.isArray((revenueLastMonthResult as any)[0]) ? (revenueLastMonthResult as any)[0] : (revenueLastMonthResult as any);
-      const thisMonthRevenue = parseFloat((revRows as any)[0]?.thisMonth || '0');
-      const lastMonthRevenue = parseFloat((revLastRows as any)[0]?.lastMonth || '0');
+      const thisMonthRevenue = parseFloat((revenueResult as any)[0]?.thisMonth || '0');
+      const lastMonthRevenue = parseFloat((revenueLastMonthResult as any)[0]?.lastMonth || '0');
 
       // Budget summary (active campaigns)
       const budgetResult = await database.execute(`
@@ -3643,8 +3640,7 @@ Return a JSON object with:
         FROM campaigns
         WHERE status = 'active'
       `);
-      const budgetRows = Array.isArray((budgetResult as any)[0]) ? (budgetResult as any)[0] : (budgetResult as any);
-      const b = (budgetRows as any)[0] || {};
+      const b = (budgetResult as any)[0] || {};
       const totalBudget = parseFloat(b.totalBudget || '0');
       const totalSpent = parseFloat(b.totalSpent || '0');
 
@@ -3652,8 +3648,32 @@ Return a JSON object with:
       const campaignResult = await database.execute(`
         SELECT COUNT(*) as activeCampaigns FROM campaigns WHERE status = 'active'
       `);
-      const campaignRows = Array.isArray((campaignResult as any)[0]) ? (campaignResult as any)[0] : (campaignResult as any);
-      const activeCampaigns = Number((campaignRows as any)[0]?.activeCampaigns || 0);
+      const activeCampaigns = Number((campaignResult as any)[0]?.activeCampaigns || 0);
+
+      // Last email sent
+      const lastEmailResult = await database.execute(`
+        SELECT name, subject, send_at, delivered, open_rate
+        FROM encharge_broadcasts
+        WHERE status = 'sent'
+        ORDER BY send_at DESC
+        LIMIT 1
+      `);
+      const lastEmail = (lastEmailResult as any)[0] || null;
+
+      // Top funnel this month
+      const topFunnelResult = await database.execute(`
+        SELECT f.name, f.opt_in_count,
+               COUNT(s.id) AS submissionsThisMonth
+        FROM cf_funnels f
+        LEFT JOIN cf_form_submissions s
+          ON s.funnel_id = f.cf_id
+          AND s.submitted_at >= DATE_FORMAT(NOW(), '%Y-%m-01')
+        WHERE f.archived = 0
+        GROUP BY f.cf_id, f.name, f.opt_in_count
+        ORDER BY submissionsThisMonth DESC, f.opt_in_count DESC
+        LIMIT 1
+      `);
+      const topFunnel = (topFunnelResult as any)[0] || null;
 
       return {
         generatedAt: new Date().toISOString(),
@@ -3680,6 +3700,18 @@ Return a JSON object with:
         campaigns: {
           active: activeCampaigns,
         },
+        lastEmailSent: lastEmail ? {
+          name: lastEmail.name as string,
+          subject: lastEmail.subject as string | null,
+          sentAt: lastEmail.send_at ? new Date(lastEmail.send_at).toISOString() : null,
+          delivered: Number(lastEmail.delivered || 0),
+          openRate: parseFloat(lastEmail.open_rate || '0'),
+        } : null,
+        topFunnel: topFunnel ? {
+          name: topFunnel.name as string,
+          optInCount: Number(topFunnel.opt_in_count || 0),
+          submissionsThisMonth: Number(topFunnel.submissionsThisMonth || 0),
+        } : null,
       };
     }),
   }),
@@ -3734,185 +3766,6 @@ Return a JSON object with:
       const result = await syncClickFunnels();
       return result;
     }),
-  }),
-
-  // ─── Guest Preview (public read-only access to all dashboard data) ─────────
-  guest: router({
-    getMemberStats: publicProcedure.query(async () => {
-      return await db.getMemberStats();
-    }),
-    getMembers: publicProcedure
-      .input(z.object({
-        search: z.string().optional(),
-        status: z.enum(["active", "inactive", "cancelled", "trial"]).optional(),
-        membershipTier: z.enum(["trial", "monthly", "annual", "corporate", "none", "all_access_aces", "swing_savers", "golf_vx_pro"]).optional(),
-      }).optional())
-      .query(async ({ input }) => {
-        const allMembers = await db.getAllMembers(input);
-        return allMembers.map(m => ({
-          id: m.id, name: m.name, email: m.email,
-          membershipTier: m.membershipTier, status: m.status,
-          joinDate: m.joinDate, acquisitionSource: m.acquisitionSource,
-          monthlyAmount: m.monthlyAmount, loyaltyPoints: m.loyaltyPoints,
-          totalVisits: m.totalVisits, lastVisitDate: m.lastVisitDate, tags: m.tags,
-        }));
-      }),
-    getCampaigns: publicProcedure.query(async () => await db.getAllCampaigns()),
-    getCampaignsByStatus: publicProcedure
-      .input(z.object({ status: z.enum(["planned", "active", "completed", "paused"]) }))
-      .query(async ({ input }) => await db.getCampaignsByStatus(input.status)),
-    getCampaignsByCategory: publicProcedure
-      .input(z.object({ category: z.enum(["trial_conversion", "membership_acquisition", "member_retention", "corporate_events"]) }))
-      .query(async ({ input }) => await db.getCampaignsByCategory(input.category)),
-    getCategorySummary: publicProcedure.query(async () => await db.getCategorySummary()),
-    getDashboardOverview: publicProcedure
-      .input(z.object({ startDate: z.date(), endDate: z.date() }))
-      .query(async ({ input }) => {
-        const [totalRevenue, memberStats, campaigns, channelPerformance] = await Promise.all([
-          db.getTotalRevenue(input.startDate, input.endDate),
-          db.getMemberStats(),
-          db.getAllCampaigns(),
-          db.getChannelPerformanceSummary(input.startDate, input.endDate),
-        ]);
-        const activeCampaigns = campaigns.filter(c => c.status === "active");
-        const totalSpend = activeCampaigns.reduce((sum, c) => sum + parseFloat(c.actualSpend), 0);
-        const totalCampaignRevenue = activeCampaigns.reduce((sum, c) => sum + parseFloat(c.actualRevenue), 0);
-        const roi = totalSpend > 0 ? ((totalCampaignRevenue - totalSpend) / totalSpend) * 100 : 0;
-        const allAccessMRR = parseFloat(memberStats?.allAccessMRR as string || '0') || (memberStats?.allAccessCount || 0) * 325;
-        const swingSaversMRR = parseFloat(memberStats?.swingSaversMRR as string || '0') || (memberStats?.swingSaversCount || 0) * 225;
-        const golfVxProMRR = parseFloat(memberStats?.golfVxProMRR as string || '0') || (memberStats?.golfVxProCount || 0) * 500;
-        const totalMRR = allAccessMRR + swingSaversMRR + golfVxProMRR;
-        return {
-          totalRevenue, activeMembers: memberStats?.activeMembers || 0,
-          totalMembers: memberStats?.totalMembers || 0, monthlyRecurringRevenue: totalMRR,
-          marketingSpend: totalSpend.toFixed(2), overallROI: roi.toFixed(2),
-          activeCampaignsCount: activeCampaigns.length, memberStats, channelPerformance,
-        };
-      }),
-    getRevenueSummary: publicProcedure
-      .input(z.object({ startDate: z.date(), endDate: z.date() }))
-      .query(async ({ input }) => await db.getRevenueSummary(input.startDate, input.endDate)),
-    getToastSummary: publicProcedure.query(async () => {
-      const dbConn = await db.getDb();
-      if (!dbConn) return null;
-      const [rows] = await dbConn.execute(
-        `SELECT SUM(total_revenue) as all_time_revenue, SUM(bay_revenue) as all_time_bay,
-          SUM(food_bev_revenue) as all_time_food_bev, SUM(golf_revenue) as all_time_golf,
-          SUM(total_orders) as all_time_orders, SUM(total_guests) as all_time_guests,
-          SUM(total_tips) as all_time_tips, MAX(CAST(date AS UNSIGNED)) as latest_date,
-          COUNT(*) as days_with_data,
-          SUM(CASE WHEN LEFT(date,6)=DATE_FORMAT(NOW(),'%Y%m') THEN total_revenue ELSE 0 END) as this_month_revenue,
-          SUM(CASE WHEN LEFT(date,6)=DATE_FORMAT(DATE_SUB(NOW(),INTERVAL 1 MONTH),'%Y%m') THEN total_revenue ELSE 0 END) as last_month_revenue,
-          SUM(CASE WHEN LEFT(date,6)=DATE_FORMAT(NOW(),'%Y%m') THEN total_orders ELSE 0 END) as this_month_orders
-         FROM toast_daily_summary`
-      ) as any[];
-      const r = (rows as any[])[0];
-      if (!r) return null;
-      return {
-        allTimeRevenue: parseFloat(r.all_time_revenue || '0'), allTimeBay: parseFloat(r.all_time_bay || '0'),
-        allTimeFoodBev: parseFloat(r.all_time_food_bev || '0'), allTimeGolf: parseFloat(r.all_time_golf || '0'),
-        allTimeOrders: Number(r.all_time_orders), allTimeGuests: Number(r.all_time_guests),
-        allTimeTips: parseFloat(r.all_time_tips || '0'), latestDate: String(r.latest_date || ''),
-        daysWithData: Number(r.days_with_data), thisMonthRevenue: parseFloat(r.this_month_revenue || '0'),
-        lastMonthRevenue: parseFloat(r.last_month_revenue || '0'), thisMonthOrders: Number(r.this_month_orders),
-      };
-    }),
-    getToastDaily: publicProcedure.query(async () => {
-      const dbConn = await db.getDb();
-      if (!dbConn) return [];
-      const [rows] = await dbConn.execute(
-        `SELECT date, total_revenue, bay_revenue, food_bev_revenue, golf_revenue,
-                total_orders, total_guests, total_tax, total_tips, total_discounts,
-                cash_revenue, credit_revenue FROM toast_daily_summary ORDER BY date ASC`
-      ) as any[];
-      return (rows as any[]).map((r: any) => ({
-        date: r.date as string, totalRevenue: parseFloat(r.total_revenue || '0'),
-        bayRevenue: parseFloat(r.bay_revenue || '0'), foodBevRevenue: parseFloat(r.food_bev_revenue || '0'),
-        golfRevenue: parseFloat(r.golf_revenue || '0'), totalOrders: Number(r.total_orders),
-        totalGuests: Number(r.total_guests), totalTax: parseFloat(r.total_tax || '0'),
-        totalTips: parseFloat(r.total_tips || '0'), totalDiscounts: parseFloat(r.total_discounts || '0'),
-        cashRevenue: parseFloat(r.cash_revenue || '0'), creditRevenue: parseFloat(r.credit_revenue || '0'),
-      }));
-    }),
-    getMetaAdsCampaigns: publicProcedure
-      .input(z.object({ datePreset: z.enum(["today", "yesterday", "last_7d", "last_14d", "last_30d", "last_90d", "lifetime"]).default("last_30d") }))
-      .query(async ({ input }) => {
-        try { return await metaAds.getAllCampaignsWithInsights(input.datePreset); }
-        catch {
-          const cachedData = metaAdsCache.getAllCampaignsFromCache();
-          if (cachedData && cachedData.length > 0) {
-            return cachedData.map(c => ({
-              id: c.campaign_id, name: c.campaign_name, status: c.status || "UNKNOWN",
-              objective: c.objective || "UNKNOWN", created_time: c.date_start || "", updated_time: c.date_stop || "",
-              insights: { campaign_name: c.campaign_name, campaign_id: c.campaign_id,
-                impressions: c.impressions, clicks: c.clicks, spend: c.spend,
-                reach: c.reach, cpc: c.cpc, cpm: c.cpm, ctr: c.ctr },
-            }));
-          }
-          return [];
-        }
-      }),
-    getEmailCampaigns: publicProcedure.query(async () => {
-      const { getSyncedBroadcasts } = await import("./enchargeBroadcastSync");
-      return await getSyncedBroadcasts();
-    }),
-    getEmailSummary: publicProcedure.query(async () => {
-      const { getEmailPerformanceSummary } = await import("./enchargeBroadcastSync");
-      return await getEmailPerformanceSummary();
-    }),
-    getFunnels: publicProcedure
-      .input(z.object({ includeArchived: z.boolean().optional().default(false) }).optional())
-      .query(async ({ input }) => {
-        const { getCfFunnels } = await import("./db");
-        return await getCfFunnels(input?.includeArchived ?? false);
-      }),
-    getFunnelSubmissions: publicProcedure
-      .input(z.object({ funnelId: z.number().optional(), limit: z.number().optional().default(100) }))
-      .query(async ({ input }) => {
-        const { getCfSubmissions } = await import("./db");
-        return await getCfSubmissions(input.funnelId, input.limit);
-      }),
-    getFunnelSummary: publicProcedure.query(async () => {
-      const { getCfFunnelSummary } = await import("./db");
-      return await getCfFunnelSummary();
-    }),
-    getEnchargeMetrics: publicProcedure.query(async () => {
-      try { return await encharge.getSubscriberMetrics(); }
-      catch { return { totalSubscribers: 0, recentSubscribers: 0, segments: 0, segmentDetails: [] }; }
-    }),
-    getEnchargeSegments: publicProcedure.query(async () => {
-      try { return await encharge.getEnchargeSegments(); } catch { return []; }
-    }),
-    getEnchargeAccount: publicProcedure.query(async () => {
-      try { return await encharge.getEnchargeAccount(); } catch { return null; }
-    }),
-    getAcuityRevenue: publicProcedure
-      .input(z.object({ minDate: z.string().optional(), maxDate: z.string().optional() }))
-      .query(async ({ input }) => {
-        try {
-          const { getAllRevenueByType } = await import('./acuity');
-          const data = await getAllRevenueByType(input.minDate, input.maxDate);
-          const grouped: Record<string, { totalRevenue: number; bookingCount: number; types: string[] }> = {
-            pbga_clinics: { totalRevenue: 0, bookingCount: 0, types: [] },
-            trial: { totalRevenue: 0, bookingCount: 0, types: [] },
-            other: { totalRevenue: 0, bookingCount: 0, types: [] },
-          };
-          for (const item of data) {
-            const name = (item.appointmentType || '').toLowerCase();
-            let group = 'other';
-            if (name.includes('pbga') || name.includes('clinic') || name.includes('drive day') || name.includes('winter') || name.includes('summer camp') || name.includes('camp')) group = 'pbga_clinics';
-            else if (name.includes('trial') || name.includes('intro') || name.includes('free')) group = 'trial';
-            grouped[group].totalRevenue += item.totalRevenue;
-            grouped[group].bookingCount += item.bookingCount;
-            grouped[group].types.push(item.appointmentType);
-          }
-          const total = data.reduce((s, d) => s + d.totalRevenue, 0);
-          const totalBookings = data.reduce((s, d) => s + d.bookingCount, 0);
-          return { byType: data.sort((a, b) => b.totalRevenue - a.totalRevenue), grouped, total, totalBookings };
-        } catch {
-          return { byType: [], grouped: { pbga_clinics: { totalRevenue: 0, bookingCount: 0, types: [] }, trial: { totalRevenue: 0, bookingCount: 0, types: [] }, other: { totalRevenue: 0, bookingCount: 0, types: [] } }, total: 0, totalBookings: 0 };
-        }
-      }),
   }),
 });
 export type AppRouter = typeof appRouter;

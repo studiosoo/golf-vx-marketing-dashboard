@@ -42,20 +42,7 @@ interface CachedInsight {
   account_id?: string;
 }
 
-// Use /tmp as fallback if project cache dir is corrupted (filesystem issue)
-function resolveCacheFilePath(): string {
-  const projectPath = path.join(process.cwd(), '.meta-ads-cache', 'insights.json');
-  try {
-    const dir = path.dirname(projectPath);
-    fs.accessSync(dir, fs.constants.R_OK);
-    return projectPath;
-  } catch {
-    const tmpPath = '/tmp/meta-ads-cache/insights.json';
-    try { fs.mkdirSync('/tmp/meta-ads-cache', { recursive: true }); } catch {}
-    return tmpPath;
-  }
-}
-const CACHE_FILE_PATH = resolveCacheFilePath();
+const CACHE_FILE_PATH = path.join(process.cwd(), '.meta-ads-cache', 'insights.json');
 
 /**
  * Read Meta Ads insights from cache file
