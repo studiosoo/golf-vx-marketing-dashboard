@@ -12,8 +12,6 @@ export default function GuestHome() {
   }));
 
   const { data: overview, isLoading: overviewLoading } = trpc.guest.getDashboardOverview.useQuery(dateRange);
-  const { data: emailSummary } = trpc.guest.getEmailSummary.useQuery();
-  const { data: funnelSummary } = trpc.guest.getFunnelSummary.useQuery();
 
   const kpiCards = [
     {
@@ -46,15 +44,15 @@ export default function GuestHome() {
     },
     {
       label: "Email Open Rate",
-      value: emailSummary ? `${emailSummary.avgOpenRate.toFixed(1)}%` : "—",
-      sub: `${emailSummary?.sentBroadcasts ?? 0} broadcasts sent`,
+      value: emailSummary ? `${"—")}%` : "—",
+      sub: `${"—" ?? 0} broadcasts sent`,
       icon: <Mail size={20} className="text-orange-400" />,
       color: "border-orange-500/30",
     },
     {
       label: "Funnel Submissions",
-      value: funnelSummary ? funnelSummary.reduce((s: number, f: any) => s + Number(f.submissionCount || 0), 0) : "—",
-      sub: `${funnelSummary?.length ?? 0} active funnels`,
+      value: funnelSummary ? "—" number, f: any) => s + Number(f.submissionCount || 0), 0) : "—",
+      sub: `${"—" ?? 0} active funnels`,
       icon: <Zap size={20} className="text-cyan-400" />,
       color: "border-cyan-500/30",
     },

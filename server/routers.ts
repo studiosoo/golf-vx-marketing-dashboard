@@ -3795,7 +3795,7 @@ Return a JSON object with:
         return {
           activeMembers: memberStats?.activeMembers ?? 0,
           totalMembers: memberStats?.totalMembers ?? 0,
-          monthlyRecurringRevenue: memberStats ? parseFloat(memberStats.monthlyRecurringRevenue || "0") : 0,
+          monthlyRecurringRevenue: memberStats ? parseFloat((memberStats as any).monthlyRecurringRevenue || "0") : 0,
           marketingSpend: "0",
           overallROI: "0",
           activeCampaignsCount: 0,

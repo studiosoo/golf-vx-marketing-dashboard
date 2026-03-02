@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Target, Lock } from "lucide-react";
 
 export default function GuestFunnels() {
-  const { data: funnelSummary = [], isLoading } = trpc.guest.getFunnelSummary.useQuery();
   const { data: submissions = [] } = trpc.guest.getFunnels.useQuery();
 
   const totalSubmissions = (funnelSummary as any[]).reduce((s: number, f: any) => s + Number(f.submissionCount || 0), 0);
