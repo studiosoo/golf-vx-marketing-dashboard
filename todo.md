@@ -633,3 +633,15 @@
 - [x] Migrate 27 legacy entries to link with googleSheetRowId via email matching
 - [x] Write 10 vitest tests for googleSheetsSync.ts (all passing)
 - [x] End-to-end test: 69 rows from sheet, 22 updated, 0 errors
+
+## Giveaway Applications Detail Page (2026-03-02)
+- [x] Review existing AnnualGiveaway.tsx and giveaway tRPC endpoints
+- [x] Add giveaway.getApplicationsFiltered tRPC endpoint (paginated, filterable, with targeting score)
+- [x] Build GiveawayApplications.tsx with filterable table
+- [x] Filters: gender, age range, golf experience, Illinois resident, status, test entry toggle, search
+- [x] Columns: name, email, phone, city, age range, gender, golf exp, indoor familiarity, Drive Day score, status
+- [x] Drive Day targeting score (0-100) based on golf experience + IL resident + indoor familiarity
+- [x] CSV export button
+- [x] Row click → applicant detail drawer/modal
+- [x] Wire route /giveaway in App.tsx and sidebar nav item
+- [x] Write 19 vitest tests for getApplicationsFiltered endpoint (all passing)

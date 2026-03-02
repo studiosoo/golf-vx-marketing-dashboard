@@ -33,6 +33,7 @@ import Announcements from "@/pages/Announcements";
 import Programs from "@/pages/Programs";
 import Leagues from "@/pages/Leagues";
 import PrivateEvents from "@/pages/PrivateEvents";
+import GiveawayApplications from "@/pages/GiveawayApplications";
 
 // Tools
 import SiteControl from "@/pages/SiteControl";
@@ -79,6 +80,9 @@ export default function App() {
               <Route path="/programs" component={Programs} />
               <Route path="/programs/leagues" component={Leagues} />
               <Route path="/programs/events" component={PrivateEvents} />
+
+              {/* Giveaway */}
+              <Route path="/giveaway" component={GiveawayApplications} />
 
               {/* Tools */}
               <Route path="/site-control" component={SiteControl} />

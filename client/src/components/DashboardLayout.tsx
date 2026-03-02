@@ -16,6 +16,7 @@ import {
   ChevronRight,
   Eye,
   Target,
+  Gift,
 } from "lucide-react";
 
 interface NavItem {
@@ -30,6 +31,7 @@ const navItems: NavItem[] = [
   { href: "/funnels", label: "Funnels", icon: <Target size={18} /> },
   { href: "/email-campaigns", label: "Email Campaigns", icon: <Mail size={18} /> },
   { href: "/members", label: "Members", icon: <Users size={18} /> },
+  { href: "/giveaway", label: "Annual Giveaway", icon: <Gift size={18} /> },
 ];
 
 interface DashboardLayoutProps {

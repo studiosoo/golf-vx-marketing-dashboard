@@ -2161,6 +2161,92 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
     getApplications: protectedProcedure.query(async () => {
       return await giveawaySync.getGiveawayApplications();
     }),
+
+    // Filterable, paginated applications with Drive Day targeting score
+    getApplicationsFiltered: protectedProcedure
+      .input(z.object({
+        search: z.string().optional(),
+        gender: z.string().optional(),
+        ageRange: z.string().optional(),
+        golfExperience: z.string().optional(),
+        illinoisResident: z.boolean().optional(),
+        status: z.string().optional(),
+        showTestEntries: z.boolean().default(false),
+        sortBy: z.enum(["submissionTimestamp", "name", "driveDayScore", "status"]).default("submissionTimestamp"),
+        sortDir: z.enum(["asc", "desc"]).default("desc"),
+        page: z.number().min(1).default(1),
+        pageSize: z.number().min(1).max(200).default(50),
+      }))
+      .query(async ({ input }) => {
+        const db = await (await import("./db")).getDb();
+        if (!db) return { applications: [], total: 0, page: input.page, pageSize: input.pageSize };
+        const { giveawayApplications: tbl } = await import("../drizzle/schema");
+        const { eq: eqOp, like, and: andOp, or: orOp, desc: descOp, asc: ascOp, ilike } = await import("drizzle-orm");
+
+        // Build where conditions
+        const conditions: any[] = [];
+        if (!input.showTestEntries) conditions.push(eqOp(tbl.isTestEntry, false));
+        if (input.gender) conditions.push(eqOp(tbl.gender, input.gender));
+        if (input.ageRange) conditions.push(eqOp(tbl.ageRange, input.ageRange));
+        if (input.golfExperience) conditions.push(eqOp(tbl.golfExperienceLevel, input.golfExperience));
+        if (input.illinoisResident !== undefined) conditions.push(eqOp(tbl.illinoisResident, input.illinoisResident));
+        if (input.status) conditions.push(eqOp(tbl.status as any, input.status as any));
+        if (input.search) {
+          const term = `%${input.search}%`;
+          conditions.push(orOp(
+            like(tbl.name, term),
+            like(tbl.email, term),
+            like(tbl.city, term),
+          ));
+        }
+
+        const whereClause = conditions.length > 0 ? andOp(...conditions) : undefined;
+
+        const allRows = await db
+          .select()
+          .from(tbl)
+          .where(whereClause);
+
+        // Compute Drive Day targeting score for each row
+        const scoredRows = allRows.map((app) => {
+          let score = 50;
+          const reasons: string[] = [];
+          const expLower = (app.golfExperienceLevel || "").toLowerCase();
+          if (expLower.includes("beginner") || expLower.includes("new") || expLower.includes("never")) {
+            score += 20; reasons.push("Beginner");
+          } else if (expLower.includes("intermediate")) {
+            score += 15; reasons.push("Intermediate");
+          } else if (expLower.includes("advanced") || expLower.includes("experienced")) {
+            score += 5; reasons.push("Advanced");
+          }
+          const visitLower = (app.visitedBefore || "").toLowerCase();
+          if (visitLower === "yes") { score += 10; reasons.push("Visited before"); }
+          else if (visitLower === "no" || visitLower === "new") { score += 5; reasons.push("New visitor"); }
+          if (app.illinoisResident) { score += 10; reasons.push("IL resident"); }
+          const indoorLower = (app.indoorGolfFamiliarity || "").toLowerCase();
+          if (indoorLower.includes("never")) { score += 15; reasons.push("Never tried indoor"); }
+          else if (indoorLower.includes("once") || indoorLower.includes("twice")) { score += 10; reasons.push("Tried once"); }
+          return { ...app, driveDayScore: Math.min(score, 100), driveDayReasons: reasons };
+        });
+
+        // Sort
+        const sorted = scoredRows.sort((a, b) => {
+          let aVal: any, bVal: any;
+          if (input.sortBy === "driveDayScore") { aVal = a.driveDayScore; bVal = b.driveDayScore; }
+          else if (input.sortBy === "name") { aVal = a.name; bVal = b.name; }
+          else if (input.sortBy === "status") { aVal = a.status; bVal = b.status; }
+          else { aVal = a.submissionTimestamp?.getTime() ?? 0; bVal = b.submissionTimestamp?.getTime() ?? 0; }
+          if (aVal < bVal) return input.sortDir === "asc" ? -1 : 1;
+          if (aVal > bVal) return input.sortDir === "asc" ? 1 : -1;
+          return 0;
+        });
+
+        const total = sorted.length;
+        const offset = (input.page - 1) * input.pageSize;
+        const paged = sorted.slice(offset, offset + input.pageSize);
+
+        return { applications: paged, total, page: input.page, pageSize: input.pageSize };
+      }),
     
     getStats: protectedProcedure.query(async () => {
       return await giveawaySync.getGiveawayStats();
