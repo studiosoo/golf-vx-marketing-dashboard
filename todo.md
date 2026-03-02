@@ -656,3 +656,6 @@
 - [x] Fix 1: Added process.on('uncaughtException') handler in server/_core/index.ts to suppress errno -117
 - [x] Fix 2: Patched Vite bundle's chokidar _handleError to also ignore errno -117 at the source
 - [x] Fix 3: Added scripts/patch-vite-chokidar.sh + postinstall script to re-apply patch after pnpm install
+- [x] Fix 4: Patched tsx bundle's chokidar _handleError (cli.mjs) to also ignore errno -117
+- [x] Fix 5: Updated scripts/patch-vite-chokidar.sh to patch both Vite and tsx bundles via postinstall
+- [x] Verified: No FSWatcher/errno-117 errors after patch applied (server stable since 18:46 CST)
