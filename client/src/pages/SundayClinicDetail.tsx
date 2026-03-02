@@ -325,9 +325,15 @@ export default function SundayClinicDetail() {
     );
   }
 
-  const memberGoalProgress = (metrics.memberAttendees / metrics.totalMembers) * 100;
+  // Active customer members = All Access Aces + Swing Savers (from KPI data)
+  // totalMembers from Acuity = all email addresses (369), not active members
+  // Use memberAttendees / totalMembers for attendance rate, but display active count separately
+  const ACTIVE_CUSTOMER_MEMBERS = 87; // All Access Aces (54) + Swing Savers (33)
+  const memberGoalProgress = (metrics.memberAttendees / ACTIVE_CUSTOMER_MEMBERS) * 100;
   const targetMemberAttendance = 50;
   const memberPerformance = (memberGoalProgress / targetMemberAttendance) * 100;
+  // Sort events by date ascending (Jan 25 first)
+  const sortedEvents = [...(metrics.events || [])].sort((a, b) => a.date.localeCompare(b.date));
 
   return (
     <DashboardLayout>
@@ -357,8 +363,9 @@ export default function SundayClinicDetail() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs text-muted-foreground">Total Members</p>
-                  <p className="text-2xl font-bold text-foreground">{metrics.totalMembers}</p>
+                  <p className="text-xs text-muted-foreground">Active Members</p>
+                  <p className="text-2xl font-bold text-foreground">{ACTIVE_CUSTOMER_MEMBERS}</p>
+                  <p className="text-xs text-muted-foreground">AA: 54 · SS: 33</p>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Members Attended</p>
@@ -383,9 +390,9 @@ export default function SundayClinicDetail() {
               <div>
                 <div className="flex justify-between text-xs text-muted-foreground mb-1">
                   <span>Member Engagement Goal</span>
-                  <span>{memberGoalProgress.toFixed(0)}%</span>
+                  <span>{Math.round(memberGoalProgress)}%</span>
                 </div>
-                <Progress value={memberGoalProgress} className="h-2" />
+                <Progress value={Math.min(memberGoalProgress, 100)} className="h-2" />
               </div>
             </CardContent>
           </Card>
@@ -443,7 +450,92 @@ export default function SundayClinicDetail() {
           </Card>
         </div>
 
-        {/* Acquisition Source Attribution */}
+        {/* Event Breakdown — shown FIRST, sorted by date ascending (Jan 25 first) */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-primary" />
+                <CardTitle>Event Breakdown</CardTitle>
+              </div>
+              {(metrics as any).totalRevenue != null && (
+                <Badge variant="outline" className="text-sm font-semibold text-green-600 border-green-500">
+                  ${(metrics as any).totalRevenue?.toFixed(0)} total revenue
+                </Badge>
+              )}
+            </div>
+            <CardDescription>
+              {metrics.totalEvents} events • {metrics.totalBookings} total bookings
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {sortedEvents.map((event) => (
+                <div key={event.date} className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-lg">
+                        <Calendar className="h-6 w-6 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-foreground">
+                          {new Date(event.date + 'T12:00:00').toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {event.uniqueAttendees} unique attendees
+                          {(event as any).revenue != null && (event as any).revenue > 0 && (
+                            <span className="ml-2 text-green-600 font-medium">
+                              · ${(event as any).revenue?.toFixed(0)} revenue
+                            </span>
+                          )}
+                        </p>
+                        {(event as any).paidAttendees != null && (
+                          <p className="text-xs text-muted-foreground">
+                            Paid: {(event as any).paidAttendees} · Members: {(event as any).memberAttendees}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <button
+                        onClick={() => setEventModal({ eventDate: event.date, label: new Date(event.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) })}
+                        className="text-lg font-bold text-primary hover:underline cursor-pointer transition-colors block"
+                        title="Click to see attendee list"
+                      >{event.totalBookings}</button>
+                      <p className="text-xs text-muted-foreground">bookings ↑ click</p>
+                    </div>
+                  </div>
+
+                  {event.sourceBreakdown && Object.keys(event.sourceBreakdown).length > 0 && (
+                    <div className="pl-16 pr-3 pb-2">
+                      <div className="flex flex-wrap gap-2">
+                        {Object.entries(event.sourceBreakdown)
+                          .sort(([, a], [, b]) => (b as number) - (a as number))
+                          .map(([source, count]) => (
+                            <Badge
+                              key={source}
+                              variant="outline"
+                              className="text-xs cursor-pointer hover:bg-primary/10 hover:border-primary transition-colors"
+                              onClick={() => setSourceModal({ source })}
+                              title={`Click to see ${source} attendees`}
+                            >
+                              {source}: {count}
+                            </Badge>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Acquisition Source Attribution — shown SECOND */}
         {metrics.sourceBreakdown && Object.keys(metrics.sourceBreakdown).length > 0 && (
           <Card>
             <CardHeader>
@@ -491,7 +583,7 @@ export default function SundayClinicDetail() {
                           <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
                             <span>Goal: {goal} attendees</span>
                             <span className={goalProgress >= 100 ? "text-green-600 font-semibold" : ""}>
-                              {goalProgress.toFixed(0)}% of goal
+                              {Math.round(goalProgress)}% of goal
                             </span>
                           </div>
                         )}
@@ -502,74 +594,6 @@ export default function SundayClinicDetail() {
             </CardContent>
           </Card>
         )}
-
-        {/* Event Breakdown */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-primary" />
-              <CardTitle>Event Breakdown</CardTitle>
-            </div>
-            <CardDescription>
-              {metrics.totalEvents} events • {metrics.totalBookings} total bookings
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {metrics.events.map((event) => (
-                <div key={event.date} className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-lg">
-                        <Calendar className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-foreground">
-                          {new Date(event.date).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {event.uniqueAttendees} unique attendees
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <button
-                        onClick={() => setEventModal({ eventDate: event.date, label: new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) })}
-                        className="text-lg font-bold text-primary hover:underline cursor-pointer transition-colors block"
-                        title="Click to see attendee list"
-                      >{event.totalBookings}</button>
-                      <p className="text-xs text-muted-foreground">bookings ↑ click</p>
-                    </div>
-                  </div>
-
-                  {event.sourceBreakdown && Object.keys(event.sourceBreakdown).length > 0 && (
-                    <div className="pl-16 pr-3 pb-2">
-                      <div className="flex flex-wrap gap-2">
-                        {Object.entries(event.sourceBreakdown)
-                          .sort(([, a], [, b]) => (b as number) - (a as number))
-                          .map(([source, count]) => (
-                            <Badge
-                              key={source}
-                              variant="outline"
-                              className="text-xs cursor-pointer hover:bg-primary/10 hover:border-primary transition-colors"
-                              onClick={() => setSourceModal({ source })}
-                              title={`Click to see ${source} attendees`}
-                            >
-                              {source}: {count}
-                            </Badge>
-                          ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Overall Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

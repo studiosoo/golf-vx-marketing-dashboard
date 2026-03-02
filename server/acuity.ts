@@ -297,18 +297,30 @@ export async function getSundayClinicData(params?: {
       eventSourceBreakdown[source] = (eventSourceBreakdown[source] || 0) + 1;
     });
 
+    // Calculate revenue for this event
+    const revenue = appts.reduce((sum, apt) => {
+      return sum + parseFloat(apt.amountPaid || apt.priceSold || apt.price || '0');
+    }, 0);
+    const paidCount = appts.filter(apt => parseFloat(apt.amountPaid || apt.priceSold || apt.price || '0') > 0).length;
+    const memberCount = appts.filter(apt => parseFloat(apt.amountPaid || apt.priceSold || apt.price || '0') === 0).length;
+
     return {
       date,
       totalBookings: totalAttendees,
       uniqueAttendees,
       sourceBreakdown: eventSourceBreakdown,
       appointments: appts,
+      revenue,
+      paidAttendees: paidCount,
+      memberAttendees: memberCount,
     };
   });
 
   // Calculate overall metrics
   const allEmails = new Set(clinicAppointments.map(a => a.email.toLowerCase()));
   const repeatAttendees = clinicAppointments.length - allEmails.size;
+
+  const totalRevenue = events.reduce((sum, e) => sum + e.revenue, 0);
 
   return {
     events: events.sort((a, b) => a.date.localeCompare(b.date)),
@@ -318,6 +330,7 @@ export async function getSundayClinicData(params?: {
     repeatAttendees,
     repeatRate: allEmails.size > 0 ? (repeatAttendees / allEmails.size) * 100 : 0,
     sourceBreakdown,
+    totalRevenue,
   };
 }
 

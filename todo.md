@@ -671,3 +671,12 @@
 - [x] Update GuestHome.tsx with KPI progress bars
 - [x] Fix progress percentage display rounding
 - [x] Add kpi-fix.test.ts with 7 passing tests
+
+## SundayClinicDetail Fixes (2026-03-02)
+- [x] Fix Member Retention card: totalMembers 369 → ACTIVE_CUSTOMER_MEMBERS 87 (AA:54 + SS:33)
+- [x] Swap section order: Event Breakdown first, Acquisition Sources second
+- [x] Sort events by date ascending (Jan 25, 2026 first)
+- [x] Add revenue data per event ($X revenue · Paid: N · Members: N)
+- [x] Add totalRevenue badge in Event Breakdown header
+- [x] Fix date display timezone issue (added T12:00:00 suffix)
+- [x] Add sunday-clinic-fixes.test.ts with 9 passing tests
