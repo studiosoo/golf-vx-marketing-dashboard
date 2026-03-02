@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE `email_captures` ADD `boomerang_card_status` varchar(50);\nALTER TABLE `email_captures` ADD `boomerang_template_id` varchar(50);\nALTER TABLE `email_captures` ADD `boomerang_template_name` varchar(100);\nALTER TABLE `email_captures` ADD `boomerang_device` varchar(50);\nALTER TABLE `email_captures` ADD `boomerang_installed_at` timestamp;\nALTER TABLE `email_captures` ADD `boomerang_deleted_at` timestamp;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2R3ugynrRDzjYQU.e9d0c4c091a8 --database A5GjFitCrpqWQ2wnoTJiWm --execute ALTER TABLE `email_captures` ADD `boomerang_card_status` varchar(50);\nALTER TABLE `email_captures` ADD `boomerang_template_id` varchar(50);\nALTER TABLE `email_captures` ADD `boomerang_template_name` varchar(100);\nALTER TABLE `email_captures` ADD `boomerang_device` varchar(50);\nALTER TABLE `email_captures` ADD `boomerang_installed_at` timestamp;\nALTER TABLE `email_captures` ADD `boomerang_deleted_at` timestamp;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1607
+}

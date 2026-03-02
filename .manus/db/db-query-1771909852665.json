@@ -1,0 +1,9 @@
+{
+  "query": "SELECT id, name, metaAdsCampaignId FROM campaigns WHERE metaAdsCampaignId LIKE '%test%' OR metaAdsCampaignId = 'test_meta_campaign_123';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2R3ugynrRDzjYQU.e9d0c4c091a8 --database A5GjFitCrpqWQ2wnoTJiWm --execute SELECT id, name, metaAdsCampaignId FROM campaigns WHERE metaAdsCampaignId LIKE '%test%' OR metaAdsCampaignId = 'test_meta_campaign_123';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 55
+}

@@ -1,0 +1,306 @@
+{
+  "query": "DESCRIBE campaigns",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2R3ugynrRDzjYQU.e9d0c4c091a8 --database A5GjFitCrpqWQ2wnoTJiWm --execute DESCRIBE campaigns",
+  "rows": [
+    {
+      "Field": "id",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "PRI",
+      "Default": "NULL",
+      "Extra": "auto_increment"
+    },
+    {
+      "Field": "name",
+      "Type": "varchar(255)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "category",
+      "Type": "enum('trial_conversion','membership_acquisition','member_retention','corporate_events')",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "type",
+      "Type": "enum('trial_conversion','membership_acquisition','corporate_events','member_retention','pbga_programs','event_specific')",
+      "Null": "NO",
+      "Key": "MUL",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "status",
+      "Type": "enum('planned','active','completed','paused')",
+      "Null": "NO",
+      "Key": "MUL",
+      "Default": "planned",
+      "Extra": ""
+    },
+    {
+      "Field": "description",
+      "Type": "text",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "startDate",
+      "Type": "timestamp",
+      "Null": "NO",
+      "Key": "MUL",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "endDate",
+      "Type": "timestamp",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "budget",
+      "Type": "decimal(10,2)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "actualSpend",
+      "Type": "decimal(10,2)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    },
+    {
+      "Field": "targetRevenue",
+      "Type": "decimal(10,2)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "actualRevenue",
+      "Type": "decimal(10,2)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    },
+    {
+      "Field": "targetApplications",
+      "Type": "int",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "actualApplications",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    },
+    {
+      "Field": "targetConversions",
+      "Type": "int",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "actualConversions",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    },
+    {
+      "Field": "metaAdsCampaignId",
+      "Type": "varchar(64)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "metaAdsBudget",
+      "Type": "decimal(10,2)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "metaAdsSpend",
+      "Type": "decimal(10,2)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    },
+    {
+      "Field": "asanaProjectId",
+      "Type": "varchar(64)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "asanaTaskId",
+      "Type": "varchar(64)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "asanaSectionId",
+      "Type": "varchar(64)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "landingPageUrl",
+      "Type": "text",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "posterImageUrl",
+      "Type": "text",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "reelThumbnailUrl",
+      "Type": "text",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "additionalVisuals",
+      "Type": "json",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "goalType",
+      "Type": "enum('revenue','followers','leads','attendance','retention')",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "goalTarget",
+      "Type": "decimal(12,2)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "goalActual",
+      "Type": "decimal(12,2)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    },
+    {
+      "Field": "goalUnit",
+      "Type": "varchar(50)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "primaryKpi",
+      "Type": "varchar(100)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "kpiTarget",
+      "Type": "decimal(12,4)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "kpiActual",
+      "Type": "decimal(12,4)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "kpiUnit",
+      "Type": "varchar(50)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "performanceScore",
+      "Type": "int",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "createdAt",
+      "Type": "timestamp",
+      "Null": "NO",
+      "Key": "",
+      "Default": "CURRENT_TIMESTAMP",
+      "Extra": ""
+    },
+    {
+      "Field": "updatedAt",
+      "Type": "timestamp",
+      "Null": "NO",
+      "Key": "",
+      "Default": "CURRENT_TIMESTAMP",
+      "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+    }
+  ],
+  "messages": [],
+  "stdout": "Field\tType\tNull\tKey\tDefault\tExtra\nid\tint\tNO\tPRI\tNULL\tauto_increment\nname\tvarchar(255)\tNO\t\tNULL\t\ncategory\tenum('trial_conversion','membership_acquisition','member_retention','corporate_events')\tNO\t\tNULL\t\ntype\tenum('trial_conversion','membership_acquisition','corporate_events','member_retention','pbga_programs','event_specific')\tNO\tMUL\tNULL\t\nstatus\tenum('planned','active','completed','paused')\tNO\tMUL\tplanned\t\ndescription\ttext\tYES\t\tNULL\t\nstartDate\ttimestamp\tNO\tMUL\tNULL\t\nendDate\ttimestamp\tNO\t\tNULL\t\nbudget\tdecimal(10,2)\tNO\t\tNULL\t\nactualSpend\tdecimal(10,2)\tNO\t\t0\t\ntargetRevenue\tdecimal(10,2)\tYES\t\tNULL\t\nactualRevenue\tdecimal(10,2)\tNO\t\t0\t\ntargetApplications\tint\tYES\t\tNULL\t\nactualApplications\tint\tNO\t\t0\t\ntargetConversions\tint\tYES\t\tNULL\t\nactualConversions\tint\tNO\t\t0\t\nmetaAdsCampaignId\tvarchar(64)\tYES\t\tNULL\t\nmetaAdsBudget\tdecimal(10,2)\tYES\t\tNULL\t\nmetaAdsSpend\tdecimal(10,2)\tYES\t\t0\t\nasanaProjectId\tvarchar(64)\tYES\t\tNULL\t\nasanaTaskId\tvarchar(64)\tYES\t\tNULL\t\nasanaSectionId\tvarchar(64)\tYES\t\tNULL\t\nlandingPageUrl\ttext\tYES\t\tNULL\t\nposterImageUrl\ttext\tYES\t\tNULL\t\nreelThumbnailUrl\ttext\tYES\t\tNULL\t\nadditionalVisuals\tjson\tYES\t\tNULL\t\ngoalType\tenum('revenue','followers','leads','attendance','retention')\tYES\t\tNULL\t\ngoalTarget\tdecimal(12,2)\tYES\t\tNULL\t\ngoalActual\tdecimal(12,2)\tYES\t\t0\t\ngoalUnit\tvarchar(50)\tYES\t\tNULL\t\nprimaryKpi\tvarchar(100)\tYES\t\tNULL\t\nkpiTarget\tdecimal(12,4)\tYES\t\tNULL\t\nkpiActual\tdecimal(12,4)\tYES\t\tNULL\t\nkpiUnit\tvarchar(50)\tYES\t\tNULL\t\nperformanceScore\tint\tYES\t\tNULL\t\ncreatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t\nupdatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\n",
+  "stderr": "",
+  "execution_time_ms": 115
+}

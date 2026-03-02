@@ -1,0 +1,50 @@
+{
+  "query": "SELECT id, campaignId, campaignName, actionType, actionParams, status FROM autonomous_actions WHERE campaignName LIKE '%Anniversary%' OR campaignName LIKE '%Giveaway%' LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2R3ugynrRDzjYQU.e9d0c4c091a8 --database A5GjFitCrpqWQ2wnoTJiWm --execute SELECT id, campaignId, campaignName, actionType, actionParams, status FROM autonomous_actions WHERE campaignName LIKE '%Anniversary%' OR campaignName LIKE '%Giveaway%' LIMIT 5;",
+  "rows": [
+    {
+      "id": "3",
+      "campaignId": "demo_anniversary_giveaway",
+      "campaignName": "Anniversary Giveaway 2026",
+      "actionType": "budget_increase",
+      "actionParams": "{\"budgetChange\": 0.5, \"currentBudget\": 20, \"newBudget\": 30, \"reason\": \"strong_roas\"}",
+      "status": "approved"
+    },
+    {
+      "id": "4",
+      "campaignId": "demo_anniversary_giveaway",
+      "campaignName": "Anniversary Giveaway 2026",
+      "actionType": "send_email",
+      "actionParams": "{\"emailType\": \"nurture_3part\", \"sequence\": [\"welcome\", \"tour_invite\", \"membership_offer\"], \"targetCount\": 12}",
+      "status": "auto_executed"
+    },
+    {
+      "id": "30002",
+      "campaignId": "anniversary_giveaway_2026",
+      "campaignName": "Anniversary Giveaway 2026",
+      "actionType": "budget_increase",
+      "actionParams": "{}",
+      "status": "execution_failed"
+    },
+    {
+      "id": "60002",
+      "campaignId": "Anniversary Giveaway 2026",
+      "campaignName": "Anniversary Giveaway 2026",
+      "actionType": "budget_increase",
+      "actionParams": "{}",
+      "status": "execution_failed"
+    },
+    {
+      "id": "90002",
+      "campaignId": "anniversary_giveaway_2026",
+      "campaignName": "Anniversary Giveaway 2026",
+      "actionType": "budget_increase",
+      "actionParams": "{}",
+      "status": "execution_failed"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tcampaignId\tcampaignName\tactionType\tactionParams\tstatus\n3\tdemo_anniversary_giveaway\tAnniversary Giveaway 2026\tbudget_increase\t{\"budgetChange\": 0.5, \"currentBudget\": 20, \"newBudget\": 30, \"reason\": \"strong_roas\"}\tapproved\n4\tdemo_anniversary_giveaway\tAnniversary Giveaway 2026\tsend_email\t{\"emailType\": \"nurture_3part\", \"sequence\": [\"welcome\", \"tour_invite\", \"membership_offer\"], \"targetCount\": 12}\tauto_executed\n30002\tanniversary_giveaway_2026\tAnniversary Giveaway 2026\tbudget_increase\t{}\texecution_failed\n60002\tAnniversary Giveaway 2026\tAnniversary Giveaway 2026\tbudget_increase\t{}\texecution_failed\n90002\tanniversary_giveaway_2026\tAnniversary Giveaway 2026\tbudget_increase\t{}\texecution_failed\n",
+  "stderr": "",
+  "execution_time_ms": 65
+}

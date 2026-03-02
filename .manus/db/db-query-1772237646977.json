@@ -1,0 +1,50 @@
+{
+  "query": "SELECT id, campaignId, campaignName, actionType, actionParams, status FROM autonomous_actions WHERE status = 'pending_approval' LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2R3ugynrRDzjYQU.e9d0c4c091a8 --database A5GjFitCrpqWQ2wnoTJiWm --execute SELECT id, campaignId, campaignName, actionType, actionParams, status FROM autonomous_actions WHERE status = 'pending_approval' LIMIT 10;",
+  "rows": [
+    {
+      "id": "240002",
+      "campaignId": "anniversary_giveaway_2026",
+      "campaignName": "Anniversary Giveaway 2026",
+      "actionType": "budget_increase",
+      "actionParams": "{}",
+      "status": "pending_approval"
+    },
+    {
+      "id": "240003",
+      "campaignId": "trial_session_spring_push",
+      "campaignName": "Trial Session - Spring Push",
+      "actionType": "change_targeting",
+      "actionParams": "{}",
+      "status": "pending_approval"
+    },
+    {
+      "id": "240008",
+      "campaignId": "Anniversary Giveaway 2026",
+      "campaignName": "Anniversary Giveaway 2026",
+      "actionType": "budget_increase",
+      "actionParams": "{}",
+      "status": "pending_approval"
+    },
+    {
+      "id": "240009",
+      "campaignId": "Trial Session - Spring Push",
+      "campaignName": "Trial Session - Spring Push",
+      "actionType": "change_targeting",
+      "actionParams": "{}",
+      "status": "pending_approval"
+    },
+    {
+      "id": "240015",
+      "campaignId": "trial_session_spring_push",
+      "campaignName": "Trial Session - Spring Push",
+      "actionType": "change_targeting",
+      "actionParams": "{}",
+      "status": "pending_approval"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tcampaignId\tcampaignName\tactionType\tactionParams\tstatus\n240002\tanniversary_giveaway_2026\tAnniversary Giveaway 2026\tbudget_increase\t{}\tpending_approval\n240003\ttrial_session_spring_push\tTrial Session - Spring Push\tchange_targeting\t{}\tpending_approval\n240008\tAnniversary Giveaway 2026\tAnniversary Giveaway 2026\tbudget_increase\t{}\tpending_approval\n240009\tTrial Session - Spring Push\tTrial Session - Spring Push\tchange_targeting\t{}\tpending_approval\n240015\ttrial_session_spring_push\tTrial Session - Spring Push\tchange_targeting\t{}\tpending_approval\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

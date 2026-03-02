@@ -84,33 +84,30 @@ import AnniversaryGiveawayThankYou from "./pages/AnniversaryGiveawayThankYou";
 import AnnualGiveaway from "./pages/AnnualGiveaway";
 import AnnualGiveawayActions from "./pages/AnnualGiveawayActions";
 import Tasks from "./pages/Tasks";
-
-
-// ── Guest Preview (no auth required) ──
-import GuestDashboardLayout from "./components/GuestDashboardLayout";
-import GuestHome from "./pages/guest/GuestHome";
-import GuestOverview from "./pages/guest/GuestOverview";
-import GuestMembers from "./pages/guest/GuestMembers";
-import GuestCampaigns from "./pages/guest/GuestCampaigns";
-import GuestRevenue from "./pages/guest/GuestRevenue";
-import GuestMetaAds from "./pages/guest/GuestMetaAds";
-import GuestEmailCampaigns from "./pages/guest/GuestEmailCampaigns";
-import GuestFunnels from "./pages/guest/GuestFunnels";
-import GuestPerformance from "./pages/guest/GuestPerformance";
-import GuestAutomations from "./pages/guest/GuestAutomations";
-import GuestMarketingIntelligence from "./pages/guest/GuestMarketingIntelligence";
-import GuestAIActions from "./pages/guest/GuestAIActions";
-import GuestGuests from "./pages/guest/GuestGuests";
-import GuestLeads from "./pages/guest/GuestLeads";
-import GuestLeagues from "./pages/guest/GuestLeagues";
-import GuestNewsManager from "./pages/guest/GuestNewsManager";
-import GuestDripCampaigns from "./pages/guest/GuestDripCampaigns";
-import GuestPrograms from "./pages/guest/GuestPrograms";
-import GuestPrivateEvents from "./pages/guest/GuestPrivateEvents";
-import GuestSiteControl from "./pages/guest/GuestSiteControl";
-import GuestIntegrations from "./pages/guest/GuestIntegrations";
-import GuestAccountSettings from "./pages/guest/GuestAccountSettings";
-import GuestAnnouncements from "./pages/guest/GuestAnnouncements";
+import GuestDashboardLayout from "@/components/GuestDashboardLayout";
+import GuestHome from "@/pages/guest/GuestHome";
+import GuestOverview from "@/pages/guest/GuestOverview";
+import GuestMembers from "@/pages/guest/GuestMembers";
+import GuestCampaigns from "@/pages/guest/GuestCampaigns";
+import GuestRevenue from "@/pages/guest/GuestRevenue";
+import GuestMetaAds from "@/pages/guest/GuestMetaAds";
+import GuestEmailCampaigns from "@/pages/guest/GuestEmailCampaigns";
+import GuestFunnels from "@/pages/guest/GuestFunnels";
+import GuestPerformance from "@/pages/guest/GuestPerformance";
+import GuestAutomations from "@/pages/guest/GuestAutomations";
+import GuestMarketingIntelligence from "@/pages/guest/GuestMarketingIntelligence";
+import GuestAIActions from "@/pages/guest/GuestAIActions";
+import GuestGuests from "@/pages/guest/GuestGuests";
+import GuestLeads from "@/pages/guest/GuestLeads";
+import GuestLeagues from "@/pages/guest/GuestLeagues";
+import GuestNewsManager from "@/pages/guest/GuestNewsManager";
+import GuestDripCampaigns from "@/pages/guest/GuestDripCampaigns";
+import GuestPrograms from "@/pages/guest/GuestPrograms";
+import GuestPrivateEvents from "@/pages/guest/GuestPrivateEvents";
+import GuestSiteControl from "@/pages/guest/GuestSiteControl";
+import GuestIntegrations from "@/pages/guest/GuestIntegrations";
+import GuestAccountSettings from "@/pages/guest/GuestAccountSettings";
+import GuestAnnouncements from "@/pages/guest/GuestAnnouncements";
 
 function Router() {
   return (
@@ -220,124 +217,6 @@ function Router() {
       {/* ── Funnels / Landing Pages (ClickFunnels sync) ── */}
       <Route path="/funnels" component={Funnels} />
       <Route path="/website/funnels" component={Funnels} />
-
-
-      {/* ── Guest Preview routes (no auth required) ── */}
-      <Route path="/guest">
-        <GuestDashboardLayout>
-          <GuestHome />
-        </GuestDashboardLayout>
-      </Route>
-      <Route path="/guest/overview">
-        <GuestDashboardLayout>
-          <GuestOverview />
-        </GuestDashboardLayout>
-      </Route>
-      <Route path="/guest/members">
-        <GuestDashboardLayout>
-          <GuestMembers />
-        </GuestDashboardLayout>
-      </Route>
-      <Route path="/guest/campaigns">
-        <GuestDashboardLayout>
-          <GuestCampaigns />
-        </GuestDashboardLayout>
-      </Route>
-      <Route path="/guest/revenue">
-        <GuestDashboardLayout>
-          <GuestRevenue />
-        </GuestDashboardLayout>
-      </Route>
-      <Route path="/guest/meta-ads">
-        <GuestDashboardLayout>
-          <GuestMetaAds />
-        </GuestDashboardLayout>
-      </Route>
-      <Route path="/guest/email-campaigns">
-        <GuestDashboardLayout>
-          <GuestEmailCampaigns />
-        </GuestDashboardLayout>
-      </Route>
-      <Route path="/guest/funnels">
-        <GuestDashboardLayout>
-          <GuestFunnels />
-        </GuestDashboardLayout>
-      </Route>
-      <Route path="/guest/performance">
-        <GuestDashboardLayout>
-          <GuestPerformance />
-        </GuestDashboardLayout>
-      </Route>
-      <Route path="/guest/automations">
-        <GuestDashboardLayout>
-          <GuestAutomations />
-        </GuestDashboardLayout>
-      </Route>
-      <Route path="/guest/intelligence">
-        <GuestDashboardLayout>
-          <GuestMarketingIntelligence />
-        </GuestDashboardLayout>
-      </Route>
-      <Route path="/guest/ai-actions">
-        <GuestDashboardLayout>
-          <GuestAIActions />
-        </GuestDashboardLayout>
-      </Route>
-      <Route path="/guest/guests">
-        <GuestDashboardLayout>
-          <GuestGuests />
-        </GuestDashboardLayout>
-      </Route>
-      <Route path="/guest/leads">
-        <GuestDashboardLayout>
-          <GuestLeads />
-        </GuestDashboardLayout>
-      </Route>
-      <Route path="/guest/leagues">
-        <GuestDashboardLayout>
-          <GuestLeagues />
-        </GuestDashboardLayout>
-      </Route>
-      <Route path="/guest/news">
-        <GuestDashboardLayout>
-          <GuestNewsManager />
-        </GuestDashboardLayout>
-      </Route>
-      <Route path="/guest/drip">
-        <GuestDashboardLayout>
-          <GuestDripCampaigns />
-        </GuestDashboardLayout>
-      </Route>
-      <Route path="/guest/programs">
-        <GuestDashboardLayout>
-          <GuestPrograms />
-        </GuestDashboardLayout>
-      </Route>
-      <Route path="/guest/private-events">
-        <GuestDashboardLayout>
-          <GuestPrivateEvents />
-        </GuestDashboardLayout>
-      </Route>
-      <Route path="/guest/site-control">
-        <GuestDashboardLayout>
-          <GuestSiteControl />
-        </GuestDashboardLayout>
-      </Route>
-      <Route path="/guest/integrations">
-        <GuestDashboardLayout>
-          <GuestIntegrations />
-        </GuestDashboardLayout>
-      </Route>
-      <Route path="/guest/settings">
-        <GuestDashboardLayout>
-          <GuestAccountSettings />
-        </GuestDashboardLayout>
-      </Route>
-      <Route path="/guest/announcements">
-        <GuestDashboardLayout>
-          <GuestAnnouncements />
-        </GuestDashboardLayout>
-      </Route>
 
       {/* ── 404 ── */}
       <Route path="/404" component={NotFound} />

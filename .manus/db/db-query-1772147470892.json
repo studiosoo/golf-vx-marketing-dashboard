@@ -1,0 +1,13 @@
+{
+  "query": "SHOW TABLES LIKE 'communication_logs';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2R3ugynrRDzjYQU.e9d0c4c091a8 --database A5GjFitCrpqWQ2wnoTJiWm --execute SHOW TABLES LIKE 'communication_logs';",
+  "rows": [
+    {
+      "Tables_in_A5GjFitCrpqWQ2wnoTJiWm (communication_logs)": "communication_logs"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_A5GjFitCrpqWQ2wnoTJiWm (communication_logs)\ncommunication_logs\n",
+  "stderr": "",
+  "execution_time_ms": 434
+}

@@ -1,0 +1,14 @@
+{
+  "query": "SELECT COUNT(*) as total, MAX(submissionTimestamp) as latest FROM giveawayApplications;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2R3ugynrRDzjYQU.e9d0c4c091a8 --database A5GjFitCrpqWQ2wnoTJiWm --execute SELECT COUNT(*) as total, MAX(submissionTimestamp) as latest FROM giveawayApplications;",
+  "rows": [
+    {
+      "total": "51",
+      "latest": "2026-02-25 11:52:38"
+    }
+  ],
+  "messages": [],
+  "stdout": "total\tlatest\n51\t2026-02-25 11:52:38\n",
+  "stderr": "",
+  "execution_time_ms": 363
+}

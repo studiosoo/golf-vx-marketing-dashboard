@@ -1,0 +1,43 @@
+{
+  "query": "SELECT COUNT(*) as total FROM email_captures;\nSELECT status, COUNT(*) as count FROM email_captures GROUP BY status;\nSELECT source, COUNT(*) as count FROM email_captures GROUP BY source;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2R3ugynrRDzjYQU.e9d0c4c091a8 --database A5GjFitCrpqWQ2wnoTJiWm --execute SELECT COUNT(*) as total FROM email_captures;\nSELECT status, COUNT(*) as count FROM email_captures GROUP BY status;\nSELECT source, COUNT(*) as count FROM email_captures GROUP BY source;",
+  "rows": [
+    {
+      "total": "837"
+    },
+    {
+      "total": "status\tcount"
+    },
+    {
+      "total": "unsubscribed\t494"
+    },
+    {
+      "total": "new\t52"
+    },
+    {
+      "total": "contacted\t11"
+    },
+    {
+      "total": "qualified\t280"
+    },
+    {
+      "total": "source\tcount"
+    },
+    {
+      "total": "web_form\t11"
+    },
+    {
+      "total": "boomerang\t782"
+    },
+    {
+      "total": "manual_csv\t33"
+    },
+    {
+      "total": "giveaway\t11"
+    }
+  ],
+  "messages": [],
+  "stdout": "total\n837\nstatus\tcount\nunsubscribed\t494\nnew\t52\ncontacted\t11\nqualified\t280\nsource\tcount\nweb_form\t11\nboomerang\t782\nmanual_csv\t33\ngiveaway\t11\n",
+  "stderr": "",
+  "execution_time_ms": 66
+}

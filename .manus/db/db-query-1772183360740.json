@@ -1,0 +1,94 @@
+{
+  "query": "SELECT id, actionType, campaignName, status, title FROM autonomous_actions WHERE id IN (2, 3, 4, 6, 180002, 180003, 180008, 180009, 180014, 180015, 180020, 180021) ORDER BY id DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2R3ugynrRDzjYQU.e9d0c4c091a8 --database A5GjFitCrpqWQ2wnoTJiWm --execute SELECT id, actionType, campaignName, status, title FROM autonomous_actions WHERE id IN (2, 3, 4, 6, 180002, 180003, 180008, 180009, 180014, 180015, 180020, 180021) ORDER BY id DESC;",
+  "rows": [
+    {
+      "id": "180021",
+      "actionType": "change_targeting",
+      "campaignName": "Trial Session - Spring Push",
+      "status": "dismissed",
+      "title": "Refine Targeting for Trial Session Campaign"
+    },
+    {
+      "id": "180020",
+      "actionType": "budget_increase",
+      "campaignName": "Anniversary Giveaway 2026",
+      "status": "dismissed",
+      "title": "Increase Budget for High-Performing Anniversary Giveaway"
+    },
+    {
+      "id": "180015",
+      "actionType": "change_targeting",
+      "campaignName": "Trial Session - Spring Push",
+      "status": "dismissed",
+      "title": "Refine Targeting for Trial Session Campaign"
+    },
+    {
+      "id": "180014",
+      "actionType": "budget_increase",
+      "campaignName": "Anniversary Giveaway 2026",
+      "status": "dismissed",
+      "title": "Increase Budget for High-Performing Anniversary Giveaway"
+    },
+    {
+      "id": "180009",
+      "actionType": "change_targeting",
+      "campaignName": "Trial Session - Spring Push",
+      "status": "dismissed",
+      "title": "Refine Targeting for Trial Session Campaign"
+    },
+    {
+      "id": "180008",
+      "actionType": "budget_increase",
+      "campaignName": "Anniversary Giveaway 2026",
+      "status": "dismissed",
+      "title": "Increase Budget for High-Performing Anniversary Giveaway"
+    },
+    {
+      "id": "180003",
+      "actionType": "change_targeting",
+      "campaignName": "Trial Session - Spring Push",
+      "status": "dismissed",
+      "title": "Refine Targeting for Trial Session Campaign"
+    },
+    {
+      "id": "180002",
+      "actionType": "budget_increase",
+      "campaignName": "Anniversary Giveaway 2026",
+      "status": "dismissed",
+      "title": "Increase Budget for High-Performing Anniversary Giveaway"
+    },
+    {
+      "id": "6",
+      "actionType": "send_email",
+      "campaignName": "Trial Session - Spring Push",
+      "status": "approved",
+      "title": "Follow-up Email: 5 Trial Session Converters"
+    },
+    {
+      "id": "4",
+      "actionType": "send_email",
+      "campaignName": "Anniversary Giveaway 2026",
+      "status": "approved",
+      "title": "Email Nurture: 12 Anniversary Giveaway Leads"
+    },
+    {
+      "id": "3",
+      "actionType": "budget_increase",
+      "campaignName": "Anniversary Giveaway 2026",
+      "status": "approved",
+      "title": "Scale Up: Anniversary Giveaway — 4.2x ROAS"
+    },
+    {
+      "id": "2",
+      "actionType": "reduce_frequency",
+      "campaignName": "Instagram Follower Growth",
+      "status": "auto_executed",
+      "title": "Frequency Cap: Instagram Growth — Excellent Efficiency"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tactionType\tcampaignName\tstatus\ttitle\n180021\tchange_targeting\tTrial Session - Spring Push\tdismissed\tRefine Targeting for Trial Session Campaign\n180020\tbudget_increase\tAnniversary Giveaway 2026\tdismissed\tIncrease Budget for High-Performing Anniversary Giveaway\n180015\tchange_targeting\tTrial Session - Spring Push\tdismissed\tRefine Targeting for Trial Session Campaign\n180014\tbudget_increase\tAnniversary Giveaway 2026\tdismissed\tIncrease Budget for High-Performing Anniversary Giveaway\n180009\tchange_targeting\tTrial Session - Spring Push\tdismissed\tRefine Targeting for Trial Session Campaign\n180008\tbudget_increase\tAnniversary Giveaway 2026\tdismissed\tIncrease Budget for High-Performing Anniversary Giveaway\n180003\tchange_targeting\tTrial Session - Spring Push\tdismissed\tRefine Targeting for Trial Session Campaign\n180002\tbudget_increase\tAnniversary Giveaway 2026\tdismissed\tIncrease Budget for High-Performing Anniversary Giveaway\n6\tsend_email\tTrial Session - Spring Push\tapproved\tFollow-up Email: 5 Trial Session Converters\n4\tsend_email\tAnniversary Giveaway 2026\tapproved\tEmail Nurture: 12 Anniversary Giveaway Leads\n3\tbudget_increase\tAnniversary Giveaway 2026\tapproved\tScale Up: Anniversary Giveaway — 4.2x ROAS\n2\treduce_frequency\tInstagram Follower Growth\tauto_executed\tFrequency Cap: Instagram Growth — Excellent Efficiency\n",
+  "stderr": "",
+  "execution_time_ms": 363
+}

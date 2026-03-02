@@ -1,0 +1,52 @@
+{
+  "query": "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'cf_funnels' ORDER BY ORDINAL_POSITION;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2R3ugynrRDzjYQU.e9d0c4c091a8 --database A5GjFitCrpqWQ2wnoTJiWm --execute SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'cf_funnels' ORDER BY ORDINAL_POSITION;",
+  "rows": [
+    {
+      "COLUMN_NAME": "id"
+    },
+    {
+      "COLUMN_NAME": "cf_id"
+    },
+    {
+      "COLUMN_NAME": "cf_public_id"
+    },
+    {
+      "COLUMN_NAME": "workspace_id"
+    },
+    {
+      "COLUMN_NAME": "name"
+    },
+    {
+      "COLUMN_NAME": "current_path"
+    },
+    {
+      "COLUMN_NAME": "archived"
+    },
+    {
+      "COLUMN_NAME": "live_mode"
+    },
+    {
+      "COLUMN_NAME": "tags"
+    },
+    {
+      "COLUMN_NAME": "opt_in_count"
+    },
+    {
+      "COLUMN_NAME": "order_count"
+    },
+    {
+      "COLUMN_NAME": "last_synced_at"
+    },
+    {
+      "COLUMN_NAME": "created_at"
+    },
+    {
+      "COLUMN_NAME": "updated_at"
+    }
+  ],
+  "messages": [],
+  "stdout": "COLUMN_NAME\nid\ncf_id\ncf_public_id\nworkspace_id\nname\ncurrent_path\narchived\nlive_mode\ntags\nopt_in_count\norder_count\nlast_synced_at\ncreated_at\nupdated_at\n",
+  "stderr": "",
+  "execution_time_ms": 63
+}

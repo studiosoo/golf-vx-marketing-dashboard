@@ -1,0 +1,8 @@
+{
+  "query": "SELECT name, email, membership_tier FROM members WHERE membership_tier = 'golf_vx_pro' ORDER BY name;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2R3ugynrRDzjYQU.e9d0c4c091a8 --database A5GjFitCrpqWQ2wnoTJiWm --execute SELECT name, email, membership_tier FROM members WHERE membership_tier = 'golf_vx_pro' ORDER BY name;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'membership_tier' in 'where clause'"
+  ]
+}
