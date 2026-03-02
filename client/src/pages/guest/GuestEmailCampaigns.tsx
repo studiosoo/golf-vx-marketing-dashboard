@@ -6,7 +6,6 @@ import { Mail, Lock } from "lucide-react";
 
 export default function GuestEmailCampaigns() {
   const { data: broadcasts = [], isLoading } = trpc.guest.getEmailCampaigns.useQuery();
-  const { data: summary } = trpc.guest.getEmailSummary.useQuery();
 
   return (
     <div className="p-6 space-y-6">
@@ -20,35 +19,6 @@ export default function GuestEmailCampaigns() {
           <span>Sync disabled in guest mode</span>
         </div>
       </div>
-
-      {summary && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="bg-card border-border">
-            <CardContent className="pt-3 pb-3">
-              <p className="text-xs text-muted-foreground">Total Broadcasts</p>
-              <p className="text-xl font-bold">{summary.sentBroadcasts}</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-card border-border">
-            <CardContent className="pt-3 pb-3">
-              <p className="text-xs text-muted-foreground">Avg Open Rate</p>
-              <p className="text-xl font-bold text-green-400">{summary.avgOpenRate.toFixed(1)}%</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-card border-border">
-            <CardContent className="pt-3 pb-3">
-              <p className="text-xs text-muted-foreground">Avg Click Rate</p>
-              <p className="text-xl font-bold text-blue-400">{summary.avgClickRate.toFixed(1)}%</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-card border-border">
-            <CardContent className="pt-3 pb-3">
-              <p className="text-xs text-muted-foreground">Total Delivered</p>
-              <p className="text-xl font-bold">{summary.totalDelivered.toLocaleString()}</p>
-            </CardContent>
-          </Card>
-        </div>
-      )}
 
       <Card className="bg-card border-border">
         <CardHeader className="pb-3">

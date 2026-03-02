@@ -5,9 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { Target, Lock } from "lucide-react";
 
 export default function GuestFunnels() {
-  const { data: submissions = [] } = trpc.guest.getFunnels.useQuery();
+  const { data: funnels = [], isLoading } = trpc.guest.getFunnels.useQuery();
 
-  const totalSubmissions = (funnelSummary as any[]).reduce((s: number, f: any) => s + Number(f.submissionCount || 0), 0);
+  const funnelsArr = funnels as any[];
+  const totalOptIns = funnelsArr.reduce((s: number, f: any) => s + Number(f.opt_in_count || 0), 0);
 
   return (
     <div className="p-6 space-y-6">
@@ -26,19 +27,19 @@ export default function GuestFunnels() {
         <Card className="bg-card border-border">
           <CardContent className="pt-3 pb-3">
             <p className="text-xs text-muted-foreground">Active Funnels</p>
-            <p className="text-xl font-bold">{(funnelSummary as any[]).length}</p>
+            <p className="text-xl font-bold">{isLoading ? "..." : funnelsArr.length}</p>
           </CardContent>
         </Card>
         <Card className="bg-card border-border">
           <CardContent className="pt-3 pb-3">
-            <p className="text-xs text-muted-foreground">Total Submissions</p>
-            <p className="text-xl font-bold">{totalSubmissions.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground">Total Opt-Ins</p>
+            <p className="text-xl font-bold">{isLoading ? "..." : totalOptIns.toLocaleString()}</p>
           </CardContent>
         </Card>
         <Card className="bg-card border-border">
           <CardContent className="pt-3 pb-3">
-            <p className="text-xs text-muted-foreground">Recent Submissions</p>
-            <p className="text-xl font-bold">{(submissions as any[]).length}</p>
+            <p className="text-xs text-muted-foreground">Funnels Loaded</p>
+            <p className="text-xl font-bold">{isLoading ? "..." : funnelsArr.length}</p>
           </CardContent>
         </Card>
       </div>
@@ -47,7 +48,7 @@ export default function GuestFunnels() {
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Target size={16} />
-            Funnel Performance
+            Funnel List
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -57,25 +58,27 @@ export default function GuestFunnels() {
                 <div key={i} className="h-14 bg-muted/30 rounded animate-pulse" />
               ))}
             </div>
-          ) : (funnelSummary as any[]).length === 0 ? (
+          ) : funnelsArr.length === 0 ? (
             <p className="text-muted-foreground text-sm text-center py-8">No funnel data available</p>
           ) : (
             <div className="space-y-2">
-              {(funnelSummary as any[]).map((f: any) => (
-                <div key={f.funnelId} className="flex items-center justify-between py-3 border-b border-border last:border-0">
+              {funnelsArr.map((f: any) => (
+                <div key={f.id || f.cf_id} className="flex items-center justify-between py-3 border-b border-border last:border-0">
                   <div>
-                    <p className="text-sm font-medium text-foreground">{f.funnelName}</p>
+                    <p className="text-sm font-medium text-foreground">{f.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {f.lastSubmission ? `Last: ${new Date(f.lastSubmission).toLocaleDateString()}` : "No submissions yet"}
+                      {f.url ? f.url : "No URL"}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30">
-                      {f.submissionCount} submissions
-                    </Badge>
-                    {f.optInCount > 0 && (
+                    {f.opt_in_count > 0 && (
                       <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
-                        {f.optInCount} opt-ins
+                        {f.opt_in_count} opt-ins
+                      </Badge>
+                    )}
+                    {f.archived && (
+                      <Badge className="bg-muted/40 text-muted-foreground border-border">
+                        Archived
                       </Badge>
                     )}
                   </div>
