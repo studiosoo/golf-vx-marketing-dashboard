@@ -653,3 +653,21 @@
 - [ ] Home.tsx: restore Member Retention KPI bar alongside Drive Day Clinic
 - [ ] Fix Drive Day date breakdown (a.date format mismatch causing 0 bookings per date)
 - [ ] Add revenue data to Drive Day Programs page
+
+## KPI Display Bug Fixes (2026-03-02)
+- [x] Fix Membership Acquisition showing 0/300: Drizzle execute() returns [rows, fields] tuple, fixed [0]?.[0]?.field access pattern
+- [x] Fix Member Retention showing 0/106: Same execute() result parsing fix applied
+- [x] Fix SundayClinicDetail showing 4 events/34 bookings: Added max:200 to getSundayClinicData() getAppointments call
+- [x] Add guest.getStrategicKPIs public endpoint for guest preview mode
+- [x] Update GuestHome.tsx with KPI progress bars using guest.getStrategicKPIs
+- [x] Fix progress percentage display rounding (was showing 28.999...%)
+- [x] Add kpi-fix.test.ts with 7 passing tests verifying the fix
+
+## KPI Display Bug Fixes (2026-03-02)
+- [x] Fix Membership Acquisition showing 0/300: Drizzle execute() returns [rows, fields] tuple
+- [x] Fix Member Retention showing 0/106: Same execute() result parsing fix applied
+- [x] Fix SundayClinicDetail showing 4 events/34 bookings: Added max:200 to getSundayClinicData()
+- [x] Add guest.getStrategicKPIs public endpoint for guest preview mode
+- [x] Update GuestHome.tsx with KPI progress bars
+- [x] Fix progress percentage display rounding
+- [x] Add kpi-fix.test.ts with 7 passing tests

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, DollarSign, Target, TrendingUp, Mail, Zap, Eye, Lock } from "lucide-react";
+import { Users, DollarSign, Target, TrendingUp, Mail, Zap, Eye, Lock, Trophy } from "lucide-react";
 
 export default function GuestHome() {
   const [dateRange] = useState(() => ({
@@ -12,6 +12,14 @@ export default function GuestHome() {
   }));
 
   const { data: overview, isLoading: overviewLoading } = trpc.guest.getDashboardOverview.useQuery(dateRange);
+  const { data: strategicKPIs } = trpc.guest.getStrategicKPIs.useQuery();
+  const { data: driveDayData } = trpc.guest.getDriveDaySessions.useQuery();
+
+  const customerMembers = strategicKPIs?.membershipAcquisition?.current ?? null;
+  const memberGoal = strategicKPIs?.membershipAcquisition?.target ?? 300;
+  const allAccess = strategicKPIs?.membershipAcquisition?.breakdown?.allAccess ?? 0;
+  const swingSaver = strategicKPIs?.membershipAcquisition?.breakdown?.swingSaver ?? 0;
+  const retentionRate = strategicKPIs?.memberRetention?.retentionRate ?? 0;
 
   const kpiCards = [
     {
@@ -20,13 +28,6 @@ export default function GuestHome() {
       sub: `of ${overview?.totalMembers ?? "?"} total`,
       icon: <Users size={20} className="text-blue-400" />,
       color: "border-blue-500/30",
-    },
-    {
-      label: "Monthly Revenue",
-      value: overviewLoading ? "..." : `$${parseFloat(overview?.marketingSpend ?? "0").toLocaleString()}`,
-      sub: "This month",
-      icon: <DollarSign size={20} className="text-green-400" />,
-      color: "border-green-500/30",
     },
     {
       label: "MRR",
@@ -50,6 +51,13 @@ export default function GuestHome() {
       color: "border-orange-500/30",
     },
     {
+      label: "Drive Day Clinic",
+      value: driveDayData ? `${driveDayData.overall.totalRegistrations} registered` : "...",
+      sub: driveDayData ? `$${driveDayData.overall.revenueCollected.toFixed(0)} revenue` : "Loading...",
+      icon: <Trophy size={20} className="text-amber-400" />,
+      color: "border-amber-500/30",
+    },
+    {
       label: "Funnel Submissions",
       value: "—",
       sub: "Active funnels",
@@ -70,6 +78,57 @@ export default function GuestHome() {
         <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
         <p className="text-muted-foreground text-sm mt-1">Golf VX Arlington Heights — Marketing Overview</p>
       </div>
+
+      {/* KPI Progress Bars */}
+      {customerMembers !== null && (
+        <div className="grid gap-4 md:grid-cols-2">
+          {/* Membership Acquisition */}
+          <Card className="bg-card border-border">
+            <CardContent className="pt-4 pb-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-muted-foreground">Membership Acquisition</p>
+                <Badge className="text-xs bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300">
+                  {memberGoal - customerMembers} more to goal
+                </Badge>
+              </div>
+              <p className="text-2xl font-bold text-foreground mb-2">{customerMembers} / {memberGoal}</p>
+              <div className="h-2 bg-muted rounded-full overflow-hidden mb-1">
+                <div
+                  className="h-full rounded-full bg-[#ef9253] transition-all duration-500"
+                  style={{ width: `${Math.min((customerMembers / memberGoal) * 100, 100)}%` }}
+                />
+              </div>
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>{Math.round((customerMembers / memberGoal) * 100)}%</span>
+                <span>AA: {allAccess} · SS: {swingSaver}</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Member Retention */}
+          <Card className="bg-card border-border">
+            <CardContent className="pt-4 pb-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-muted-foreground">Member Retention</p>
+                <Badge className={`text-xs ${retentionRate >= 90 ? "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300" : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300"}`}>
+                  {Math.round(retentionRate)}% retention
+                </Badge>
+              </div>
+              <p className="text-2xl font-bold text-foreground mb-2">{customerMembers} / 106 active</p>
+              <div className="h-2 bg-muted rounded-full overflow-hidden mb-1">
+                <div
+                  className="h-full rounded-full bg-[#5daf68] transition-all duration-500"
+                  style={{ width: `${Math.min((customerMembers / 106) * 100, 100)}%` }}
+                />
+              </div>
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>{Math.min(Math.round((customerMembers / 106) * 100), 100)}%</span>
+                <span>Goal: retain 106 members</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">

@@ -2703,16 +2703,18 @@ Respond in JSON with this exact structure:
             COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers') AND paymentInterval = 'monthly' THEN 1 END) as monthlyCount
           FROM members WHERE status = 'active'`
         );
-        const customerMemberCount = Number((memberCountResult as any)[0]?.customerMembers || 0);
-        const proMemberCount = Number((memberCountResult as any)[0]?.proMembers || 0);
-        const allAccessCount = Number((memberCountResult as any)[0]?.allAccessCount || 0);
-        const swingSaverCount = Number((memberCountResult as any)[0]?.swingSaverCount || 0);
-        const allAccessMRR = parseFloat((memberCountResult as any)[0]?.allAccessMRR || '0');
-        const swingSaverMRR = parseFloat((memberCountResult as any)[0]?.swingSaverMRR || '0');
-        const proMRR = parseFloat((memberCountResult as any)[0]?.proMRR || '0');
+        // Drizzle execute() returns [rows, fields] tuple; rows[0] is the first row
+        const memberRow = (memberCountResult as any)[0]?.[0];
+        const customerMemberCount = Number(memberRow?.customerMembers || 0);
+        const proMemberCount = Number(memberRow?.proMembers || 0);
+        const allAccessCount = Number(memberRow?.allAccessCount || 0);
+        const swingSaverCount = Number(memberRow?.swingSaverCount || 0);
+        const allAccessMRR = parseFloat(memberRow?.allAccessMRR || '0');
+        const swingSaverMRR = parseFloat(memberRow?.swingSaverMRR || '0');
+        const proMRR = parseFloat(memberRow?.proMRR || '0');
         const totalMRR = allAccessMRR + swingSaverMRR + proMRR;
-        const annualMemberCount = Number((memberCountResult as any)[0]?.annualCount || 0);
-        const monthlyMemberCount = Number((memberCountResult as any)[0]?.monthlyCount || 0);
+        const annualMemberCount = Number(memberRow?.annualCount || 0);
+        const monthlyMemberCount = Number(memberRow?.monthlyCount || 0);
         // New members this month vs last month (All Access + Swing Saver only)
         const newMembersResult = await database.execute(`
           SELECT
@@ -2723,8 +2725,9 @@ Respond in JSON with this exact structure:
               AND joinDate < DATE_FORMAT(NOW(), '%Y-%m-01') THEN 1 END) as lastMonth
           FROM members WHERE status = 'active'
         `);
-        const newMembersThisMonth = Number((newMembersResult as any)[0]?.thisMonth || 0);
-        const newMembersLastMonth = Number((newMembersResult as any)[0]?.lastMonth || 0);
+        const newMembersRow = (newMembersResult as any)[0]?.[0];
+        const newMembersThisMonth = Number(newMembersRow?.thisMonth || 0);
+        const newMembersLastMonth = Number(newMembersRow?.lastMonth || 0);
         // Acquisition goal: 300 total customer members (2-year goal)
         // Current active members: ~106 (All Access + Swing Saver)
         const MEMBERSHIP_GOAL = 300;
@@ -2741,7 +2744,7 @@ Respond in JSON with this exact structure:
           FROM members
           WHERE status = 'active' AND createdAt >= DATE_SUB(NOW(), INTERVAL 90 DAY)
         `);
-        const conversions = Number((conversionsResult as any)[0]?.conversions || 0);
+        const conversions = Number((conversionsResult as any)[0]?.[0]?.conversions || 0);
         const conversionRate = (conversions / trials) * 100;
 
         // 3. Member Retention: Calculate retention rate (active members / total members)
@@ -2751,8 +2754,9 @@ Respond in JSON with this exact structure:
             COUNT(CASE WHEN status = 'active' THEN 1 END) as active
           FROM members
         `);
-        const totalMembers = Number((retentionResult as any)[0]?.total || 1);
-        const activeMembers = Number((retentionResult as any)[0]?.active || 0);
+        const retentionRow = (retentionResult as any)[0]?.[0];
+        const totalMembers = Number(retentionRow?.total || 1);
+        const activeMembers = Number(retentionRow?.active || 0);
         const retentionRate = (activeMembers / totalMembers) * 100;
 
          // 4. B2B Corporate Events: Fetch real data from Acuity for current month
@@ -2784,8 +2788,9 @@ Respond in JSON with this exact structure:
           FROM members
           WHERE membershipTier IN ('all_access_aces', 'swing_savers')
         `);
-        const totalCustomers = Number((customerRetentionResult as any)[0]?.total || 1);
-        const activeCustomers = Number((customerRetentionResult as any)[0]?.activeCustomers || 0);
+        const customerRetentionRow = (customerRetentionResult as any)[0]?.[0];
+        const totalCustomers = Number(customerRetentionRow?.total || 1);
+        const activeCustomers = Number(customerRetentionRow?.activeCustomers || 0);
         const customerRetentionRate = totalCustomers > 0 ? (activeCustomers / totalCustomers) * 100 : 0;
 
         return {
@@ -3997,6 +4002,55 @@ Return a JSON object with:
           },
         };
       } catch { return { sessions: [], overall: { totalRegistrations: 0, paidAttendees: 0, memberAttendees: 0, revenueCollected: 0 } }; }
+    }),
+
+    // Public version of strategic KPIs for guest preview mode
+    getStrategicKPIs: publicProcedure.query(async () => {
+      try {
+        const database = await db.getDb();
+        if (!database) return null;
+
+        const memberCountResult = await database.execute(
+          `SELECT 
+            COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers') THEN 1 END) as customerMembers,
+            COUNT(CASE WHEN membershipTier = 'all_access_aces' THEN 1 END) as allAccessCount,
+            COUNT(CASE WHEN membershipTier = 'swing_savers' THEN 1 END) as swingSaverCount
+          FROM members WHERE status = 'active'`
+        );
+        const memberRow = (memberCountResult as any)[0]?.[0];
+        const customerMemberCount = Number(memberRow?.customerMembers || 0);
+        const allAccessCount = Number(memberRow?.allAccessCount || 0);
+        const swingSaverCount = Number(memberRow?.swingSaverCount || 0);
+        const MEMBERSHIP_GOAL = 300;
+
+        // Customer retention rate
+        const customerRetentionResult = await database.execute(
+          `SELECT COUNT(*) as total,
+            COUNT(CASE WHEN status = 'active' THEN 1 END) as activeCustomers
+          FROM members WHERE membershipTier IN ('all_access_aces', 'swing_savers')`
+        );
+        const retRow = (customerRetentionResult as any)[0]?.[0];
+        const totalCustomers = Number(retRow?.total || 1);
+        const activeCustomers = Number(retRow?.activeCustomers || 0);
+        const customerRetentionRate = totalCustomers > 0 ? (activeCustomers / totalCustomers) * 100 : 0;
+
+        return {
+          membershipAcquisition: {
+            current: customerMemberCount,
+            target: MEMBERSHIP_GOAL,
+            remaining: Math.max(0, MEMBERSHIP_GOAL - customerMemberCount),
+            progress: Math.min((customerMemberCount / MEMBERSHIP_GOAL) * 100, 100),
+            breakdown: { allAccess: allAccessCount, swingSaver: swingSaverCount },
+          },
+          memberRetention: {
+            current: customerMemberCount,
+            retentionRate: customerRetentionRate,
+            progress: Math.min(customerRetentionRate, 100),
+            activeCount: activeCustomers,
+            totalCount: totalCustomers,
+          },
+        };
+      } catch { return null; }
     }),
   }),
 });

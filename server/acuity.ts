@@ -251,10 +251,12 @@ export async function getSundayClinicData(params?: {
   maxDate?: string;
 }) {
   // Get all appointments for the date range
+  // Use max:200 to ensure all Drive Day bookings are captured (default limit is too low)
   const appointments = await getAppointments({
     minDate: params?.minDate,
     maxDate: params?.maxDate,
     canceled: false,
+    max: 200,
   });
 
   // Filter for Sunday Clinic / Drive Day appointments

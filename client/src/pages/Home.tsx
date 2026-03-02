@@ -403,7 +403,7 @@ export default function Home() {
                     />
                   </div>
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{kpi.progress}%</span>
+                    <span>{Math.round(kpi.progress)}%</span>
                     <span>{kpi.goal}</span>
                   </div>
                 </CardContent>
