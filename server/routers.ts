@@ -3769,29 +3769,29 @@ Return a JSON object with:
   }),
   guest: router({
     getMemberStats: publicProcedure.query(async () => {
-      return await getMemberStats();
+      return await db.getMemberStats();
     }),
     getMembers: publicProcedure.query(async () => {
-      return await getMembers();
+      return await db.getAllMembers();
     }),
     getCampaigns: publicProcedure.query(async () => {
-      return await getCampaigns();
+      return await db.getAllCampaigns();
     }),
-    getMetaAdsCampaigns: publicProcedure.input(z.object({ datePreset: z.string().optional() })).query(async ({ input }) => {
+    getMetaAdsCampaigns: publicProcedure.input(z.object({ datePreset: z.string().optional() })).query(async () => {
       try {
-        return await getAllCampaignsFromCache();
+        return await metaAdsCache.getAllCampaignsFromCache();
       } catch { return []; }
     }),
     getEnchargeMetrics: publicProcedure.query(async () => {
-      try { return await getSubscriberMetrics(); } catch { return null; }
+      try { return await encharge.getSubscriberMetrics(); } catch { return null; }
     }),
     getEnchargeSegments: publicProcedure.query(async () => {
       try { return await encharge.getEnchargeSegments(); } catch { return []; }
     }),
     getDashboardOverview: publicProcedure.input(z.object({ startDate: z.date(), endDate: z.date() })).query(async ({ input }) => {
       try {
-        const memberStats = await getMemberStats();
-        const channelPerformance = await getChannelPerformance(input.startDate, input.endDate);
+        const memberStats = await db.getMemberStats();
+        const channelPerformance = await db.getChannelPerformanceSummary(input.startDate, input.endDate);
         return {
           activeMembers: memberStats?.activeMembers ?? 0,
           totalMembers: memberStats?.totalMembers ?? 0,
@@ -3805,16 +3805,19 @@ Return a JSON object with:
       } catch { return null; }
     }),
     getRevenueSummary: publicProcedure.input(z.object({ startDate: z.date(), endDate: z.date() })).query(async ({ input }) => {
-      try { return await getRevenueSummary(input.startDate, input.endDate); } catch { return null; }
+      try { return await db.getRevenueSummary(input.startDate, input.endDate); } catch { return null; }
     }),
     getFunnels: publicProcedure.query(async () => {
-      try { return await getCfFunnels(); } catch { return []; }
+      try { return await db.getCfFunnels(); } catch { return []; }
     }),
     getEmailCampaigns: publicProcedure.query(async () => {
-      try { return await getEmailCampaigns(); } catch { return []; }
+      try {
+        const { getSyncedBroadcasts } = await import("./enchargeBroadcastSync");
+        return await getSyncedBroadcasts();
+      } catch { return []; }
     }),
     getChannelPerformance: publicProcedure.input(z.object({ startDate: z.date(), endDate: z.date() })).query(async ({ input }) => {
-      try { return await getChannelPerformance(input.startDate, input.endDate); } catch { return []; }
+      try { return await db.getChannelPerformanceSummary(input.startDate, input.endDate); } catch { return []; }
     }),
   }),
 });
