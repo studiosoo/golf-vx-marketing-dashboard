@@ -680,3 +680,17 @@
 - [x] Add totalRevenue badge in Event Breakdown header
 - [x] Fix date display timezone issue (added T12:00:00 suffix)
 - [x] Add sunday-clinic-fixes.test.ts with 9 passing tests
+
+## UI/UX Improvements (2026-03-01)
+- [x] SundayClinicDetail: Remove Member Retention card
+- [x] SundayClinicDetail: Integrate Acquisition Sources + New Member Acquisition into unified view
+- [x] SundayClinicDetail: Fix Invalid Date error (timezone-safe date parsing)
+- [x] SundayClinicDetail: Add event topic grouping (Drive Day / Putting / Hitting Below the Hips)
+- [x] SundayClinicDetail: Sort events by date ascending (Jan 25 first)
+- [x] SundayClinicDetail: Add revenue data per event
+- [x] Home: Hide B2B Events KPI card
+- [x] Home: Add Annual Membership Giveaway status card (45 applicants, pending/contacted)
+- [x] Home: Revenue banner - add weekly revenue row
+- [x] Home: Revenue banner - add Food & Bev and Bay category breakdown
+- [x] Server: getGiveawayStats - add statusBreakdown (pending/contacted counts)
+- [x] Server: getToastSummary - add weekly revenue + Food/Bay category fields

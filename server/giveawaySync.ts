@@ -94,11 +94,21 @@ export async function getGiveawayStats(): Promise<any> {
     golfExperienceCount[experience] = (golfExperienceCount[experience] || 0) + 1;
   }
   
+  // Status breakdown
+  const statusCount: Record<string, number> = {};
+  for (const app of applications) {
+    const s = app.status || 'pending';
+    statusCount[s] = (statusCount[s] || 0) + 1;
+  }
+
   return {
     totalApplications: applications.length,
     ageRangeDistribution: ageRangeCount,
     genderDistribution: genderCount,
     golfExperienceDistribution: golfExperienceCount,
+    statusBreakdown: statusCount,
+    pendingCount: statusCount['pending'] || 0,
+    contactedCount: statusCount['contacted'] || 0,
     test: 0, // Test entries are already excluded
   };
 }

@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Users, UserPlus, TrendingUp, Calendar, Share2, Mail, Phone, X } from "lucide-react";
+import { Loader2, Users, UserPlus, TrendingUp, Calendar, Share2, Mail, Phone, X, Target, DollarSign } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 type AttendeeType = "members" | "new_visitors";
@@ -297,6 +297,18 @@ function EventAttendeeModal({
   );
 }
 
+// Event topic grouping: 2 dates per topic based on the Drive Day Clinic series schedule
+const EVENT_TOPICS: Record<string, { topic: string; color: string; icon: string }> = {
+  "2026-01-25": { topic: "Drive Day", color: "text-amber-600", icon: "🏌️" },
+  "2026-02-01": { topic: "Drive Day", color: "text-amber-600", icon: "🏌️" },
+  "2026-02-22": { topic: "Putting Clinic", color: "text-blue-600", icon: "⛳" },
+  "2026-03-01": { topic: "Putting Clinic", color: "text-blue-600", icon: "⛳" },
+  "2026-03-22": { topic: "Hitting Below the Hips", color: "text-green-600", icon: "🎯" },
+  "2026-03-29": { topic: "Hitting Below the Hips", color: "text-green-600", icon: "🎯" },
+};
+
+const TOPIC_ORDER = ["Drive Day", "Putting Clinic", "Hitting Below the Hips"];
+
 export default function SundayClinicDetail() {
   const [attendeeModal, setAttendeeModal] = useState<AttendeeType | null>(null);
   const [sourceModal, setSourceModal] = useState<SourceModal>(null);
@@ -325,15 +337,26 @@ export default function SundayClinicDetail() {
     );
   }
 
-  // Active customer members = All Access Aces + Swing Savers (from KPI data)
-  // totalMembers from Acuity = all email addresses (369), not active members
-  // Use memberAttendees / totalMembers for attendance rate, but display active count separately
-  const ACTIVE_CUSTOMER_MEMBERS = 87; // All Access Aces (54) + Swing Savers (33)
-  const memberGoalProgress = (metrics.memberAttendees / ACTIVE_CUSTOMER_MEMBERS) * 100;
-  const targetMemberAttendance = 50;
-  const memberPerformance = (memberGoalProgress / targetMemberAttendance) * 100;
   // Sort events by date ascending (Jan 25 first)
   const sortedEvents = [...(metrics.events || [])].sort((a, b) => a.date.localeCompare(b.date));
+
+  // Group events by topic
+  const eventsByTopic = sortedEvents.reduce((acc, event) => {
+    const topicInfo = EVENT_TOPICS[event.date];
+    const topic = topicInfo?.topic || "Other";
+    if (!acc[topic]) acc[topic] = [];
+    acc[topic].push(event);
+    return acc;
+  }, {} as Record<string, typeof sortedEvents>);
+
+  // Format date safely (avoid Invalid Date)
+  const formatEventDate = (dateStr: string) => {
+    try {
+      const d = new Date(dateStr + 'T12:00:00');
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch { return dateStr; }
+  };
 
   return (
     <DashboardLayout>
@@ -344,113 +367,109 @@ export default function SundayClinicDetail() {
           <p className="text-muted-foreground">Public drive day events - Member retention & new visitor acquisition</p>
         </div>
 
-        {/* Dual Goal Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Member Retention Goal */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-primary" />
-                  <CardTitle>Member Retention</CardTitle>
-                </div>
-                <Badge variant={memberPerformance >= 80 ? "default" : "secondary"}>
-                  {Math.round(memberPerformance)}% Performance
-                </Badge>
+        {/* New Visitor Acquisition + Source Attribution — unified card */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <UserPlus className="h-5 w-5 text-primary" />
+                <CardTitle>New Member Acquisition</CardTitle>
               </div>
-              <CardDescription>Track member engagement through clinic attendance</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs text-muted-foreground">Active Members</p>
-                  <p className="text-2xl font-bold text-foreground">{ACTIVE_CUSTOMER_MEMBERS}</p>
-                  <p className="text-xs text-muted-foreground">AA: 54 · SS: 33</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Members Attended</p>
-                  <button
-                    onClick={() => setAttendeeModal("members")}
-                    className="text-2xl font-bold text-primary hover:underline cursor-pointer transition-colors"
-                    title="Click to see member list"
-                  >
-                    {metrics.memberAttendees}
-                  </button>
-                  <p className="text-xs text-muted-foreground mt-0.5">↑ click to view list</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Attendance Rate</p>
-                  <p className="text-lg font-semibold text-foreground">{metrics.memberAttendanceRate.toFixed(1)}%</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Repeat Rate</p>
-                  <p className="text-lg font-semibold text-foreground">{metrics.memberRepeatRate.toFixed(1)}%</p>
-                </div>
+              <Badge variant="secondary">{metrics.nonMemberAttendees} Prospects</Badge>
+            </div>
+            <CardDescription>New visitors by acquisition source — conversion opportunities for membership</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            {/* Top stats row */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-muted/30 rounded-lg p-3">
+                <p className="text-xs text-muted-foreground">New Visitors</p>
+                <button
+                  onClick={() => setAttendeeModal("new_visitors")}
+                  className="text-2xl font-bold text-primary hover:underline cursor-pointer transition-colors block"
+                  title="Click to see new visitor list"
+                >{metrics.nonMemberAttendees}</button>
+                <p className="text-xs text-muted-foreground mt-0.5">↑ click to view list</p>
               </div>
-              <div>
-                <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                  <span>Member Engagement Goal</span>
-                  <span>{Math.round(memberGoalProgress)}%</span>
-                </div>
-                <Progress value={Math.min(memberGoalProgress, 100)} className="h-2" />
+              <div className="bg-muted/30 rounded-lg p-3">
+                <p className="text-xs text-muted-foreground">Total Visits</p>
+                <p className="text-2xl font-bold text-foreground">{metrics.nonMemberTotalBookings}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">across all events</p>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Non-Member Acquisition Goal */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <UserPlus className="h-5 w-5 text-primary" />
-                  <CardTitle>New Visitor Acquisition</CardTitle>
-                </div>
-                <Badge variant="secondary">
-                  {metrics.nonMemberAttendees} Prospects
-                </Badge>
-              </div>
-              <CardDescription>Convert clinic attendees to paying members</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs text-muted-foreground">New Visitors</p>
-                  <button
-                    onClick={() => setAttendeeModal("new_visitors")}
-                    className="text-2xl font-bold text-primary hover:underline cursor-pointer transition-colors"
-                    title="Click to see new visitor list"
-                  >
-                    {metrics.nonMemberAttendees}
-                  </button>
-                  <p className="text-xs text-muted-foreground mt-0.5">↑ click to view list</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Total Visits</p>
-                  <p className="text-2xl font-bold text-foreground">{metrics.nonMemberTotalBookings}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Conversion Opportunities</p>
-                  <p className="text-lg font-semibold text-foreground">{metrics.conversionOpportunities}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Avg Visits/Person</p>
-                  <p className="text-lg font-semibold text-foreground">
-                    {metrics.nonMemberAttendees > 0
-                      ? (metrics.nonMemberTotalBookings / metrics.nonMemberAttendees).toFixed(1)
-                      : '0'}
-                  </p>
-                </div>
-              </div>
-              <div className="bg-muted/50 p-3 rounded-lg">
-                <p className="text-sm text-muted-foreground">
-                  💡 Follow up with {metrics.conversionOpportunities} prospects to convert them into members
+              <div className="bg-muted/30 rounded-lg p-3">
+                <p className="text-xs text-muted-foreground">Avg Visits/Person</p>
+                <p className="text-2xl font-bold text-foreground">
+                  {metrics.nonMemberAttendees > 0
+                    ? (metrics.nonMemberTotalBookings / metrics.nonMemberAttendees).toFixed(1)
+                    : '0'}
                 </p>
+                <p className="text-xs text-muted-foreground mt-0.5">repeat engagement</p>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+              <div className="bg-muted/30 rounded-lg p-3">
+                <p className="text-xs text-muted-foreground">Conversion Opps</p>
+                <p className="text-2xl font-bold text-amber-500">{metrics.conversionOpportunities}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">prospects to follow up</p>
+              </div>
+            </div>
 
-        {/* Event Breakdown — shown FIRST, sorted by date ascending (Jan 25 first) */}
+            {/* Acquisition source breakdown */}
+            {metrics.sourceBreakdown && Object.keys(metrics.sourceBreakdown).length > 0 && (
+              <div className="space-y-3">
+                <p className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Share2 className="h-4 w-4 text-primary" />
+                  How They Found Us
+                </p>
+                {Object.entries(metrics.sourceBreakdown)
+                  .sort(([, a], [, b]) => (b as number) - (a as number))
+                  .map(([source, count]) => {
+                    const percentage = ((count as number) / metrics.totalBookings) * 100;
+                    const sourceGoals: Record<string, number> = {
+                      'Social Media': 15,
+                      'PBGA': 20,
+                      'Golf VX': 10,
+                      'Referral': 5,
+                    };
+                    const goal = sourceGoals[source] || 0;
+                    const goalProgress = goal > 0 ? Math.min(((count as number) / goal) * 100, 100) : 0;
+
+                    return (
+                      <div key={source} className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2.5 h-2.5 rounded-full bg-primary" />
+                            <span className="font-medium text-sm text-foreground">{source}</span>
+                            {goal > 0 && (
+                              <span className="text-xs text-muted-foreground">Goal: {goal}</span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => setSourceModal({ source })}
+                              className="font-bold text-primary hover:underline cursor-pointer transition-colors text-sm"
+                              title="Click to see attendee list"
+                            >{count}</button>
+                            <span className="text-xs text-muted-foreground">({percentage.toFixed(1)}%)</span>
+                            {goal > 0 && goalProgress >= 100 && (
+                              <Badge variant="default" className="text-xs py-0 px-1.5 bg-green-600">✓ Goal</Badge>
+                            )}
+                          </div>
+                        </div>
+                        <Progress value={percentage} className="h-1.5" />
+                      </div>
+                    );
+                  })}
+              </div>
+            )}
+
+            <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-3 rounded-lg">
+              <p className="text-sm text-amber-800 dark:text-amber-300">
+                💡 Follow up with <strong>{metrics.conversionOpportunities}</strong> prospects to convert them into members
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Event Breakdown — grouped by topic, sorted by date ascending (Jan 25 first) */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -469,131 +488,94 @@ export default function SundayClinicDetail() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {sortedEvents.map((event) => (
-                <div key={event.date} className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-lg">
-                        <Calendar className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-foreground">
-                          {new Date(event.date + 'T12:00:00').toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {event.uniqueAttendees} unique attendees
-                          {(event as any).revenue != null && (event as any).revenue > 0 && (
-                            <span className="ml-2 text-green-600 font-medium">
-                              · ${(event as any).revenue?.toFixed(0)} revenue
-                            </span>
-                          )}
-                        </p>
-                        {(event as any).paidAttendees != null && (
-                          <p className="text-xs text-muted-foreground">
-                            Paid: {(event as any).paidAttendees} · Members: {(event as any).memberAttendees}
-                          </p>
-                        )}
-                      </div>
+            <div className="space-y-6">
+              {TOPIC_ORDER.map((topic) => {
+                const topicEvents = eventsByTopic[topic];
+                if (!topicEvents || topicEvents.length === 0) return null;
+                const topicInfo = Object.values(EVENT_TOPICS).find(t => t.topic === topic);
+                const topicTotal = topicEvents.reduce((s, e) => s + e.totalBookings, 0);
+                const topicRevenue = topicEvents.reduce((s, e) => s + ((e as any).revenue || 0), 0);
+
+                return (
+                  <div key={topic}>
+                    {/* Topic header */}
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-lg">{topicInfo?.icon}</span>
+                      <h3 className={`font-bold text-base ${topicInfo?.color || 'text-foreground'}`}>{topic}</h3>
+                      <div className="flex-1 h-px bg-border" />
+                      <span className="text-xs text-muted-foreground">{topicTotal} total bookings</span>
+                      {topicRevenue > 0 && (
+                        <span className="text-xs text-green-600 font-medium">${topicRevenue.toFixed(0)} revenue</span>
+                      )}
                     </div>
-                    <div className="text-right">
-                      <button
-                        onClick={() => setEventModal({ eventDate: event.date, label: new Date(event.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) })}
-                        className="text-lg font-bold text-primary hover:underline cursor-pointer transition-colors block"
-                        title="Click to see attendee list"
-                      >{event.totalBookings}</button>
-                      <p className="text-xs text-muted-foreground">bookings ↑ click</p>
+
+                    <div className="space-y-3 pl-2">
+                      {topicEvents.map((event) => (
+                        <div key={event.date} className="space-y-2">
+                          <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="flex items-center justify-center w-10 h-10 bg-primary/10 rounded-lg">
+                                <Calendar className="h-5 w-5 text-primary" />
+                              </div>
+                              <div>
+                                <p className="font-semibold text-foreground">
+                                  {formatEventDate(event.date)}
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  {event.uniqueAttendees} unique attendees
+                                  {(event as any).revenue != null && (event as any).revenue > 0 && (
+                                    <span className="ml-2 text-green-600 font-medium">
+                                      · ${(event as any).revenue?.toFixed(0)} revenue
+                                    </span>
+                                  )}
+                                </p>
+                                {(event as any).paidAttendees != null && (
+                                  <p className="text-xs text-muted-foreground">
+                                    Paid: {(event as any).paidAttendees} · Members: {(event as any).memberAttendees}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <button
+                                onClick={() => setEventModal({ eventDate: event.date, label: formatEventDate(event.date) })}
+                                className="text-lg font-bold text-primary hover:underline cursor-pointer transition-colors block"
+                                title="Click to see attendee list"
+                              >{event.totalBookings}</button>
+                              <p className="text-xs text-muted-foreground">bookings ↑ click</p>
+                            </div>
+                          </div>
+
+                          {event.sourceBreakdown && Object.keys(event.sourceBreakdown).length > 0 && (
+                            <div className="pl-14 pr-3 pb-1">
+                              <div className="flex flex-wrap gap-2">
+                                {Object.entries(event.sourceBreakdown)
+                                  .sort(([, a], [, b]) => (b as number) - (a as number))
+                                  .map(([source, count]) => (
+                                    <Badge
+                                      key={source}
+                                      variant="outline"
+                                      className="text-xs cursor-pointer hover:bg-primary/10 hover:border-primary transition-colors"
+                                      onClick={() => setSourceModal({ source })}
+                                      title={`Click to see ${source} attendees`}
+                                    >
+                                      {source}: {count}
+                                    </Badge>
+                                  ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
                     </div>
                   </div>
-
-                  {event.sourceBreakdown && Object.keys(event.sourceBreakdown).length > 0 && (
-                    <div className="pl-16 pr-3 pb-2">
-                      <div className="flex flex-wrap gap-2">
-                        {Object.entries(event.sourceBreakdown)
-                          .sort(([, a], [, b]) => (b as number) - (a as number))
-                          .map(([source, count]) => (
-                            <Badge
-                              key={source}
-                              variant="outline"
-                              className="text-xs cursor-pointer hover:bg-primary/10 hover:border-primary transition-colors"
-                              onClick={() => setSourceModal({ source })}
-                              title={`Click to see ${source} attendees`}
-                            >
-                              {source}: {count}
-                            </Badge>
-                          ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>
 
-        {/* Acquisition Source Attribution — shown SECOND */}
-        {metrics.sourceBreakdown && Object.keys(metrics.sourceBreakdown).length > 0 && (
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Share2 className="h-5 w-5 text-primary" />
-                <CardTitle>Acquisition Sources</CardTitle>
-              </div>
-              <CardDescription>
-                How attendees found out about Sunday Clinic events
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {Object.entries(metrics.sourceBreakdown)
-                  .sort(([, a], [, b]) => (b as number) - (a as number))
-                  .map(([source, count]) => {
-                    const percentage = ((count as number) / metrics.totalBookings) * 100;
-                    const sourceGoals: Record<string, number> = {
-                      'Social Media': 15,
-                      'PBGA': 20,
-                      'Golf VX': 10,
-                      'Referral': 5,
-                    };
-                    const goal = sourceGoals[source] || 0;
-                    const goalProgress = goal > 0 ? Math.min(((count as number) / goal) * 100, 100) : 0;
 
-                    return (
-                      <div key={source} className="space-y-2 p-3 bg-muted/20 rounded-lg">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-primary" />
-                            <span className="font-medium text-foreground">{source}</span>
-                          </div>
-                          <div className="text-right">
-                            <button
-                              onClick={() => setSourceModal({ source })}
-                              className="font-bold text-primary hover:underline cursor-pointer transition-colors"
-                              title="Click to see attendee list"
-                            >{count}</button>
-                            <span className="text-sm text-muted-foreground ml-2">({percentage.toFixed(1)}%)</span>
-                          </div>
-                        </div>
-                        <Progress value={percentage} className="h-2" />
-                        {goal > 0 && (
-                          <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
-                            <span>Goal: {goal} attendees</span>
-                            <span className={goalProgress >= 100 ? "text-green-600 font-semibold" : ""}>
-                              {Math.round(goalProgress)}% of goal
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Overall Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

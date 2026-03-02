@@ -97,6 +97,7 @@ export default function Home() {
   const { data: strategicKPIs } = trpc.intelligence.getStrategicKPIs.useQuery();
   const { data: previewSnapshot } = trpc.preview.getSnapshot.useQuery();
   const { data: driveDayData } = trpc.campaigns.getDriveDaySessions.useQuery();
+  const { data: giveawayStats } = trpc.giveaway.getStats.useQuery();
   const syncMutation = trpc.autonomous.syncAllData.useMutation();
   const utils = trpc.useUtils();
   const [approvingId, setApprovingId] = useState<number | null>(null);
@@ -239,7 +240,8 @@ export default function Home() {
   const allAccess = strategicKPIs?.membershipAcquisition?.breakdown?.allAccess ?? 0;
   const swingSaver = strategicKPIs?.membershipAcquisition?.breakdown?.swingSaver ?? 0;
 
-  const liveKpiBars = KPI_BARS.map((kpi) => {
+  // Filter out B2B Events from KPI bars (hidden per user request)
+  const liveKpiBars = KPI_BARS.filter(kpi => kpi.label !== "B2B Events").map((kpi) => {
     if (kpi.label === "B2B Events" && b2bCount !== null) {
       const progress = Math.min(b2bCount * 100, 100);
       return {
@@ -336,12 +338,12 @@ export default function Home() {
           </Button>
         </div>
 
-        {/* ── Section 0: Revenue KPI ── */}
+        {/* ── Section 0: Revenue KPI (Monthly + Weekly + Food/Bay) ── */}
         {toastSummary && (
           <Link href="/revenue">
             <Card className="border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer">
               <CardContent className="pt-4 pb-4">
-                {/* Mobile: stacked, Desktop: side-by-side */}
+                {/* Row 1: Monthly revenue */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-primary/20">
@@ -352,7 +354,6 @@ export default function Home() {
                       <p className="text-2xl font-bold text-foreground">{formatCurrency(toastSummary.thisMonthRevenue)}</p>
                     </div>
                   </div>
-                  {/* Mobile: 3-col grid, Desktop: inline flex */}
                   <div className="grid grid-cols-3 gap-3 sm:flex sm:items-center sm:gap-6 text-sm">
                     <div className="sm:text-right">
                       <p className="text-xs text-muted-foreground">Last Month</p>
@@ -378,6 +379,31 @@ export default function Home() {
                       </p>
                     </div>
                     <ChevronRight className="hidden sm:block h-5 w-5 text-muted-foreground" />
+                  </div>
+                </div>
+                {/* Row 2: Weekly + Food/Bay breakdown */}
+                <div className="mt-3 pt-3 border-t border-primary/10 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground">This Week</p>
+                    <p className="font-semibold text-foreground text-sm">{formatCurrency(toastSummary.thisWeekRevenue)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Week Bay</p>
+                    <p className="font-semibold text-foreground text-sm">
+                      {toastSummary.thisWeekBay > 0 ? formatCurrency(toastSummary.thisWeekBay) : <span className="text-muted-foreground/50">—</span>}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Week Food & Bev</p>
+                    <p className="font-semibold text-foreground text-sm">
+                      {toastSummary.thisWeekFood > 0 ? formatCurrency(toastSummary.thisWeekFood) : <span className="text-muted-foreground/50">—</span>}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Month Food & Bev</p>
+                    <p className="font-semibold text-foreground text-sm">
+                      {toastSummary.thisMonthFood > 0 ? formatCurrency(toastSummary.thisMonthFood) : <span className="text-muted-foreground/50">—</span>}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -642,6 +668,61 @@ export default function Home() {
                     </div>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+          </Link>
+        )}
+
+        {/* ── Section 2d: Annual Membership Giveaway ── */}
+        {giveawayStats && (
+          <Link href="/audience/giveaway">
+            <Card className="border border-yellow-500/30 bg-yellow-500/5 hover:bg-yellow-500/10 transition-colors cursor-pointer">
+              <CardContent className="pt-4 pb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-yellow-500/20">
+                      <Trophy className="h-5 w-5 text-yellow-500" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground font-medium">Annual Membership Giveaway 2026</p>
+                      <p className="text-2xl font-bold text-foreground">{giveawayStats.totalApplications} Applicants</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3 sm:flex sm:items-center sm:gap-6 text-sm">
+                    <div className="sm:text-right">
+                      <p className="text-xs text-muted-foreground">Pending Review</p>
+                      <p className="font-semibold text-yellow-500 text-sm">{(giveawayStats as any).pendingCount ?? '—'}</p>
+                    </div>
+                    <div className="sm:text-right">
+                      <p className="text-xs text-muted-foreground">Contacted</p>
+                      <p className="font-semibold text-green-500 text-sm">{(giveawayStats as any).contactedCount ?? '—'}</p>
+                    </div>
+                    <div className="sm:text-right">
+                      <p className="text-xs text-muted-foreground">Top Age Group</p>
+                      <p className="font-semibold text-foreground text-sm">
+                        {Object.entries(giveawayStats.ageRangeDistribution || {})
+                          .sort(([,a],[,b]) => (b as number)-(a as number))[0]?.[0] || '—'}
+                      </p>
+                    </div>
+                    <ChevronRight className="hidden sm:block h-5 w-5 text-muted-foreground" />
+                  </div>
+                </div>
+                {/* Age distribution mini-bar */}
+                {giveawayStats.ageRangeDistribution && Object.keys(giveawayStats.ageRangeDistribution).length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-yellow-500/10">
+                    <p className="text-xs text-muted-foreground mb-2">Age Distribution</p>
+                    <div className="flex gap-2 flex-wrap">
+                      {Object.entries(giveawayStats.ageRangeDistribution)
+                        .sort(([,a],[,b]) => (b as number)-(a as number))
+                        .slice(0, 5)
+                        .map(([age, count]) => (
+                          <span key={age} className="text-xs bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 px-2 py-0.5 rounded-full">
+                            {age}: {count as number}
+                          </span>
+                        ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </Link>

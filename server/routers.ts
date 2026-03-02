@@ -1516,7 +1516,12 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
             COUNT(*) as days_with_data,
             SUM(CASE WHEN LEFT(date,6)=DATE_FORMAT(NOW(),'%Y%m') THEN total_revenue ELSE 0 END) as this_month_revenue,
             SUM(CASE WHEN LEFT(date,6)=DATE_FORMAT(DATE_SUB(NOW(),INTERVAL 1 MONTH),'%Y%m') THEN total_revenue ELSE 0 END) as last_month_revenue,
-            SUM(CASE WHEN LEFT(date,6)=DATE_FORMAT(NOW(),'%Y%m') THEN total_orders ELSE 0 END) as this_month_orders
+            SUM(CASE WHEN LEFT(date,6)=DATE_FORMAT(NOW(),'%Y%m') THEN total_orders ELSE 0 END) as this_month_orders,
+            SUM(CASE WHEN STR_TO_DATE(date,'%Y%m%d') >= DATE_SUB(CURDATE(),INTERVAL 7 DAY) THEN total_revenue ELSE 0 END) as this_week_revenue,
+            SUM(CASE WHEN STR_TO_DATE(date,'%Y%m%d') >= DATE_SUB(CURDATE(),INTERVAL 7 DAY) THEN bay_revenue ELSE 0 END) as this_week_bay,
+            SUM(CASE WHEN STR_TO_DATE(date,'%Y%m%d') >= DATE_SUB(CURDATE(),INTERVAL 7 DAY) THEN food_bev_revenue ELSE 0 END) as this_week_food,
+            SUM(CASE WHEN LEFT(date,6)=DATE_FORMAT(NOW(),'%Y%m') THEN bay_revenue ELSE 0 END) as this_month_bay,
+            SUM(CASE WHEN LEFT(date,6)=DATE_FORMAT(NOW(),'%Y%m') THEN food_bev_revenue ELSE 0 END) as this_month_food
            FROM toast_daily_summary`
         ) as any[];
         const r = (rows as any[])[0];
@@ -1534,6 +1539,11 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
           thisMonthRevenue: parseFloat(r.this_month_revenue || '0'),
           lastMonthRevenue: parseFloat(r.last_month_revenue || '0'),
           thisMonthOrders: Number(r.this_month_orders),
+          thisWeekRevenue: parseFloat(r.this_week_revenue || '0'),
+          thisWeekBay: parseFloat(r.this_week_bay || '0'),
+          thisWeekFood: parseFloat(r.this_week_food || '0'),
+          thisMonthBay: parseFloat(r.this_month_bay || '0'),
+          thisMonthFood: parseFloat(r.this_month_food || '0'),
         };
       }),
 

@@ -1,0 +1,20 @@
+{
+  "query": "SELECT total, pending, contacted, scheduled, completed FROM (SELECT COUNT(*) as total, SUM(IF(status='pending',1,0)) as pending, SUM(IF(status='contacted',1,0)) as contacted, SUM(IF(status='scheduled',1,0)) as scheduled, SUM(IF(status='completed',1,0)) as completed FROM giveawayApplications WHERE isTestEntry=0) t; SELECT SUM(total_revenue) as week_revenue, SUM(bay_revenue) as week_bay, SUM(food_bev_revenue) as week_food FROM toast_daily_summary WHERE STR_TO_DATE(date, '%Y%m%d') >= DATE_SUB(CURDATE(), INTERVAL 7 DAY);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2R3ugynrRDzjYQU.e9d0c4c091a8 --database A5GjFitCrpqWQ2wnoTJiWm --execute SELECT total, pending, contacted, scheduled, completed FROM (SELECT COUNT(*) as total, SUM(IF(status='pending',1,0)) as pending, SUM(IF(status='contacted',1,0)) as contacted, SUM(IF(status='scheduled',1,0)) as scheduled, SUM(IF(status='completed',1,0)) as completed FROM giveawayApplications WHERE isTestEntry=0) t; SELECT SUM(total_revenue) as week_revenue, SUM(bay_revenue) as week_bay, SUM(food_bev_revenue) as week_food FROM toast_daily_summary WHERE STR_TO_DATE(date, '%Y%m%d') >= DATE_SUB(CURDATE(), INTERVAL 7 DAY);",
+  "rows": [
+    {
+      "total": "45",
+      "pending": "45",
+      "contacted": "0",
+      "scheduled": "0",
+      "completed": "0"
+    }
+  ],
+  "messages": [
+    "week_revenue\tweek_bay\tweek_food",
+    "4781.12\t0.00\t4779.12"
+  ],
+  "stdout": "total\tpending\tcontacted\tscheduled\tcompleted\n45\t45\t0\t0\t0\nweek_revenue\tweek_bay\tweek_food\n4781.12\t0.00\t4779.12\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}
