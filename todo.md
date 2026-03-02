@@ -640,3 +640,16 @@
 - [x] guest.* public tRPC endpoints added to server/routers.ts
 - [x] All TypeScript errors resolved (0 errors)
 - [x] App.tsx updated with all /guest/* routes
+
+## Drive Day Dashboard Fixes (2026-03-01)
+- [ ] Fix total member count: use 106 (active members) not 369 (all-time Acuity contacts)
+- [ ] Add Jan 25 Drive Day data (currently missing from Programs page - only 4 events shown)
+- [ ] Replace Member Retention KPI bar with Drive Day Clinic KPI on Home page
+- [ ] Add revenue data to Programs / Drive Day section
+
+## KPI Structure Fix (2026-03-01)
+- [ ] Restore MEMBERSHIP_GOAL=300 in server (Acquisition: 300 total goal, 106 current, 194 remaining)
+- [ ] Member Retention KPI: show retention rate % of current 106 members (not 300 goal)
+- [ ] Home.tsx: restore Member Retention KPI bar alongside Drive Day Clinic
+- [ ] Fix Drive Day date breakdown (a.date format mismatch causing 0 bookings per date)
+- [ ] Add revenue data to Drive Day Programs page

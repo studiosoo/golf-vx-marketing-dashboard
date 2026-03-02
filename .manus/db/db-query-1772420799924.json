@@ -1,0 +1,17 @@
+{
+  "query": "SELECT \n  COUNT(*) as totalMembers,\n  SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as activeMembers,\n  SUM(CASE WHEN membershipTier = 'all_access_aces' AND status = 'active' THEN 1 ELSE 0 END) as allAccessActive,\n  SUM(CASE WHEN membershipTier = 'swing_savers' AND status = 'active' THEN 1 ELSE 0 END) as swingSaversActive,\n  SUM(CASE WHEN membershipTier = 'golf_vx_pro' AND status = 'active' THEN 1 ELSE 0 END) as proActive\nFROM members;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2R3ugynrRDzjYQU.e9d0c4c091a8 --database A5GjFitCrpqWQ2wnoTJiWm --execute SELECT \n  COUNT(*) as totalMembers,\n  SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as activeMembers,\n  SUM(CASE WHEN membershipTier = 'all_access_aces' AND status = 'active' THEN 1 ELSE 0 END) as allAccessActive,\n  SUM(CASE WHEN membershipTier = 'swing_savers' AND status = 'active' THEN 1 ELSE 0 END) as swingSaversActive,\n  SUM(CASE WHEN membershipTier = 'golf_vx_pro' AND status = 'active' THEN 1 ELSE 0 END) as proActive\nFROM members;",
+  "rows": [
+    {
+      "totalMembers": "369",
+      "activeMembers": "277",
+      "allAccessActive": "54",
+      "swingSaversActive": "33",
+      "proActive": "4"
+    }
+  ],
+  "messages": [],
+  "stdout": "totalMembers\tactiveMembers\tallAccessActive\tswingSaversActive\tproActive\n369\t277\t54\t33\t4\n",
+  "stderr": "",
+  "execution_time_ms": 130
+}

@@ -132,6 +132,7 @@ export async function getAppointments(params?: {
   appointmentTypeID?: number;
   calendarID?: number;
   canceled?: boolean;
+  max?: number;
 }): Promise<AcuityAppointment[]> {
   const client = createAcuityClient();
   const response = await client.get<AcuityAppointment[]>("/appointments", { params });

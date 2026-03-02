@@ -38,11 +38,21 @@ const KPI_BARS = [
     label: "Member Retention",
     value: "Loading...",
     progress: 0,
+    color: "bg-[#5daf68]",
+    badge: "Loading...",
+    badgeColor: "text-muted-foreground",
+    goal: "Goal: retain 106 members",
+    href: "/audience/members",
+  },
+  {
+    label: "Drive Day Clinic",
+    value: "Loading...",
+    progress: 0,
     color: "bg-[#a87fbe]",
     badge: "Loading...",
     badgeColor: "text-muted-foreground",
-    goal: "Goal: 300 members",
-    href: "/campaigns",
+    goal: "Goal: 60 attendees",
+    href: "/programs",
   },
   {
     label: "B2B Events",
@@ -251,20 +261,38 @@ export default function Home() {
         ...kpi,
         value: `${customerMembers} / 300`,
         progress,
-        badge: newThisMonth > 0 ? `+${newThisMonth} this month${momDiff >= 0 ? ` (↑${momDiff} vs last)` : ` (↓${Math.abs(momDiff)} vs last)`}` : `${Math.max(0, 300 - customerMembers)} more needed`,
+        badge: newThisMonth > 0 ? `+${newThisMonth} this month${momDiff >= 0 ? ` (↑${momDiff} vs last)` : ` (↓${Math.abs(momDiff)} vs last)`}` : `${300 - customerMembers} more to goal`,
         badgeColor: newThisMonth > 0 ? "text-green-500" : "text-[#ef9253]",
         goal: `AA: ${allAccess} · SS: ${swingSaver}${mrrDisplay}`,
       };
     }
     if (kpi.label === "Member Retention" && customerMembers !== null) {
-      const progress = Math.min((customerMembers / 300) * 100, 100);
+      // Retention = how many of the 106 active members are still active
+      // Until Boomerang data is fully synced, show current active count vs 106 baseline
+      const RETENTION_BASE = 106;
+      const retentionRate = Math.min(Math.round((customerMembers / RETENTION_BASE) * 100), 100);
       return {
         ...kpi,
-        value: `${customerMembers} / 300`,
+        value: `${customerMembers} / ${RETENTION_BASE} active`,
+        progress: retentionRate,
+        badge: `${retentionRate}% retention rate`,
+        badgeColor: retentionRate >= 90 ? "text-green-500" : retentionRate >= 75 ? "text-yellow-500" : "text-red-400",
+        goal: `${RETENTION_BASE - customerMembers > 0 ? `${RETENTION_BASE - customerMembers} churned` : 'All members retained'} · Boomerang sync pending`,
+      };
+    }
+    if (kpi.label === "Drive Day Clinic" && driveDayData) {
+      const totalReg = driveDayData.overall.totalRegistrations;
+      const revenue = driveDayData.overall.revenueCollected;
+      const DRIVE_DAY_GOAL = 60; // 3 sessions × 20 attendees goal
+      const progress = Math.min((totalReg / DRIVE_DAY_GOAL) * 100, 100);
+      const completedSessions = driveDayData.sessions.filter(s => s.totalRegistrations > 0).length;
+      return {
+        ...kpi,
+        value: `${totalReg} registered`,
         progress,
-        badge: progress >= 100 ? "Goal reached! ✓" : `${(progress).toFixed(0)}% to goal`,
-        badgeColor: progress >= 100 ? "text-green-500" : "text-[#a87fbe]",
-        goal: `All Access: ${allAccess}, Swing Saver: ${swingSaver}`,
+        badge: `$${revenue.toFixed(0)} revenue · ${completedSessions}/3 sessions`,
+        badgeColor: "text-[#a87fbe]",
+        goal: `Paid: ${driveDayData.overall.paidAttendees} · Members: ${driveDayData.overall.memberAttendees}`,
       };
     }
     return kpi;

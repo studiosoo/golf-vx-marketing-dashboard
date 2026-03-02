@@ -618,12 +618,14 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
           minDate: "2026-01-25",
           maxDate: "2026-03-29",
           canceled: false,
+          max: 200,
         });
 
         const driveDayAppts = (appts as any[]).filter((a) =>
           (a.type || "").toLowerCase().includes("drive day")
         );
 
+        const getAmt = (a: any): number => parseFloat(a.amountPaid || "0");
         const sessionDefs = [
           {
             name: "Driving to the Ball",
@@ -661,22 +663,19 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
           });
 
           const byDate = def.dates.reduce((acc: Record<string, any>, date: string) => {
-            const dateAppts = sessionAppts.filter((a: any) => a.date === date);
-            const paidCount = dateAppts.filter((a: any) => parseFloat(a.price || "0") > 0).length;
-            const memberCount = dateAppts.filter((a: any) => parseFloat(a.price || "0") === 0).length;
-            const revenue = dateAppts
-              .filter((a: any) => a.paid === "yes")
-              .reduce((s: number, a: any) => s + parseFloat(a.price || "0"), 0);
+            // Acuity 'date' is human-readable ("January 25, 2026"), use 'datetime' ISO string
+            const dateAppts = sessionAppts.filter((a: any) => (a.datetime || '').startsWith(date));
+            const paidCount = dateAppts.filter((a: any) => getAmt(a) > 0).length;
+            const memberCount = dateAppts.filter((a: any) => getAmt(a) === 0).length;
+            const revenue = dateAppts.reduce((s: number, a: any) => s + getAmt(a), 0);
             acc[date] = { registrations: dateAppts.length, paid: paidCount, members: memberCount, revenue };
             return acc;
           }, {});
 
           const totalRegistrations = sessionAppts.length;
-          const paidAttendees = sessionAppts.filter((a: any) => parseFloat(a.price || "0") > 0).length;
-          const memberAttendees = sessionAppts.filter((a: any) => parseFloat(a.price || "0") === 0).length;
-          const revenueCollected = sessionAppts
-            .filter((a: any) => a.paid === "yes")
-            .reduce((s: number, a: any) => s + parseFloat(a.price || "0"), 0);
+          const paidAttendees = sessionAppts.filter((a: any) => getAmt(a) > 0).length;
+          const memberAttendees = sessionAppts.filter((a: any) => getAmt(a) === 0).length;
+          const revenueCollected = sessionAppts.reduce((s: number, a: any) => s + getAmt(a), 0);
 
           return {
             name: def.name,
@@ -695,11 +694,9 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
 
         const overall = {
           totalRegistrations: driveDayAppts.length,
-          paidAttendees: driveDayAppts.filter((a: any) => parseFloat(a.price || "0") > 0).length,
-          memberAttendees: driveDayAppts.filter((a: any) => parseFloat(a.price || "0") === 0).length,
-          revenueCollected: driveDayAppts
-            .filter((a: any) => a.paid === "yes")
-            .reduce((s: number, a: any) => s + parseFloat(a.price || "0"), 0),
+          paidAttendees: driveDayAppts.filter((a: any) => getAmt(a) > 0).length,
+          memberAttendees: driveDayAppts.filter((a: any) => getAmt(a) === 0).length,
+          revenueCollected: driveDayAppts.reduce((s: number, a: any) => s + getAmt(a), 0),
         };
 
         return { sessions, overall };
@@ -2728,8 +2725,8 @@ Respond in JSON with this exact structure:
         `);
         const newMembersThisMonth = Number((newMembersResult as any)[0]?.thisMonth || 0);
         const newMembersLastMonth = Number((newMembersResult as any)[0]?.lastMonth || 0);
-        // Acquisition goal: 300 total customer members over 2 years
-        // Retention goal: retain all current customer members (target = 300)
+        // Acquisition goal: 300 total customer members (2-year goal)
+        // Current active members: ~106 (All Access + Swing Saver)
         const MEMBERSHIP_GOAL = 300;
         const memberCount = customerMemberCount; // alias for downstream use
 
@@ -2806,12 +2803,16 @@ Respond in JSON with this exact structure:
             paymentBreakdown: { monthly: monthlyMemberCount, annual: annualMemberCount },
           },
           memberRetention: {
-            // Goal: retain all 300 customer members
+            // Goal: retain all current active members (106 as of now)
+            // Target = current active count (dynamic, not 300)
             current: customerMemberCount,
-            target: MEMBERSHIP_GOAL,
+            target: customerMemberCount, // retention target = current base
             retentionRate: customerRetentionRate,
-            progress: Math.min((customerMemberCount / MEMBERSHIP_GOAL) * 100, 100),
+            // Progress = retention rate % (how many of current members are still active)
+            progress: Math.min(customerRetentionRate, 100),
             breakdown: { allAccess: allAccessCount, swingSaver: swingSaverCount },
+            activeCount: activeCustomers,
+            totalCount: totalCustomers,
           },
           proMembers: {
             // Pro members tracked separately — NOT part of the 300 goal
@@ -3919,6 +3920,83 @@ Return a JSON object with:
     }),
     getChannelPerformance: publicProcedure.input(z.object({ startDate: z.date(), endDate: z.date() })).query(async ({ input }) => {
       try { return await db.getChannelPerformanceSummary(input.startDate, input.endDate); } catch { return []; }
+    }),
+    getDriveDaySessions: publicProcedure.query(async () => {
+      try {
+        const { getAppointments } = await import('./acuity');
+        const appts = await getAppointments({ minDate: '2026-01-01', maxDate: '2026-12-31', canceled: false, max: 200 });
+        const driveDayAppts = (appts as any[]).filter((a) =>
+          (a.type || '').toLowerCase().includes('drive day')
+        );
+        const getAmt = (a: any): number => parseFloat(a.amountPaid || '0');
+        const sessionDefs = [
+          {
+            name: 'Driving to the Ball',
+            label: 'Day 1 — Driving to the Ball',
+            day: 'Day 1',
+            dates: ['2026-01-25', '2026-02-01'],
+            keywords: ['driving', 'driving to the ball'],
+            color: 'yellow',
+            description: 'Tee-shot fundamentals: setup, posture, alignment, grip, and generating effortless power.',
+          },
+          {
+            name: 'Putting',
+            label: 'Day 2 — Putting: Score Low',
+            day: 'Day 2',
+            dates: ['2026-02-22', '2026-03-01'],
+            keywords: ['putting', 'score low'],
+            color: 'blue',
+            description: 'Green-reading, distance control, and the mental game of putting.',
+          },
+          {
+            name: 'Short Game',
+            label: 'Day 3 — Short Game',
+            day: 'Day 3',
+            dates: ['2026-03-22', '2026-03-29'],
+            keywords: ['short game', 'chipping', 'pitching'],
+            color: 'green',
+            description: 'Chipping, pitching, bunker play, and scoring from inside 100 yards.',
+          },
+        ];
+        const sessions = sessionDefs.map((sess) => {
+          const sessAppts = driveDayAppts.filter((a: any) => {
+            const t = (a.type || '').toLowerCase();
+            return sess.keywords.some((kw) => t.includes(kw));
+          });
+          const dateBreakdown = sess.dates.map((date) => {
+            const dateAppts = sessAppts.filter((a: any) => {
+              // Acuity 'datetime' is ISO format: "2026-01-25T14:00:00-0600"
+              // Acuity 'date' is human format: "January 25, 2026"
+              const dt = a.datetime || '';
+              return dt.startsWith(date);
+            });
+            const paidCount = dateAppts.filter((a: any) => getAmt(a) > 0).length;
+            const memberCount = dateAppts.filter((a: any) => getAmt(a) === 0).length;
+            const revenue = dateAppts.reduce((s: number, a: any) => s + getAmt(a), 0);
+            return { date, bookings: dateAppts.length, paid: paidCount, members: memberCount, revenue };
+          });
+          const paidAttendees = sessAppts.filter((a: any) => getAmt(a) > 0).length;
+          const memberAttendees = sessAppts.filter((a: any) => getAmt(a) === 0).length;
+          const revenueCollected = sessAppts.reduce((s: number, a: any) => s + getAmt(a), 0);
+          return {
+            ...sess,
+            totalRegistrations: sessAppts.length,
+            paidAttendees,
+            memberAttendees,
+            revenueCollected,
+            dates: dateBreakdown,
+          };
+        });
+        return {
+          sessions,
+          overall: {
+            totalRegistrations: driveDayAppts.length,
+            paidAttendees: driveDayAppts.filter((a: any) => getAmt(a) > 0).length,
+            memberAttendees: driveDayAppts.filter((a: any) => getAmt(a) === 0).length,
+            revenueCollected: driveDayAppts.reduce((s: number, a: any) => s + getAmt(a), 0),
+          },
+        };
+      } catch { return { sessions: [], overall: { totalRegistrations: 0, paidAttendees: 0, memberAttendees: 0, revenueCollected: 0 } }; }
     }),
   }),
 });
