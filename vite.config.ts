@@ -74,6 +74,32 @@ function writeToLogFile(source: LogSource, entries: unknown[]) {
  * - Files: browserConsole.log, networkRequests.log, sessionReplay.log
  * - Auto-trimmed when exceeding 1MB (keeps newest entries)
  */
+/**
+ * Vite plugin to suppress FSWatcher errors from corrupted filesystem entries
+ * (.manus, .meta-ads-cache) that cause "Unknown system error -117" crashes.
+ * Patches the chokidar FSWatcher error handler to treat errno -117 as non-fatal.
+ */
+function vitePluginSuppressFsWatcherErrors(): Plugin {
+  return {
+    name: "manus-suppress-fswatcher-errors",
+    configureServer(server: ViteDevServer) {
+      // Intercept the 'error' event on the watcher before it propagates
+      const originalEmit = server.watcher.emit.bind(server.watcher);
+      (server.watcher as any).emit = function (event: string, ...args: any[]) {
+        if (event === "error") {
+          const err = args[0];
+          // Suppress corrupted filesystem errors (errno -117) — these come from
+          // .manus and .meta-ads-cache dirs that have broken inodes in the sandbox
+          if (err && (err.errno === -117 || err.code === "Unknown system error -117")) {
+            return false;
+          }
+        }
+        return originalEmit(event, ...args);
+      };
+    },
+  };
+}
+
 function vitePluginManusDebugCollector(): Plugin {
   return {
     name: "manus-debug-collector",
@@ -150,7 +176,7 @@ function vitePluginManusDebugCollector(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
+const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginSuppressFsWatcherErrors(), vitePluginManusDebugCollector()];
 
 export default defineConfig({
   plugins,
@@ -172,12 +198,18 @@ export default defineConfig({
     host: true,
     watch: {
       // Exclude internal Manus runtime dirs that trigger FSWatcher error -117
+      // Use both glob patterns AND absolute paths for corrupted filesystem entries
       ignored: [
         "**/.manus/**",
         "**/.manus-logs/**",
         "**/.meta-ads-cache/**",
         "**/.git_broken_backup/**",
         "**/.git_broken_backup2/**",
+        path.resolve(import.meta.dirname, ".manus"),
+        path.resolve(import.meta.dirname, ".meta-ads-cache"),
+        path.resolve(import.meta.dirname, ".git_broken_backup"),
+        path.resolve(import.meta.dirname, ".git_broken_backup2"),
+        (filePath: string) => filePath.includes("/.manus") || filePath.includes("/.meta-ads-cache") || filePath.includes("/.git_broken"),
       ],
     },
     allowedHosts: [

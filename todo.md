@@ -650,3 +650,7 @@
 - [ ] Diagnose why sidebar is not showing on Home page
 - [ ] Fix DashboardLayout to wrap all dashboard routes
 - [ ] Ensure sidebar is always visible on every page
+
+## Bug Fix: SyntaxError on /campaigns/meta-ads (2026-03-02)
+- [x] Diagnose: Same root cause as before - Vite FSWatcher crashing on corrupted .manus/.meta-ads-cache dirs
+- [x] Fix: Added vitePluginSuppressFsWatcherErrors plugin to intercept and suppress errno -117 errors before they propagate to crash the server
