@@ -1,6 +1,5 @@
 import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
-import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -191,7 +190,7 @@ export default function CommunicationsHub() {
   };
 
   return (
-    <DashboardLayout>
+    <>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -447,6 +446,6 @@ export default function CommunicationsHub() {
           </div>
         </DialogContent>
       </Dialog>
-    </DashboardLayout>
+    </>
   );
 }

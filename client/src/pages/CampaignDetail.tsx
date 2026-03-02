@@ -1,4 +1,3 @@
-import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -179,16 +178,13 @@ export default function CampaignDetail() {
 
   if (isLoading) {
     return (
-      <DashboardLayout>
         <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout>
       <div className="space-y-6 p-6">
         {/* Header */}
         <div className="flex items-start justify-between">
@@ -352,6 +348,5 @@ export default function CampaignDetail() {
           </Card>
         </div>
       </div>
-    </DashboardLayout>
   );
 }

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
-import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +27,6 @@ export default function AnnualGiveawayActions() {
 
   if (isLoading) {
     return (
-      <DashboardLayout>
         <div className="container py-8">
           <div className="animate-pulse space-y-4">
             <div className="h-8 bg-muted rounded w-1/3"></div>
@@ -36,13 +34,11 @@ export default function AnnualGiveawayActions() {
             <div className="h-32 bg-muted rounded"></div>
           </div>
         </div>
-      </DashboardLayout>
     );
   }
 
   if (!actionPlan) {
     return (
-      <DashboardLayout>
         <div className="container py-8">
           <Card>
             <CardHeader>
@@ -61,7 +57,6 @@ export default function AnnualGiveawayActions() {
             </CardContent>
           </Card>
         </div>
-      </DashboardLayout>
     );
   }
 
@@ -94,7 +89,6 @@ export default function AnnualGiveawayActions() {
   };
 
   return (
-    <DashboardLayout>
       <div className="container py-8 space-y-6">
         {/* Header */}
         <div>
@@ -269,6 +263,5 @@ export default function AnnualGiveawayActions() {
           })}
         </div>
       </div>
-    </DashboardLayout>
   );
 }

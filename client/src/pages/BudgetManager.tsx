@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
-import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -91,7 +90,6 @@ export default function BudgetManager() {
   ] : [];
   
   return (
-    <DashboardLayout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
@@ -325,7 +323,6 @@ export default function BudgetManager() {
           </>
         )}
       </div>
-    </DashboardLayout>
   );
 }
 

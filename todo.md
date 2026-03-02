@@ -645,3 +645,8 @@
 - [x] Row click → applicant detail drawer/modal
 - [x] Wire route /giveaway in App.tsx and sidebar nav item
 - [x] Write 19 vitest tests for getApplicationsFiltered endpoint (all passing)
+
+## Sidebar Always Visible Fix (2026-03-02)
+- [ ] Diagnose why sidebar is not showing on Home page
+- [ ] Fix DashboardLayout to wrap all dashboard routes
+- [ ] Ensure sidebar is always visible on every page

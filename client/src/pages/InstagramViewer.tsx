@@ -1,5 +1,4 @@
 import { useState } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,7 +60,6 @@ export default function InstagramViewer() {
   ];
 
   return (
-    <DashboardLayout>
       <div className="container py-6 space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
@@ -241,6 +239,5 @@ export default function InstagramViewer() {
           </DialogContent>
         </Dialog>
       </div>
-    </DashboardLayout>
   );
 }

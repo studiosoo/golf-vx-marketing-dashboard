@@ -1,4 +1,3 @@
-import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { Mail, Users, TrendingUp, Loader2, Tag } from "lucide-react";
@@ -20,17 +19,14 @@ export default function EmailMarketing() {
 
   if (isLoading) {
     return (
-      <DashboardLayout>
         <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </DashboardLayout>
     );
   }
 
   if (hasError) {
     return (
-      <DashboardLayout>
         <div className="container py-8">
           <Card className="border-destructive">
             <CardHeader>
@@ -54,12 +50,10 @@ export default function EmailMarketing() {
             </CardContent>
           </Card>
         </div>
-      </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout>
       <div className="space-y-6 p-6">
         {/* Header */}
         <div>
@@ -183,6 +177,5 @@ export default function EmailMarketing() {
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
   );
 }

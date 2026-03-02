@@ -1,5 +1,4 @@
 import { useState } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
 import ProgramMarketingPanel from "@/components/ProgramMarketingPanel";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -290,19 +289,15 @@ export default function SundayClinicDetail() {
 
   if (isLoading) {
     return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      </DashboardLayout>
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
     );
   }
 
   if (!metrics) {
     return (
-      <DashboardLayout>
-        <div className="text-center text-muted-foreground">No data available</div>
-      </DashboardLayout>
+      <div className="text-center text-muted-foreground">No data available</div>
     );
   }
 
@@ -311,7 +306,7 @@ export default function SundayClinicDetail() {
   const memberPerformance = (memberGoalProgress / targetMemberAttendance) * 100;
 
   return (
-    <DashboardLayout>
+    <>
       <div className="space-y-6">
         {/* Header */}
         <div>
@@ -633,6 +628,6 @@ export default function SundayClinicDetail() {
           maxDate="2026-03-29"
         />
       )}
-    </DashboardLayout>
+    </>
   );
 }

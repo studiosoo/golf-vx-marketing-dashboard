@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useParams, Link } from "wouter";
 import { trpc } from "@/lib/trpc";
-import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -72,7 +71,6 @@ export default function MetaAdsCampaignDetail() {
   const campaignName = (dailyInsights?.[0] as any)?.campaign_name || "Campaign";
 
   return (
-    <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -280,6 +278,5 @@ export default function MetaAdsCampaignDetail() {
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
   );
 }

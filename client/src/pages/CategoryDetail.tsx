@@ -1,4 +1,3 @@
-import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { TrendingUp, TrendingDown, ArrowLeft, DollarSign, BarChart3, Target, Calendar, Loader2, Image as ImageIcon, Users } from "lucide-react";
@@ -73,7 +72,6 @@ export default function CategoryDetail() {
 
   if (!category) {
     return (
-      <DashboardLayout>
         <div className="p-6">
           <div className="text-center py-12">
             <h2 className="text-2xl font-bold text-foreground">Category not found</h2>
@@ -85,17 +83,14 @@ export default function CategoryDetail() {
             </Button>
           </div>
         </div>
-      </DashboardLayout>
     );
   }
 
   if (isLoading) {
     return (
-      <DashboardLayout>
         <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </DashboardLayout>
     );
   }
 
@@ -113,7 +108,6 @@ export default function CategoryDetail() {
   const roi = totals.spend > 0 ? ((totals.revenue - totals.spend) / totals.spend) * 100 : 0;
 
   return (
-    <DashboardLayout>
       <div className="space-y-6 p-6">
         {/* Header */}
         <div className="flex items-start justify-between">
@@ -365,6 +359,5 @@ export default function CategoryDetail() {
           )}
         </div>
       </div>
-    </DashboardLayout>
   );
 }
