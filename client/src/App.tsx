@@ -78,6 +78,7 @@ import AnniversaryGiveaway from "./pages/AnniversaryGiveaway";
 import AnniversaryGiveawayApplication from "./pages/AnniversaryGiveawayApplication";
 import AnniversaryGiveawayThankYou from "./pages/AnniversaryGiveawayThankYou";
 import AnnualGiveaway from "./pages/AnnualGiveaway";
+import TrialSessionDetail from "./pages/TrialSessionDetail";
 import AnnualGiveawayActions from "./pages/AnnualGiveawayActions";
 import Tasks from "./pages/Tasks";
 import AIWorkspace from "./pages/AIWorkspace";
@@ -125,6 +126,8 @@ function DashboardRoutes() {
         <Route path="/programs/junior-summer-camp" component={JuniorCampDashboard} />
         <Route path="/programs/leagues" component={Leagues} />
         <Route path="/programs/annual-giveaway" component={AnnualGiveaway} />
+        <Route path="/programs/trial-session" component={TrialSessionDetail} />
+        <Route path="/programs/4" component={TrialSessionDetail} />
 
         {/* ── PROMOTIONS ── */}
         <Route path="/promotions/annual-giveaway" component={AnnualGiveaway} />

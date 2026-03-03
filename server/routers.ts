@@ -1703,6 +1703,12 @@ Respond in JSON:
           type: a.type,
         }));
       }),
+
+    getTrialSessionDetail: protectedProcedure
+      .query(async () => {
+        const { getTrialSessionDetail } = await import('./acuity');
+        return await getTrialSessionDetail();
+      }),
   }),
   // Task Management (Asana Integration)
   tasks: router({

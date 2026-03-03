@@ -109,6 +109,7 @@ function getProgramRoute(program: Program): string {
   if (name.includes("junior") || name.includes("summer camp")) return "/programs/summer-camp";
   if (name.includes("league") || name.includes("tournament")) return "/programs/leagues";
   if (name.includes("giveaway")) return "/programs/annual-giveaway";
+  if (name.includes("trial") || name.includes("1-hour")) return "/programs/trial-session";
   return `/programs/${program.id}`;
 }
 

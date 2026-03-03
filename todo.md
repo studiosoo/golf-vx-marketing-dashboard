@@ -828,3 +828,11 @@
 - [x] Fix 1-Hour Trial Session: DB updated to 9 bookings / 50 target; card now shows Spend / Bookings / Revenue + progress bar (18%)
 - [x] Sort Programs & Events cards: Active → Planned → Completed → Paused (STATUS_ORDER sort in useMemo)
 - [x] Instagram Follower Growth: shows Spend / 8,854 Engagements / Cost-per-Engagement ($0.0049) + green Live bar (Meta Ads API auth expired — engagements from cache)
+
+## Session 2026-03-03 Part 10 — 1-Hour Trial Session Detail Page
+- [x] Add getTrialSessionDetail tRPC endpoint: revenue.getTrialSessionDetail (fetches all 3 active appointment types from Acuity)
+- [x] Create TrialSessionDetail.tsx: KPI cards + breakdown cards per type + full booking list (name, date, type, price, paid status, source)
+- [x] Fix Programs.tsx route for 1-Hour Trial Session → /programs/trial-session
+- [ ] Fix Bookings "—" display bug on Programs card (kpiActual=9 showing as "—")
+- [x] Register /programs/trial-session and /programs/4 routes in App.tsx
+- [x] 8 vitest unit tests for TrialSessionDetail data shape and route mapping — all passing

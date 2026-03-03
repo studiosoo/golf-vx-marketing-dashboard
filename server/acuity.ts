@@ -741,3 +741,104 @@ export async function getJuniorCampData(params?: {
     overallHowHeard,
   };
 }
+
+// ─── 1-Hour Trial Session Detail ─────────────────────────────────────────────
+// Appointment type IDs for all trial variants
+const TRIAL_TYPE_IDS = {
+  offPeak25: 86461965,          // 1-Hour Trial Session (Off-Peak) @ $25
+  peak35: 86472398,             // 1-Hour Trial Session (Peak) @ $35
+  anniversaryOffPeak9: 89062344, // Anniversary Trial Sessions (Off-Peak) @ $9
+  // $18 Anniversary Peak – add ID here when created in Acuity
+};
+
+export interface TrialBooking {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  datetime: string;
+  price: string;
+  amountPaid: string;
+  paid: string;
+  type: string;
+  appointmentTypeID: number;
+  source: string;
+  calendar: string;
+}
+
+export interface TrialTypeGroup {
+  typeId: number;
+  typeName: string;
+  priceLabel: string;
+  bookings: TrialBooking[];
+  totalRevenue: number;
+  paidCount: number;
+}
+
+export interface TrialSessionDetail {
+  types: TrialTypeGroup[];
+  totalBookings: number;
+  totalRevenue: number;
+  allBookings: TrialBooking[];
+}
+
+function extractTrialSource(apt: AcuityAppointment): string {
+  const allValues = (apt.forms || []).flatMap((f: any) => f.values || []);
+  const sourceField = allValues.find((v: any) =>
+    v.name?.toLowerCase().includes('source') ||
+    v.name?.toLowerCase().includes('hear') ||
+    v.name?.toLowerCase().includes('referral') ||
+    v.name?.toLowerCase().includes('how did')
+  );
+  return sourceField?.value || 'Not specified';
+}
+
+export async function getTrialSessionDetail(): Promise<TrialSessionDetail> {
+  const allAppts = await getAppointments({ max: 500, canceled: false });
+  const trialTypeIds = new Set(Object.values(TRIAL_TYPE_IDS));
+  const trialAppts = allAppts.filter(a => trialTypeIds.has(a.appointmentTypeID));
+
+  const typeConfig: { typeId: number; typeName: string; priceLabel: string }[] = [
+    { typeId: TRIAL_TYPE_IDS.offPeak25, typeName: '1-Hour Trial Session (Off-Peak)', priceLabel: '$25 Off-Peak Trial' },
+    { typeId: TRIAL_TYPE_IDS.peak35, typeName: '1-Hour Trial Session (Peak)', priceLabel: '$35 Peak Trial' },
+    { typeId: TRIAL_TYPE_IDS.anniversaryOffPeak9, typeName: 'Anniversary Trial Sessions (Off-Peak)', priceLabel: '$9 Anniversary Off-Peak Trial' },
+  ];
+
+  const types: TrialTypeGroup[] = typeConfig.map(cfg => {
+    const bookings: TrialBooking[] = trialAppts
+      .filter(a => a.appointmentTypeID === cfg.typeId)
+      .map(a => ({
+        id: a.id,
+        firstName: a.firstName,
+        lastName: a.lastName,
+        email: a.email,
+        phone: a.phone,
+        datetime: a.datetime,
+        price: a.price,
+        amountPaid: a.amountPaid,
+        paid: a.paid,
+        type: a.type,
+        appointmentTypeID: a.appointmentTypeID,
+        source: extractTrialSource(a),
+        calendar: a.calendar,
+      }))
+      .sort((a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime());
+
+    const totalRevenue = bookings.reduce((sum, b) => sum + parseFloat(b.amountPaid || b.price || '0'), 0);
+    const paidCount = bookings.filter(b => b.paid === 'yes').length;
+
+    return { ...cfg, bookings, totalRevenue, paidCount };
+  });
+
+  const allBookings: TrialBooking[] = types
+    .flatMap(t => t.bookings)
+    .sort((a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime());
+
+  return {
+    types,
+    totalBookings: allBookings.length,
+    totalRevenue: types.reduce((sum, t) => sum + t.totalRevenue, 0),
+    allBookings,
+  };
+}
