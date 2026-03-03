@@ -6,14 +6,16 @@ import {
   RefreshCw,
   Users,
   Calendar,
-  ChevronDown,
-  ChevronUp,
   Loader2,
   X,
   Phone,
   Mail,
   MapPin,
   Trophy,
+  Eye,
+  BarChart2,
+  Pencil,
+  Check,
 } from "lucide-react";
 
 interface Submission {
@@ -140,13 +142,152 @@ interface FunnelSummary {
   funnelName: string;
   archived: boolean;
   optInCount: number;
+  uniqueVisitors: number;
+  pageViews: number;
   lastSyncedAt: Date;
   submissionCount: number;
   lastSubmission: Date | null;
 }
 
-function FunnelCard({ funnel }: { funnel: FunnelSummary }) {
+function UvPvEditModal({
+  funnel,
+  onClose,
+  onSaved,
+}: {
+  funnel: FunnelSummary;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const [uv, setUv] = useState(String(funnel.uniqueVisitors || ""));
+  const [pv, setPv] = useState(String(funnel.pageViews || ""));
+
+  const updateMutation = trpc.funnels.updateUvPv.useMutation({
+    onSuccess: () => {
+      toast.success("UV/PV stats updated successfully");
+      onSaved();
+      onClose();
+    },
+    onError: (err) => {
+      toast.error(`Failed to update: ${err.message}`);
+    },
+  });
+
+  const handleSave = () => {
+    const uvNum = parseInt(uv) || 0;
+    const pvNum = parseInt(pv) || 0;
+    if (uvNum < 0 || pvNum < 0) {
+      toast.error("Values must be non-negative");
+      return;
+    }
+    updateMutation.mutate({
+      cfId: funnel.funnelId,
+      uniqueVisitors: uvNum,
+      pageViews: pvNum,
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+      <div className="bg-card border border-border rounded-xl w-full max-w-sm">
+        <div className="flex items-center justify-between p-5 border-b border-border">
+          <div>
+            <h2 className="font-bold text-base" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+              Edit UV/PV Stats
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5 max-w-[220px] truncate">
+              {funnel.funnelName}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-4">
+          <p className="text-xs text-muted-foreground">
+            ClickFunnels API does not expose visit counts. Enter the values manually from your ClickFunnels dashboard.
+          </p>
+
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs font-medium text-foreground mb-1.5 flex items-center gap-1.5">
+                <Eye size={12} className="text-primary" />
+                Unique Visitors (UV)
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={uv}
+                onChange={(e) => setUv(e.target.value)}
+                placeholder="e.g. 176"
+                className="w-full px-3 py-2 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-foreground mb-1.5 flex items-center gap-1.5">
+                <BarChart2 size={12} className="text-primary" />
+                Page Views (PV)
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={pv}
+                onChange={(e) => setPv(e.target.value)}
+                placeholder="e.g. 312"
+                className="w-full px-3 py-2 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+              />
+            </div>
+          </div>
+
+          {/* Conversion rate preview */}
+          {parseInt(uv) > 0 && funnel.optInCount > 0 && (
+            <div className="bg-primary/5 border border-primary/20 rounded-md p-3">
+              <p className="text-xs text-muted-foreground">Conversion Rate Preview</p>
+              <p className="text-sm font-semibold text-primary mt-0.5">
+                {((funnel.optInCount / parseInt(uv)) * 100).toFixed(1)}% opt-in rate
+                <span className="text-xs font-normal text-muted-foreground ml-1">
+                  ({funnel.optInCount} opt-ins / {parseInt(uv).toLocaleString()} UV)
+                </span>
+              </p>
+            </div>
+          )}
+
+          <div className="flex gap-2 pt-1">
+            <button
+              onClick={onClose}
+              className="flex-1 px-4 py-2 text-sm border border-border rounded-md hover:bg-muted transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={updateMutation.isPending}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50"
+            >
+              {updateMutation.isPending ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Check size={14} />
+              )}
+              Save
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FunnelCard({ funnel, onRefetch }: { funnel: FunnelSummary; onRefetch: () => void }) {
   const [showModal, setShowModal] = useState(false);
+  const [showUvPvModal, setShowUvPvModal] = useState(false);
+
+  const conversionRate = funnel.uniqueVisitors > 0
+    ? ((funnel.optInCount / funnel.uniqueVisitors) * 100).toFixed(1)
+    : null;
 
   return (
     <>
@@ -162,9 +303,42 @@ function FunnelCard({ funnel }: { funnel: FunnelSummary }) {
               }`}>
                 {funnel.archived ? "Archived" : "Active"}
               </span>
+              {conversionRate && (
+                <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                  {conversionRate}% CVR
+                </span>
+              )}
             </div>
           </div>
           <Target size={18} className="text-muted-foreground shrink-0" />
+        </div>
+
+        {/* UV / PV row */}
+        <div className="flex items-center justify-between mb-3 p-2.5 bg-muted/40 rounded-md">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1.5">
+              <Eye size={12} className="text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">UV</span>
+              <span className="text-sm font-semibold text-foreground">
+                {funnel.uniqueVisitors > 0 ? funnel.uniqueVisitors.toLocaleString() : "—"}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <BarChart2 size={12} className="text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">PV</span>
+              <span className="text-sm font-semibold text-foreground">
+                {funnel.pageViews > 0 ? funnel.pageViews.toLocaleString() : "—"}
+              </span>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowUvPvModal(true)}
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+            title="Edit UV/PV stats"
+          >
+            <Pencil size={11} />
+            Edit
+          </button>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -215,6 +389,14 @@ function FunnelCard({ funnel }: { funnel: FunnelSummary }) {
           onClose={() => setShowModal(false)}
         />
       )}
+
+      {showUvPvModal && (
+        <UvPvEditModal
+          funnel={funnel}
+          onClose={() => setShowUvPvModal(false)}
+          onSaved={onRefetch}
+        />
+      )}
     </>
   );
 }
@@ -236,6 +418,7 @@ export default function Funnels() {
 
   const totalOptIns = funnelSummary.reduce((sum: number, f: FunnelSummary) => sum + (f.optInCount || 0), 0);
   const totalSubmissions = funnelSummary.reduce((sum: number, f: FunnelSummary) => sum + (f.submissionCount || 0), 0);
+  const totalUv = funnelSummary.reduce((sum: number, f: FunnelSummary) => sum + (f.uniqueVisitors || 0), 0);
 
   return (
     <div className="p-6 space-y-6">
@@ -262,10 +445,16 @@ export default function Funnels() {
       </div>
 
       {/* Summary stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="bg-card border border-border rounded-lg p-4">
           <div className="text-sm text-muted-foreground mb-1">Active Funnels</div>
           <div className="text-3xl font-bold text-primary">{activeFunnels.length}</div>
+        </div>
+        <div className="bg-card border border-border rounded-lg p-4">
+          <div className="text-sm text-muted-foreground mb-1">Total Unique Visitors</div>
+          <div className="text-3xl font-bold text-foreground">
+            {totalUv > 0 ? totalUv.toLocaleString() : "—"}
+          </div>
         </div>
         <div className="bg-card border border-border rounded-lg p-4">
           <div className="text-sm text-muted-foreground mb-1">Total Opt-Ins</div>
@@ -275,6 +464,15 @@ export default function Funnels() {
           <div className="text-sm text-muted-foreground mb-1">Total Submissions</div>
           <div className="text-3xl font-bold text-foreground">{totalSubmissions.toLocaleString()}</div>
         </div>
+      </div>
+
+      {/* UV/PV info banner */}
+      <div className="flex items-start gap-3 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-xs text-amber-700 dark:text-amber-400">
+        <Eye size={14} className="shrink-0 mt-0.5" />
+        <span>
+          <strong>UV/PV stats are entered manually.</strong> ClickFunnels API does not expose visit counts.
+          Click the <strong>Edit</strong> button on each funnel card to enter UV and PV from your ClickFunnels dashboard.
+        </span>
       </div>
 
       {isLoading ? (
@@ -291,7 +489,7 @@ export default function Funnels() {
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {activeFunnels.map((funnel: FunnelSummary) => (
-                  <FunnelCard key={funnel.funnelId} funnel={funnel} />
+                  <FunnelCard key={funnel.funnelId} funnel={funnel} onRefetch={refetch} />
                 ))}
               </div>
             </div>
@@ -305,7 +503,7 @@ export default function Funnels() {
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 opacity-60">
                 {archivedFunnels.map((funnel: FunnelSummary) => (
-                  <FunnelCard key={funnel.funnelId} funnel={funnel} />
+                  <FunnelCard key={funnel.funnelId} funnel={funnel} onRefetch={refetch} />
                 ))}
               </div>
             </div>

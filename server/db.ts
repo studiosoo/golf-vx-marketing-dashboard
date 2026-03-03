@@ -1229,13 +1229,15 @@ export async function getCfFunnelSummary() {
       f.name AS funnelName,
       f.archived,
       f.opt_in_count AS optInCount,
+      COALESCE(f.unique_visitors, 0) AS uniqueVisitors,
+      COALESCE(f.page_views, 0) AS pageViews,
       f.last_synced_at AS lastSyncedAt,
       COUNT(DISTINCT s.id) AS submissionCount,
       MAX(s.submitted_at) AS lastSubmission
     FROM cf_funnels f
     LEFT JOIN cf_form_submissions s ON s.funnel_id = f.cf_id
     WHERE f.archived = 0
-    GROUP BY f.cf_id, f.name, f.archived, f.opt_in_count, f.last_synced_at
+    GROUP BY f.cf_id, f.name, f.archived, f.opt_in_count, f.unique_visitors, f.page_views, f.last_synced_at
     ORDER BY submissionCount DESC
   `);
   return rows[0] as unknown as Array<{
@@ -1243,8 +1245,20 @@ export async function getCfFunnelSummary() {
     funnelName: string;
     archived: boolean;
     optInCount: number;
+    uniqueVisitors: number;
+    pageViews: number;
     lastSyncedAt: Date;
     submissionCount: number;
     lastSubmission: Date | null;
   }>;
+}
+
+export async function updateFunnelUvPv(cfId: number, uniqueVisitors: number, pageViews: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db
+    .update(cfFunnels)
+    .set({ uniqueVisitors, pageViews })
+    .where(eq(cfFunnels.cfId, cfId));
+  return { success: true };
 }

@@ -198,6 +198,14 @@ export default function MarketingIntelligence() {
     onSuccess: () => { toast.success("Dismissed"); utils.autonomous.getMonitoring.invalidate(); setActionLoading(null); },
     onError: (err) => { toast.error(`Dismiss failed: ${err.message}`); setActionLoading(null); },
   });
+  const clearStaleMutation = trpc.autonomous.clearStaleActions.useMutation({
+    onSuccess: () => {
+      toast.success("Stale actions cleared (3+ day old pending actions dismissed)");
+      utils.autonomous.getApprovalCards.invalidate();
+      utils.autonomous.getMonitoring.invalidate();
+    },
+    onError: (err) => toast.error(`Clear failed: ${err.message}`),
+  });
 
   const handleApprove = (id: number) => { setActionLoading(id); approveMutation.mutate({ actionId: id }); };
   const handleReject = (id: number) => { setActionLoading(id); rejectMutation.mutate({ actionId: id }); };
@@ -212,11 +220,22 @@ export default function MarketingIntelligence() {
           <h1 className="text-2xl font-bold text-[#111] tracking-tight">AI Analysis</h1>
           <p className="text-sm text-[#666] mt-1">Autonomous decision engine — analyzes campaigns and takes action</p>
         </div>
-        <Button onClick={() => syncMutation.mutate()} disabled={syncMutation.isPending}
-          className="flex items-center gap-2 bg-[#F5C72C] hover:bg-[#E6B800] text-[#111] font-semibold text-sm px-4 py-2 rounded-lg border-0">
-          {syncMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-          {syncMutation.isPending ? "Syncing…" : "Sync Now"}
-        </Button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => clearStaleMutation.mutate()}
+            disabled={clearStaleMutation.isPending}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs text-[#666] border border-[#E0E0E0] bg-white hover:bg-[#F5F5F5] rounded-lg transition-colors disabled:opacity-50"
+            title="Dismiss pending actions older than 3 days"
+          >
+            {clearStaleMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+            Clear Stale
+          </button>
+          <Button onClick={() => syncMutation.mutate()} disabled={syncMutation.isPending}
+            className="flex items-center gap-2 bg-[#F5C72C] hover:bg-[#E6B800] text-[#111] font-semibold text-sm px-4 py-2 rounded-lg border-0">
+            {syncMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+            {syncMutation.isPending ? "Syncing…" : "Sync Now"}
+          </Button>
+        </div>
       </div>
 
       {syncStatus && (

@@ -10,7 +10,7 @@
  * - On approve: executes the action (Meta Ads budget change, Encharge email, Owner notification)
  */
 
-import { eq, desc, inArray } from "drizzle-orm";
+import { eq, desc, inArray, and, lt, or } from "drizzle-orm";
 import { getDb } from "./db";
 import { autonomousSyncStatus, autonomousActions } from "../drizzle/schema";
 import { invokeLLM } from "./_core/llm";
@@ -583,6 +583,30 @@ export async function runAutonomousCycle(): Promise<{ actionsCreated: number; su
   await upsertSyncStatus(db, "meta_ads", "syncing");
 
   try {
+    // Auto-dismiss stale pending_approval actions older than 3 days
+    const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+    await db
+      .update(autonomousActions)
+      .set({ status: "dismissed" })
+      .where(
+        and(
+          eq(autonomousActions.status, "pending_approval"),
+          lt(autonomousActions.createdAt, threeDaysAgo)
+        )
+      );
+
+    // Also dismiss stale monitoring actions older than 7 days
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    await db
+      .update(autonomousActions)
+      .set({ status: "dismissed" })
+      .where(
+        and(
+          eq(autonomousActions.status, "monitoring"),
+          lt(autonomousActions.createdAt, sevenDaysAgo)
+        )
+      );
+
     const campaigns = await fetchCampaignData();
 
     let actions: GeneratedAction[];
@@ -605,6 +629,28 @@ export async function runAutonomousCycle(): Promise<{ actionsCreated: number; su
     for (const action of actions) {
       const status = determineStatus(action.riskLevel);
       const now = Date.now();
+
+      // Deduplication: skip if there's already an active pending_approval or monitoring action
+      // for the same campaign + actionType (prevents duplicate cards on re-sync)
+      if (status === "pending_approval" || status === "monitoring") {
+        const existing = await db
+          .select({ id: autonomousActions.id })
+          .from(autonomousActions)
+          .where(
+            and(
+              eq(autonomousActions.campaignId, action.campaignId),
+              eq(autonomousActions.actionType, action.actionType),
+              eq(autonomousActions.status, status)
+            )
+          )
+          .limit(1);
+        if (existing.length > 0) {
+          // Already have an active action for this campaign+type, skip
+          if (status === "pending_approval") pendingApproval++;
+          else monitoring++;
+          continue;
+        }
+      }
 
       // For auto-executed actions, actually execute them
       let executionResult: ActionExecutionResult | null = null;

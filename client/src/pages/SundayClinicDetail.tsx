@@ -283,9 +283,9 @@ export default function SundayClinicDetail() {
   const [eventModal, setEventModal] = useState<EventModal>(null);
 
   const { data: metrics, isLoading } = trpc.campaigns.getSundayClinicMetrics.useQuery({
-    minDate: "2026-01-25",
-    maxDate: "2026-03-29",
-  });
+    minDate: "2026-01-01",
+    maxDate: "2026-03-31",
+  }, { staleTime: 0 });
 
   if (isLoading) {
     return (

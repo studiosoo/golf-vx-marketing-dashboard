@@ -712,3 +712,20 @@
 - [x] Add color-coded topic badges and session numbers to Event Breakdown
 - [x] Add 6-session schedule grid at top of Event Breakdown card
 - [x] Update acuity.ts filter to include all Drive Day Clinic type variants
+
+## Session 2026-03-03 Updates
+- [x] Fix AI Actions stale data: auto-dismiss pending_approval actions older than 3 days
+- [x] Fix AI Actions stale data: auto-dismiss monitoring actions older than 7 days
+- [x] Add deduplication: skip inserting duplicate pending/monitoring actions for same campaign+actionType
+- [x] Add clearStaleActions endpoint to autonomous router (manual trigger)
+- [x] Add "Clear Stale" button to MarketingIntelligence.tsx UI
+- [x] Add uniqueVisitors and pageViews columns to cf_funnels table (SQL migration)
+- [x] Update getCfFunnelSummary to include UV/PV in query
+- [x] Add updateFunnelUvPv() helper to db.ts
+- [x] Add funnels.updateUvPv tRPC mutation endpoint
+- [x] Rewrite Funnels.tsx with UV/PV manual input modal (UvPvEditModal component)
+- [x] Add conversion rate preview in UV/PV edit modal
+- [x] Add UV/PV info banner to Funnels page
+- [x] Verify Google Sheets sync: 67 real applicants already in DB (GID 883252165 correct)
+- [x] Confirm scheduler running: 8am/6pm CST auto-sync active
+- [x] TypeScript: 0 errors throughout

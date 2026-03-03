@@ -3549,6 +3549,25 @@ Generate 3-5 top priorities and 3-4 quick wins. Be specific to Golf VX Arlington
     seedDemo: protectedProcedure.mutation(async () => {
       return seedDemoData();
     }),
+
+    /** Manually clear stale pending_approval actions (older than 3 days) */
+    clearStaleActions: protectedProcedure.mutation(async () => {
+      const database = await db.getDb();
+      if (!database) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      const { autonomousActions } = await import("../drizzle/schema");
+      const { and, lt, eq: eqOp } = await import("drizzle-orm");
+      const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      await database
+        .update(autonomousActions)
+        .set({ status: "dismissed" })
+        .where(and(eqOp(autonomousActions.status, "pending_approval"), lt(autonomousActions.createdAt, threeDaysAgo)));
+      await database
+        .update(autonomousActions)
+        .set({ status: "dismissed" })
+        .where(and(eqOp(autonomousActions.status, "monitoring"), lt(autonomousActions.createdAt, sevenDaysAgo)));
+      return { success: true, message: "Stale actions cleared" };
+    }),
   }),
 
   // ---------------------------------------------------------------------------
@@ -4067,6 +4086,18 @@ Return a JSON object with:
       const result = await syncClickFunnels();
       return result;
     }),
+
+    // Update UV/PV stats manually (ClickFunnels API doesn't expose visit counts)
+    updateUvPv: protectedProcedure
+      .input(z.object({
+        cfId: z.number(),
+        uniqueVisitors: z.number().min(0),
+        pageViews: z.number().min(0),
+      }))
+      .mutation(async ({ input }) => {
+        const { updateFunnelUvPv } = await import("./db");
+        return await updateFunnelUvPv(input.cfId, input.uniqueVisitors, input.pageViews);
+      }),
   }),
 
   // ── AI Workspace ──────────────────────────────────────────────────────────────

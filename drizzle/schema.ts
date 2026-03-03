@@ -1518,6 +1518,8 @@ export const cfFunnels = mysqlTable("cf_funnels", {
   tags: json("tags"),
   optInCount: int("opt_in_count").default(0),
   orderCount: int("order_count").default(0),
+  uniqueVisitors: int("unique_visitors").default(0), // Manual UV input (ClickFunnels dashboard)
+  pageViews: int("page_views").default(0), // Manual PV input (ClickFunnels dashboard)
   lastSyncedAt: timestamp("last_synced_at").defaultNow(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
