@@ -2732,6 +2732,68 @@ Respond in JSON with this exact structure:
       }
       return { current, goal: GOAL, remaining, progressPct, daysSinceStart, dailyAvg, requiredDailyRate, daysRemaining, statusLevel, actionPlan, lastUpdated: new Date().toISOString() };
     }),
+
+    // Bottom-funnel conversions: giveaway applicants who booked $9 Trial or Drive Day
+    getConversions: protectedProcedure.query(async () => {
+      const database = await db.getDb();
+      if (!database) return { total: 0, trialCount: 0, driveDayCount: 0, conversions: [] };
+
+      const { giveawayApplications, memberAppointments, members } = await import('../drizzle/schema');
+      const { eq: eqOp, and: andOp, isNotNull, like, or: orOp } = await import('drizzle-orm');
+
+      // Get all non-test giveaway applicant emails
+      const applicants = await database
+        .select({ email: giveawayApplications.email, name: giveawayApplications.name })
+        .from(giveawayApplications)
+        .where(andOp(eqOp(giveawayApplications.isTestEntry, false), isNotNull(giveawayApplications.email)));
+      const applicantEmailMap = new Map(applicants.map(a => [a.email!.toLowerCase().trim(), a.name]));
+
+      // Get Trial and Drive Day appointments with member emails
+      const appts = await database
+        .select({
+          email: members.email,
+          memberName: members.name,
+          appointmentType: memberAppointments.appointmentType,
+          appointmentDate: memberAppointments.appointmentDate,
+        })
+        .from(memberAppointments)
+        .innerJoin(members, eqOp(members.id, memberAppointments.memberId))
+        .where(
+          andOp(
+            eqOp(memberAppointments.canceled, false),
+            orOp(
+              like(memberAppointments.appointmentType, '%Trial%'),
+              like(memberAppointments.appointmentType, '%Drive Day%'),
+            ),
+          )
+        );
+
+      // Match by email, deduplicate per person per conversion type
+      const seen = new Set<string>();
+      const conversions: Array<{ email: string; applicantName: string; appointmentType: string; appointmentDate: Date | null; conversionType: 'trial' | 'drive_day' }> = [];
+      let trialCount = 0;
+      let driveDayCount = 0;
+
+      for (const appt of appts) {
+        const emailKey = appt.email?.toLowerCase().trim() ?? '';
+        if (!emailKey || !applicantEmailMap.has(emailKey)) continue;
+        const isDriveDay = appt.appointmentType.toLowerCase().includes('drive day');
+        const conversionType = isDriveDay ? 'drive_day' as const : 'trial' as const;
+        const dedupeKey = `${emailKey}:${conversionType}`;
+        if (seen.has(dedupeKey)) continue;
+        seen.add(dedupeKey);
+        if (isDriveDay) driveDayCount++; else trialCount++;
+        conversions.push({
+          email: emailKey,
+          applicantName: applicantEmailMap.get(emailKey) || appt.memberName || '',
+          appointmentType: appt.appointmentType,
+          appointmentDate: appt.appointmentDate,
+          conversionType,
+        });
+      }
+
+      return { total: conversions.length, trialCount, driveDayCount, conversions };
+    }),
   }),
   // Reports
   reports: router({

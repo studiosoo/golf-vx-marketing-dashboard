@@ -750,3 +750,17 @@
 - [x] Extend per-program AI Intelligence to all programs (Drive Day, Winter Clinic, Junior Camp, Leagues)
 - [x] Revenue & Goals merged into Reports (Revenue tab with real Toast/Acuity data)
 - [x] Sidebar "Revenue & Goals" renamed to "Revenue & Reports" → opens Reports/revenue tab
+
+## Session 2026-03-03 Part 3
+- [ ] Update giveaway goals: entry target=1000, long-form target=250
+- [ ] Fix Top Funnel card: replace $25 Trial with $9 Trial + Drive Day (two conversion paths)
+- [ ] Calculate giveaway-to-trial conversion using Acuity data (email match)
+- [ ] Fix Revenue $0: Total Revenue MTD and Toast POS MTD showing $0
+- [ ] Fix Avg Daily Revenue showing $0
+
+## Session 2026-03-03 Part 3 — Goals, Conversion, Revenue Fix
+- [x] Update goals: Entry 1000 / Applications 250 in DB and UI
+- [x] Add Bottom Funnel Conversion section: $9 Trial + Drive Day from Acuity (4 conversions matched)
+- [x] Fix Revenue MTD cards: show thisMonthRevenue, lastMonthRevenue, last-sync date
+- [x] Revenue $0 root cause: Toast SFTP data only through 2/24, March data pending daily sync
+- [x] UV/PV manual input: available in Funnels page (sidebar → Funnels, click ✏️ on each funnel card)

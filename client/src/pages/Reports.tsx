@@ -97,10 +97,10 @@ function RevenueTabContent() {
     <div className="space-y-4">
       {/* KPI Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard icon={DollarSign} label="Total Revenue (MTD)" value={summary ? fmt((summary as any).total || 0) : "—"} />
-        <StatCard icon={ShoppingBag} label="Toast POS (MTD)" value={toastSummary ? fmt((toastSummary as any).totalRevenue || 0) : "—"} sub={toastSummary ? `${(toastSummary as any).totalOrders || 0} orders` : undefined} />
+        <StatCard icon={DollarSign} label="Total Revenue (MTD)" value={toastSummary ? fmt((toastSummary as any).thisMonthRevenue || 0) : "—"} sub={toastSummary && !(toastSummary as any).thisMonthRevenue ? `Last data: ${String((toastSummary as any).latestDate || '').replace(/(\d{4})(\d{2})(\d{2})/, '$2/$3/$1')}` : undefined} />
+        <StatCard icon={ShoppingBag} label="Toast POS (MTD)" value={toastSummary ? fmt((toastSummary as any).thisMonthRevenue || 0) : "—"} sub={toastSummary ? `${(toastSummary as any).thisMonthOrders || 0} orders this month` : undefined} />
         <StatCard icon={CreditCard} label="Acuity Bookings" value={acuityRevenue ? fmt((acuityRevenue as any).total || 0) : "—"} sub={acuityRevenue ? `${(acuityRevenue as any).count || 0} bookings` : undefined} />
-        <StatCard icon={TrendingUp} label="Avg Daily Revenue" value={toastSummary ? fmt((toastSummary as any).avgDailyRevenue || 0) : "—"} />
+        <StatCard icon={TrendingUp} label="Last Month Revenue" value={toastSummary ? fmt((toastSummary as any).lastMonthRevenue || 0) : "—"} sub={toastSummary ? `All-time: ${fmt((toastSummary as any).allTimeRevenue || 0)}` : undefined} />
       </div>
 
       {/* Revenue Breakdown Chart */}
