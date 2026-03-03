@@ -823,3 +823,8 @@
 - [x] Instagram Follower Growth card: KPI mode — shows Spend / Followers / Cost Per Engagement + goal progress bar
 - [x] Programs.tsx: added primaryKpi/kpiTarget/kpiActual/kpiUnit fields to Program interface
 - [x] ProgramCard: conditional KPI display mode for goalType=leads or goalType=followers
+
+## Session 2026-03-03 Part 9 — Programs Accuracy & Sorting
+- [x] Fix 1-Hour Trial Session: DB updated to 9 bookings / 50 target; card now shows Spend / Bookings / Revenue + progress bar (18%)
+- [x] Sort Programs & Events cards: Active → Planned → Completed → Paused (STATUS_ORDER sort in useMemo)
+- [x] Instagram Follower Growth: shows Spend / 8,854 Engagements / Cost-per-Engagement ($0.0049) + green Live bar (Meta Ads API auth expired — engagements from cache)

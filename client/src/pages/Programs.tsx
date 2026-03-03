@@ -141,13 +141,20 @@ function ProgramCard({ program, onClick }: { program: Program; onClick: () => vo
   const roi = spend > 0 ? ((revenue - spend) / spend) * 100 : 0;
   const hasMetaAds = !!program.metaAdsCampaignId;
   const score = program.performanceScore;
-  // KPI display mode for non-revenue campaigns (giveaway, follower growth, etc.)
-  const useKpiDisplay = program.goalType === 'leads' || program.goalType === 'followers';
+  // KPI display mode for non-revenue campaigns (giveaway, follower growth, trial bookings, etc.)
+  const useKpiDisplay = program.goalType === 'leads' || program.goalType === 'followers' ||
+    (program.primaryKpi === 'Trial Bookings');
   const goalActual = toNum(program.goalActual);
   const goalTarget = toNum(program.goalTarget);
   const goalPct = goalTarget > 0 ? Math.min((goalActual / goalTarget) * 100, 100) : 0;
   const kpiActual = toNum(program.kpiActual);
   const kpiTarget = toNum(program.kpiTarget);
+  const kpiPct = kpiTarget > 0 ? Math.min((kpiActual / kpiTarget) * 100, 100) : 0;
+  // Determine KPI label and value display based on program type
+  const isTrialBookings = program.primaryKpi === 'Trial Bookings';
+  const isEngagements = program.kpiUnit === 'engagements';
+  const isFollowers = program.goalType === 'followers';
+  const isLeads = program.goalType === 'leads' && !isTrialBookings;
 
   return (
     <button
@@ -193,32 +200,84 @@ function ProgramCard({ program, onClick }: { program: Program; onClick: () => vo
               <p className="text-[14px] font-bold text-[#111111] leading-none">{fmtCurrency(spend)}</p>
               <p className="text-[10px] text-[#AAAAAA] mt-0.5">Spend</p>
             </div>
-            <div>
-              <p className="text-[14px] font-bold text-[#111111] leading-none">{goalActual > 0 ? goalActual.toLocaleString() : '—'}</p>
-              <p className="text-[10px] text-[#AAAAAA] mt-0.5 capitalize">{program.goalUnit || 'Progress'}</p>
-            </div>
-            <div>
-              <p className={cn("text-[14px] font-bold leading-none",
-                kpiActual > 0 && kpiTarget > 0 && kpiActual <= kpiTarget ? "text-[#3DB855]"
-                : kpiActual > 0 ? "text-[#F5A623]" : "text-[#AAAAAA]")}>
-                {kpiActual > 0 ? `$${kpiActual.toFixed(2)}` : '—'}
-              </p>
-              <p className="text-[10px] text-[#AAAAAA] mt-0.5 truncate" title={program.primaryKpi || 'KPI'}>
-                {program.primaryKpi || 'KPI'}
-              </p>
-            </div>
+            {isTrialBookings ? (
+              <>
+                <div>
+                  <p className="text-[14px] font-bold text-[#111111] leading-none">{kpiActual > 0 ? kpiActual.toFixed(0) : '—'}</p>
+                  <p className="text-[10px] text-[#AAAAAA] mt-0.5">Bookings</p>
+                </div>
+                <div>
+                  <p className="text-[14px] font-bold text-[#111111] leading-none">{fmtCurrency(revenue)}</p>
+                  <p className="text-[10px] text-[#AAAAAA] mt-0.5">Revenue</p>
+                </div>
+              </>
+            ) : isEngagements ? (
+              <>
+                <div>
+                  <p className="text-[14px] font-bold text-[#111111] leading-none">{kpiActual > 0 ? kpiActual.toLocaleString() : '—'}</p>
+                  <p className="text-[10px] text-[#AAAAAA] mt-0.5">Engagements</p>
+                </div>
+                <div>
+                  <p className={cn("text-[14px] font-bold leading-none", "text-[#3DB855]")}>  
+                    {toNum(program.kpiActual) > 0 ? `$${(spend / kpiActual).toFixed(4)}` : '—'}
+                  </p>
+                  <p className="text-[10px] text-[#AAAAAA] mt-0.5">Cost/Engage</p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div>
+                  <p className="text-[14px] font-bold text-[#111111] leading-none">{goalActual > 0 ? goalActual.toLocaleString() : '—'}</p>
+                  <p className="text-[10px] text-[#AAAAAA] mt-0.5 capitalize">{program.goalUnit || 'Progress'}</p>
+                </div>
+                <div>
+                  <p className={cn("text-[14px] font-bold leading-none",
+                    toNum(program.kpiActual) > 0 && toNum(program.kpiTarget) > 0 && toNum(program.kpiActual) <= toNum(program.kpiTarget) ? "text-[#3DB855]"
+                    : toNum(program.kpiActual) > 0 ? "text-[#F5A623]" : "text-[#AAAAAA]")}>  
+                    {toNum(program.kpiActual) > 0 ? `$${toNum(program.kpiActual).toFixed(2)}` : '—'}
+                  </p>
+                  <p className="text-[10px] text-[#AAAAAA] mt-0.5 truncate" title={program.primaryKpi || 'KPI'}>
+                    {program.primaryKpi || 'KPI'}
+                  </p>
+                </div>
+              </>
+            )}
           </div>
-          {/* Goal progress bar */}
+          {/* Progress bar — bookings for trial, engagements for IG, goal progress for leads */}
           <div>
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-[10px] text-[#AAAAAA]">
-                {goalActual.toLocaleString()} / {goalTarget.toLocaleString()} {program.goalUnit}
-              </span>
-              <span className="text-[10px] font-semibold text-[#007AFF]">{goalPct.toFixed(0)}%</span>
-            </div>
-            <div className="h-1.5 bg-[#F2F2F7] rounded-full overflow-hidden">
-              <div className="h-full rounded-full bg-[#007AFF]" style={{ width: `${goalPct}%` }} />
-            </div>
+            {isTrialBookings ? (
+              <>
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-[10px] text-[#AAAAAA]">{kpiActual.toFixed(0)} / {kpiTarget.toFixed(0)} bookings</span>
+                  <span className="text-[10px] font-semibold text-[#007AFF]">{kpiPct.toFixed(0)}%</span>
+                </div>
+                <div className="h-1.5 bg-[#F2F2F7] rounded-full overflow-hidden">
+                  <div className="h-full rounded-full bg-[#007AFF]" style={{ width: `${kpiPct}%` }} />
+                </div>
+              </>
+            ) : isEngagements ? (
+              <>
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-[10px] text-[#AAAAAA]">{kpiActual.toLocaleString()} engagements · Jan–Mar 2026</span>
+                  <span className="text-[10px] font-semibold text-[#3DB855]">Live</span>
+                </div>
+                <div className="h-1.5 bg-[#F2F2F7] rounded-full overflow-hidden">
+                  <div className="h-full rounded-full bg-[#3DB855]" style={{ width: '100%' }} />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-[10px] text-[#AAAAAA]">
+                    {goalActual.toLocaleString()} / {goalTarget.toLocaleString()} {program.goalUnit}
+                  </span>
+                  <span className="text-[10px] font-semibold text-[#007AFF]">{goalPct.toFixed(0)}%</span>
+                </div>
+                <div className="h-1.5 bg-[#F2F2F7] rounded-full overflow-hidden">
+                  <div className="h-full rounded-full bg-[#007AFF]" style={{ width: `${goalPct}%` }} />
+                </div>
+              </>
+            )}
           </div>
         </div>
       ) : (
@@ -378,14 +437,22 @@ export default function Programs() {
     staleTime: 2 * 60 * 1000,
   });
 
+  const STATUS_ORDER: Record<CampaignStatus, number> = { active: 0, planned: 1, completed: 2, paused: 3 };
+
   const filtered = useMemo(() => {
     if (!programs) return [];
-    return programs.filter((p: Program) => {
-      const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || (p.description || "").toLowerCase().includes(search.toLowerCase());
-      const matchStatus = statusFilter === "all" || p.status === statusFilter;
-      const matchCategory = categoryFilter === "all" || p.category === categoryFilter;
-      return matchSearch && matchStatus && matchCategory;
-    });
+    return programs
+      .filter((p: Program) => {
+        const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || (p.description || "").toLowerCase().includes(search.toLowerCase());
+        const matchStatus = statusFilter === "all" || p.status === statusFilter;
+        const matchCategory = categoryFilter === "all" || p.category === categoryFilter;
+        return matchSearch && matchStatus && matchCategory;
+      })
+      .sort((a: Program, b: Program) => {
+        const orderA = STATUS_ORDER[a.status] ?? 4;
+        const orderB = STATUS_ORDER[b.status] ?? 4;
+        return orderA - orderB;
+      });
   }, [programs, search, statusFilter, categoryFilter]);
 
   const counts = useMemo(() => {
