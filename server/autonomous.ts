@@ -10,7 +10,7 @@
  * - On approve: executes the action (Meta Ads budget change, Encharge email, Owner notification)
  */
 
-import { eq, desc, inArray, and, lt, or } from "drizzle-orm";
+import { eq, desc, inArray, and, lt, or, sql } from "drizzle-orm";
 import { getDb } from "./db";
 import { autonomousSyncStatus, autonomousActions } from "../drizzle/schema";
 import { invokeLLM } from "./_core/llm";
@@ -1001,5 +1001,17 @@ export async function dismissAction(actionId: number) {
 export async function getAllActions() {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(autonomousActions).orderBy(desc(autonomousActions.createdAt));
+  // Exclude archived actions from the main view
+  return db.select().from(autonomousActions)
+    .where(sql`${autonomousActions.status} != 'archived'`)
+    .orderBy(desc(autonomousActions.createdAt));
+}
+
+export async function getArchivedActions() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(autonomousActions)
+    .where(sql`${autonomousActions.status} = 'archived'`)
+    .orderBy(desc(autonomousActions.createdAt))
+    .limit(200);
 }

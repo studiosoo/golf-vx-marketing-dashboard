@@ -764,3 +764,20 @@
 - [x] Fix Revenue MTD cards: show thisMonthRevenue, lastMonthRevenue, last-sync date
 - [x] Revenue $0 root cause: Toast SFTP data only through 2/24, March data pending daily sync
 - [x] UV/PV manual input: available in Funnels page (sidebar → Funnels, click ✏️ on each funnel card)
+
+## Session 2026-03-03 Part 4 — Actions Archive, Market Research, Revenue F&B, Nav Cleanup
+- [ ] Remove duplicate "Reports" sidebar item (keep only "Revenue & Reports")
+- [ ] AI Actions: add Archive tab, show only latest action per campaign in main view, delete failed actions
+- [ ] Revenue: add F&B breakdown to Toast data display
+- [ ] Market Research: add indoor golf vs general golf market comparison
+- [ ] Market Research: add Sports Bar market analysis for Golf VX AH
+- [ ] Market Research: improve Seasonal Trends with indoor/outdoor distinction
+- [ ] Market Research: add WJ Golf (wj.golf) to Competitors tab
+
+## Session 2026-03-03 Part 5 — Market Research Upgrade Complete
+- [x] Market Research: add indoor golf vs general golf market comparison (new "Market Comparison" tab)
+- [x] Market Research: add Sports Bar market analysis for Golf VX AH
+- [x] Market Research: improve Seasonal Trends with indoor/outdoor/sports bar bar chart (recharts)
+- [x] Market Research: add WJ Golf (wj.golf) to Competitors tab with full details (primary threat badge)
+- [x] Market Research: expand Key Insights with WJ Golf threat analysis and Sports Bar opportunity
+- [x] Market Research: add expandable competitor detail cards

@@ -106,28 +106,54 @@ function RevenueTabContent() {
       {/* Revenue Breakdown Chart */}
       <Card className="bg-card border-border">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold">Revenue Breakdown — March 2026</CardTitle>
+          <CardTitle className="text-sm font-semibold">Revenue Breakdown (Last 30 Days — Toast POS)</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={220}>
-            <PieChart>
-              <Pie
-                data={[
-                  { name: "Membership", value: 57070 },
-                  { name: "Coaching", value: 1800 },
-                  { name: "Bay Rental", value: 1040 },
-                ]}
-                cx="50%" cy="50%" innerRadius={60} outerRadius={90} dataKey="value"
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                labelLine={false}
-              >
-                <Cell fill={YELLOW} />
-                <Cell fill="#333333" />
-                <Cell fill="#888888" />
-              </Pie>
-              <Tooltip formatter={(v: any) => fmtCurrency(v)} />
-            </PieChart>
-          </ResponsiveContainer>
+          {toastSummary ? (() => {
+            const ts = toastSummary as any;
+            const golf = ts.allTimeGolf ? 0 : 0; // use monthly breakdown
+            const foodBev = ts.allTimeFoodBev || 0;
+            const bay = ts.allTimeBay || 0;
+            const acuity = (acuityRevenue as any)?.total || 0;
+            const breakdownData = [
+              { name: "F&B", value: parseFloat(String(foodBev)) },
+              { name: "Acuity Bookings", value: parseFloat(String(acuity)) },
+              { name: "Bay Rental", value: parseFloat(String(bay)) },
+            ].filter(d => d.value > 0);
+            return (
+              <div className="space-y-3">
+                <ResponsiveContainer width="100%" height={200}>
+                  <PieChart>
+                    <Pie data={breakdownData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} dataKey="value"
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
+                      <Cell fill={YELLOW} />
+                      <Cell fill="#333333" />
+                      <Cell fill="#888888" />
+                      <Cell fill="#AAAAAA" />
+                    </Pie>
+                    <Tooltip formatter={(v: any) => fmtCurrency(v)} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="grid grid-cols-3 gap-3 pt-2 border-t border-border">
+                  <div className="text-center">
+                    <div className="text-xs text-muted-foreground">F&B Revenue</div>
+                    <div className="text-base font-bold text-foreground">{fmt(foodBev)}</div>
+                    <div className="text-xs text-muted-foreground">All-time</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xs text-muted-foreground">Acuity Bookings</div>
+                    <div className="text-base font-bold text-foreground">{fmt(acuity)}</div>
+                    <div className="text-xs text-muted-foreground">{(acuityRevenue as any)?.count || 0} bookings</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xs text-muted-foreground">Bay Rental</div>
+                    <div className="text-base font-bold text-foreground">{fmt(bay)}</div>
+                    <div className="text-xs text-muted-foreground">All-time</div>
+                  </div>
+                </div>
+              </div>
+            );
+          })() : <div className="text-center py-8 text-muted-foreground text-sm">Loading revenue data…</div>}
         </CardContent>
       </Card>
 

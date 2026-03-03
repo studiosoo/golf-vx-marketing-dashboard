@@ -18,6 +18,7 @@ import {
   dismissAction,
   runAutonomousCycle,
   getAllActions,
+  getArchivedActions,
 } from "./autonomous";
 import { seedDemoData } from "./seed-demo";
 import * as encharge from "./encharge";
@@ -3726,9 +3727,13 @@ Generate 3-5 top priorities and 3-4 quick wins. Be specific to Golf VX Arlington
       return getMonitoringActions();
     }),
 
-    /** Get all actions regardless of status */
+    /** Get all actions regardless of status (excludes archived) */
     getAllActions: publicProcedure.query(async () => {
       return getAllActions();
+    }),
+    /** Get archived actions */
+    getArchivedActions: publicProcedure.query(async () => {
+      return getArchivedActions();
     }),
 
     /** Trigger a full sync cycle: fetch data → analyze → generate actions */

@@ -4,13 +4,13 @@ import { toast } from "sonner";
 import {
   Zap, Clock, Eye, CheckCircle, XCircle, RotateCcw,
   RefreshCw, ChevronDown, ChevronUp, AlertTriangle,
-  TrendingUp, Loader2, Trash2,
+  TrendingUp, Loader2, Trash2, Archive,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type ActionStatus =
   | "auto_executed" | "pending_approval" | "monitoring"
-  | "approved" | "rejected" | "undone" | "dismissed" | "execution_failed";
+  | "approved" | "rejected" | "undone" | "dismissed" | "execution_failed" | "archived";
 
 interface AutonomousAction {
   id: number;
@@ -53,6 +53,7 @@ function StatusBadge({ status }: { status: ActionStatus }) {
     undone:           { label: "Undone",            className: "bg-gray-50 text-gray-500 border border-gray-200" },
     dismissed:        { label: "Dismissed",         className: "bg-gray-50 text-gray-400 border border-gray-200" },
     execution_failed: { label: "Failed",            className: "bg-red-50 text-red-600 border border-red-200" },
+    archived:         { label: "Archived",          className: "bg-gray-50 text-gray-400 border border-gray-200" },
   };
   const s = map[status] || map.monitoring;
   return (
@@ -148,7 +149,9 @@ function ActionCard({
 }
 
 export default function AIActions() {
+  const [view, setView] = useState<"active" | "archive">("active");
   const { data: actions, isLoading, refetch } = trpc.autonomous.getAllActions.useQuery(undefined, { refetchInterval: 60_000 });
+  const { data: archivedActions, isLoading: isArchiveLoading } = trpc.autonomous.getArchivedActions.useQuery(undefined, { enabled: view === "archive" });
   const approveMutation = trpc.autonomous.approveAction.useMutation({ onSuccess: () => { toast.success("Action approved"); refetch(); }, onError: (e) => toast.error(e.message) });
   const rejectMutation = trpc.autonomous.rejectAction.useMutation({ onSuccess: () => { toast.success("Action rejected"); refetch(); }, onError: (e) => toast.error(e.message) });
   const undoMutation = trpc.autonomous.undoAction.useMutation({ onSuccess: () => { toast.success("Action undone"); refetch(); }, onError: (e) => toast.error(e.message) });
@@ -166,11 +169,27 @@ export default function AIActions() {
           <h1 className="text-2xl font-bold text-[#111] tracking-tight">AI Actions</h1>
           <p className="text-sm text-[#666] mt-1">Autonomous decisions and recommendations based on live campaign data{lastSync && <span className="ml-2 text-[#999]">· Last sync {lastSync}</span>}</p>
         </div>
-        <Button onClick={() => syncMutation.mutate()} disabled={syncMutation.isPending}
-          className="flex items-center gap-2 bg-[#F5C72C] hover:bg-[#E6B800] text-[#111] font-semibold text-sm px-4 py-2 rounded-lg border-0">
-          {syncMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-          {syncMutation.isPending ? "Syncing…" : "Sync Now"}
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center bg-white border border-[#E0E0E0] rounded-lg p-1">
+            <button onClick={() => setView("active")} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              view === "active" ? "bg-[#111] text-white" : "text-[#666] hover:text-[#111]"
+            }`}>
+              <Zap className="w-3.5 h-3.5" /> Active
+            </button>
+            <button onClick={() => setView("archive")} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              view === "archive" ? "bg-[#111] text-white" : "text-[#666] hover:text-[#111]"
+            }`}>
+              <Archive className="w-3.5 h-3.5" /> Archive {archivedActions && archivedActions.length > 0 && <span className="ml-1 text-xs opacity-70">{archivedActions.length}</span>}
+            </button>
+          </div>
+          {view === "active" && (
+            <Button onClick={() => syncMutation.mutate()} disabled={syncMutation.isPending}
+              className="flex items-center gap-2 bg-[#F5C72C] hover:bg-[#E6B800] text-[#111] font-semibold text-sm px-4 py-2 rounded-lg border-0">
+              {syncMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+              {syncMutation.isPending ? "Syncing…" : "Sync Now"}
+            </Button>
+          )}
+        </div>
       </div>
       <div className="grid grid-cols-3 gap-4">
         {[
@@ -184,7 +203,40 @@ export default function AIActions() {
           </div>
         ))}
       </div>
-      {isLoading ? (
+      {view === "archive" ? (
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center"><Archive className="w-4 h-4 text-[#666]" /></div>
+            <div>
+              <h2 className="text-base font-semibold text-[#111]">Archived Actions</h2>
+              <p className="text-xs text-[#888]">Historical actions — older entries and duplicates moved here automatically</p>
+            </div>
+          </div>
+          {isArchiveLoading ? (
+            <div className="flex items-center justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-[#F5C72C]" /><span className="ml-2 text-[#666] text-sm">Loading archive…</span></div>
+          ) : !archivedActions?.length ? (
+            <div className="text-center py-16 text-[#999]">
+              <Archive className="w-10 h-10 mx-auto mb-3 opacity-30" />
+              <p className="text-sm font-medium">Archive is empty</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {archivedActions.map(action => (
+                <div key={action.id} className="bg-white border border-[#E8E8E8] rounded-xl p-4 opacity-75">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <StatusBadge status={action.status as ActionStatus} />
+                      {action.campaignName && <span className="text-xs font-mono bg-[#F5F5F5] text-[#555] px-2 py-0.5 rounded border border-[#E8E8E8]">{action.campaignName}</span>}
+                    </div>
+                    <span className="text-xs text-[#AAA] whitespace-nowrap">{new Date(action.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                  </div>
+                  <p className="text-sm text-[#444] mt-2 leading-relaxed">{action.description}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : isLoading ? (
         <div className="flex items-center justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-[#F5C72C]" /><span className="ml-2 text-[#666] text-sm">Loading actions…</span></div>
       ) : (
         <div className="space-y-10">

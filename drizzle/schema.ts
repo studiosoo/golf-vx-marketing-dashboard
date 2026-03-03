@@ -1179,7 +1179,7 @@ export const autonomousActions = mysqlTable("autonomous_actions", {
   campaignName: varchar("campaignName", { length: 255 }).notNull(),
   actionType: varchar("actionType", { length: 64 }).notNull(), // budget_increase, budget_decrease, send_email, change_targeting, etc.
   riskLevel: mysqlEnum("riskLevel", ["low", "medium", "high", "monitor"]).notNull(),
-  status: mysqlEnum("status", ["auto_executed", "pending_approval", "approved", "rejected", "undone", "monitoring", "execution_failed", "dismissed"]).notNull(),
+  status: mysqlEnum("status", ["auto_executed", "pending_approval", "approved", "rejected", "undone", "monitoring", "execution_failed", "dismissed", "archived"]).notNull(),
   title: varchar("title", { length: 500 }).notNull(),
   description: text("description").notNull(),
   actionParams: json("actionParams").$type<Record<string, unknown>>(),
