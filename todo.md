@@ -805,3 +805,12 @@
 - [x] KPI summary strip: total promotions, total budget, total conversions, planned count
 - [x] CPL (Cost Per Lead) calculated inline per promotion row
 - [x] 14 vitest unit tests for chart data builder, gap analysis, CPL, and summary stats — all passing
+
+## Session 2026-03-03 Part 7 — 5 UI/Data Fixes
+- [x] Rename "$25 1-Hour Trial Session" program card to "1-Hour Trial Session" (DB + conversionTracking.ts)
+- [x] Merge Acuity "Anniversary Trial Sessions" (Off-Peak $9 + Peak $18) with regular trial data; show combined 1-Hour Bay Trial KPI widget (total users + total revenue) always visible
+- [x] Rename sidebar nav "Reports & Revenue" to "Reports"; elevate Revenue Data as a prominent standalone section
+- [x] Rename all "Acuity Booking" labels to "Programs Revenue" throughout Reports.tsx
+- [x] Update Annual Membership Giveaway target goals: Entry = 1000, Application = 250
+- [x] Fix Winter Clinic "0 booking" display bug (count → totalBookings)
+- [x] Add clickable participant count on Winter Clinic dashboard — clicking opens filtered modal per category (Kids / Adult / Family)

@@ -99,7 +99,7 @@ function RevenueTabContent() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard icon={DollarSign} label="Total Revenue (MTD)" value={toastSummary ? fmt((toastSummary as any).thisMonthRevenue || 0) : "—"} sub={toastSummary && !(toastSummary as any).thisMonthRevenue ? `Last data: ${String((toastSummary as any).latestDate || '').replace(/(\d{4})(\d{2})(\d{2})/, '$2/$3/$1')}` : undefined} />
         <StatCard icon={ShoppingBag} label="Toast POS (MTD)" value={toastSummary ? fmt((toastSummary as any).thisMonthRevenue || 0) : "—"} sub={toastSummary ? `${(toastSummary as any).thisMonthOrders || 0} orders this month` : undefined} />
-        <StatCard icon={CreditCard} label="Acuity Bookings" value={acuityRevenue ? fmt((acuityRevenue as any).total || 0) : "—"} sub={acuityRevenue ? `${(acuityRevenue as any).count || 0} bookings` : undefined} />
+        <StatCard icon={CreditCard} label="Programs Revenue" value={acuityRevenue ? fmt((acuityRevenue as any).total || 0) : "—"} sub={acuityRevenue ? `${(acuityRevenue as any).totalBookings || 0} bookings` : undefined} />
         <StatCard icon={TrendingUp} label="Last Month Revenue" value={toastSummary ? fmt((toastSummary as any).lastMonthRevenue || 0) : "—"} sub={toastSummary ? `All-time: ${fmt((toastSummary as any).allTimeRevenue || 0)}` : undefined} />
       </div>
 
@@ -117,7 +117,7 @@ function RevenueTabContent() {
             const acuity = (acuityRevenue as any)?.total || 0;
             const breakdownData = [
               { name: "F&B", value: parseFloat(String(foodBev)) },
-              { name: "Acuity Bookings", value: parseFloat(String(acuity)) },
+              { name: "Programs", value: parseFloat(String(acuity)) },
               { name: "Bay Rental", value: parseFloat(String(bay)) },
             ].filter(d => d.value > 0);
             return (
@@ -141,9 +141,9 @@ function RevenueTabContent() {
                     <div className="text-xs text-muted-foreground">All-time</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-xs text-muted-foreground">Acuity Bookings</div>
+                    <div className="text-xs text-muted-foreground">Programs Revenue</div>
                     <div className="text-base font-bold text-foreground">{fmt(acuity)}</div>
-                    <div className="text-xs text-muted-foreground">{(acuityRevenue as any)?.count || 0} bookings</div>
+                    <div className="text-xs text-muted-foreground">{(acuityRevenue as any)?.totalBookings || 0} bookings</div>
                   </div>
                   <div className="text-center">
                     <div className="text-xs text-muted-foreground">Bay Rental</div>
@@ -194,22 +194,86 @@ function RevenueTabContent() {
         </CardContent>
       </Card>
 
-      {/* Acuity Bookings */}
+      {/* 1-Hour Bay Trial KPI — highlighted */}
+      <Card className="bg-card border-border" style={{ borderLeft: `4px solid #F5C72C` }}>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+            <span style={{ color: '#F5C72C' }}>⛳</span> 1-Hour Bay Trial Sessions
+            <span className="text-[10px] font-normal text-muted-foreground ml-1">(Trial Sessions + Anniversary Trial Sessions combined)</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {acuityRevenue ? (() => {
+            const trialGroup = (acuityRevenue as any).grouped?.trial || { totalRevenue: 0, bookingCount: 0, types: [] };
+            const trialTypes = (trialGroup.types as string[]) || [];
+            return (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 rounded-xl bg-[#F5C72C]/10 border border-[#F5C72C]/30">
+                    <div className="text-xs text-muted-foreground mb-1">Total Participants</div>
+                    <div className="text-3xl font-black text-foreground">{trialGroup.bookingCount}</div>
+                    <div className="text-xs text-muted-foreground mt-1">1-hour bay trial bookings</div>
+                  </div>
+                  <div className="p-4 rounded-xl bg-[#F5C72C]/10 border border-[#F5C72C]/30">
+                    <div className="text-xs text-muted-foreground mb-1">Total Revenue</div>
+                    <div className="text-3xl font-black text-foreground">{fmt(trialGroup.totalRevenue)}</div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      avg {trialGroup.bookingCount > 0 ? fmt(trialGroup.totalRevenue / trialGroup.bookingCount) : '$0'} / session
+                    </div>
+                  </div>
+                </div>
+                {trialTypes.length > 0 && (
+                  <div className="text-xs text-muted-foreground">
+                    <span className="font-medium text-foreground">Includes: </span>
+                    {trialTypes.join(' · ')}
+                  </div>
+                )}
+              </div>
+            );
+          })() : (
+            <div className="text-center py-8 text-muted-foreground text-sm">Loading trial session data...</div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* All Programs Revenue Breakdown */}
       <Card className="bg-card border-border">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold">Acuity Bookings Revenue</CardTitle>
+          <CardTitle className="text-sm font-semibold">All Programs Revenue (Acuity)</CardTitle>
         </CardHeader>
         <CardContent>
           {acuityRevenue ? (
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-lg bg-muted/30">
-                <div className="text-xs text-muted-foreground mb-1">Total Bookings Revenue</div>
-                <div className="text-2xl font-bold text-foreground">{fmt((acuityRevenue as any).total || 0)}</div>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 rounded-lg bg-muted/30">
+                  <div className="text-xs text-muted-foreground mb-1">Total Programs Revenue</div>
+                  <div className="text-2xl font-bold text-foreground">{fmt((acuityRevenue as any).total || 0)}</div>
+                </div>
+                <div className="p-4 rounded-lg bg-muted/30">
+                  <div className="text-xs text-muted-foreground mb-1">Total Booking Count</div>
+                  <div className="text-2xl font-bold text-foreground">{(acuityRevenue as any).totalBookings || 0}</div>
+                </div>
               </div>
-              <div className="p-4 rounded-lg bg-muted/30">
-                <div className="text-xs text-muted-foreground mb-1">Booking Count</div>
-                <div className="text-2xl font-bold text-foreground">{(acuityRevenue as any).count || 0}</div>
-              </div>
+              {(acuityRevenue as any).byType && (acuityRevenue as any).byType.length > 0 && (
+                <div className="rounded-lg border border-border overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead><tr className="border-b border-border bg-muted/20">
+                      <th className="text-left p-3 text-xs text-muted-foreground font-medium">Appointment Type</th>
+                      <th className="text-right p-3 text-xs text-muted-foreground font-medium">Bookings</th>
+                      <th className="text-right p-3 text-xs text-muted-foreground font-medium">Revenue</th>
+                    </tr></thead>
+                    <tbody>
+                      {((acuityRevenue as any).byType as any[]).map((row: any) => (
+                        <tr key={row.appointmentType} className="border-b border-border/50 hover:bg-muted/10">
+                          <td className="p-3 text-foreground text-xs">{row.appointmentType}</td>
+                          <td className="p-3 text-right text-muted-foreground text-xs">{row.bookingCount}</td>
+                          <td className="p-3 text-right font-medium text-foreground text-xs">{fmt(row.totalRevenue)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground text-sm">Loading Acuity data...</div>
@@ -276,16 +340,16 @@ export default function Reports() {
       name: "Annual Giveaway",
       type: "Acquisition Campaign",
       status: "active",
-      goalCompletionPct: 47,   // 88/187 unique opt-ins vs 500 target (ClickFunnels)
+      goalCompletionPct: 9,    // 88/1000 entry goal
       attendancePct: 0,
       revenuePct: 0,           // No direct revenue yet (pre-conversion)
-      leadCapturePct: 47,      // 88 applications vs 400-500 target
+      leadCapturePct: 35,      // 88 applications vs 250 target
       socialPct: 70,           // 214k impressions
-      kpi: "88 / 400–500 applications",
+      kpi: "88 / 250 applications · 875 / 1,000 entries",
       kpiLabel: "Lead Capture",
       revenue: 0,
       revenueTarget: 52720,
-      notes: "ClickFunnels: 875 views → 187 opt-ins → 88 applications (47% conversion). Winner announcement Mar 31.",
+      notes: "ClickFunnels: 875 views → 187 opt-ins → 88 applications (35% of 250 target). Winner announcement Mar 31.",
     },
     {
       name: "Junior Summer Camp",
@@ -630,9 +694,9 @@ export default function Reports() {
               </div>
               <div className="mt-4 p-3 rounded-lg bg-muted/20 border border-border">
                 <p className="text-xs text-muted-foreground">
-                  <strong className="text-foreground">Target:</strong> 400–500 applications by Mar 15.
-                  Current pace: 88 applications (18–22% of target).
-                  <strong className="text-foreground"> Action needed:</strong> Increase Meta Ads budget for Junior Summer Camp and Giveaway A2 to drive more entry page traffic.
+                  <strong className="text-foreground">Target:</strong> 1,000 entries · 250 applications by Apr 29.
+                  Current pace: 875 entries (87.5% of entry goal) · 88 applications (35% of application goal).
+                  <strong className="text-foreground"> Action needed:</strong> Increase Meta Ads budget for Giveaway A2 to convert more opt-ins into full applications.
                 </p>
               </div>
             </CardContent>

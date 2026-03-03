@@ -19,7 +19,7 @@ export async function calculateCampaignConversions() {
     const appointmentTypeToCampaign: Record<number, string> = {
       // Based on previous mapping
       53476127: "Sunday Clinic", // Drive Day Program for Public
-      53476128: "$25 1-Hour Trial Session", // Trial Session
+      53476128: "1-Hour Trial Session", // Trial Session
       53476129: "PBGA Junior Summer Camp", // Junior Golf Summer Camp
       53476130: "PBGA Winter Clinic", // Winter Clinic
       53476131: "Sports Game Watch Party", // Super Bowl Watch Party / Sports Game Watch Party

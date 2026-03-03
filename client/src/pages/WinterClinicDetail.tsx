@@ -23,21 +23,41 @@ import {
   X,
 } from "lucide-react";
 
+// Category keyword maps for filtering attendees by category
+const CATEGORY_KEYWORDS: Record<string, string[]> = {
+  kids: ['tots', 'bogey', 'par shooter', 'h.s.', 'player/prep'],
+  adults: ['ladies', 'co-ed', 'morning mulligan'],
+  family: ['adults & kids', 'adults and kids'],
+};
+
 function WinterClinicAttendeeModal({
   open,
   onClose,
   clinicShortName,
   clinicDisplayName,
+  category,
 }: {
   open: boolean;
   onClose: () => void;
   clinicShortName: string;
   clinicDisplayName: string;
+  category?: 'kids' | 'adults' | 'family';
 }) {
-  const { data: attendees, isLoading } = trpc.campaigns.getWinterClinicAttendeeList.useQuery(
-    { minDate: "2026-01-01", maxDate: "2026-03-31", clinicShortName },
+  // Fetch all clinic attendees when filtering by category (clinicShortName empty)
+  const { data: allAttendees, isLoading } = trpc.campaigns.getWinterClinicAttendeeList.useQuery(
+    { minDate: "2026-01-01", maxDate: "2026-03-31", clinicShortName: clinicShortName || undefined },
     { enabled: open }
   );
+  // Filter by category if specified
+  const attendees = useMemo(() => {
+    if (!allAttendees) return allAttendees;
+    if (!category) return allAttendees;
+    const keywords = CATEGORY_KEYWORDS[category] || [];
+    return allAttendees.filter(a => {
+      const typeLower = (a.type || '').toLowerCase();
+      return keywords.some(kw => typeLower.includes(kw));
+    });
+  }, [allAttendees, category]);
   const sendSms = trpc.communication.sendSMS.useMutation();
   const sendEmail = trpc.communication.sendEmail.useMutation();
 
@@ -118,7 +138,7 @@ function WinterClinicAttendeeModal({
 
 export default function WinterClinicDetail() {
   const [, setLocation] = useLocation();
-  const [selectedClinic, setSelectedClinic] = useState<{ shortName: string; displayName: string } | null>(null);
+  const [selectedClinic, setSelectedClinic] = useState<{ shortName: string; displayName: string; category?: 'kids' | 'adults' | 'family' } | null>(null);
 
   const dateRange = useMemo(() => ({
     minDate: "2026-01-01",
@@ -372,12 +392,16 @@ export default function WinterClinicDetail() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
-            { key: 'kids', label: 'Kids Programs', items: categorySummary.kids, icon: <Baby className="h-5 w-5" /> },
-            { key: 'adults', label: 'Adult Programs', items: categorySummary.adults, icon: <UserCheck className="h-5 w-5" /> },
-            { key: 'family', label: 'Family Programs', items: categorySummary.family, icon: <Users className="h-5 w-5" /> },
+            { key: 'kids', label: 'Kids Programs', items: categorySummary.kids, icon: <Baby className="h-5 w-5" />, filterKeyword: 'tots|bogey|par shooter|h.s.' },
+            { key: 'adults', label: 'Adult Programs', items: categorySummary.adults, icon: <UserCheck className="h-5 w-5" />, filterKeyword: 'ladies|co-ed|morning mulligan' },
+            { key: 'family', label: 'Family Programs', items: categorySummary.family, icon: <Users className="h-5 w-5" />, filterKeyword: 'adults & kids|adults and kids' },
           ].map(({ key, label, items, icon }) => {
             const totalReg = items.reduce((s, c) => s + c.registrations, 0);
             const totalRev = items.reduce((s, c) => s + c.totalRevenue, 0);
+            // Build a combined displayName for the category modal
+            const categoryDisplayName = label;
+            // Use the first clinic shortName as a representative filter (modal accepts partial match)
+            const representativeShortName = items[0]?.shortName || key;
             return (
               <div key={key} className="bg-card border border-border rounded-xl p-5">
                 <div className="flex items-center gap-2 mb-3">
@@ -392,7 +416,14 @@ export default function WinterClinicDetail() {
                 <div className="grid grid-cols-2 gap-3 mt-3">
                   <div>
                     <p className="text-xs text-muted-foreground">Registrations</p>
-                    <p className="text-lg font-bold">{totalReg}</p>
+                    <button
+                      onClick={() => setSelectedClinic({ shortName: '', displayName: categoryDisplayName, category: key as 'kids' | 'adults' | 'family' })}
+                      className="text-lg font-bold text-primary hover:underline cursor-pointer transition-colors block"
+                      title="Click to view participant list"
+                    >
+                      {totalReg}
+                    </button>
+                    <p className="text-xs text-muted-foreground">click to view list</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Revenue</p>
@@ -554,6 +585,7 @@ export default function WinterClinicDetail() {
           onClose={() => setSelectedClinic(null)}
           clinicShortName={selectedClinic.shortName}
           clinicDisplayName={selectedClinic.displayName}
+          category={selectedClinic.category}
         />
       )}
     </div>

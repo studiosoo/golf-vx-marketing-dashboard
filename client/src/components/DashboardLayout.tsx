@@ -71,7 +71,7 @@ const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
   {
     heading: "Strategic",
     items: [
-      { label: "Reports & Revenue", path: "/intelligence/reports", icon: FileText },
+      { label: "Reports", path: "/intelligence/reports", icon: FileText },
     ],
   },
   {
