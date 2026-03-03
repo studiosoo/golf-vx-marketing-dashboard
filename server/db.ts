@@ -452,9 +452,12 @@ export async function getMemberStats() {
     .select({
       totalMembers: sql<number>`COUNT(*)`,
       activeMembers: sql<number>`SUM(CASE WHEN ${members.status} = 'active' THEN 1 ELSE 0 END)`,
+      // Active paying members = All Access Aces + Swing Savers + Golf VX Pro + Family (all active tiers)
+      activePayingMembers: sql<number>`SUM(CASE WHEN ${members.status} = 'active' AND ${members.membershipTier} IN ('all_access_aces', 'swing_savers', 'golf_vx_pro', 'family', 'monthly', 'annual', 'corporate') THEN 1 ELSE 0 END)`,
       allAccessCount: sql<number>`SUM(CASE WHEN ${members.membershipTier} = 'all_access_aces' AND ${members.status} = 'active' THEN 1 ELSE 0 END)`,
       swingSaversCount: sql<number>`SUM(CASE WHEN ${members.membershipTier} = 'swing_savers' AND ${members.status} = 'active' THEN 1 ELSE 0 END)`,
       golfVxProCount: sql<number>`SUM(CASE WHEN ${members.membershipTier} = 'golf_vx_pro' AND ${members.status} = 'active' THEN 1 ELSE 0 END)`,
+      familyCount: sql<number>`SUM(CASE WHEN ${members.membershipTier} = 'family' AND ${members.status} = 'active' THEN 1 ELSE 0 END)`,
       totalLifetimeValue: sql<string>`SUM(${members.lifetimeValue})`,
       // Actual MRR from Boomerang payment data
       allAccessMRR: sql<string>`SUM(CASE WHEN ${members.membershipTier} = 'all_access_aces' AND ${members.status} = 'active' THEN COALESCE(${members.monthlyAmount}, 0) ELSE 0 END)`,

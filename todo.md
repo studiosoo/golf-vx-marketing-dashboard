@@ -689,3 +689,26 @@
 - [x] Added intelligence.generateActionPlan procedure with LLM + live DB data
 - [x] Guests & Leads — removed Source column, compact table layout (no scroll needed)
 - [x] Guests — uses getGuestContacts procedure (Acuity visitors, last 6 months)
+
+## Sprint — Mar 3, 2026 (Session 2)
+- [x] Fix member count to include all active tiers (All Access + Swing Saver + Golf VX Pro + Family)
+- [x] Make Membership Acquisition goal dynamic: 300 - active member count
+- [x] Fix Member Retention goal display on dashboard (300 target)
+- [x] Fix getSundayClinicMetrics to use only active paying members for totalMembers
+- [x] Update Sunday Clinic page header with 6-session series overview (Jan 25 – Mar 29)
+- [x] Add topic classification to each event (Drive Day / Putting / Short Game)
+- [x] Add color-coded topic badges to Event Breakdown card
+- [x] Add session numbers (#1–#6) to event breakdown
+- [x] Add 6-session schedule grid at top of Event Breakdown card
+- [x] Update acuity.ts filter to include all Drive Day Clinic type variants
+- [x] Add topic/topicLabel fields to getSundayClinicData event return
+
+## Sprint - Mar 3 2026 Session 2
+- [x] Fix member count to include all active tiers (All Access + Swing Saver + Golf VX Pro + Family)
+- [x] Make Membership Acquisition goal dynamic: 300 - active member count
+- [x] Fix getSundayClinicMetrics to use only active paying members
+- [x] Update Sunday Clinic page with 6-session series overview (Jan 25 to Mar 29)
+- [x] Add topic classification per event (Drive Day / Putting / Short Game)
+- [x] Add color-coded topic badges and session numbers to Event Breakdown
+- [x] Add 6-session schedule grid at top of Event Breakdown card
+- [x] Update acuity.ts filter to include all Drive Day Clinic type variants

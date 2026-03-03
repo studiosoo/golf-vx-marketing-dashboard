@@ -219,9 +219,14 @@ export const appRouter = router({
       .query(async ({ input }) => {
         const { getSundayClinicGoalMetrics } = await import("./acuity");
         
-        // Get member emails from database for tracking
-        const members = await db.getAllMembers();
-        const memberEmails = members.map(m => m.email);
+        // Get only ACTIVE PAYING member emails for retention tracking
+        // Active paying = All Access Aces + Swing Savers + Golf VX Pro + Family (not 'none' or 'trial')
+        const database = await db.getDb();
+        const activePayingResult = database ? await database.execute(
+          `SELECT email FROM members WHERE status = 'active' AND membershipTier IN ('all_access_aces', 'swing_savers', 'golf_vx_pro', 'family', 'monthly', 'annual', 'corporate')`
+        ) : [[]];
+        const activePayingRows = Array.isArray((activePayingResult as any)[0]) ? (activePayingResult as any)[0] : (activePayingResult as any);
+        const memberEmails = (activePayingRows as any[]).map((r: any) => r.email).filter(Boolean);
         
         const metrics = await getSundayClinicGoalMetrics({
           minDate: input.minDate,
@@ -2772,15 +2777,15 @@ Respond in JSON with this exact structure:
         //    Pro members (golf_vx_pro) are tracked separately, NOT counted toward the 300 goal
         const memberCountResult = await database.execute(
           `SELECT 
-            COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers') THEN 1 END) as customerMembers,
+            COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers', 'golf_vx_pro', 'family', 'monthly', 'annual', 'corporate') THEN 1 END) as customerMembers,
             COUNT(CASE WHEN membershipTier = 'golf_vx_pro' THEN 1 END) as proMembers,
             COUNT(CASE WHEN membershipTier = 'all_access_aces' THEN 1 END) as allAccessCount,
             COUNT(CASE WHEN membershipTier = 'swing_savers' THEN 1 END) as swingSaverCount,
             SUM(CASE WHEN membershipTier = 'all_access_aces' THEN COALESCE(monthlyAmount, 0) ELSE 0 END) as allAccessMRR,
             SUM(CASE WHEN membershipTier = 'swing_savers' THEN COALESCE(monthlyAmount, 0) ELSE 0 END) as swingSaverMRR,
             SUM(CASE WHEN membershipTier = 'golf_vx_pro' THEN COALESCE(monthlyAmount, 0) ELSE 0 END) as proMRR,
-            COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers') AND paymentInterval = 'annual' THEN 1 END) as annualCount,
-            COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers') AND paymentInterval = 'monthly' THEN 1 END) as monthlyCount
+            COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers', 'golf_vx_pro', 'family', 'monthly', 'annual', 'corporate') AND paymentInterval = 'annual' THEN 1 END) as annualCount,
+            COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers', 'golf_vx_pro', 'family', 'monthly', 'annual', 'corporate') AND paymentInterval = 'monthly' THEN 1 END) as monthlyCount
           FROM members WHERE status = 'active'`
         );
         const customerMemberCount = Number((memberCountResult as any)[0]?.customerMembers || 0);
@@ -2872,8 +2877,9 @@ Respond in JSON with this exact structure:
           membershipAcquisition: {
             current: customerMemberCount,
             target: MEMBERSHIP_GOAL,
-            // Remaining = how many more needed to reach 300
+            // Remaining = how many more needed to reach 300 (dynamic based on current count)
             remaining: Math.max(0, MEMBERSHIP_GOAL - customerMemberCount),
+            acquisitionGoal: Math.max(0, MEMBERSHIP_GOAL - customerMemberCount),
             progress: Math.min((customerMemberCount / MEMBERSHIP_GOAL) * 100, 100),
             breakdown: { allAccess: allAccessCount, swingSaver: swingSaverCount },
             newThisMonth: newMembersThisMonth,
@@ -3932,12 +3938,12 @@ Return a JSON object with:
       // Member counts
       const memberResult = await database.execute(`
         SELECT
-          COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers') AND status = 'active' THEN 1 END) as customerMembers,
+          COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers', 'golf_vx_pro', 'family', 'monthly', 'annual', 'corporate') AND status = 'active' THEN 1 END) as customerMembers,
           COUNT(CASE WHEN membershipTier = 'all_access_aces' AND status = 'active' THEN 1 END) as allAccessCount,
           COUNT(CASE WHEN membershipTier = 'swing_savers' AND status = 'active' THEN 1 END) as swingSaverCount,
           COUNT(CASE WHEN membershipTier = 'golf_vx_pro' AND status = 'active' THEN 1 END) as proCount,
           COALESCE(SUM(CASE WHEN status = 'active' THEN COALESCE(monthlyAmount, 0) ELSE 0 END), 0) as totalMRR,
-          COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers') AND status = 'active'
+          COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers', 'golf_vx_pro', 'family', 'monthly', 'annual', 'corporate') AND status = 'active'
             AND joinDate >= DATE_FORMAT(NOW(), '%Y-%m-01') THEN 1 END) as newThisMonth
         FROM members
       `);
@@ -3989,6 +3995,7 @@ Return a JSON object with:
           swingSaver: Number(m.swingSaverCount || 0),
           pro: Number(m.proCount || 0),
           goal: 300,
+          acquisitionGoal: Math.max(0, 300 - Number(m.customerMembers || 0)),
           newThisMonth: Number(m.newThisMonth || 0),
           mrr: parseFloat(m.totalMRR || '0'),
         },

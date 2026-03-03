@@ -257,12 +257,22 @@ export async function getSundayClinicData(params?: {
   });
 
   // Filter for Sunday Clinic / Drive Day appointments
-  // These typically have "Drive Day" or "Sunday Clinic" in the type name
-  const clinicAppointments = appointments.filter(apt => 
-    apt.type.toLowerCase().includes('drive day') || 
-    apt.type.toLowerCase().includes('sunday clinic') ||
-    apt.type.toLowerCase().includes('public drive')
-  );
+  // Covers all variants: "Drive Day Clinic:", "Drive Day ·", "Sunday Clinic", "Public Drive"
+  const clinicAppointments = appointments.filter(apt => {
+    const t = apt.type.toLowerCase();
+    return t.includes('drive day clinic') || 
+           t.includes('drive day ·') ||
+           t.includes('sunday clinic') ||
+           t.includes('public drive');
+  });
+  
+  // Helper to classify topic from appointment type name
+  const getClinicTopic = (typeName: string): 'drive_day' | 'putting' | 'short_game' => {
+    const t = typeName.toLowerCase();
+    if (t.includes('putting') || t.includes('score low')) return 'putting';
+    if (t.includes('short game') || t.includes('below the hips') || t.includes('swing below')) return 'short_game';
+    return 'drive_day';
+  };
 
   // Group appointments by date (event) and track sources
   const eventsByDate = clinicAppointments.reduce((acc, apt) => {
@@ -294,8 +304,19 @@ export async function getSundayClinicData(params?: {
       eventSourceBreakdown[source] = (eventSourceBreakdown[source] || 0) + 1;
     });
 
+    // Determine topic from appointment type names
+    const topicCounts: Record<string, number> = {};
+    appts.forEach(apt => {
+      const topic = getClinicTopic(apt.type);
+      topicCounts[topic] = (topicCounts[topic] || 0) + 1;
+    });
+    const dominantTopic = (Object.entries(topicCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'drive_day') as 'drive_day' | 'putting' | 'short_game';
+    const topicLabel = dominantTopic === 'putting' ? 'Putting — Score Low' : dominantTopic === 'short_game' ? 'Short Game — Swing Below the Hips' : 'Driving to the Ball';
+
     return {
       date,
+      topic: dominantTopic,
+      topicLabel,
       totalBookings: totalAttendees,
       uniqueAttendees,
       sourceBreakdown: eventSourceBreakdown,

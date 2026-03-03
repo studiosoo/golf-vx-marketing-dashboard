@@ -143,7 +143,7 @@ export default function Home() {
           {
             icon: Users, label: "Active Members",
             value: snapLoading ? "—" : fmt(members?.total ?? 0),
-            sub: members ? `Goal: ${fmt(members.goal)} · ${members.newThisMonth} new this month` : undefined,
+            sub: members ? `Retention goal: 300 · Acquisition goal: ${fmt(members.acquisitionGoal ?? Math.max(0, 300 - (members.total ?? 0)))} remaining · ${members.newThisMonth} new this month` : undefined,
             trend: undefined as number | undefined, accent: false, path: "/list/members",
           },
           {
