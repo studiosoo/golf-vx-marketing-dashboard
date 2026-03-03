@@ -1,0 +1,1 @@
+ALTER TABLE `autonomous_actions` MODIFY COLUMN `status` enum('auto_executed','pending_approval','approved','rejected','undone','monitoring','execution_failed','dismissed') NOT NULL;

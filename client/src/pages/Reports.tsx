@@ -1,0 +1,532 @@
+import { useState, useMemo } from "react";
+import { trpc } from "@/lib/trpc";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  LineChart, Line, PieChart, Pie, Cell, Legend
+} from "recharts";
+import {
+  TrendingUp, TrendingDown, Users, DollarSign, Target, Calendar,
+  FileText, Download, RefreshCw, Star, Activity, Award
+} from "lucide-react";
+
+const YELLOW = "#F5C72C";
+const DARK = "#111111";
+const GRAY = "#888888";
+
+function fmtCurrency(n: number) {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
+}
+
+function fmtPct(n: number) {
+  return `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`;
+}
+
+// Program Health Score (1-5) calculation
+function calcHealthScore(program: {
+  goalCompletionPct: number;
+  attendancePct: number;
+  revenuePct: number;
+  leadCapturePct: number;
+  socialPct: number;
+}): number {
+  const weighted =
+    program.goalCompletionPct * 0.30 +
+    program.attendancePct * 0.25 +
+    program.revenuePct * 0.20 +
+    program.leadCapturePct * 0.15 +
+    program.socialPct * 0.10;
+  return Math.min(5, Math.max(1, Math.round((weighted / 100) * 4 + 1)));
+}
+
+function HealthDots({ score }: { score: number }) {
+  return (
+    <div className="flex gap-1 items-center">
+      {[1, 2, 3, 4, 5].map(i => (
+        <div
+          key={i}
+          className="w-2.5 h-2.5 rounded-full"
+          style={{ background: i <= score ? YELLOW : "#E0E0E0" }}
+        />
+      ))}
+      <span className="text-xs text-muted-foreground ml-1">{score}/5</span>
+    </div>
+  );
+}
+
+function StatCard({ icon: Icon, label, value, sub, trend }: any) {
+  return (
+    <Card className="bg-card border-border">
+      <CardContent className="p-4">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="w-7 h-7 rounded-md flex items-center justify-center" style={{ background: `${YELLOW}20` }}>
+            <Icon size={14} style={{ color: YELLOW }} />
+          </div>
+          <span className="text-xs text-muted-foreground">{label}</span>
+        </div>
+        <div className="text-2xl font-bold text-foreground">{value}</div>
+        {sub && (
+          <div className={`text-xs mt-1 flex items-center gap-1 ${trend != null && trend >= 0 ? "text-green-500" : "text-red-400"}`}>
+            {trend != null && (trend >= 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />)}
+            {sub}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function Reports() {
+  const [activeTab, setActiveTab] = useState("overview");
+
+  const now = useMemo(() => new Date(), []);
+  const startOfMonth = useMemo(() => new Date(now.getFullYear(), now.getMonth(), 1), [now]);
+  const endOfMonth = useMemo(() => new Date(now.getFullYear(), now.getMonth() + 1, 0), [now]);
+  const startOfYear = useMemo(() => new Date(now.getFullYear(), 0, 1), [now]);
+
+  const { data: snapshot } = trpc.preview.getSnapshot.useQuery();
+  const { data: campaigns } = trpc.campaigns.list.useQuery();
+  const { data: memberStats } = trpc.members.getStats.useQuery();
+  const { data: revSummary } = trpc.revenue.getSummary.useQuery({ startDate: startOfYear, endDate: endOfMonth });
+  // Drive Day metrics sourced from programs array below
+
+  // Program health scores based on real data
+  const programs = useMemo(() => [
+    {
+      name: "Drive Day",
+      type: "Member Appreciation + Prospect",
+      status: "active",
+      goalCompletionPct: 87,   // 52/60 attendance
+      attendancePct: 87,
+      revenuePct: 70,          // $20/person, 52 paid some
+      leadCapturePct: 60,
+      socialPct: 50,
+      kpi: "52 / 60 attendees",
+      kpiLabel: "Attendance",
+      revenue: 1040,
+      revenueTarget: 1200,
+      notes: "2 dates remaining (Mar 22 + Mar 29)",
+    },
+    {
+      name: "Winter Clinic",
+      type: "Instruction Program",
+      status: "active",
+      goalCompletionPct: 55,   // Bogey Jrs + Par Shooters on target, others low
+      attendancePct: 55,
+      revenuePct: 55,
+      leadCapturePct: 40,
+      socialPct: 30,
+      kpi: "4 / 8 class types on target",
+      kpiLabel: "Class Fill Rate",
+      revenue: 0,
+      revenueTarget: 2400,
+      notes: "Bogey Jrs & Par Shooters performing well; other levels need promotion",
+    },
+    {
+      name: "Annual Giveaway",
+      type: "Acquisition Campaign",
+      status: "active",
+      goalCompletionPct: 47,   // 88/187 unique opt-ins vs 500 target (ClickFunnels)
+      attendancePct: 0,
+      revenuePct: 0,           // No direct revenue yet (pre-conversion)
+      leadCapturePct: 47,      // 88 applications vs 400-500 target
+      socialPct: 70,           // 214k impressions
+      kpi: "88 / 400–500 applications",
+      kpiLabel: "Lead Capture",
+      revenue: 0,
+      revenueTarget: 52720,
+      notes: "ClickFunnels: 875 views → 187 opt-ins → 88 applications (47% conversion). Winner announcement Mar 31.",
+    },
+    {
+      name: "Junior Summer Camp",
+      type: "Revenue Program",
+      status: "planned",
+      goalCompletionPct: 0,
+      attendancePct: 0,
+      revenuePct: 0,
+      leadCapturePct: 0,
+      socialPct: 20,
+      kpi: "0 / 120 enrolled",
+      kpiLabel: "Enrollment",
+      revenue: 0,
+      revenueTarget: 66000,
+      notes: "⚠ Early Bird deadline Mar 31. Urgent: email campaign needed.",
+    },
+    {
+      name: "Superbowl Watch Party",
+      type: "Brand Awareness",
+      status: "completed",
+      goalCompletionPct: 30,
+      attendancePct: 10,       // 1 attendee vs unknown target
+      revenuePct: 100,         // $300 bay booking = full revenue from event
+      leadCapturePct: 10,
+      socialPct: 40,           // 4,167 impressions
+      kpi: "4,167 impressions · $300 revenue",
+      kpiLabel: "Awareness + Revenue",
+      revenue: 300,
+      revenueTarget: 300,
+      notes: "1 bay booking ($300). 4,167 ad impressions. Low attendance but positive ROI on ad spend.",
+    },
+  ], []);
+
+  const programsWithScore = useMemo(() =>
+    programs.map(p => ({ ...p, healthScore: calcHealthScore(p) }))
+  , [programs]);
+
+  // Revenue chart data (monthly from revenue table)
+  const revenueChartData = useMemo(() => {
+    if (!revSummary) return [];
+    return (revSummary as any[]).map((r: any) => ({
+      month: new Date(r.month + "-01").toLocaleDateString("en-US", { month: "short" }),
+      membership: parseFloat(r.membership || '0'),
+      events: parseFloat(r.event || '0') + parseFloat(r.bay_rental || '0'),
+      coaching: parseFloat(r.coaching || '0'),
+    }));
+  }, [revSummary]);
+
+  // Campaign funnel data from ClickFunnels
+  const funnelData = [
+    { step: "Entry Page Views", value: 875, fill: "#F5C72C" },
+    { step: "Opt-ins", value: 187, fill: "#F5C72C" },
+    { step: "Applications", value: 88, fill: "#F5C72C" },
+    { step: "Offer Views", value: 118, fill: "#E0E0E0" },
+  ];
+
+  const metaSpend = [
+    { name: "Annual Giveaway A1", spend: 803, impressions: 80947, ctr: 0.90 },
+    { name: "Junior Summer Camp", spend: 430, impressions: 82307, ctr: 1.82 },
+    { name: "Annual Giveaway A2", spend: 379, impressions: 26434, ctr: 2.80 },
+    { name: "Superbowl Watch Party", spend: 75, impressions: 4167, ctr: 1.37 },
+    { name: "Drive Day Boost", spend: 55, impressions: 4633, ctr: 4.21 },
+    { name: "IG Giveaway", spend: 43, impressions: 15528, ctr: 0.30 },
+  ];
+
+  const totalMetaSpend = metaSpend.reduce((s, c) => s + c.spend, 0);
+  const totalImpressions = metaSpend.reduce((s, c) => s + c.impressions, 0);
+
+  return (
+    <div className="p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-foreground">Reports</h1>
+          <p className="text-muted-foreground text-sm mt-1">Performance across all programs, campaigns, and revenue streams</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" className="gap-2">
+            <Download size={14} /> Export PDF
+          </Button>
+          <Button variant="outline" size="sm" className="gap-2">
+            <RefreshCw size={14} /> Refresh
+          </Button>
+        </div>
+      </div>
+
+      {/* Top KPI Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard
+          icon={DollarSign}
+          label="MRR (Mar 2026)"
+          value={fmtCurrency(snapshot?.members?.mrr ?? 59910)}
+          sub={snapshot?.revenue?.mom != null ? `${fmtPct(snapshot.revenue.mom)} vs last month` : undefined}
+          trend={snapshot?.revenue?.mom}
+        />
+        <StatCard
+          icon={Users}
+          label="Active Members"
+          value={snapshot?.members?.total ?? "—"}
+          sub={`+${snapshot?.members?.newThisMonth ?? 0} this month`}
+          trend={snapshot?.members?.newThisMonth ?? 0}
+        />
+        <StatCard
+          icon={Target}
+          label="Meta Ads Spend"
+          value={fmtCurrency(totalMetaSpend)}
+          sub={`${(totalImpressions / 1000).toFixed(0)}K impressions`}
+        />
+        <StatCard
+          icon={Activity}
+          label="Active Programs"
+          value={programs.filter(p => p.status === "active").length}
+          sub={`${programs.filter(p => p.status === "completed").length} completed`}
+        />
+      </div>
+
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="bg-muted/30 border border-border">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="programs">Program Health</TabsTrigger>
+          <TabsTrigger value="meta">Meta Ads</TabsTrigger>
+          <TabsTrigger value="revenue">Revenue</TabsTrigger>
+          <TabsTrigger value="funnel">Giveaway Funnel</TabsTrigger>
+        </TabsList>
+
+        {/* Overview Tab */}
+        <TabsContent value="overview" className="space-y-4 mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Program Health Summary */}
+            <Card className="bg-card border-border">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <Award size={14} style={{ color: YELLOW }} /> Program Health Scores
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {programsWithScore.map(p => (
+                  <div key={p.name} className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm font-medium text-foreground">{p.name}</div>
+                      <div className="text-xs text-muted-foreground">{p.kpi}</div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Badge
+                        variant="secondary"
+                        className="text-xs capitalize"
+                        style={{
+                          background: p.status === "active" ? `${YELLOW}20` : p.status === "completed" ? "#22c55e20" : "#88888820",
+                          color: p.status === "active" ? "#b8900a" : p.status === "completed" ? "#16a34a" : GRAY,
+                          border: "none"
+                        }}
+                      >
+                        {p.status}
+                      </Badge>
+                      <HealthDots score={p.healthScore} />
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            {/* Meta Ads Spend Breakdown */}
+            <Card className="bg-card border-border">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <TrendingUp size={14} style={{ color: YELLOW }} /> Meta Ads Spend by Campaign
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={metaSpend} layout="vertical" margin={{ left: 0, right: 20 }}>
+                    <XAxis type="number" tick={{ fontSize: 10, fill: GRAY }} tickFormatter={v => `$${v}`} />
+                    <YAxis type="category" dataKey="name" tick={{ fontSize: 9, fill: GRAY }} width={130} />
+                    <Tooltip formatter={(v: any) => [`$${v}`, "Spend"]} />
+                    <Bar dataKey="spend" fill={YELLOW} radius={[0, 4, 4, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Revenue vs Goal */}
+          <Card className="bg-card border-border">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <DollarSign size={14} style={{ color: YELLOW }} /> Program Revenue vs Target
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {programsWithScore.filter(p => p.revenueTarget > 0).map(p => (
+                <div key={p.name}>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-foreground font-medium">{p.name}</span>
+                    <span className="text-muted-foreground">{fmtCurrency(p.revenue)} / {fmtCurrency(p.revenueTarget)}</span>
+                  </div>
+                  <Progress
+                    value={p.revenueTarget > 0 ? Math.min(100, (p.revenue / p.revenueTarget) * 100) : 0}
+                    className="h-2"
+                    style={{ "--progress-bg": YELLOW } as any}
+                  />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Program Health Tab */}
+        <TabsContent value="programs" className="space-y-4 mt-4">
+          {programsWithScore.map(p => (
+            <Card key={p.name} className="bg-card border-border">
+              <CardContent className="p-5">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-foreground">{p.name}</h3>
+                      <Badge variant="secondary" className="text-xs" style={{
+                        background: p.status === "active" ? `${YELLOW}20` : p.status === "completed" ? "#22c55e20" : "#88888820",
+                        color: p.status === "active" ? "#b8900a" : p.status === "completed" ? "#16a34a" : GRAY,
+                        border: "none"
+                      }}>{p.status}</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">{p.type}</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs text-muted-foreground mb-1">Health Score</div>
+                    <HealthDots score={p.healthScore} />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-3">
+                  {[
+                    { label: "Goal Completion", value: p.goalCompletionPct, weight: "30%" },
+                    { label: "Attendance", value: p.attendancePct, weight: "25%" },
+                    { label: "Revenue", value: p.revenuePct, weight: "20%" },
+                    { label: "Lead Capture", value: p.leadCapturePct, weight: "15%" },
+                    { label: "Social Impact", value: p.socialPct, weight: "10%" },
+                  ].map(f => (
+                    <div key={f.label} className="text-center">
+                      <div className="text-xs text-muted-foreground mb-1">{f.label}</div>
+                      <div className="text-lg font-bold text-foreground">{f.value}%</div>
+                      <div className="text-[10px] text-muted-foreground">weight {f.weight}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between pt-3 border-t border-border">
+                  <div>
+                    <span className="text-xs text-muted-foreground">{p.kpiLabel}: </span>
+                    <span className="text-xs font-medium text-foreground">{p.kpi}</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground max-w-xs text-right">{p.notes}</div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </TabsContent>
+
+        {/* Meta Ads Tab */}
+        <TabsContent value="meta" className="space-y-4 mt-4">
+          <div className="grid grid-cols-3 gap-4">
+            <StatCard icon={DollarSign} label="Total Spend" value={fmtCurrency(totalMetaSpend)} sub="Feb 2 – Mar 3, 2026" />
+            <StatCard icon={Activity} label="Total Impressions" value={`${(totalImpressions / 1000).toFixed(0)}K`} />
+            <StatCard icon={Target} label="Avg CTR" value={`${(metaSpend.reduce((s, c) => s + c.ctr, 0) / metaSpend.length).toFixed(2)}%`} />
+          </div>
+          <Card className="bg-card border-border">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold">Campaign Performance</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-lg border border-border overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border bg-muted/20">
+                      <th className="text-left p-3 text-xs text-muted-foreground font-medium">Campaign</th>
+                      <th className="text-right p-3 text-xs text-muted-foreground font-medium">Spend</th>
+                      <th className="text-right p-3 text-xs text-muted-foreground font-medium">Impressions</th>
+                      <th className="text-right p-3 text-xs text-muted-foreground font-medium">CTR</th>
+                      <th className="text-right p-3 text-xs text-muted-foreground font-medium">CPM</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {metaSpend.map(c => (
+                      <tr key={c.name} className="border-b border-border hover:bg-muted/10">
+                        <td className="p-3 text-foreground">{c.name}</td>
+                        <td className="p-3 text-right font-medium text-foreground">{fmtCurrency(c.spend)}</td>
+                        <td className="p-3 text-right text-muted-foreground">{c.impressions.toLocaleString()}</td>
+                        <td className="p-3 text-right text-muted-foreground">{c.ctr.toFixed(2)}%</td>
+                        <td className="p-3 text-right text-muted-foreground">{fmtCurrency((c.spend / c.impressions) * 1000)}</td>
+                      </tr>
+                    ))}
+                    <tr className="bg-muted/20 font-semibold">
+                      <td className="p-3 text-foreground">Total</td>
+                      <td className="p-3 text-right text-foreground">{fmtCurrency(totalMetaSpend)}</td>
+                      <td className="p-3 text-right text-foreground">{totalImpressions.toLocaleString()}</td>
+                      <td className="p-3 text-right text-muted-foreground">—</td>
+                      <td className="p-3 text-right text-muted-foreground">{fmtCurrency((totalMetaSpend / totalImpressions) * 1000)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Revenue Tab */}
+        <TabsContent value="revenue" className="space-y-4 mt-4">
+          <div className="grid grid-cols-3 gap-4">
+            <StatCard icon={DollarSign} label="Membership MRR" value={fmtCurrency(57070)} sub="88 active members" />
+            <StatCard icon={DollarSign} label="Coaching Revenue" value={fmtCurrency(1800)} sub="Pro member sessions" />
+            <StatCard icon={DollarSign} label="Bay Rental" value={fmtCurrency(1040)} sub="Drive Day + events" />
+          </div>
+          <Card className="bg-card border-border">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold">Revenue Breakdown — March 2026</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={220}>
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: "Membership", value: 57070 },
+                      { name: "Coaching", value: 1800 },
+                      { name: "Bay Rental", value: 1040 },
+                    ]}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={90}
+                    dataKey="value"
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    labelLine={false}
+                  >
+                    <Cell fill={YELLOW} />
+                    <Cell fill="#333333" />
+                    <Cell fill="#888888" />
+                  </Pie>
+                  <Tooltip formatter={(v: any) => fmtCurrency(v)} />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Giveaway Funnel Tab */}
+        <TabsContent value="funnel" className="space-y-4 mt-4">
+          <div className="grid grid-cols-4 gap-4">
+            <StatCard icon={Activity} label="Entry Page Views" value="875" sub="Unique: 875" />
+            <StatCard icon={Users} label="Opt-ins" value="187" sub="21.4% of views" />
+            <StatCard icon={FileText} label="Applications" value="88" sub="47.1% of opt-ins" />
+            <StatCard icon={Target} label="Offer Views" value="118" sub="Swing Saver offer" />
+          </div>
+          <Card className="bg-card border-border">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold">Giveaway Funnel — Feb 2 to Mar 3, 2026</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {funnelData.map((step, i) => (
+                  <div key={step.step}>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-foreground font-medium">{step.step}</span>
+                      <span className="text-muted-foreground">{step.value.toLocaleString()}</span>
+                    </div>
+                    <div className="h-8 rounded-md flex items-center px-3" style={{
+                      background: `${YELLOW}${Math.round((1 - i * 0.2) * 255).toString(16).padStart(2, '0')}`,
+                      width: `${(step.value / funnelData[0].value) * 100}%`,
+                      minWidth: "120px"
+                    }}>
+                      <span className="text-xs font-bold text-[#111111]">
+                        {i > 0 ? `${((step.value / funnelData[i - 1].value) * 100).toFixed(0)}% from prev` : "Top of funnel"}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 p-3 rounded-lg bg-muted/20 border border-border">
+                <p className="text-xs text-muted-foreground">
+                  <strong className="text-foreground">Target:</strong> 400–500 applications by Mar 15.
+                  Current pace: 88 applications (18–22% of target).
+                  <strong className="text-foreground"> Action needed:</strong> Increase Meta Ads budget for Junior Summer Camp and Giveaway A2 to drive more entry page traffic.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
