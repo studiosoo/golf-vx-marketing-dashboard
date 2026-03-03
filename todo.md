@@ -814,3 +814,12 @@
 - [x] Update Annual Membership Giveaway target goals: Entry = 1000, Application = 250
 - [x] Fix Winter Clinic "0 booking" display bug (count → totalBookings)
 - [x] Add clickable participant count on Winter Clinic dashboard — clicking opens filtered modal per category (Kids / Adult / Family)
+
+## Session 2026-03-03 Part 8 — Programs & Events Data Accuracy
+- [x] Fix Sunday Clinic revenue: $2,400 (manual) → $900 (real Acuity: 52 Drive Day appts, $20 public / $0 members)
+- [x] Fix 1-Hour Trial Session revenue: already updated in Part 7 to $137 (9 Acuity appts)
+- [x] Fix Superbowl Watch Party revenue: $0 → $300 (Joan Fesl, Chicago Bears Game Day Private Bay Watch Party, Jan 18)
+- [x] Annual Membership Giveaway card: KPI mode — shows Spend / Applications / Cost Per Application + goal progress bar (88/250)
+- [x] Instagram Follower Growth card: KPI mode — shows Spend / Followers / Cost Per Engagement + goal progress bar
+- [x] Programs.tsx: added primaryKpi/kpiTarget/kpiActual/kpiUnit fields to Program interface
+- [x] ProgramCard: conditional KPI display mode for goalType=leads or goalType=followers

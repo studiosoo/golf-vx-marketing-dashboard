@@ -66,6 +66,10 @@ interface Program {
   goalUnit?: string | null;
   performanceScore?: number | null;
   metaAdsCampaignId?: string | null;
+  primaryKpi?: string | null;
+  kpiTarget?: string | number | null;
+  kpiActual?: string | number | null;
+  kpiUnit?: string | null;
 }
 
 // ─────────────────────────────────────────────
@@ -137,6 +141,13 @@ function ProgramCard({ program, onClick }: { program: Program; onClick: () => vo
   const roi = spend > 0 ? ((revenue - spend) / spend) * 100 : 0;
   const hasMetaAds = !!program.metaAdsCampaignId;
   const score = program.performanceScore;
+  // KPI display mode for non-revenue campaigns (giveaway, follower growth, etc.)
+  const useKpiDisplay = program.goalType === 'leads' || program.goalType === 'followers';
+  const goalActual = toNum(program.goalActual);
+  const goalTarget = toNum(program.goalTarget);
+  const goalPct = goalTarget > 0 ? Math.min((goalActual / goalTarget) * 100, 100) : 0;
+  const kpiActual = toNum(program.kpiActual);
+  const kpiTarget = toNum(program.kpiTarget);
 
   return (
     <button
@@ -174,23 +185,60 @@ function ProgramCard({ program, onClick }: { program: Program; onClick: () => vo
         <span>{fmtDate(program.startDate)} – {fmtDate(program.endDate)}</span>
       </div>
 
-      {/* Metrics row */}
-      <div className="grid grid-cols-3 gap-2">
-        <div>
-          <p className="text-[14px] font-bold text-[#111111] leading-none">{fmtCurrency(spend)}</p>
-          <p className="text-[10px] text-[#AAAAAA] mt-0.5">Spend</p>
+      {/* Metrics row — KPI mode for non-revenue campaigns */}
+      {useKpiDisplay ? (
+        <div className="flex flex-col gap-2">
+          <div className="grid grid-cols-3 gap-2">
+            <div>
+              <p className="text-[14px] font-bold text-[#111111] leading-none">{fmtCurrency(spend)}</p>
+              <p className="text-[10px] text-[#AAAAAA] mt-0.5">Spend</p>
+            </div>
+            <div>
+              <p className="text-[14px] font-bold text-[#111111] leading-none">{goalActual > 0 ? goalActual.toLocaleString() : '—'}</p>
+              <p className="text-[10px] text-[#AAAAAA] mt-0.5 capitalize">{program.goalUnit || 'Progress'}</p>
+            </div>
+            <div>
+              <p className={cn("text-[14px] font-bold leading-none",
+                kpiActual > 0 && kpiTarget > 0 && kpiActual <= kpiTarget ? "text-[#3DB855]"
+                : kpiActual > 0 ? "text-[#F5A623]" : "text-[#AAAAAA]")}>
+                {kpiActual > 0 ? `$${kpiActual.toFixed(2)}` : '—'}
+              </p>
+              <p className="text-[10px] text-[#AAAAAA] mt-0.5 truncate" title={program.primaryKpi || 'KPI'}>
+                {program.primaryKpi || 'KPI'}
+              </p>
+            </div>
+          </div>
+          {/* Goal progress bar */}
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-[10px] text-[#AAAAAA]">
+                {goalActual.toLocaleString()} / {goalTarget.toLocaleString()} {program.goalUnit}
+              </span>
+              <span className="text-[10px] font-semibold text-[#007AFF]">{goalPct.toFixed(0)}%</span>
+            </div>
+            <div className="h-1.5 bg-[#F2F2F7] rounded-full overflow-hidden">
+              <div className="h-full rounded-full bg-[#007AFF]" style={{ width: `${goalPct}%` }} />
+            </div>
+          </div>
         </div>
-        <div>
-          <p className="text-[14px] font-bold text-[#111111] leading-none">{fmtCurrency(revenue)}</p>
-          <p className="text-[10px] text-[#AAAAAA] mt-0.5">Revenue</p>
+      ) : (
+        <div className="grid grid-cols-3 gap-2">
+          <div>
+            <p className="text-[14px] font-bold text-[#111111] leading-none">{fmtCurrency(spend)}</p>
+            <p className="text-[10px] text-[#AAAAAA] mt-0.5">Spend</p>
+          </div>
+          <div>
+            <p className="text-[14px] font-bold text-[#111111] leading-none">{fmtCurrency(revenue)}</p>
+            <p className="text-[10px] text-[#AAAAAA] mt-0.5">Revenue</p>
+          </div>
+          <div>
+            <p className={cn("text-[14px] font-bold leading-none", roi >= 0 ? "text-[#3DB855]" : "text-red-500")}>
+              {spend > 0 ? (roi >= 0 ? "+" : "") + roi.toFixed(0) + "%" : "—"}
+            </p>
+            <p className="text-[10px] text-[#AAAAAA] mt-0.5">ROI</p>
+          </div>
         </div>
-        <div>
-          <p className={cn("text-[14px] font-bold leading-none", roi >= 0 ? "text-[#3DB855]" : "text-red-500")}>
-            {spend > 0 ? (roi >= 0 ? "+" : "") + roi.toFixed(0) + "%" : "—"}
-          </p>
-          <p className="text-[10px] text-[#AAAAAA] mt-0.5">ROI</p>
-        </div>
-      </div>
+      )}
 
       {/* Budget bar */}
       <div>
