@@ -94,7 +94,7 @@ const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
     heading: "Marketing",
     items: [
       { label: "Programs & Events", path: "/programs", icon: Flag },
-      { label: "Advertising", path: "/campaigns/meta-ads", icon: BarChart3 },
+      { label: "Advertising", path: "/advertising", icon: BarChart3 },
       { label: "Social & Content", path: "/website/instagram", icon: Instagram },
       {
         label: "Communications",

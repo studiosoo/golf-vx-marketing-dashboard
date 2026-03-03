@@ -29,7 +29,7 @@ import * as giveawaySync from "./giveawaySync";
 import { syncGiveawayFromSheets } from "./googleSheetsSync";
 import { calculateCampaignPerformance, GOAL_TEMPLATES } from "./goalTemplates";
 import { eq, desc, sql, inArray, and, gte } from "drizzle-orm";
-import { aiRecommendations, userActions, priorities } from "../drizzle/schema";
+import { aiRecommendations, userActions, priorities, influencerPartnerships, communityOutreach } from "../drizzle/schema";
 import { emailCaptureRouter } from "./emailCaptureRouter";
 import { boomerangRouter } from "./boomerangRouter";
 import { communicationRouter } from "./communicationRouter";
@@ -4398,6 +4398,271 @@ When the user provides data (e.g., "we had 12 attendees at Drive Day"), acknowle
           "Which campaign has the best ROI right now?",
         ];
       }),
+  }),
+  // ─── Influencer Partnerships ──────────────────────────────────────────────
+  influencer: router({
+    list: protectedProcedure.query(async () => {
+      const database = await db.getDb();
+      if (!database) return [];
+      const rows = await database.select().from(influencerPartnerships).orderBy(desc(influencerPartnerships.dealDate));
+      return rows;
+    }),
+    create: protectedProcedure
+      .input(z.object({
+        handle: z.string(),
+        platform: z.enum(["instagram","tiktok","youtube","facebook","other"]).default("instagram"),
+        followerCount: z.number().optional(),
+        contactName: z.string().optional(),
+        contactEmail: z.string().optional(),
+        contactPhone: z.string().optional(),
+        dealDate: z.string().optional(),
+        totalCost: z.string().optional(),
+        deliverables: z.string().optional(),
+        campaignGoal: z.string().optional(),
+        targetAudience: z.string().optional(),
+        status: z.enum(["negotiating","contracted","in_progress","completed","cancelled"]).default("contracted"),
+        actualReach: z.number().optional(),
+        actualImpressions: z.number().optional(),
+        actualEngagements: z.number().optional(),
+        actualLinkClicks: z.number().optional(),
+        actualLeadsGenerated: z.number().optional(),
+        actualBookingsGenerated: z.number().optional(),
+        actualRevenue: z.string().optional(),
+        contentUrls: z.array(z.string()).optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const database = await db.getDb();
+        if (!database) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB unavailable" });
+        await database.insert(influencerPartnerships).values({
+          handle: input.handle,
+          platform: input.platform,
+          followerCount: input.followerCount,
+          contactName: input.contactName,
+          contactEmail: input.contactEmail,
+          contactPhone: input.contactPhone,
+          dealDate: input.dealDate as any,
+          totalCost: input.totalCost,
+          deliverables: input.deliverables,
+          campaignGoal: input.campaignGoal,
+          targetAudience: input.targetAudience,
+          status: input.status,
+          actualReach: input.actualReach,
+          actualImpressions: input.actualImpressions,
+          actualEngagements: input.actualEngagements,
+          actualLinkClicks: input.actualLinkClicks,
+          actualLeadsGenerated: input.actualLeadsGenerated,
+          actualBookingsGenerated: input.actualBookingsGenerated,
+          actualRevenue: input.actualRevenue,
+          contentUrls: input.contentUrls as any,
+          notes: input.notes,
+        });
+        return { success: true };
+      }),
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        updates: z.object({
+          handle: z.string().optional(),
+          platform: z.enum(["instagram","tiktok","youtube","facebook","other"]).optional(),
+          followerCount: z.number().optional(),
+          contactName: z.string().optional(),
+          contactEmail: z.string().optional(),
+          dealDate: z.string().optional(),
+          totalCost: z.string().optional(),
+          deliverables: z.string().optional(),
+          campaignGoal: z.string().optional(),
+          status: z.enum(["negotiating","contracted","in_progress","completed","cancelled"]).optional(),
+          actualReach: z.number().optional(),
+          actualImpressions: z.number().optional(),
+          actualEngagements: z.number().optional(),
+          actualLinkClicks: z.number().optional(),
+          actualLeadsGenerated: z.number().optional(),
+          actualBookingsGenerated: z.number().optional(),
+          actualRevenue: z.string().optional(),
+          contentUrls: z.array(z.string()).optional(),
+          notes: z.string().optional(),
+        }),
+      }))
+      .mutation(async ({ input }) => {
+        const database = await db.getDb();
+        if (!database) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB unavailable" });
+        await database.update(influencerPartnerships).set({
+          ...input.updates,
+          dealDate: input.updates.dealDate as any,
+          contentUrls: input.updates.contentUrls as any,
+          updatedAt: new Date(),
+        }).where(eq(influencerPartnerships.id, input.id));
+        return { success: true };
+      }),
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const database = await db.getDb();
+        if (!database) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB unavailable" });
+        await database.delete(influencerPartnerships).where(eq(influencerPartnerships.id, input.id));
+        return { success: true };
+      }),
+  }),
+
+  // ─── Community Outreach (Sponsorship / Donation Requests) ─────────────────
+  outreach: router({
+    list: protectedProcedure.query(async () => {
+      const database = await db.getDb();
+      if (!database) return [];
+      const rows = await database.select().from(communityOutreach).orderBy(desc(communityOutreach.requestDate));
+      return rows;
+    }),
+    getById: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        const database = await db.getDb();
+        if (!database) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB unavailable" });
+        const rows = await database.select().from(communityOutreach).where(eq(communityOutreach.id, input.id));
+        if (!rows[0]) throw new TRPCError({ code: "NOT_FOUND", message: "Outreach record not found" });
+        return rows[0];
+      }),
+    create: protectedProcedure
+      .input(z.object({
+        orgName: z.string(),
+        orgType: z.enum(["school_pta","school_sports","nonprofit","civic","arts_culture","sports_league","religious","business","other"]).default("other"),
+        contactName: z.string().optional(),
+        contactEmail: z.string().optional(),
+        contactPhone: z.string().optional(),
+        website: z.string().optional(),
+        ein: z.string().optional(),
+        is501c3: z.boolean().optional(),
+        requestType: z.enum(["cash_donation","gift_card","product_donation","service_donation","sponsorship","partnership","networking"]).default("gift_card"),
+        requestDate: z.string().optional(),
+        eventName: z.string().optional(),
+        eventDate: z.string().optional(),
+        eventLocation: z.string().optional(),
+        estimatedAttendees: z.number().optional(),
+        requestedAmount: z.string().optional(),
+        requestDescription: z.string().optional(),
+        status: z.enum(["received","under_review","approved","rejected","fulfilled","follow_up"]).default("received"),
+        decisionDate: z.string().optional(),
+        decisionNotes: z.string().optional(),
+        rejectionReason: z.string().optional(),
+        actualDonationType: z.string().optional(),
+        actualCashValue: z.string().optional(),
+        actualPerceivedValue: z.string().optional(),
+        benefitsReceived: z.string().optional(),
+        estimatedReach: z.number().optional(),
+        actualLeadsGenerated: z.number().optional(),
+        actualBookingsGenerated: z.number().optional(),
+        actualRevenue: z.string().optional(),
+        roiNotes: z.string().optional(),
+        isRecurring: z.boolean().optional(),
+        priority: z.enum(["low","medium","high"]).optional(),
+        tags: z.array(z.string()).optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const database = await db.getDb();
+        if (!database) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB unavailable" });
+        await database.insert(communityOutreach).values({
+          ...input,
+          requestDate: input.requestDate as any,
+          eventDate: input.eventDate as any,
+          decisionDate: input.decisionDate as any,
+          tags: input.tags as any,
+        });
+        return { success: true };
+      }),
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        updates: z.object({
+          orgName: z.string().optional(),
+          orgType: z.enum(["school_pta","school_sports","nonprofit","civic","arts_culture","sports_league","religious","business","other"]).optional(),
+          contactName: z.string().optional(),
+          contactEmail: z.string().optional(),
+          contactPhone: z.string().optional(),
+          requestType: z.enum(["cash_donation","gift_card","product_donation","service_donation","sponsorship","partnership","networking"]).optional(),
+          requestDate: z.string().optional(),
+          eventName: z.string().optional(),
+          eventDate: z.string().optional(),
+          estimatedAttendees: z.number().optional(),
+          requestedAmount: z.string().optional(),
+          requestDescription: z.string().optional(),
+          status: z.enum(["received","under_review","approved","rejected","fulfilled","follow_up"]).optional(),
+          decisionDate: z.string().optional(),
+          decisionNotes: z.string().optional(),
+          rejectionReason: z.string().optional(),
+          actualDonationType: z.string().optional(),
+          actualCashValue: z.string().optional(),
+          actualPerceivedValue: z.string().optional(),
+          benefitsReceived: z.string().optional(),
+          estimatedReach: z.number().optional(),
+          actualLeadsGenerated: z.number().optional(),
+          actualBookingsGenerated: z.number().optional(),
+          actualRevenue: z.string().optional(),
+          roiNotes: z.string().optional(),
+          isRecurring: z.boolean().optional(),
+          priority: z.enum(["low","medium","high"]).optional(),
+          tags: z.array(z.string()).optional(),
+          notes: z.string().optional(),
+        }),
+      }))
+      .mutation(async ({ input }) => {
+        const database = await db.getDb();
+        if (!database) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB unavailable" });
+        await database.update(communityOutreach).set({
+          ...input.updates,
+          requestDate: input.updates.requestDate as any,
+          eventDate: input.updates.eventDate as any,
+          decisionDate: input.updates.decisionDate as any,
+          tags: input.updates.tags as any,
+          updatedAt: new Date(),
+        }).where(eq(communityOutreach.id, input.id));
+        return { success: true };
+      }),
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const database = await db.getDb();
+        if (!database) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB unavailable" });
+        await database.delete(communityOutreach).where(eq(communityOutreach.id, input.id));
+        return { success: true };
+      }),
+    updateStatus: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        status: z.enum(["received","under_review","approved","rejected","fulfilled","follow_up"]),
+        decisionNotes: z.string().optional(),
+        rejectionReason: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const database = await db.getDb();
+        if (!database) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB unavailable" });
+        await database.update(communityOutreach).set({
+          status: input.status,
+          decisionDate: new Date().toISOString().split("T")[0] as any,
+          decisionNotes: input.decisionNotes,
+          rejectionReason: input.rejectionReason,
+          updatedAt: new Date(),
+        }).where(eq(communityOutreach.id, input.id));
+        return { success: true };
+      }),
+    getSummary: protectedProcedure.query(async () => {
+      const database = await db.getDb();
+      if (!database) return { total: 0, totalCashValue: 0, totalPerceivedValue: 0, totalEstimatedReach: 0, byStatus: {}, byType: {} };
+      const rows = await database.select().from(communityOutreach);
+      const byStatus: Record<string, number> = {};
+      const byType: Record<string, number> = {};
+      let totalCashValue = 0;
+      let totalPerceivedValue = 0;
+      let totalEstimatedReach = 0;
+      for (const row of rows) {
+        byStatus[row.status] = (byStatus[row.status] || 0) + 1;
+        byType[row.requestType] = (byType[row.requestType] || 0) + 1;
+        totalCashValue += parseFloat(String(row.actualCashValue || 0));
+        totalPerceivedValue += parseFloat(String(row.actualPerceivedValue || 0));
+        totalEstimatedReach += row.estimatedReach || 0;
+      }
+      return { total: rows.length, totalCashValue, totalPerceivedValue, totalEstimatedReach, byStatus, byType };
+    }),
   }),
 });
 export type AppRouter = typeof appRouter;

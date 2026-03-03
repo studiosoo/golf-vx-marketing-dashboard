@@ -836,3 +836,20 @@
 - [ ] Fix Bookings "—" display bug on Programs card (kpiActual=9 showing as "—")
 - [x] Register /programs/trial-session and /programs/4 routes in App.tsx
 - [x] 8 vitest unit tests for TrialSessionDetail data shape and route mapping — all passing
+
+## Session 2026-03-03 Part 11 — Advertising System Expansion
+- [x] DB schema: influencer_partnerships table (handle, platform, cost, deliverables, reach/engagement metrics)
+- [x] DB schema: community_outreach table (org, type, request, status pipeline, ROI tracking)
+- [x] Both tables created in production database
+- [x] tRPC router: influencer.list, influencer.create, influencer.update, influencer.delete
+- [x] tRPC router: outreach.list, outreach.getSummary, outreach.create, outreach.update, outreach.delete
+- [x] Advertising.tsx: 3-tab page (Meta Ads | Influencer Partnerships | Community Outreach)
+- [x] MetaAds.tsx: added embedded prop for use inside Advertising tabs
+- [x] DashboardLayout sidebar: Advertising now links to /advertising (was /campaigns/meta-ads)
+- [x] App.tsx: /advertising route registered
+- [x] Seed data: @actionheightslifestyle ($500, 1 reel + 3 stories, completed)
+- [x] Seed data: Windsor Elementary PTA Trivia Night (fulfilled, $100 cash + $699 perceived value)
+- [x] Seed data: Skokie Firefighters Benevolent Fund (received, no decision)
+- [x] Seed data: Illinois Sluggers Athletic Association (received, no decision)
+- [x] Seed data: Lake County Symphony Orchestra (follow_up, proactive outreach)
+- [x] 17 vitest unit tests for data model, ROI calculations, status pipeline — all passing

@@ -113,6 +113,13 @@
       "when": 1772567056386,
       "tag": "0015_broken_vulture",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "5",
+      "when": 1772578412890,
+      "tag": "0016_broken_tyger_tiger",
+      "breakpoints": true
     }
   ]
 }

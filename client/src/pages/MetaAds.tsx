@@ -8,7 +8,11 @@ import { RefreshCw, TrendingUp, DollarSign, Eye, MousePointer } from "lucide-rea
 
 type DatePreset = "today" | "yesterday" | "last_7d" | "last_14d" | "last_30d" | "last_90d" | "lifetime";
 
-export default function MetaAds() {
+interface MetaAdsProps {
+  embedded?: boolean;
+  params?: Record<string, string | undefined>;
+}
+export default function MetaAds({ embedded }: MetaAdsProps = {}) {
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
 
   const { data: campaigns, isLoading, refetch } = trpc.metaAds.getAllCampaignsWithInsights.useQuery({ datePreset });
@@ -25,12 +29,13 @@ export default function MetaAds() {
   const totalClicks = (campaigns as any[])?.reduce((sum: number, c: any) => sum + parseInt(c.insights?.clicks || 0), 0) || 0;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className={embedded ? "space-y-6" : "p-6 space-y-6"}>
       <div className="flex items-center justify-between">
-        <div>
+        {!embedded && <div>
           <h1 className="text-2xl font-bold text-foreground">Meta Ads</h1>
           <p className="text-muted-foreground text-sm mt-1">Facebook & Instagram campaign performance</p>
-        </div>
+        </div>}
+        {embedded && <div />}
         <div className="flex items-center gap-3">
           <Select value={datePreset} onValueChange={(v) => setDatePreset(v as DatePreset)}>
             <SelectTrigger className="w-36">

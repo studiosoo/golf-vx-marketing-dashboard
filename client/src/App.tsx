@@ -12,6 +12,7 @@ import Overview from "./pages/Overview";
 
 // ── MARKETING & PROGRAMS / Campaigns ──
 import StrategicCampaigns from "./pages/StrategicCampaigns";
+import Advertising from "./pages/Advertising";
 import MetaAds from "./pages/MetaAds";
 import MetaAdsCampaignDetail from "./pages/MetaAdsCampaignDetail";
 import CampaignDetail from "./pages/CampaignDetail";
@@ -102,6 +103,7 @@ function DashboardRoutes() {
         <Route path="/campaigns/strategic" component={StrategicCampaigns} />
         <Route path="/campaigns/meta-ads" component={MetaAds} />
         <Route path="/campaigns/meta-ads/campaign/:id" component={MetaAdsCampaignDetail} />
+        <Route path="/advertising" component={Advertising} />
         <Route path="/campaign/:id" component={CampaignDetail} />
         <Route path="/category/:id" component={CategoryDetail} />
         <Route path="/campaign-visuals" component={CampaignVisuals} />
