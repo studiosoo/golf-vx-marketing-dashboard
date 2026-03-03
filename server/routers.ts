@@ -1186,6 +1186,52 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
         }));
       }),
 
+    // Guests & Leads: all Acuity visitors (non-paying contacts)
+    getGuestContacts: protectedProcedure
+      .input(z.object({
+        search: z.string().optional(),
+        minDate: z.string().optional(),
+        maxDate: z.string().optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        const { getAppointments } = await import('./acuity');
+        const now = new Date();
+        const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
+        const minDate = input?.minDate || sixMonthsAgo.toISOString().split('T')[0];
+        const maxDate = input?.maxDate || now.toISOString().split('T')[0];
+        const appointments = await getAppointments({ minDate, maxDate, canceled: false });
+        // Group appointments by email
+        const byEmail = new Map<string, { firstName: string; lastName: string; email: string; phone: string; appointments: any[] }>();
+        for (const apt of appointments) {
+          if (!apt.email) continue;
+          const key = apt.email.toLowerCase();
+          if (!byEmail.has(key)) {
+            byEmail.set(key, { firstName: apt.firstName, lastName: apt.lastName, email: apt.email, phone: apt.phone, appointments: [] });
+          }
+          byEmail.get(key)!.appointments.push(apt);
+        }
+        // Filter by search if provided
+        const search = input?.search?.toLowerCase();
+        const contacts = Array.from(byEmail.values())
+          .filter(c => !search || c.email.includes(search) || c.firstName.toLowerCase().includes(search) || c.lastName.toLowerCase().includes(search))
+          .sort((a, b) => {
+            const aLast = a.appointments[a.appointments.length - 1]?.datetime || '';
+            const bLast = b.appointments[b.appointments.length - 1]?.datetime || '';
+            return bLast.localeCompare(aLast);
+          });
+        return contacts.map(c => ({
+          email: c.email,
+          firstName: c.firstName,
+          lastName: c.lastName,
+          phone: c.phone,
+          visitCount: c.appointments.length,
+          programs: Array.from(new Set(c.appointments.map((a: any) => a.type as string))),
+          lastVisit: c.appointments[c.appointments.length - 1]?.datetime || null,
+          firstVisit: c.appointments[0]?.datetime || null,
+          totalPaid: c.appointments.reduce((s: number, a: any) => s + parseFloat(a.amountPaid || '0'), 0),
+        }));
+      }),
+
     logEvent: protectedProcedure
       .input(z.object({
         email: z.string().email(),
@@ -2934,6 +2980,79 @@ Respond in JSON with this exact structure:
           .orderBy(desc(campaignMetrics.snapshotDate));
         
         return metrics;
+      }),
+    // Generate AI Action Plan based on real data
+    generateActionPlan: protectedProcedure
+      .input(z.object({
+        timeframe: z.enum(["week", "month"]).default("week"),
+        focus: z.enum(["all", "membership", "meta_ads", "programs", "retention"]).default("all"),
+      }))
+      .mutation(async ({ input }) => {
+        const { invokeLLM } = await import("./_core/llm");
+        const database = await db.getDb();
+        let contextData = "";
+        try {
+          if (database) {
+            const memberResult = await database.execute(
+              `SELECT COUNT(*) as total,
+               SUM(CASE WHEN status='active' THEN 1 ELSE 0 END) as active,
+               SUM(CASE WHEN membershipTier IN ('all_access_aces','swing_savers') AND status='active' THEN 1 ELSE 0 END) as customerMembers,
+               SUM(CASE WHEN membershipTier = 'golf_vx_pro' AND status='active' THEN 1 ELSE 0 END) as proMembers,
+               SUM(CASE WHEN status='active' THEN COALESCE(monthlyAmount,0) ELSE 0 END) as totalMRR
+               FROM members`
+            );
+            const newMembersResult = await database.execute(
+              `SELECT COUNT(*) as newThisMonth FROM members
+               WHERE membershipTier IN ('all_access_aces','swing_savers')
+               AND joinDate >= DATE_FORMAT(NOW(), '%Y-%m-01')`
+            );
+            const campaignResult = await database.execute(
+              `SELECT COUNT(*) as total, SUM(CASE WHEN status='active' THEN 1 ELSE 0 END) as active,
+               SUM(budget) as totalBudget, SUM(actualSpend) as totalSpend, SUM(actualRevenue) as totalRevenue
+               FROM campaigns`
+            );
+            const m = (memberResult as any)[0];
+            const nm = (newMembersResult as any)[0];
+            const c = (campaignResult as any)[0];
+            const customerMembers = Number(m?.customerMembers || 0);
+            const proMembers = Number(m?.proMembers || 0);
+            const totalMRR = parseFloat(m?.totalMRR || '0');
+            const newThisMonth = Number(nm?.newThisMonth || 0);
+            const membershipGoal = 300;
+            const remaining = membershipGoal - customerMembers;
+            contextData = `
+GOLF VX ARLINGTON HEIGHTS — LIVE DATA SNAPSHOT:
+- Customer Members (All Access Aces + Swing Savers): ${customerMembers} / ${membershipGoal} goal (${remaining} remaining)
+- Pro Members (Golf VX Pro): ${proMembers}
+- New Members This Month: ${newThisMonth}
+- Total MRR: $${totalMRR.toFixed(0)}
+- Active Programs: ${c?.active || 0} of ${c?.total || 0} total
+- Total Marketing Budget: $${Number(c?.totalBudget || 0).toFixed(0)}
+- Total Spend: $${Number(c?.totalSpend || 0).toFixed(0)}
+- Total Revenue: $${Number(c?.totalRevenue || 0).toFixed(0)}
+- Location: Arlington Heights, IL — Population 77,676, Median Income $95,400
+- Current date: ${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}`;
+          }
+        } catch (_) {}
+        const focusLabel = input.focus === "all" ? "all areas" : input.focus.replace(/_/g, " ");
+        const systemPrompt = `You are a senior marketing strategist for Golf VX Arlington Heights, an indoor golf facility. Generate a structured, actionable ${input.timeframe}ly action plan focused on ${focusLabel}.
+${contextData}
+Return ONLY a JSON object (no markdown, no code blocks) with this exact structure:
+{"summary":"2-3 sentence executive summary","priority":"high","generatedAt":"${new Date().toISOString()}","timeframe":"${input.timeframe}","focus":"${input.focus}","topPriorities":[{"rank":1,"title":"Action title","category":"membership","description":"What to do and why","expectedImpact":"Specific measurable outcome","effort":"medium","deadline":"This week","steps":["Step 1","Step 2","Step 3"]}],"quickWins":[{"title":"Quick win","action":"Specific action","time":"30 min"}],"kpiTargets":[{"metric":"Metric","current":"value","target":"target","by":"timeframe"}],"risks":["Risk 1"],"insight":"One key strategic insight"}
+Generate 3-5 top priorities and 3-4 quick wins. Be specific to Golf VX Arlington Heights. Focus on the 300 member goal.`;
+        const response = await invokeLLM({
+          messages: [
+            { role: "system" as const, content: systemPrompt },
+            { role: "user" as const, content: `Generate a ${input.timeframe}ly action plan for Golf VX Arlington Heights, focusing on ${focusLabel}.` },
+          ],
+          response_format: { type: "json_object" },
+        });
+        const rawContent = String(response.choices?.[0]?.message?.content || "{}");
+        try {
+          return JSON.parse(rawContent);
+        } catch {
+          return { summary: "Unable to generate plan. Please try again.", topPriorities: [], quickWins: [], kpiTargets: [], risks: [], insight: "" };
+        }
       }),
   }),
 

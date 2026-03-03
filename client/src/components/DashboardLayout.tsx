@@ -29,6 +29,8 @@ import {
   Zap,
   Trophy,
   Mail,
+  Search,
+  Lightbulb,
 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -81,8 +83,10 @@ const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
         path: "/intelligence",
         icon: Sparkles,
         children: [
-          { label: "Actions", path: "/intelligence/ai-actions", icon: Bot },
-          { label: "Performance", path: "/intelligence/performance", icon: TrendingUp },
+          { label: "Actions", path: "/intelligence/ai-actions", icon: Zap },
+          { label: "Market Research", path: "/intelligence/market-research", icon: Search },
+          { label: "AI Workspace", path: "/workspace", icon: Bot },
+          { label: "Action Plan", path: "/intelligence/action-plan", icon: Lightbulb },
         ],
       },
     ],
@@ -111,12 +115,6 @@ const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
       { label: "Members", path: "/list/members", icon: UserCheck },
       { label: "Pro Members", path: "/pro-members", icon: Trophy },
       { label: "Guests & Leads", path: "/list/guests", icon: UserPlus },
-    ],
-  },
-  {
-    heading: "Workspace",
-    items: [
-      { label: "AI Workspace", path: "/workspace", icon: Bot },
     ],
   },
 ];

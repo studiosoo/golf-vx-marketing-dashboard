@@ -678,3 +678,14 @@
 - [x] Update Guests tab: replace Status column with program participation history (listWithPrograms endpoint)
 - [x] Fix AI Workspace 404 error — added /workspace route + AIWorkspace.tsx page
 - [x] Build Reports dashboard page (5 tabs: Overview, Program Health, Meta Ads, Revenue, Giveaway Funnel)
+
+## Sprint — Mar 3, 2026 (Session 3)
+- [x] AI Analysis (MarketingIntelligence.tsx) — redesign with white background matching guide
+- [x] AI Actions page — confirmed white bg (#FAFAFA) with white cards, correct
+- [x] Intelligence nav restructure — merged AI Workspace under AI Analysis, removed Performance
+- [x] Added Market Research nav item under Intelligence → /intelligence/market-research
+- [x] Added Action Plan nav item under Intelligence → /intelligence/action-plan
+- [x] Created ActionPlan.tsx — AI-generated strategic weekly/monthly plan with real data
+- [x] Added intelligence.generateActionPlan procedure with LLM + live DB data
+- [x] Guests & Leads — removed Source column, compact table layout (no scroll needed)
+- [x] Guests — uses getGuestContacts procedure (Acuity visitors, last 6 months)
