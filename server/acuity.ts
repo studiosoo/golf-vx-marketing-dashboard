@@ -329,7 +329,13 @@ export async function getSundayClinicData(params?: {
   const repeatAttendees = clinicAppointments.length - allEmails.size;
 
   return {
-    events: events.sort((a, b) => a.date.localeCompare(b.date)),
+    // Sort by actual date using the first appointment's datetime field (ISO format)
+    // Cannot use localeCompare on "January 25, 2026" format — alphabetical order is wrong
+    events: events.sort((a, b) => {
+      const dateA = a.appointments[0]?.datetime ? new Date(a.appointments[0].datetime).getTime() : new Date(a.date).getTime();
+      const dateB = b.appointments[0]?.datetime ? new Date(b.appointments[0].datetime).getTime() : new Date(b.date).getTime();
+      return dateA - dateB;
+    }),
     totalEvents: events.length,
     totalBookings: clinicAppointments.length,
     uniqueAttendees: allEmails.size,
