@@ -132,9 +132,13 @@ export async function getAppointments(params?: {
   appointmentTypeID?: number;
   calendarID?: number;
   canceled?: boolean;
+  max?: number;
 }): Promise<AcuityAppointment[]> {
   const client = createAcuityClient();
-  const response = await client.get<AcuityAppointment[]>("/appointments", { params });
+  // Default max=500 to avoid Acuity's 100-record default limit cutting off older data
+  const response = await client.get<AcuityAppointment[]>("/appointments", {
+    params: { max: 500, ...params },
+  });
   return response.data;
 }
 
