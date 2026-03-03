@@ -781,3 +781,27 @@
 - [x] Market Research: add WJ Golf (wj.golf) to Competitors tab with full details (primary threat badge)
 - [x] Market Research: expand Key Insights with WJ Golf threat analysis and Sports Bar opportunity
 - [x] Market Research: add expandable competitor detail cards
+
+## Session 2026-03-03 Part 6 — Promotions vs. Demand Feature
+- [x] Seasonal Trends: add "Promotions vs. Demand" sub-tab toggle (Demand Index / Promotions vs. Demand)
+- [x] Promotions data model: Promotion type with name, month, channel, budget, reach, conversions, status, notes
+- [x] Pre-populated with 10 real/planned Golf VX AH promotions (Giveaway, $9 Trial, Super Bowl, etc.)
+- [x] Combo chart: indoor demand + sports bar demand bars overlaid with promotion budget spend line + conversions line
+- [x] Gap Analysis component: demand vs. spend dual progress bars per month, severity badges (⚠ Gap / ~ Partial / ✓ Covered)
+- [x] Promotion History & Plan table: filterable by channel and status, with CRUD (add/edit/delete)
+- [x] PromoForm: inline add/edit form with all fields, validation, toast feedback
+- [x] KPI summary strip: total promotions, total budget, total conversions, planned count
+- [x] CPL (Cost Per Lead) calculated inline per promotion row
+- [x] 14 vitest unit tests for chart data builder, gap analysis, CPL, and summary stats — all passing
+
+## Session 2026-03-03 Part 6 — Promotions vs. Demand Feature
+- [x] Seasonal Trends: add "Promotions vs. Demand" sub-tab toggle (Demand Index / Promotions vs. Demand)
+- [x] Promotions data model: Promotion type with name, month, channel, budget, reach, conversions, status, notes
+- [x] Pre-populated with 10 real/planned Golf VX AH promotions (Giveaway, $9 Trial, Super Bowl, etc.)
+- [x] Combo chart: indoor demand + sports bar demand bars overlaid with promotion budget spend line + conversions line
+- [x] Gap Analysis component: demand vs. spend dual progress bars per month, severity badges (Gap / Partial / Covered)
+- [x] Promotion History & Plan table: filterable by channel and status, with CRUD (add/edit/delete)
+- [x] PromoForm: inline add/edit form with all fields, validation, toast feedback
+- [x] KPI summary strip: total promotions, total budget, total conversions, planned count
+- [x] CPL (Cost Per Lead) calculated inline per promotion row
+- [x] 14 vitest unit tests for chart data builder, gap analysis, CPL, and summary stats — all passing
