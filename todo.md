@@ -729,3 +729,24 @@
 - [x] Verify Google Sheets sync: 67 real applicants already in DB (GID 883252165 correct)
 - [x] Confirm scheduler running: 8am/6pm CST auto-sync active
 - [x] TypeScript: 0 errors throughout
+
+## Session 2026-03-03 Part 2 — Giveaway + Demographics + AI Intelligence
+- [x] Sync Google Sheets: trigger fresh sync to get latest 67+ applicants
+- [x] Rename "Annual Giveaway" → "Annual Membership Giveaway" everywhere (DB, UI, routes)
+- [x] Update program goals: entry target=500, long-form target=150
+- [x] Update ClickFunnels funnel data: Entry (875 UV, 998 PV), Application (187 UV, 252 PV), Offer (118 UV, 175 PV)
+- [x] Fix program health status based on real data
+- [x] Redesign Demographics tab: show FIRST (before Applicants tab)
+- [x] Demographics: use Golf VX gray-tone palette (no black/yellow only)
+- [x] Demographics: add City distribution chart
+- [x] Demographics: add Visited Golf VX Before chart
+- [x] Demographics: add Golf Experience Level chart
+- [x] Demographics: add How Did They Hear chart
+- [x] Demographics: add Best Time to Call chart
+- [x] Remove Drive Day Targeting tab
+- [x] Add AI Intelligence tab to Annual Membership Giveaway page
+- [x] AI Intelligence: analyze demographics + generate Meta Ads recommendations
+- [x] AI Intelligence: generate multi-channel marketing strategy (email, SMS, social, events)
+- [x] Extend per-program AI Intelligence to all programs (Drive Day, Winter Clinic, Junior Camp, Leagues)
+- [x] Revenue & Goals merged into Reports (Revenue tab with real Toast/Acuity data)
+- [x] Sidebar "Revenue & Goals" renamed to "Revenue & Reports" → opens Reports/revenue tab

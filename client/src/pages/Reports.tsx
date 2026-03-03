@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,8 @@ import {
 } from "recharts";
 import {
   TrendingUp, TrendingDown, Users, DollarSign, Target, Calendar,
-  FileText, Download, RefreshCw, Star, Activity, Award
+  FileText, Download, RefreshCw, Star, Activity, Award,
+  ShoppingBag, CreditCard
 } from "lucide-react";
 
 const YELLOW = "#F5C72C";
@@ -80,8 +81,127 @@ function StatCard({ icon: Icon, label, value, sub, trend }: any) {
   );
 }
 
+// ─── Revenue Tab (merged from Revenue & Goals page) ───────────────────────────
+function RevenueTabContent() {
+  const [dateRange] = useState(() => ({
+    startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+    endDate: new Date(),
+  }));
+  const { data: summary } = trpc.revenue.getSummary.useQuery(dateRange);
+  const { data: toastDaily, isLoading: toastLoading } = trpc.revenue.getToastDaily.useQuery({ startDate: undefined, endDate: undefined });
+  const { data: toastSummary } = trpc.revenue.getToastSummary.useQuery();
+  const { data: acuityRevenue } = trpc.revenue.getAcuityRevenue.useQuery({ minDate: undefined, maxDate: undefined });
+  const fmt = (v: number | string) => `$${parseFloat(String(v || 0)).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+
+  return (
+    <div className="space-y-4">
+      {/* KPI Row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard icon={DollarSign} label="Total Revenue (MTD)" value={summary ? fmt((summary as any).total || 0) : "—"} />
+        <StatCard icon={ShoppingBag} label="Toast POS (MTD)" value={toastSummary ? fmt((toastSummary as any).totalRevenue || 0) : "—"} sub={toastSummary ? `${(toastSummary as any).totalOrders || 0} orders` : undefined} />
+        <StatCard icon={CreditCard} label="Acuity Bookings" value={acuityRevenue ? fmt((acuityRevenue as any).total || 0) : "—"} sub={acuityRevenue ? `${(acuityRevenue as any).count || 0} bookings` : undefined} />
+        <StatCard icon={TrendingUp} label="Avg Daily Revenue" value={toastSummary ? fmt((toastSummary as any).avgDailyRevenue || 0) : "—"} />
+      </div>
+
+      {/* Revenue Breakdown Chart */}
+      <Card className="bg-card border-border">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-semibold">Revenue Breakdown — March 2026</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={220}>
+            <PieChart>
+              <Pie
+                data={[
+                  { name: "Membership", value: 57070 },
+                  { name: "Coaching", value: 1800 },
+                  { name: "Bay Rental", value: 1040 },
+                ]}
+                cx="50%" cy="50%" innerRadius={60} outerRadius={90} dataKey="value"
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                labelLine={false}
+              >
+                <Cell fill={YELLOW} />
+                <Cell fill="#333333" />
+                <Cell fill="#888888" />
+              </Pie>
+              <Tooltip formatter={(v: any) => fmtCurrency(v)} />
+            </PieChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      {/* Toast POS Daily Table */}
+      <Card className="bg-card border-border">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-semibold">Daily Toast Revenue (Last 14 Days)</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {toastLoading ? (
+            <div className="space-y-2 p-4">{Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-10 bg-muted rounded animate-pulse" />)}</div>
+          ) : toastDaily && (toastDaily as any[]).length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead><tr className="border-b border-border">
+                  <th className="text-left px-4 py-2 text-muted-foreground font-medium text-xs">Date</th>
+                  <th className="text-right px-4 py-2 text-muted-foreground font-medium text-xs">Total</th>
+                  <th className="text-right px-4 py-2 text-muted-foreground font-medium text-xs">Bay</th>
+                  <th className="text-right px-4 py-2 text-muted-foreground font-medium text-xs">F&B</th>
+                  <th className="text-right px-4 py-2 text-muted-foreground font-medium text-xs">Orders</th>
+                </tr></thead>
+                <tbody>
+                  {(toastDaily as any[]).slice(-14).reverse().map((row: any) => (
+                    <tr key={row.date} className="border-b border-border/50 hover:bg-muted/30">
+                      <td className="px-4 py-2 text-foreground text-sm">{row.date}</td>
+                      <td className="px-4 py-2 text-right font-medium text-foreground text-sm">{fmt(row.totalRevenue)}</td>
+                      <td className="px-4 py-2 text-right text-muted-foreground text-sm">{fmt(row.bayRevenue)}</td>
+                      <td className="px-4 py-2 text-right text-muted-foreground text-sm">{fmt(row.foodBevRevenue)}</td>
+                      <td className="px-4 py-2 text-right text-muted-foreground text-sm">{row.totalOrders}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground text-sm">No Toast POS data available</div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Acuity Bookings */}
+      <Card className="bg-card border-border">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-semibold">Acuity Bookings Revenue</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {acuityRevenue ? (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 rounded-lg bg-muted/30">
+                <div className="text-xs text-muted-foreground mb-1">Total Bookings Revenue</div>
+                <div className="text-2xl font-bold text-foreground">{fmt((acuityRevenue as any).total || 0)}</div>
+              </div>
+              <div className="p-4 rounded-lg bg-muted/30">
+                <div className="text-xs text-muted-foreground mb-1">Booking Count</div>
+                <div className="text-2xl font-bold text-foreground">{(acuityRevenue as any).count || 0}</div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground text-sm">Loading Acuity data...</div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 export default function Reports() {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("tab") || "overview";
+    }
+    return "overview";
+  });
 
   const now = useMemo(() => new Date(), []);
   const startOfMonth = useMemo(() => new Date(now.getFullYear(), now.getMonth(), 1), [now]);
@@ -445,43 +565,9 @@ export default function Reports() {
           </Card>
         </TabsContent>
 
-        {/* Revenue Tab */}
+        {/* Revenue Tab — unified from Revenue & Goals */}
         <TabsContent value="revenue" className="space-y-4 mt-4">
-          <div className="grid grid-cols-3 gap-4">
-            <StatCard icon={DollarSign} label="Membership MRR" value={fmtCurrency(57070)} sub="88 active members" />
-            <StatCard icon={DollarSign} label="Coaching Revenue" value={fmtCurrency(1800)} sub="Pro member sessions" />
-            <StatCard icon={DollarSign} label="Bay Rental" value={fmtCurrency(1040)} sub="Drive Day + events" />
-          </div>
-          <Card className="bg-card border-border">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-semibold">Revenue Breakdown — March 2026</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={220}>
-                <PieChart>
-                  <Pie
-                    data={[
-                      { name: "Membership", value: 57070 },
-                      { name: "Coaching", value: 1800 },
-                      { name: "Bay Rental", value: 1040 },
-                    ]}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={90}
-                    dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    labelLine={false}
-                  >
-                    <Cell fill={YELLOW} />
-                    <Cell fill="#333333" />
-                    <Cell fill="#888888" />
-                  </Pie>
-                  <Tooltip formatter={(v: any) => fmtCurrency(v)} />
-                </PieChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+          <RevenueTabContent />
         </TabsContent>
 
         {/* Giveaway Funnel Tab */}

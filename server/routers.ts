@@ -615,6 +615,73 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
         await db.updateCampaignVisuals(id, visuals);
         return { success: true };
       }),
+
+    // AI-driven per-program marketing insights
+    generateInsights: protectedProcedure
+      .input(z.object({ campaignId: z.number() }))
+      .mutation(async ({ input }) => {
+        const campaign = await db.getCampaignById(input.campaignId);
+        if (!campaign) throw new TRPCError({ code: 'NOT_FOUND', message: 'Campaign not found' });
+        const { invokeLLM } = await import('./_core/llm');
+
+        const progressPct = campaign.goalTarget && parseFloat(campaign.goalTarget) > 0
+          ? Math.min((parseFloat(campaign.goalActual || '0') / parseFloat(campaign.goalTarget)) * 100, 100).toFixed(1)
+          : '0.0';
+        const daysRunning = campaign.startDate
+          ? Math.max(1, Math.floor((Date.now() - new Date(campaign.startDate).getTime()) / (1000 * 60 * 60 * 24)))
+          : 1;
+        const budget = parseFloat(campaign.budget || '0');
+        const spent = parseFloat(campaign.actualSpend || '0');
+        const budgetUtilization = budget > 0 ? ((spent / budget) * 100).toFixed(1) : '0.0';
+
+        const prompt = `You are a senior marketing strategist for Golf VX Arlington Heights, an indoor golf simulator facility in the Chicago suburbs.
+
+PROGRAM: ${campaign.name}
+Status: ${campaign.status}
+Description: ${campaign.description || 'N/A'}
+Goal: ${campaign.goalTarget} ${campaign.goalUnit || 'units'}
+Actual: ${campaign.goalActual} ${campaign.goalUnit || 'units'} (${progressPct}% progress)
+Budget: $${budget.toFixed(2)} | Spent: $${spent.toFixed(2)} (${budgetUtilization}% utilized)
+Days running: ${daysRunning}
+Applications: ${campaign.actualApplications || 0} / ${campaign.targetApplications || 'N/A'} target
+Conversions: ${campaign.actualConversions || 0} / ${campaign.targetConversions || 'N/A'} target
+
+Provide actionable marketing intelligence for this program. Include:
+1. Performance assessment
+2. Meta Ads recommendations
+3. Multi-channel strategy (email, SMS, social, in-venue, partnerships)
+4. Content recommendations
+5. Next 7-day action plan
+
+Respond in JSON:
+{
+  "executiveSummary": "string",
+  "performanceAssessment": { "status": "on_track|behind|ahead|critical", "summary": "string", "strengths": ["string"], "gaps": ["string"] },
+  "keyInsights": [{ "insight": "string", "implication": "string", "priority": "high|medium|low" }],
+  "metaAdsStrategy": { "audienceRecommendations": ["string"], "creativeRecommendations": ["string"], "budgetRecommendations": ["string"] },
+  "multiChannelStrategy": [{ "channel": "string", "strategy": "string", "tactics": ["string"], "priority": "high|medium|low" }],
+  "contentStrategy": { "themes": ["string"], "formats": ["string"], "messaging": "string" },
+  "sevenDayPlan": [{ "day": "string", "actions": ["string"] }],
+  "generatedAt": "${new Date().toISOString()}"
+}`;
+
+        const response = await invokeLLM({
+          messages: [
+            { role: 'system', content: 'You are a senior marketing strategist. Always respond with valid JSON only, no markdown.' },
+            { role: 'user', content: prompt },
+          ],
+          response_format: { type: 'json_object' },
+        });
+
+        let insights: any = null;
+        try {
+          const raw = response?.choices?.[0]?.message?.content;
+          insights = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        } catch {
+          insights = { executiveSummary: 'Unable to generate insights.', keyInsights: [], metaAdsStrategy: {}, multiChannelStrategy: [], contentStrategy: {}, sevenDayPlan: [] };
+        }
+        return { insights, campaign: { id: campaign.id, name: campaign.name, progressPct: parseFloat(progressPct), budgetUtilization: parseFloat(budgetUtilization) } };
+      }),
   }),
 
   // Strategic Campaigns Overview
@@ -2508,6 +2575,96 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
         const selfReported = applicant.visitedBefore?.toLowerCase();
         const hasVisited = !!member || visitCount > 0 || selfReported === 'yes';
         return { hasVisited, visitCount, lastVisit, memberStatus: member ? member.status : null, memberTier: member ? member.membershipTier : null, selfReported: applicant.visitedBefore || 'Not specified' };
+      }),
+
+    // AI-driven marketing strategy for this program
+    generateProgramInsights: protectedProcedure
+      .input(z.object({ programId: z.number().optional() }))
+      .mutation(async () => {
+        const stats = await giveawaySync.getGiveawayStats();
+        const { invokeLLM } = await import('./_core/llm');
+        const total = stats.totalApplications || 0;
+        const entryGoal = 500;
+        const longFormGoal = 150;
+        const progressPct = Math.min((total / entryGoal) * 100, 100).toFixed(1);
+
+        // Build demographic summary
+        const topCities = Object.entries(stats.cityDistribution || {}).sort((a, b) => (b[1] as number) - (a[1] as number)).slice(0, 5).map(([city, count]) => `${city}: ${count}`).join(', ');
+        const ageBreakdown = Object.entries(stats.ageRangeDistribution || {}).map(([age, count]) => `${age}: ${count}`).join(', ');
+        const genderBreakdown = Object.entries(stats.genderDistribution || {}).map(([g, c]) => `${g}: ${c}`).join(', ');
+        const experienceBreakdown = Object.entries(stats.golfExperienceDistribution || {}).map(([e, c]) => `${e}: ${c}`).join(', ');
+        const visitedBreakdown = Object.entries(stats.visitedBeforeDistribution || {}).map(([v, c]) => `${v}: ${c}`).join(', ');
+        const hearBreakdown = Object.entries(stats.howDidTheyHearDistribution || {}).map(([h, c]) => `${h}: ${c}`).join(', ');
+        const familiarityBreakdown = Object.entries(stats.indoorGolfFamiliarityDistribution || {}).map(([f, c]) => `${f}: ${c}`).join(', ');
+
+        const prompt = `You are a senior marketing strategist for Golf VX Arlington Heights, an indoor golf simulator facility in the Chicago suburbs.
+
+PROGRAM: Annual Membership Giveaway 2026
+Goal: ${entryGoal} entries, ${longFormGoal} long-form applicants
+Current entries: ${total} (${progressPct}% of entry goal)
+Funnel: Entry page 875 UV → Application page 187 UV → 67 form completions (47% completion rate from app page)
+
+DEMOGRAPHIC DATA:
+- Age distribution: ${ageBreakdown}
+- Gender: ${genderBreakdown}
+- Top cities: ${topCities}
+- Golf experience: ${experienceBreakdown}
+- Visited Golf VX before: ${visitedBreakdown}
+- How they heard: ${hearBreakdown}
+- Indoor golf familiarity: ${familiarityBreakdown}
+
+Provide a comprehensive marketing intelligence report with:
+1. Key demographic insights and what they mean for targeting
+2. Current Meta Ads optimization recommendations (audience, creative, budget)
+3. Multi-channel marketing strategy (email, SMS, in-venue, social media, partnerships)
+4. Content strategy recommendations based on the audience profile
+5. Conversion optimization suggestions for the funnel
+6. Specific next 7-day action plan
+
+Respond in JSON with this structure:
+{
+  "executiveSummary": "2-3 sentence overview",
+  "keyInsights": [
+    { "insight": "string", "implication": "string", "priority": "high|medium|low" }
+  ],
+  "metaAdsStrategy": {
+    "audienceRecommendations": ["string"],
+    "creativeRecommendations": ["string"],
+    "budgetRecommendations": ["string"],
+    "campaignOptimizations": ["string"]
+  },
+  "multiChannelStrategy": [
+    { "channel": "string", "strategy": "string", "tactics": ["string"], "expectedImpact": "string", "priority": "high|medium|low" }
+  ],
+  "contentStrategy": {
+    "themes": ["string"],
+    "formats": ["string"],
+    "messaging": "string"
+  },
+  "funnelOptimization": ["string"],
+  "sevenDayPlan": [
+    { "day": "string", "actions": ["string"] }
+  ],
+  "generatedAt": "${new Date().toISOString()}"
+}`;
+
+        const response = await invokeLLM({
+          messages: [
+            { role: 'system', content: 'You are a senior marketing strategist. Always respond with valid JSON only, no markdown code blocks.' },
+            { role: 'user', content: prompt },
+          ],
+          response_format: { type: 'json_object' },
+        });
+
+        let insights: any = null;
+        try {
+          const raw = response?.choices?.[0]?.message?.content;
+          insights = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        } catch (e) {
+          insights = { executiveSummary: 'Unable to generate insights at this time.', keyInsights: [], metaAdsStrategy: {}, multiChannelStrategy: [], contentStrategy: {}, funnelOptimization: [], sevenDayPlan: [] };
+        }
+
+        return { insights, stats: { total, entryGoal, longFormGoal, progressPct: parseFloat(progressPct) } };
       }),
 
     // Daily Dashboard: AI-driven daily action plan based on application count vs goal

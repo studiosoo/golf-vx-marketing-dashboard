@@ -2,6 +2,7 @@ import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
 import { useMemo, useState } from "react";
 import ProgramMarketingPanel from "@/components/ProgramMarketingPanel";
+import { ProgramAIIntelligence } from "@/components/ProgramAIIntelligence";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -534,6 +535,16 @@ export default function WinterClinicDetail() {
           programName="PBGA Winter Clinic"
           programKeywords={["winter clinic", "pbga winter"]}
         />
+      </div>
+      {/* AI Marketing Intelligence */}
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <span className="text-yellow-400">✦</span> AI Marketing Intelligence
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">AI-generated multi-channel marketing strategy based on program performance data.</p>
+        </div>
+        <ProgramAIIntelligence campaignId={3} programName="PBGA Winter Clinics" />
       </div>
 
       {/* Attendee List Modal */}

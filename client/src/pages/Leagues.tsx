@@ -1,4 +1,5 @@
 import { trpc } from "@/lib/trpc";
+import { ProgramAIIntelligence } from "@/components/ProgramAIIntelligence";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Users, Calendar } from "lucide-react";
@@ -66,6 +67,17 @@ export default function Leagues() {
           <p>No leagues found</p>
         </div>
       )}
+
+      {/* AI Marketing Intelligence */}
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <span className="text-yellow-400">✦</span> AI Marketing Intelligence
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">AI-generated multi-channel marketing strategy for Golf VX Leagues.</p>
+        </div>
+        <ProgramAIIntelligence campaignId={5} programName="Golf VX Leagues" />
+      </div>
     </div>
   );
 }
