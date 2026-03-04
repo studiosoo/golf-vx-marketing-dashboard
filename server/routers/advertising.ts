@@ -3,7 +3,7 @@ import { z } from "zod";
 import * as db from "../db";
 import { TRPCError } from "@trpc/server";
 import { eq, desc } from "drizzle-orm";
-import { influencerPartnerships, communityOutreach, printAdvertising, eventAdvertising } from "../../drizzle/schema";
+import { influencerPartnerships, communityOutreach, printAdvertising, eventAdvertising, metaAdsOverrides } from "../../drizzle/schema";
 import * as metaAds from "../metaAds";
 
 export const influencerRouter = router({
@@ -572,6 +572,53 @@ export const metaAdsRouter = router({
         return { insights };
       } catch (err) {
         return { insights: 'Unable to generate insights at this time.' };
+      }
+    }),
+  getStatusOverrides: protectedProcedure.query(async () => {
+    try {
+      const database = await db.getDb();
+      if (!database) return [];
+      const rows = await database.select().from(metaAdsOverrides);
+      return rows;
+    } catch {
+      return [];
+    }
+  }),
+  setStatusOverride: protectedProcedure
+    .input(z.object({
+      campaignId: z.string(),
+      campaignName: z.string(),
+      overrideStatus: z.enum(["active", "completed", "archived"]).nullable(),
+    }))
+    .mutation(async ({ input }) => {
+      try {
+        const database = await db.getDb();
+        if (!database) return { success: false };
+        const now = Date.now();
+        if (input.overrideStatus === null) {
+          // Clear override
+          await database.delete(metaAdsOverrides).where(eq(metaAdsOverrides.campaignId, input.campaignId));
+        } else {
+          // Upsert override
+          const existing = await database.select().from(metaAdsOverrides)
+            .where(eq(metaAdsOverrides.campaignId, input.campaignId));
+          if (existing.length > 0) {
+            await database.update(metaAdsOverrides)
+              .set({ overrideStatus: input.overrideStatus, updatedAt: now })
+              .where(eq(metaAdsOverrides.campaignId, input.campaignId));
+          } else {
+            await database.insert(metaAdsOverrides).values({
+              campaignId: input.campaignId,
+              campaignName: input.campaignName,
+              overrideStatus: input.overrideStatus,
+              overriddenAt: now,
+              updatedAt: now,
+            });
+          }
+        }
+        return { success: true };
+      } catch (err: any) {
+        return { success: false, error: err?.message };
       }
     }),
   syncCache: protectedProcedure.mutation(async () => {

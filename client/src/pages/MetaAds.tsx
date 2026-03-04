@@ -6,11 +6,27 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { RefreshCw, TrendingUp, DollarSign, Eye, MousePointer, Sparkles, ChevronRight, ExternalLink } from "lucide-react";
+import { RefreshCw, TrendingUp, DollarSign, Eye, MousePointer, Sparkles, ChevronRight, ExternalLink, ChevronDown, Archive, RotateCcw } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 type DatePreset = "today" | "yesterday" | "last_7d" | "last_14d" | "last_30d" | "last_90d" | "lifetime";
 
-const STATUS_ORDER: Record<string, number> = { ACTIVE: 0, IN_PROCESS: 1, WITH_ISSUES: 2, PAUSED: 3, COMPLETED: 4, ARCHIVED: 5, DELETED: 6, UNKNOWN: 7 };
+const COMPLETED_DAYS_THRESHOLD = 7;
+
+function isAutoCompleted(campaign: any): boolean {
+  const ins = campaign.insights || campaign;
+  const dateStop = ins.date_stop || ins.dateStop;
+  if (!dateStop) return false;
+  const stopDate = new Date(dateStop);
+  const daysDiff = (Date.now() - stopDate.getTime()) / (1000 * 60 * 60 * 24);
+  return daysDiff > COMPLETED_DAYS_THRESHOLD;
+}
+
+function getEffectiveStatus(campaign: any, overrideMap: Record<string, string>): string {
+  if (overrideMap[campaign.id]) return overrideMap[campaign.id].toUpperCase();
+  if (isAutoCompleted(campaign)) return "COMPLETED";
+  return campaign.status || "ACTIVE";
+}
 
 function statusBadgeClass(status: string) {
   switch (status) {
@@ -29,37 +45,59 @@ interface MetaAdsProps {
 
 export default function MetaAds({ embedded }: MetaAdsProps = {}) {
   const [, navigate] = useLocation();
+  const { toast } = useToast();
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
   const [aiCampaign, setAiCampaign] = useState<any>(null);
   const [aiInsight, setAiInsight] = useState<string>("");
   const [aiLoading, setAiLoading] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
 
   const { data: campaigns, isLoading, refetch } = trpc.metaAds.getAllCampaignsWithInsights.useQuery(
     { datePreset },
     { staleTime: 5 * 60 * 1000 }
   );
+  const { data: overrides, refetch: refetchOverrides } = trpc.metaAds.getStatusOverrides.useQuery();
+  const utils = trpc.useUtils();
 
   const generateAiInsight = trpc.metaAds.generateCampaignInsights.useMutation({
     onSuccess: (data) => { setAiInsight(String(data.insights || "No insights generated.")); setAiLoading(false); },
     onError: () => { setAiInsight("Unable to generate insights at this time."); setAiLoading(false); },
   });
   const syncCache = trpc.metaAds.syncCache.useMutation({
-    onSuccess: () => { refetch(); },
+    onSuccess: () => { refetch(); refetchOverrides(); },
+  });
+  const setOverride = trpc.metaAds.setStatusOverride.useMutation({
+    onSuccess: () => {
+      refetchOverrides();
+      utils.metaAds.getAllCampaignsWithInsights.invalidate();
+    },
   });
 
   const formatCurrency = (val: any) =>
     `$${parseFloat(String(val || 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
   const formatNum = (val: any) => parseInt(String(val || 0)).toLocaleString();
 
-  const sortedCampaigns = campaigns
-    ? [...(campaigns as any[])].sort((a, b) => (STATUS_ORDER[a.status] ?? 7) - (STATUS_ORDER[b.status] ?? 7))
-    : [];
+  const overrideMap: Record<string, string> = {};
+  if (overrides) {
+    for (const o of overrides as any[]) {
+      overrideMap[(o as any).campaignId] = (o as any).overrideStatus;
+    }
+  }
 
-  const totalSpend = sortedCampaigns.reduce((sum, c) => sum + parseFloat(c.insights?.spend || 0), 0);
-  const totalReach = sortedCampaigns.reduce((sum, c) => sum + parseInt(c.insights?.reach || 0), 0);
-  const totalImpressions = sortedCampaigns.reduce((sum, c) => sum + parseInt(c.insights?.impressions || 0), 0);
-  const totalClicks = sortedCampaigns.reduce((sum, c) => sum + parseInt(c.insights?.clicks || 0), 0);
+  const allCampaigns = (campaigns as any[]) ?? [];
+  const activeCampaigns = allCampaigns.filter(c => {
+    const eff = getEffectiveStatus(c, overrideMap);
+    return eff === "ACTIVE" || eff === "PAUSED" || eff === "IN_PROCESS";
+  });
+  const archivedCampaigns = allCampaigns.filter(c => {
+    const eff = getEffectiveStatus(c, overrideMap);
+    return eff === "COMPLETED" || eff === "ARCHIVED";
+  });
+
+  const totalSpend = activeCampaigns.reduce((sum, c) => sum + parseFloat(c.insights?.spend || 0), 0);
+  const totalReach = activeCampaigns.reduce((sum, c) => sum + parseInt(c.insights?.reach || 0), 0);
+  const totalImpressions = activeCampaigns.reduce((sum, c) => sum + parseInt(c.insights?.impressions || 0), 0);
+  const totalClicks = activeCampaigns.reduce((sum, c) => sum + parseInt(c.insights?.clicks || 0), 0);
 
   const handleAiClick = (e: React.MouseEvent, campaign: any) => {
     e.stopPropagation();
@@ -68,9 +106,128 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
     setAiLoading(true);
     generateAiInsight.mutate({ campaignId: campaign.id, datePreset });
   };
-
   const handleCardClick = (campaign: any) => {
     navigate(embedded ? `/campaigns/meta-ads/campaign/${campaign.id}` : `/meta-ads/campaign/${campaign.id}`);
+  };
+  const handleMarkCompleted = (e: React.MouseEvent, campaign: any) => {
+    e.stopPropagation();
+    setOverride.mutate(
+      { campaignId: campaign.id, campaignName: campaign.name, overrideStatus: "completed" },
+      { onSuccess: () => toast({ title: "Marked as Completed", description: campaign.name }) }
+    );
+  };
+  const handleRestoreActive = (e: React.MouseEvent, campaign: any) => {
+    e.stopPropagation();
+    setOverride.mutate(
+      { campaignId: campaign.id, campaignName: campaign.name, overrideStatus: "active" },
+      { onSuccess: () => toast({ title: "Restored to Active", description: campaign.name }) }
+    );
+  };
+
+  const CampaignCard = ({ c, isArchived }: { c: any; isArchived: boolean }) => {
+    const effStatus = getEffectiveStatus(c, overrideMap);
+    const autoClassified = isAutoCompleted(c) && !overrideMap[c.id];
+    return (
+      <Card
+        className={`border-border hover:shadow-md transition-all cursor-pointer group ${isArchived ? "opacity-70 hover:opacity-100 bg-muted/20" : "bg-card hover:border-primary/30"}`}
+        onClick={() => handleCardClick(c)}
+      >
+        <CardContent className="p-4">
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex-1 min-w-0">
+              <div className="font-medium text-foreground text-sm flex items-center gap-1">
+                {c.name}
+                <ChevronRight size={13} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+              <div className="flex items-center gap-2 mt-1 flex-wrap">
+                <Badge className={`text-xs border ${statusBadgeClass(effStatus)}`} variant="outline">
+                  {effStatus}
+                </Badge>
+                {autoClassified && (
+                  <span className="text-xs text-muted-foreground italic">auto-classified by date</span>
+                )}
+                {c.objective && (
+                  <span className="text-xs text-muted-foreground">{c.objective}</span>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5 ml-3 shrink-0 flex-wrap justify-end">
+              {!isArchived ? (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-7 px-2 gap-1 border-primary/40 text-primary hover:bg-primary/10"
+                    onClick={(e) => handleAiClick(e, c)}
+                  >
+                    <Sparkles size={11} />
+                    AI Insights
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs h-7 px-2 gap-1 text-muted-foreground hover:text-foreground"
+                    onClick={(e) => { e.stopPropagation(); handleCardClick(c); }}
+                  >
+                    <ExternalLink size={11} />
+                    Report
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs h-7 px-2 gap-1 text-muted-foreground hover:text-orange-500"
+                    onClick={(e) => handleMarkCompleted(e, c)}
+                    title="Mark as Completed"
+                  >
+                    <Archive size={11} />
+                    Archive
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs h-7 px-2 gap-1 text-muted-foreground hover:text-green-600"
+                    onClick={(e) => handleRestoreActive(e, c)}
+                    title="Restore to Active"
+                  >
+                    <RotateCcw size={11} />
+                    Restore
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs h-7 px-2 gap-1 text-muted-foreground hover:text-foreground"
+                    onClick={(e) => { e.stopPropagation(); handleCardClick(c); }}
+                  >
+                    <ExternalLink size={11} />
+                    Report
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+          {c.insights ? (
+            <div className="grid grid-cols-4 gap-3">
+              {[
+                { label: "Spend", value: formatCurrency(c.insights.spend || 0) },
+                { label: "Reach", value: formatNum(c.insights.reach || 0) },
+                { label: "Impressions", value: formatNum(c.insights.impressions || 0) },
+                { label: "Clicks", value: formatNum(c.insights.clicks || 0) },
+              ].map((m) => (
+                <div key={m.label} className="bg-muted/30 rounded-lg p-2 text-center">
+                  <div className="text-sm font-semibold text-foreground">{m.value}</div>
+                  <div className="text-xs text-muted-foreground">{m.label}</div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-xs text-muted-foreground">No insights data for this period</div>
+          )}
+        </CardContent>
+      </Card>
+    );
   };
 
   return (
@@ -108,10 +265,9 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
         </div>
       </div>
 
-      {/* Summary KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Spend", value: formatCurrency(totalSpend), icon: <DollarSign size={18} />, color: "text-red-400" },
+          { label: "Active Spend", value: formatCurrency(totalSpend), icon: <DollarSign size={18} />, color: "text-red-400" },
           { label: "Total Reach", value: formatNum(totalReach), icon: <Eye size={18} />, color: "text-blue-400" },
           { label: "Impressions", value: formatNum(totalImpressions), icon: <TrendingUp size={18} />, color: "text-green-400" },
           { label: "Clicks", value: formatNum(totalClicks), icon: <MousePointer size={18} />, color: "text-yellow-400" },
@@ -128,87 +284,61 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
         ))}
       </div>
 
-      {/* Campaign List */}
       {isLoading ? (
         <div className="space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="h-28 bg-card rounded-xl animate-pulse border border-border" />
           ))}
         </div>
-      ) : sortedCampaigns.length > 0 ? (
-        <div className="space-y-3">
-          {sortedCampaigns.map((c: any) => (
-            <Card
-              key={c.id}
-              className="bg-card border-border hover:shadow-md hover:border-primary/30 transition-all cursor-pointer group"
-              onClick={() => handleCardClick(c)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-foreground text-sm flex items-center gap-1">
-                      {c.name}
-                      <ChevronRight size={13} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge className={`text-xs border ${statusBadgeClass(c.status)}`} variant="outline">
-                        {c.status}
-                      </Badge>
-                      {c.objective && (
-                        <span className="text-xs text-muted-foreground">{c.objective}</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 ml-3 shrink-0">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-xs h-7 px-2 gap-1 border-primary/40 text-primary hover:bg-primary/10"
-                      onClick={(e) => handleAiClick(e, c)}
-                    >
-                      <Sparkles size={11} />
-                      AI Insights
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-xs h-7 px-2 gap-1 text-muted-foreground hover:text-foreground"
-                      onClick={(e) => { e.stopPropagation(); handleCardClick(c); }}
-                    >
-                      <ExternalLink size={11} />
-                      Report
-                    </Button>
-                  </div>
-                </div>
-                {c.insights ? (
-                  <div className="grid grid-cols-4 gap-3">
-                    {[
-                      { label: "Spend", value: formatCurrency(c.insights.spend || 0) },
-                      { label: "Reach", value: formatNum(c.insights.reach || 0) },
-                      { label: "Impressions", value: formatNum(c.insights.impressions || 0) },
-                      { label: "Clicks", value: formatNum(c.insights.clicks || 0) },
-                    ].map((m) => (
-                      <div key={m.label} className="bg-muted/30 rounded-lg p-2 text-center">
-                        <div className="text-sm font-semibold text-foreground">{m.value}</div>
-                        <div className="text-xs text-muted-foreground">{m.label}</div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-xs text-muted-foreground">No insights data for this period</div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
       ) : (
-        <div className="text-center py-16 text-muted-foreground">
-          <TrendingUp size={40} className="mx-auto mb-3 opacity-30" />
-          <p>No Meta Ads campaigns found</p>
+        <div className="space-y-6">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-foreground">Active Campaigns</span>
+              <Badge className="bg-green-500/20 text-green-600 border-green-500/30 text-xs border" variant="outline">
+                {activeCampaigns.length}
+              </Badge>
+            </div>
+            {activeCampaigns.length > 0 ? (
+              activeCampaigns.map((c: any) => (
+                <CampaignCard key={c.id} c={c} isArchived={false} />
+              ))
+            ) : (
+              <div className="text-center py-10 text-muted-foreground border border-dashed border-border rounded-xl">
+                <TrendingUp size={32} className="mx-auto mb-2 opacity-30" />
+                <p className="text-sm">No active campaigns</p>
+              </div>
+            )}
+          </div>
+
+          {archivedCampaigns.length > 0 && (
+            <div className="space-y-3">
+              <button
+                className="flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors w-full text-left"
+                onClick={() => setShowArchived(!showArchived)}
+              >
+                <Archive size={14} />
+                Completed / Archived
+                <Badge className="bg-gray-500/20 text-gray-500 border-gray-500/30 text-xs border" variant="outline">
+                  {archivedCampaigns.length}
+                </Badge>
+                <ChevronDown size={14} className={`ml-auto transition-transform ${showArchived ? "rotate-180" : ""}`} />
+              </button>
+              {showArchived && archivedCampaigns.map((c: any) => (
+                <CampaignCard key={c.id} c={c} isArchived={true} />
+              ))}
+            </div>
+          )}
+
+          {allCampaigns.length === 0 && (
+            <div className="text-center py-16 text-muted-foreground">
+              <TrendingUp size={40} className="mx-auto mb-3 opacity-30" />
+              <p>No Meta Ads campaigns found</p>
+            </div>
+          )}
         </div>
       )}
 
-      {/* AI Insights Dialog */}
       <Dialog open={!!aiCampaign} onOpenChange={(open) => { if (!open) { setAiCampaign(null); setAiInsight(""); } }}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
@@ -219,8 +349,8 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Badge className={`text-xs border ${statusBadgeClass(aiCampaign?.status || "")}`} variant="outline">
-                {aiCampaign?.status}
+              <Badge className={`text-xs border ${statusBadgeClass(getEffectiveStatus(aiCampaign || {}, overrideMap))}`} variant="outline">
+                {getEffectiveStatus(aiCampaign || {}, overrideMap)}
               </Badge>
               <span>{aiCampaign?.objective}</span>
             </div>

@@ -1708,3 +1708,21 @@ export const eventAdvertising = mysqlTable("event_advertising", {
 }));
 export type EventAdvertising = typeof eventAdvertising.$inferSelect;
 export type NewEventAdvertising = typeof eventAdvertising.$inferInsert;
+
+
+/**
+ * Meta Ads manual status overrides.
+ * Allows dashboard users to override the API-reported status per campaign.
+ */
+export const metaAdsOverrides = mysqlTable("meta_ads_overrides", {
+  id: int("id").primaryKey().autoincrement(),
+  campaignId: varchar("campaign_id", { length: 64 }).notNull(),
+  campaignName: varchar("campaign_name", { length: 256 }).notNull(),
+  overrideStatus: mysqlEnum("override_status", ["active", "completed", "archived"]).notNull(),
+  overriddenAt: bigint("overridden_at", { mode: "number" }).notNull().default(0),
+  updatedAt: bigint("updated_at", { mode: "number" }).notNull().default(0),
+}, (table) => ({
+  campaignIdIdx: index("meta_ads_overrides_campaign_id_idx").on(table.campaignId),
+}));
+export type MetaAdsOverride = typeof metaAdsOverrides.$inferSelect;
+export type NewMetaAdsOverride = typeof metaAdsOverrides.$inferInsert;

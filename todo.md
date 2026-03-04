@@ -496,7 +496,7 @@
 ### Phase 1: Schema & Backend
 - [ ] Add market_research_reports table (id, title, topic, category, status, summary, full_report, sources, campaign_links, created_at)
 - [ ] Add market_research_insights table (report_id, insight_type, content, priority, action_suggested)
-- [ ] Run db:push migration
+- [x] Run db:push migration (via SQL direct)
 - [ ] Add tRPC procedures: research.list, research.getById, research.generate, research.delete, research.linkToCampaign
 
 ### Phase 2: Market Research Page UI
@@ -1048,3 +1048,13 @@
 - [x] Update MetaAds.tsx Sync button to use syncCache mutation (actually refreshes from MCP)
 - [x] Add Meta Ads cache auto-refresh to scheduler every 2 hours (even CST hours)
 - [x] TypeScript: 0 errors
+
+## Feature: Meta Ads Date-Based Auto-Classification + Manual Override (2026-03-04)
+- [x] Add meta_ads_overrides table to schema (campaign_id, override_status, overridden_at)
+- [x] Run db:push migration (via SQL direct)
+- [x] Add metaAds.setStatusOverride mutation (set/clear override per campaign_id)
+- [x] Update getAllCampaignsWithInsights to merge override status + date-based classification
+- [x] Date rule: last spend date > 7 days ago → auto-classify as "completed"
+- [x] Update MetaAds.tsx: Active group at top, Archived/Completed collapsible section
+- [x] Add "Mark as Completed" / "Restore to Active" button per campaign card
+- [x] KPI summary cards count only ACTIVE campaigns
