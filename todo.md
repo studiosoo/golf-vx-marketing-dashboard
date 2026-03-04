@@ -1086,3 +1086,11 @@
 - [x] Add "Asana Timeline" tab to StrategicCampaigns.tsx (toggle between Campaigns/Timeline views)
 - [x] Add "Add to Asana" button to AIActions.tsx header (orange button, opens AsanaTaskModal)
 - [x] 12 vitest tests passing (project ID, section mapping, URL generation, task parsing, batch creation)
+
+## Instagram Token Fix (2026-03-04)
+- [ ] Fix Instagram access token expired error (OAuthException code 190, error_subcode 463)
+- [ ] Implement Instagram long-lived token auto-refresh logic (60-day expiry, refresh when < 7 days remaining)
+
+## Bug Fix: Winter Clinics Email Validation (2026-03-04)
+- [x] Fix invalid_format email validation error on /programs/winter-clinics mutation
+- [x] Relax overly strict email regex to accept all valid email formats

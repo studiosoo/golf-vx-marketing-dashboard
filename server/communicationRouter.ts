@@ -17,6 +17,12 @@ import {
 
 const recipientTypeEnum = z.enum(["member", "lead"]);
 const channelEnum = z.enum(["sms", "email", "push"]);
+// Use a lenient email validator that accepts all reasonable formats from Acuity
+// Zod v4's built-in .email() rejects some valid emails (e.g., single-char TLDs)
+const emailSchema = z.string().min(1).refine(
+  (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
+  { message: "Invalid email address" }
+);
 
 export const communicationRouter = router({
   // ── sendSMS ───────────────────────────────────────────────────────────────
@@ -69,7 +75,7 @@ export const communicationRouter = router({
         recipientId: z.number().int(),
         recipientType: recipientTypeEnum,
         recipientName: z.string().optional(),
-        email: z.string().email(),
+        email: emailSchema,
         subject: z.string().min(1),
         htmlBody: z.string().min(1),
         textBody: z.string().optional(),
@@ -175,7 +181,7 @@ export const communicationRouter = router({
           z.object({
             id: z.number().int(),
             type: recipientTypeEnum,
-            email: z.string().email(),
+            email: emailSchema,
             name: z.string().optional(),
           })
         ),
