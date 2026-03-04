@@ -49,6 +49,7 @@ import MemberProfile from "./pages/MemberProfile";
 import Duplicates from "./pages/Duplicates";
 import Leads from "./pages/Leads";
 import Guests from "./pages/Guests";
+import ProMembers from "./pages/ProMembers";
 
 // ── AUDIENCE / Communication ──
 import Announcements from "./pages/Announcements";
@@ -141,6 +142,7 @@ function DashboardRoutes() {
         <Route path="/list/members/:id" component={MemberProfile} />
         <Route path="/list/leads" component={Leads} />
         <Route path="/list/guests" component={Guests} />
+        <Route path="/pro-members" component={ProMembers} />
         <Route path="/duplicates" component={Duplicates} />
 
         {/* ── AUDIENCE / Communication ── */}
@@ -175,6 +177,7 @@ function DashboardRoutes() {
         <Route path="/channels" component={Channels} />
         <Route path="/members" component={Members} />
         <Route path="/members/:id" component={MemberProfile} />
+        <Route path="/pro-members" component={ProMembers} />
         <Route path="/revenue" component={Revenue} />
         <Route path="/tasks" component={Tasks} />
         <Route path="/reports" component={Reports} />

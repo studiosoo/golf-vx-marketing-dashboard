@@ -380,3 +380,108 @@ Before saving a checkpoint:
 | 2026-03-04 | Renamed Command Center → Dashboard, removed Revenue/Reports from sidebar | User feedback: consolidate views |
 | 2026-03-04 | Added Chicago Opportunity card to AI Intelligence tab | User feedback: demographic-based ad targeting |
 | 2026-03-04 | Updated Strategic Campaigns to show KPIs over ROI | User feedback: KPI should be primary metric |
+
+---
+
+## 10. Post-Modification QA Checklist
+
+**MANDATORY: After every code change, dashboard update, or new feature, run through this checklist before saving a checkpoint.**
+
+### 10.1 Side-Page Verification (Check ALL pages, not just the one modified)
+
+After any modification, verify the following pages load without errors:
+
+| Page | Route | Key Checks |
+|---|---|---|
+| Dashboard | `/` | Member count > 0, revenue figures present |
+| Campaigns | `/strategic-campaigns` | KPIs show real values (not 0), member count from DB |
+| AI Analysis | `/ai-analysis` | No tRPC errors, tabs load |
+| AI Workspace | `/ai-workspace` | Chat interface loads |
+| Programs & Events | `/programs` | Program list loads |
+| Summer Camp | `/programs/summer-camp` | Participant count, Meta Ads section |
+| Drive Day | `/programs/drive-day` | Booking data loads |
+| Annual Giveaway | `/programs/annual-giveaway` | Applications count, 250 target, AI section visible |
+| Advertising | `/advertising` | Meta Ads tab (not "Paid Digital"), active ads first |
+| Meta Ads Detail | `/campaigns/meta-ads` | Campaign cards clickable, AI Insights button |
+| Promotions | `/promotions` | No 404 |
+| Social & Content | `/social` | No 404 |
+| Communications | `/communications` | No 404 |
+| Members | `/members` | Member list loads, no 0 count |
+| **Pro Members** | `/pro-members` | **Must not 404 — route registered in App.tsx** |
+| Guests & Leads | `/guests` | Guest list loads |
+| Site Control | `/site-control` | No 404 |
+| Settings | `/settings` | No 404 |
+| Marketing Intelligence | `/intelligence` | Three sections: Auto-Executed, Awaiting Approval, Monitoring |
+
+### 10.2 Zero/Empty Value Checks
+
+**Never display $0, 0 members, or empty KPI cards.** Before checkpoint:
+
+- [ ] Strategic Campaigns → Membership Acquisition KPI shows actual member count from `db.getMemberStats()` (NOT `database.execute()`)
+- [ ] Strategic Campaigns → Member Retention KPI shows retention rate (%), not raw member count
+- [ ] Dashboard → Total Members > 0 (currently ~91 active members)
+- [ ] Revenue page → figures populated from Acuity/Toast APIs
+- [ ] All progress bars show correct targets (Giveaway = 250 applications, NOT 1000)
+
+### 10.3 Real-Time Data Verification
+
+- [ ] Meta Ads cache at `/tmp/golf-vx-meta-ads-insights.json` is fresh (< 2 hours old)
+- [ ] Superbowl Watch Party status = COMPLETED (not ACTIVE) in cache
+- [ ] IG_$100 Giveaway_Feb2026 status = COMPLETED (not ACTIVE) in cache
+- [ ] Acuity sync returns bookings for the current date range
+- [ ] Scheduler logs show `[Scheduler] Started — will run at 8am and 6pm CST`
+
+### 10.4 Metadata Accuracy Checks
+
+- [ ] Campaign objectives display correctly (OUTCOME_TRAFFIC, OUTCOME_ENGAGEMENT, etc.)
+- [ ] Meta Ads sorted: ACTIVE campaigns first, COMPLETED/PAUSED/ARCHIVED last
+- [ ] Member tiers display correctly (golf_vx_pro, golf_vx_plus, golf_vx_standard)
+- [ ] Pro Members page at `/pro-members` shows pro-tier members only
+- [ ] Annual Giveaway target = 250 applications (not 1000 entry page visits)
+- [ ] AI Intelligence section on Giveaway page is a standalone yellow-bordered section (not a tab)
+
+### 10.5 Critical Known Bugs to Re-Check After Any routers.ts Change
+
+| Bug Pattern | Root Cause | Fix |
+|---|---|---|
+| Member KPI = 0 | `database.execute()` returns `[rows, fields]`; must use `[0][0]` not `[0]` | Use `db.getMemberStats()` from `server/db.ts` instead |
+| `influencerPartnerships` TS error | Stale TS watcher cache from 6:05 PM | False positive — run `npx tsc --noEmit` to confirm zero actual errors |
+| `entryGoal is not defined` | Template literal uses variable not in scope | Check prompt templates in `generateInsights` procedures |
+| Pro Members 404 | Route not registered in `App.tsx` | Verify `<Route path="/pro-members">` exists |
+| Superbowl shows ACTIVE | Meta Ads cache not updated | Update `/tmp/golf-vx-meta-ads-insights.json` status field |
+
+### 10.6 mysql2 execute() Pattern (Critical)
+
+When using `database.execute(sql\`...\`)` in Drizzle with mysql2 driver:
+
+```ts
+// ❌ WRONG — [0] is the rows array, not the first row
+const result = await database.execute(sql`SELECT COUNT(*) as count FROM members`);
+const count = (result as any)[0]?.count; // undefined!
+
+// ✅ CORRECT — [0] = rows array, [0][0] = first row
+const result = await database.execute(sql`SELECT COUNT(*) as count FROM members`);
+const count = (result as any)[0][0]?.count; // correct!
+
+// ✅ PREFERRED — use Drizzle ORM helpers from server/db.ts instead
+const stats = await getMemberStats(database);
+const count = stats.activeMembers; // correct!
+```
+
+---
+
+## 11. Change Log (continued)
+
+| Date | Change | Reason |
+|---|---|---|
+| 2026-03-04 | Fixed `getStrategicKPIs` mysql2 `[0][0]` pattern | Member KPI showed 0 due to wrong result access |
+| 2026-03-04 | Fixed `memberRetention` KPI to show retention rate % | Was showing raw member count instead of % |
+| 2026-03-04 | Added `/pro-members` route and `ProMembers.tsx` page | Pro Members sidebar link returned 404 |
+| 2026-03-04 | Renamed "Paid Digital" tab to "Meta Ads" in Advertising | User requested Meta Ads branding |
+| 2026-03-04 | Added AI Insights button + dialog to Meta Ads campaign cards | User requested per-campaign AI analysis |
+| 2026-03-04 | Added active-first sorting to Meta Ads campaign list | User requested active ads shown first |
+| 2026-03-04 | Fixed Superbowl Watch Party status to COMPLETED in cache | Was incorrectly showing as ACTIVE |
+| 2026-03-04 | Changed Annual Giveaway target from 1000 to 250 applications | User clarified target is 250 applications |
+| 2026-03-04 | Made AI Intelligence a standalone yellow-bordered section on Giveaway page | User requested it be more prominent |
+| 2026-03-04 | Added `metaAds.generateCampaignInsights` procedure | New AI Insights button needed backend support |
+| 2026-03-04 | Added Section 10 QA Checklist to AGENT_REFERENCE.md | User requested automatic QA verification |

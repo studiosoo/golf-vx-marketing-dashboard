@@ -766,7 +766,7 @@ export default function AnnualGiveaway() {
   });
 
   const totalApplications = stats?.totalApplications || 0;
-  const ENTRY_GOAL = 1000;   // Short-form entry goal
+  const ENTRY_GOAL = 250;    // Application target goal
   const LONG_FORM_GOAL = 250; // Long-form application goal
   const totalSpend = 467.59;
   const costPerSubmission = totalApplications > 0 ? (totalSpend / totalApplications).toFixed(2) : "0.00";
@@ -938,7 +938,23 @@ export default function AnnualGiveaway() {
           </CardContent>
         </Card>
 
-        {/* Tabs: Demographics / Applications / AI Intelligence */}
+        {/* AI Intelligence Standalone Button */}
+        <div className="flex items-center justify-between">
+          <div className="text-sm font-semibold text-[#111111]">Campaign Analysis</div>
+          <button
+            onClick={() => {
+              const el = document.getElementById('giveaway-ai-section');
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+            style={{ background: 'linear-gradient(135deg, #F5C72C 0%, #e6b820 100%)', color: '#111111', boxShadow: '0 2px 8px rgba(245,199,44,0.4)' }}
+          >
+            <Sparkles className="h-4 w-4" />
+            AI Intelligence
+          </button>
+        </div>
+
+        {/* Tabs: Demographics / Applications */}
         <Tabs defaultValue="demographics" className="space-y-4">
           <TabsList className="bg-[#F2F2F7] border border-[#E0E0E0]">
             <TabsTrigger value="demographics" className="data-[state=active]:bg-white data-[state=active]:text-[#111111] data-[state=active]:shadow-none text-[#888888]">
@@ -946,10 +962,6 @@ export default function AnnualGiveaway() {
             </TabsTrigger>
             <TabsTrigger value="applications" className="data-[state=active]:bg-white data-[state=active]:text-[#111111] data-[state=active]:shadow-none text-[#888888]">
               Applications ({totalApplications})
-            </TabsTrigger>
-            <TabsTrigger value="intelligence" className="data-[state=active]:bg-white data-[state=active]:text-[#111111] data-[state=active]:shadow-none text-[#888888]">
-              <Sparkles className="h-3.5 w-3.5 mr-1.5 text-[#F5C72C]" />
-              AI Intelligence
             </TabsTrigger>
           </TabsList>
 
@@ -1098,11 +1110,19 @@ export default function AnnualGiveaway() {
             </Card>
           </TabsContent>
 
-          {/* ── Tab 3: AI Intelligence ── */}
-          <TabsContent value="intelligence">
-            <AIIntelligenceTab programId={5} />
-          </TabsContent>
         </Tabs>
+
+        {/* ── AI Intelligence Section (standalone) ── */}
+        <div id="giveaway-ai-section" className="border-2 rounded-xl p-1" style={{ borderColor: '#F5C72C', background: 'linear-gradient(135deg, rgba(245,199,44,0.05) 0%, rgba(245,199,44,0.02) 100%)' }}>
+          <div className="flex items-center gap-2 px-4 pt-3 pb-2">
+            <Sparkles className="h-5 w-5" style={{ color: '#F5C72C' }} />
+            <span className="text-base font-bold text-[#111111]">AI Intelligence</span>
+            <span className="text-xs text-[#888888] ml-1">— Powered by Golf VX Marketing Engine</span>
+          </div>
+          <div className="px-1 pb-1">
+            <AIIntelligenceTab programId={5} />
+          </div>
+        </div>
       </div>
 
       {/* Email Draft Modal */}

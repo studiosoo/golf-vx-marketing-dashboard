@@ -1061,16 +1061,18 @@ Respond in JSON with this exact structure:
             COUNT(CASE WHEN membershipTier IN ('all_access_aces', 'swing_savers', 'golf_vx_pro', 'family', 'monthly', 'annual', 'corporate') AND paymentInterval = 'monthly' THEN 1 END) as monthlyCount
           FROM members WHERE status = 'active'`
         );
-        const customerMemberCount = Number((memberCountResult as any)[0]?.customerMembers || 0);
-        const proMemberCount = Number((memberCountResult as any)[0]?.proMembers || 0);
-        const allAccessCount = Number((memberCountResult as any)[0]?.allAccessCount || 0);
-        const swingSaverCount = Number((memberCountResult as any)[0]?.swingSaverCount || 0);
-        const allAccessMRR = parseFloat((memberCountResult as any)[0]?.allAccessMRR || '0');
-        const swingSaverMRR = parseFloat((memberCountResult as any)[0]?.swingSaverMRR || '0');
-        const proMRR = parseFloat((memberCountResult as any)[0]?.proMRR || '0');
+        // mysql2 execute returns [rows, fields] — [0] is the rows array, [0][0] is the first row
+        const memberRow = Array.isArray((memberCountResult as any)[0]) ? (memberCountResult as any)[0][0] : (memberCountResult as any)[0];
+        const customerMemberCount = Number(memberRow?.customerMembers || 0);
+        const proMemberCount = Number(memberRow?.proMembers || 0);
+        const allAccessCount = Number(memberRow?.allAccessCount || 0);
+        const swingSaverCount = Number(memberRow?.swingSaverCount || 0);
+        const allAccessMRR = parseFloat(memberRow?.allAccessMRR || '0');
+        const swingSaverMRR = parseFloat(memberRow?.swingSaverMRR || '0');
+        const proMRR = parseFloat(memberRow?.proMRR || '0');
         const totalMRR = allAccessMRR + swingSaverMRR + proMRR;
-        const annualMemberCount = Number((memberCountResult as any)[0]?.annualCount || 0);
-        const monthlyMemberCount = Number((memberCountResult as any)[0]?.monthlyCount || 0);
+        const annualMemberCount = Number(memberRow?.annualCount || 0);
+        const monthlyMemberCount = Number(memberRow?.monthlyCount || 0);
         // New members this month vs last month (All Access + Swing Saver only)
         const newMembersResult = await database.execute(`
           SELECT
@@ -1081,8 +1083,9 @@ Respond in JSON with this exact structure:
               AND joinDate < DATE_FORMAT(NOW(), '%Y-%m-01') THEN 1 END) as lastMonth
           FROM members WHERE status = 'active'
         `);
-        const newMembersThisMonth = Number((newMembersResult as any)[0]?.thisMonth || 0);
-        const newMembersLastMonth = Number((newMembersResult as any)[0]?.lastMonth || 0);
+        const newMembersRow = Array.isArray((newMembersResult as any)[0]) ? (newMembersResult as any)[0][0] : (newMembersResult as any)[0];
+        const newMembersThisMonth = Number(newMembersRow?.thisMonth || 0);
+        const newMembersLastMonth = Number(newMembersRow?.lastMonth || 0);
         // Acquisition goal: 300 total customer members over 2 years
         // Retention goal: retain all current customer members (target = 300)
         const MEMBERSHIP_GOAL = 300;
@@ -1099,7 +1102,8 @@ Respond in JSON with this exact structure:
           FROM members
           WHERE status = 'active' AND createdAt >= DATE_SUB(NOW(), INTERVAL 90 DAY)
         `);
-        const conversions = Number((conversionsResult as any)[0]?.conversions || 0);
+        const conversionsRow = Array.isArray((conversionsResult as any)[0]) ? (conversionsResult as any)[0][0] : (conversionsResult as any)[0];
+        const conversions = Number(conversionsRow?.conversions || 0);
         const conversionRate = (conversions / trials) * 100;
 
         // 3. Member Retention: Calculate retention rate (active members / total members)
@@ -1109,8 +1113,9 @@ Respond in JSON with this exact structure:
             COUNT(CASE WHEN status = 'active' THEN 1 END) as active
           FROM members
         `);
-        const totalMembers = Number((retentionResult as any)[0]?.total || 1);
-        const activeMembers = Number((retentionResult as any)[0]?.active || 0);
+        const retentionRow = Array.isArray((retentionResult as any)[0]) ? (retentionResult as any)[0][0] : (retentionResult as any)[0];
+        const totalMembers = Number(retentionRow?.total || 1);
+        const activeMembers = Number(retentionRow?.active || 0);
         const retentionRate = (activeMembers / totalMembers) * 100;
 
          // 4. B2B Corporate Events: Fetch real data from Acuity for current month
@@ -1142,8 +1147,9 @@ Respond in JSON with this exact structure:
           FROM members
           WHERE membershipTier IN ('all_access_aces', 'swing_savers')
         `);
-        const totalCustomers = Number((customerRetentionResult as any)[0]?.total || 1);
-        const activeCustomers = Number((customerRetentionResult as any)[0]?.activeCustomers || 0);
+        const custRetRow = Array.isArray((customerRetentionResult as any)[0]) ? (customerRetentionResult as any)[0][0] : (customerRetentionResult as any)[0];
+        const totalCustomers = Number(custRetRow?.total || 1);
+        const activeCustomers = Number(custRetRow?.activeCustomers || 0);
         const customerRetentionRate = totalCustomers > 0 ? (activeCustomers / totalCustomers) * 100 : 0;
 
         return {
@@ -1162,12 +1168,14 @@ Respond in JSON with this exact structure:
             paymentBreakdown: { monthly: monthlyMemberCount, annual: annualMemberCount },
           },
           memberRetention: {
-            // Goal: retain all 300 customer members
-            current: customerMemberCount,
-            target: MEMBERSHIP_GOAL,
+            // Retention rate: % of all-time customer members who are still active
+            current: customerRetentionRate,
+            target: 95, // Goal: retain 95% of customer members
             retentionRate: customerRetentionRate,
-            progress: Math.min((customerMemberCount / MEMBERSHIP_GOAL) * 100, 100),
+            progress: Math.min((customerRetentionRate / 95) * 100, 100),
             breakdown: { allAccess: allAccessCount, swingSaver: swingSaverCount },
+            memberCount: customerMemberCount,
+            totalCustomers: totalCustomers,
           },
           proMembers: {
             // Pro members tracked separately — NOT part of the 300 goal
@@ -3674,6 +3682,31 @@ Provide a comprehensive marketing intelligence report. Respond in JSON:
     resolveAlert: protectedProcedure
       .input(z.object({ alertId: z.number() }))
       .mutation(async () => ({ success: true })),
+    generateCampaignInsights: protectedProcedure
+      .input(z.object({ campaignId: z.string(), datePreset: z.string().optional() }))
+      .mutation(async ({ input }) => {
+        try {
+          const { invokeLLM } = await import('./_core/llm');
+          const allCampaigns = await metaAds.getAllCampaignsWithInsights(input.datePreset || 'last_30d');
+          const campaign = (allCampaigns as any[]).find((c: any) => c.id === input.campaignId);
+          if (!campaign) return { insights: 'Campaign not found in current date range.' };
+          const ins = campaign.insights || {};
+          const spend = parseFloat(ins.spend || '0');
+          const reach = parseInt(ins.reach || '0');
+          const impressions = parseInt(ins.impressions || '0');
+          const clicks = parseInt(ins.clicks || '0');
+          const ctr = parseFloat(ins.ctr || '0');
+          const cpc = parseFloat(ins.cpc || '0');
+          const cpm = parseFloat(ins.cpm || '0');
+          const prompt = `You are a senior Meta Ads strategist for Golf VX Arlington Heights, an indoor golf simulator in the Chicago suburbs.\n\nCAMPAIGN: ${campaign.name}\nStatus: ${campaign.status}\nObjective: ${campaign.objective}\nDate Range: ${ins.date_start || 'N/A'} to ${ins.date_stop || 'N/A'}\n\nPERFORMANCE METRICS:\n- Spend: $${spend.toFixed(2)}\n- Reach: ${reach.toLocaleString()} people\n- Impressions: ${impressions.toLocaleString()}\n- Clicks: ${clicks.toLocaleString()}\n- CTR: ${ctr.toFixed(2)}%\n- CPC: $${cpc.toFixed(2)}\n- CPM: $${cpm.toFixed(2)}\n\nProvide a concise analysis (3-4 paragraphs) covering:\n1. Performance assessment vs. industry benchmarks for fitness/sports facilities\n2. Key strengths and areas for improvement\n3. Specific actionable recommendations to improve ROAS and conversions\n4. Audience targeting suggestions for the Arlington Heights / Chicago suburbs market`;
+          const response = await invokeLLM({ messages: [{ role: 'user', content: prompt }] });
+          const insights = response?.choices?.[0]?.message?.content || 'Unable to generate insights.';
+          return { insights };
+        } catch (err) {
+          console.error('[metaAds.generateCampaignInsights]', err);
+          return { insights: 'Unable to generate insights at this time.' };
+        }
+      }),
   }),
   // ─── Encharge Routerr ──────────────────────────────────────────────────────
   encharge: router({

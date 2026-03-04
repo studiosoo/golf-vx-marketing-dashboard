@@ -1534,7 +1534,7 @@ export default function Advertising() {
   const [tab, setTab] = useState<"meta" | "influencer" | "outreach" | "print" | "events">("meta");
 
   const TABS = [
-    { id: "meta" as const, label: "Paid Digital", icon: <BarChart3 size={15} /> },
+    { id: "meta" as const, label: "Meta Ads", icon: <BarChart3 size={15} /> },
     { id: "influencer" as const, label: "Influencer Collabs", icon: <Instagram size={15} /> },
     { id: "outreach" as const, label: "Community Giving", icon: <HandHeart size={15} /> },
     { id: "print" as const, label: "Print & Events", icon: <Newspaper size={15} /> },
@@ -1546,7 +1546,7 @@ export default function Advertising() {
       {/* Page header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Advertising</h1>
-        <p className="text-muted-foreground text-sm mt-1">Paid digital, influencer collabs, community giving, print, and trade shows</p>
+        <p className="text-muted-foreground text-sm mt-1">Meta Ads, influencer collabs, community giving, print, and trade shows</p>
       </div>
 
       {/* Tab navigation */}
