@@ -1,21 +1,16 @@
-import { useState } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TrendingUp, TrendingDown, DollarSign, Target, Users, RefreshCw, BarChart3, ArrowRight } from "lucide-react";
+import { DollarSign, BarChart3, ArrowRight, TrendingUp, Activity } from "lucide-react";
 
 export default function Performance() {
   const [, navigate] = useLocation();
-  const [dateRange] = useState(() => ({
-    startDate: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
-    endDate: new Date(),
-  }));
 
   const { data: campaigns, isLoading: campaignsLoading } = trpc.campaigns.getByStatus.useQuery({ status: "active" });
   const { data: channelSummary } = trpc.campaigns.getCategorySummary.useQuery();
+  const { data: revSummary } = trpc.revenue.getSummary.useQuery(undefined);
 
   const formatCurrency = (val: number | string) =>
     `$${parseFloat(String(val || 0)).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -26,6 +21,12 @@ export default function Performance() {
     return s > 0 ? (r / s).toFixed(2) + "x" : "—";
   };
 
+  // Aggregate spend/revenue from active campaigns
+  const campaignList = (campaigns as any[]) ?? [];
+  const totalSpend = campaignList.reduce((s: number, c: any) => s + parseFloat(String(c.actualSpend || 0)), 0);
+  const totalRevenue = parseFloat(String(revSummary?.total || 0));
+  const roas = totalSpend > 0 ? totalRevenue / totalSpend : null;
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -33,6 +34,52 @@ export default function Performance() {
           <h1 className="text-2xl font-bold text-foreground">Performance</h1>
           <p className="text-muted-foreground text-sm mt-1">Campaign & channel performance metrics</p>
         </div>
+      </div>
+
+      {/* KPI Summary Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[
+          {
+            label: "Revenue (MTD)",
+            value: formatCurrency(totalRevenue),
+            icon: DollarSign,
+            color: "text-[#3DB855]",
+            bg: "bg-green-50",
+          },
+          {
+            label: "Ad Spend",
+            value: formatCurrency(totalSpend),
+            icon: TrendingUp,
+            color: "text-[#F5C72C]",
+            bg: "bg-[#F5C72C]/10",
+          },
+          {
+            label: "Active Campaigns",
+            value: String(campaignList.length),
+            icon: Activity,
+            color: "text-blue-600",
+            bg: "bg-blue-50",
+          },
+          {
+            label: "Avg ROAS",
+            value: roas !== null ? `${roas.toFixed(2)}×` : "—",
+            icon: BarChart3,
+            color: "text-[#888888]",
+            bg: "bg-[#F5F5F5]",
+          },
+        ].map(({ label, value, icon: Icon, color, bg }) => (
+          <Card key={label} className="bg-white border-[#E0E0E0] shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className={`w-9 h-9 rounded-lg ${bg} flex items-center justify-center shrink-0`}>
+                <Icon className={`h-4 w-4 ${color}`} />
+              </div>
+              <div>
+                <p className="text-xs text-[#AAAAAA]">{label}</p>
+                <p className="text-lg font-bold text-[#111111] leading-tight">{value}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       <Tabs defaultValue="campaigns">

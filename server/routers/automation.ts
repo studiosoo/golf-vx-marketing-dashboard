@@ -164,6 +164,18 @@ export const autonomousRouter = router({
       .where(and(eqOp(autonomousActions.status, "monitoring"), lt(autonomousActions.createdAt, sevenDaysAgo)));
     return { success: true, message: "Stale actions cleared" };
   }),
+
+  clearAllActiveActions: protectedProcedure.mutation(async () => {
+    const database = await db.getDb();
+    if (!database) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+    const { autonomousActions } = await import("../../drizzle/schema");
+    const { inArray } = await import("drizzle-orm");
+    await database
+      .update(autonomousActions)
+      .set({ status: "dismissed" })
+      .where(inArray(autonomousActions.status, ["pending_approval", "monitoring", "auto_executed", "execution_failed"]));
+    return { success: true, message: "All active actions dismissed" };
+  }),
 });
 
 export const conversionRouter = router({

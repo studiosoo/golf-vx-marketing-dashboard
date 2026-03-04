@@ -157,6 +157,7 @@ export default function AIActions() {
   const undoMutation = trpc.autonomous.undoAction.useMutation({ onSuccess: () => { toast.success("Action undone"); refetch(); }, onError: (e) => toast.error(e.message) });
   const dismissMutation = trpc.autonomous.dismissAction.useMutation({ onSuccess: () => { refetch(); }, onError: (e) => toast.error(e.message) });
   const syncMutation = trpc.autonomous.syncAllData.useMutation({ onSuccess: () => { toast.success("Sync complete"); refetch(); }, onError: (e) => toast.error("Sync failed: " + e.message) });
+  const clearAllMutation = trpc.autonomous.clearAllActiveActions.useMutation({ onSuccess: () => { toast.success("All active actions cleared"); refetch(); }, onError: (e) => toast.error(e.message) });
   const isAnyLoading = approveMutation.isPending || rejectMutation.isPending || undoMutation.isPending || dismissMutation.isPending;
   const autoExecuted = (actions || []).filter(a => a.status === "auto_executed" || a.status === "approved");
   const pendingApproval = (actions || []).filter(a => a.status === "pending_approval");
@@ -183,11 +184,19 @@ export default function AIActions() {
             </button>
           </div>
           {view === "active" && (
-            <Button onClick={() => syncMutation.mutate()} disabled={syncMutation.isPending}
-              className="flex items-center gap-2 bg-[#F5C72C] hover:bg-[#E6B800] text-[#111] font-semibold text-sm px-4 py-2 rounded-lg border-0">
-              {syncMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-              {syncMutation.isPending ? "Syncing…" : "Sync Now"}
-            </Button>
+            <>
+              <Button onClick={() => { if (confirm("모든 활성 AI 액션을 dismissed 처리할까요?")) clearAllMutation.mutate(); }} disabled={clearAllMutation.isPending}
+                variant="outline"
+                className="flex items-center gap-2 text-sm px-4 py-2 rounded-lg border border-[#E0E0E0] text-[#666] hover:text-red-600 hover:border-red-200">
+                {clearAllMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                Clear All
+              </Button>
+              <Button onClick={() => syncMutation.mutate()} disabled={syncMutation.isPending}
+                className="flex items-center gap-2 bg-[#F5C72C] hover:bg-[#E6B800] text-[#111] font-semibold text-sm px-4 py-2 rounded-lg border-0">
+                {syncMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                {syncMutation.isPending ? "Syncing…" : "Sync Now"}
+              </Button>
+            </>
           )}
         </div>
       </div>
