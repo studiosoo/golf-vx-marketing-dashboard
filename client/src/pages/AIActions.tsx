@@ -4,9 +4,10 @@ import { toast } from "sonner";
 import {
   Zap, Clock, Eye, CheckCircle, XCircle, RotateCcw,
   RefreshCw, ChevronDown, ChevronUp, AlertTriangle,
-  TrendingUp, Loader2, Trash2, Archive,
+  TrendingUp, Loader2, Trash2, Archive, ListPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import AsanaTaskModal from "@/components/AsanaTaskModal";
 
 type ActionStatus =
   | "auto_executed" | "pending_approval" | "monitoring"
@@ -150,6 +151,7 @@ function ActionCard({
 
 export default function AIActions() {
   const [view, setView] = useState<"active" | "archive">("active");
+  const [asanaModalOpen, setAsanaModalOpen] = useState(false);
   const { data: actions, isLoading, refetch } = trpc.autonomous.getAllActions.useQuery(undefined, { refetchInterval: 60_000 });
   const { data: archivedActions, isLoading: isArchiveLoading } = trpc.autonomous.getArchivedActions.useQuery(undefined, { enabled: view === "archive" });
   const approveMutation = trpc.autonomous.approveAction.useMutation({ onSuccess: () => { toast.success("Action approved"); refetch(); }, onError: (e) => toast.error(e.message) });
@@ -195,6 +197,11 @@ export default function AIActions() {
                 className="flex items-center gap-2 bg-[#F5C72C] hover:bg-[#E6B800] text-[#111] font-semibold text-sm px-4 py-2 rounded-lg border-0">
                 {syncMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
                 {syncMutation.isPending ? "Syncing…" : "Sync Now"}
+              </Button>
+              <Button onClick={() => setAsanaModalOpen(true)}
+                variant="outline"
+                className="flex items-center gap-2 text-sm px-4 py-2 rounded-lg border border-[#F06A35]/40 text-[#F06A35] hover:bg-[#F06A35]/10">
+                <ListPlus className="w-4 h-4" />Add to Asana
               </Button>
             </>
           )}
@@ -294,6 +301,13 @@ export default function AIActions() {
             </div>
           )}
         </div>
+      )}
+      {asanaModalOpen && (
+        <AsanaTaskModal
+          isOpen={asanaModalOpen}
+          onClose={() => setAsanaModalOpen(false)}
+          title="Add Action Plan to Asana"
+        />
       )}
     </div>
   );

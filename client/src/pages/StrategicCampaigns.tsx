@@ -1,10 +1,12 @@
+import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TrendingUp, Target, DollarSign, BarChart3, ChevronRight, TrendingDown } from "lucide-react";
+import { TrendingUp, Target, DollarSign, BarChart3, ChevronRight, TrendingDown, CalendarRange, LayoutGrid } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useLocation } from "wouter";
+import AsanaTimeline from "@/components/AsanaTimeline";
 
 const CAMPAIGN_COLORS: Record<string, string> = {
   trial_conversion: "emerald",
@@ -41,14 +43,36 @@ export default function StrategicCampaigns() {
     );
   }
 
+  const [activeTab, setActiveTab] = useState<"campaigns" | "timeline">("campaigns");
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Strategic Campaigns</h1>
-        <p className="text-muted-foreground mt-2">
-          High-level strategic objectives with aggregated program performance
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Strategic Campaigns</h1>
+          <p className="text-muted-foreground mt-2">
+            High-level strategic objectives with aggregated program performance
+          </p>
+        </div>
+        <div className="flex items-center gap-1 p-1 bg-[#F5F5F5] rounded-xl border border-[#E0E0E0] self-start sm:self-auto">
+          <button
+            onClick={() => setActiveTab("campaigns")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeTab === "campaigns" ? "bg-white text-[#111] shadow-sm" : "text-[#666] hover:text-[#333]"}`}
+          >
+            <LayoutGrid className="w-3.5 h-3.5" />Campaigns
+          </button>
+          <button
+            onClick={() => setActiveTab("timeline")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeTab === "timeline" ? "bg-white text-[#111] shadow-sm" : "text-[#666] hover:text-[#333]"}`}
+          >
+            <CalendarRange className="w-3.5 h-3.5" />Asana Timeline
+          </button>
+        </div>
       </div>
+
+      {activeTab === "timeline" && <AsanaTimeline />}
+
+      {activeTab === "campaigns" && (<>
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
@@ -299,6 +323,7 @@ export default function StrategicCampaigns() {
           );
         })}
       </div>
+      </>)}
     </div>
   );
 }

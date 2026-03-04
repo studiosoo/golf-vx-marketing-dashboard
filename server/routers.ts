@@ -44,6 +44,7 @@ import {
   metaAdsRouter,
   revenueRouter,
 } from "./routers/advertising";
+import { asanaRouter } from "./routers/asana";
 
 export const appRouter = router({
   system: systemRouter,
@@ -87,6 +88,7 @@ export const appRouter = router({
   printAd: printAdRouter,
   eventAd: eventAdRouter,
   metaAds: metaAdsRouter,
+  asana: asanaRouter,
   revenue: revenueRouter,
 });
 

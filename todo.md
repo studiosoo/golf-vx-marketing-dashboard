@@ -1076,3 +1076,13 @@
 - [x] Remove Promotions nav item from DashboardLayout sidebar
 - [x] Update Annual Membership Giveaway entry goal from 250 to 1500 (frontend ENTRY_GOAL + backend entryGoal)
 - [x] Fix mobile text overlap on Advertising page and other pages (responsive layout) - fixed grid-cols in 15+ pages/components
+
+## Asana Integration (2026-03-04 Session 2)
+- [x] server/asana.ts — Asana API service (getTimelineTasks, createAsanaTask, CAMPAIGN_SECTIONS, MARKETING_TIMELINE_PROJECT_ID)
+- [x] server/routers/asana.ts — tRPC router (getTimeline, createTask, createBatchTasks)
+- [x] Register asanaRouter in server/routers.ts
+- [x] client/src/components/AsanaTimeline.tsx — Gantt chart component for StrategicCampaigns page
+- [x] client/src/components/AsanaTaskModal.tsx — Task creation modal for AI Actions page
+- [x] Add "Asana Timeline" tab to StrategicCampaigns.tsx (toggle between Campaigns/Timeline views)
+- [x] Add "Add to Asana" button to AIActions.tsx header (orange button, opens AsanaTaskModal)
+- [x] 12 vitest tests passing (project ID, section mapping, URL generation, task parsing, batch creation)
