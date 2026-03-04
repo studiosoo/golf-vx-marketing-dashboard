@@ -1655,7 +1655,7 @@ export const printAdvertising = mysqlTable("print_advertising", {
   totalContractValue: decimal("total_contract_value", { precision: 10, scale: 2 }),
   startDate: date("start_date"),
   endDate: date("end_date"),
-  status: mysqlEnum("print_ad_status", ["active", "completed", "cancelled", "negotiating"]).notNull().default("active"),
+  status: mysqlEnum("status", ["active", "completed", "cancelled", "negotiating"]).notNull().default("active"),
   qrDestination: varchar("qr_destination", { length: 512 }),
   qrCodeUrl: varchar("qr_code_url", { length: 512 }),
   instagramHandle: varchar("instagram_handle", { length: 128 }),

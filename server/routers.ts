@@ -4767,8 +4767,8 @@ When the user provides data (e.g., "we had 12 attendees at Drive Day"), acknowle
   // ─── Event Advertising (Trade Shows, Expos, Sponsorships) ────────────────────
   eventAd: router({
     list: protectedProcedure.query(async () => {
-      const database = await getDb();
-      if (!database) throw new Error("DB unavailable");
+      const database = await db.getDb();
+      if (!database) return [];
       return database.select().from(eventAdvertising).orderBy(desc(eventAdvertising.eventDate));
     }),
     create: protectedProcedure
@@ -4796,7 +4796,7 @@ When the user provides data (e.g., "we had 12 attendees at Drive Day"), acknowle
         notes: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        const database = await getDb();
+        const database = await db.getDb();
         if (!database) throw new Error("DB unavailable");
         const now = Date.now();
         await database.insert(eventAdvertising).values({
@@ -4839,7 +4839,7 @@ When the user provides data (e.g., "we had 12 attendees at Drive Day"), acknowle
         notes: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        const database = await getDb();
+        const database = await db.getDb();
         if (!database) throw new Error("DB unavailable");
         const { id, ...rest } = input;
         const updates: Record<string, any> = { updatedAt: Date.now() };
@@ -4857,7 +4857,7 @@ When the user provides data (e.g., "we had 12 attendees at Drive Day"), acknowle
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
-        const database = await getDb();
+        const database = await db.getDb();
         if (!database) throw new Error("DB unavailable");
         await database.delete(eventAdvertising).where(eq(eventAdvertising.id, input.id));
         return { success: true };

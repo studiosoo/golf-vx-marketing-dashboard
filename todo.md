@@ -919,3 +919,7 @@
 - [x] Add Website section: Site Control
 - [x] Add Settings section: Integrations, Account
 - [x] Restored Strategic section: Revenue, Reports, Campaigns all visible
+
+## Session 2026-03-04 Part 20 — Advertising Page Error Fixes
+- [x] Fix "getDb is not defined" error: eventAd router used bare getDb() instead of db.getDb() — fixed all 4 occurrences
+- [x] Fix print_advertising query: schema had mysqlEnum("print_ad_status") but DB column is named "status" — fixed column name in schema.ts
