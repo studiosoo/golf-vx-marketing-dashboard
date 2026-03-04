@@ -1018,3 +1018,6 @@
 ## Session 2026-03-04 Part 5 — Danny Wojtowicz Email Fix
 - [x] Fix Danny Wojtowicz email typo: 1dannywojgolf@gmail.com → dannywojgolf@gmail.com
 - [x] Merge Daniel Wojtowicz (inactive, dannywojgolf@gmail.com) into Danny Wojtowicz (active) as same person
+
+## Session 2026-03-04 Part 6 — Reports Page Bug Fix
+- [x] Fix TypeError: revSummary.map is not a function on /intelligence/reports page

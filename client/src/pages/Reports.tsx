@@ -388,9 +388,11 @@ export default function Reports() {
   , [programs]);
 
   // Revenue chart data (monthly from revenue table)
+  // Note: revenue.getSummary returns an object {total, toastRevenue, acuityRevenue, memberCount},
+  // not an array. Guard against calling .map on a non-array to prevent crash.
   const revenueChartData = useMemo(() => {
-    if (!revSummary) return [];
-    return (revSummary as unknown as any[]).map((r: any) => ({
+    if (!revSummary || !Array.isArray(revSummary)) return [];
+    return (revSummary as any[]).map((r: any) => ({
       month: new Date(r.month + "-01").toLocaleDateString("en-US", { month: "short" }),
       membership: parseFloat(r.membership || '0'),
       events: parseFloat(r.event || '0') + parseFloat(r.bay_rental || '0'),
