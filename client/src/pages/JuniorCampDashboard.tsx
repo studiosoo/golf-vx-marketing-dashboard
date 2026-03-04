@@ -14,6 +14,7 @@ import {
   Info,
 } from "lucide-react";
 import ProgramMarketingPanel from "@/components/ProgramMarketingPanel";
+import { ProgramAIIntelligence } from "@/components/ProgramAIIntelligence";
 
 const TRACK_CONFIG = {
   full_day: { label: "Full-Day Program", ageGroup: "Ages 7–17", color: "text-yellow-400", bg: "bg-yellow-400/10 border-yellow-400/30" },
@@ -253,6 +254,16 @@ export default function JuniorCampDashboard() {
           programName="PBGA Junior Summer Camp"
           programKeywords={["summer camp", "junior camp", "pbga junior"]}
         />
+      </div>
+      {/* AI Marketing Intelligence */}
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <span className="text-yellow-400">✦</span> AI Marketing Intelligence
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">AI-generated multi-channel marketing strategy based on program performance data.</p>
+        </div>
+        <ProgramAIIntelligence campaignId={4} programName="PBGA Junior Summer Camp" />
       </div>
     </div>
   );

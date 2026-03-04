@@ -10,7 +10,9 @@ export type GoalType =
   | "retention"
   | "brand_awareness"
   | "lead_generation"
-  | "trial_signups";
+  | "trial_signups"
+  | "leads"
+  | "attendance";
 
 export interface GoalTemplate {
   goalType: GoalType;
@@ -174,6 +176,40 @@ export const GOAL_TEMPLATES: Record<GoalType, GoalTemplate> = {
       const conversionScore = kpiTarget > 0 ? Math.min((kpiActual / kpiTarget) * 100, 100) : 0;
       return Math.round((signupScore * 0.5 + conversionScore * 0.5)); // 50% signup volume, 50% conversion rate
     }
+  },
+
+  // "leads" = manually tracked bookings/trial sessions (kpiActual stored directly in DB)
+  leads: {
+    goalType: "leads",
+    goalUnit: "bookings",
+    primaryKpi: "Trial Bookings",
+    kpiUnit: "bookings",
+    description: "Track trial bookings and session conversions",
+    calculateKpi: (data) => {
+      // For manually tracked bookings, return goalActual (stored as kpiActual in DB)
+      // The actual value is preserved from DB in calculateCampaignPerformance
+      return data.goalActual;
+    },
+    calculatePerformanceScore: (goalTarget, goalActual, kpiTarget, kpiActual) => {
+      const bookingScore = kpiTarget > 0 ? Math.min((kpiActual / kpiTarget) * 100, 100) : 0;
+      return Math.round(bookingScore);
+    }
+  },
+
+  // "attendance" = event attendance tracking
+  attendance: {
+    goalType: "attendance",
+    goalUnit: "attendees",
+    primaryKpi: "Attendance Count",
+    kpiUnit: "people",
+    description: "Track event attendance and participation",
+    calculateKpi: (data) => {
+      return data.goalActual;
+    },
+    calculatePerformanceScore: (goalTarget, goalActual, kpiTarget, kpiActual) => {
+      const attendanceScore = goalTarget > 0 ? Math.min((goalActual / goalTarget) * 100, 100) : 0;
+      return Math.round(attendanceScore);
+    }
   }
 };
 
@@ -202,8 +238,10 @@ export function calculateCampaignPerformance(
 
   const template = GOAL_TEMPLATES[campaign.goalType as GoalType];
   if (!template) {
+    // Preserve DB-stored kpiActual as fallback when no template matches
+    const dbKpiActual = parseFloat(campaign.kpiActual || "0");
     return {
-      kpiActual: 0,
+      kpiActual: dbKpiActual,
       performanceScore: 0
     };
   }
@@ -219,7 +257,16 @@ export function calculateCampaignPerformance(
     ...instagramMetrics
   };
 
-  const kpiActual = template.calculateKpi(campaignData);
+  const computedKpi = template.calculateKpi(campaignData);
+  const dbKpiActual = parseFloat(campaign.kpiActual || "0");
+  // For manually-tracked KPIs (leads/bookings stored directly in DB),
+  // always prefer the DB value over the computed value.
+  // The 'leads' template computes from goalActual which is a different field.
+  const isManuallyTracked = campaign.goalType === 'leads' || campaign.kpiUnit === 'bookings';
+  const kpiActual = isManuallyTracked && dbKpiActual > 0 ? dbKpiActual
+    : computedKpi > 0 ? computedKpi
+    : dbKpiActual;
+  
   const performanceScore = template.calculatePerformanceScore(
     parseFloat(campaign.goalTarget || "0"),
     parseFloat(campaign.goalActual || "0"),

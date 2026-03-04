@@ -1,0 +1,1 @@
+ALTER TABLE `campaigns` ADD `display_order` int DEFAULT 9999;

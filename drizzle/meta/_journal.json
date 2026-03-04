@@ -99,6 +99,62 @@
       "when": 1772232541528,
       "tag": "0013_mature_night_thrasher",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "5",
+      "when": 1772559106507,
+      "tag": "0014_nostalgic_ego",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "5",
+      "when": 1772567056386,
+      "tag": "0015_broken_vulture",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "5",
+      "when": 1772578412890,
+      "tag": "0016_broken_tyger_tiger",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "5",
+      "when": 1772581248436,
+      "tag": "0017_talented_silver_sable",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1772584909700,
+      "tag": "0018_large_meggan",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1772587020523,
+      "tag": "0019_bouncy_gorgon",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "5",
+      "when": 1772605372077,
+      "tag": "0020_curly_wildside",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "5",
+      "when": 1772610784855,
+      "tag": "0021_handy_susan_delgado",
+      "breakpoints": true
     }
   ]
 }

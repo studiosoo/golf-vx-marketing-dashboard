@@ -80,6 +80,12 @@ export async function getGiveawayStats(): Promise<any> {
   const genderCount: Record<string, number> = {};
   const golfExperienceCount: Record<string, number> = {};
   
+  const cityCount: Record<string, number> = {};
+  const visitedBeforeCount: Record<string, number> = {};
+  const howDidTheyHearCount: Record<string, number> = {};
+  const bestTimeToCallCount: Record<string, number> = {};
+  const indoorGolfFamiliarityCount: Record<string, number> = {};
+
   for (const app of applications) {
     // Age range
     const age = app.ageRange || 'Unknown';
@@ -90,8 +96,28 @@ export async function getGiveawayStats(): Promise<any> {
     genderCount[gender] = (genderCount[gender] || 0) + 1;
     
     // Golf experience
-    const experience = app.golfExperienceLevel || app.howDidTheyHear || 'Unknown';
+    const experience = app.golfExperienceLevel || 'Unknown';
     golfExperienceCount[experience] = (golfExperienceCount[experience] || 0) + 1;
+
+    // City
+    const city = app.city || 'Unknown';
+    cityCount[city] = (cityCount[city] || 0) + 1;
+
+    // Visited before
+    const visited = app.visitedBefore || 'Unknown';
+    visitedBeforeCount[visited] = (visitedBeforeCount[visited] || 0) + 1;
+
+    // How did they hear
+    const hear = app.howDidTheyHear || 'Unknown';
+    howDidTheyHearCount[hear] = (howDidTheyHearCount[hear] || 0) + 1;
+
+    // Best time to call
+    const callTime = app.bestTimeToCall || 'Unknown';
+    bestTimeToCallCount[callTime] = (bestTimeToCallCount[callTime] || 0) + 1;
+
+    // Indoor golf familiarity
+    const familiarity = app.indoorGolfFamiliarity || 'Unknown';
+    indoorGolfFamiliarityCount[familiarity] = (indoorGolfFamiliarityCount[familiarity] || 0) + 1;
   }
   
   return {
@@ -99,6 +125,11 @@ export async function getGiveawayStats(): Promise<any> {
     ageRangeDistribution: ageRangeCount,
     genderDistribution: genderCount,
     golfExperienceDistribution: golfExperienceCount,
+    cityDistribution: cityCount,
+    visitedBeforeDistribution: visitedBeforeCount,
+    howDidTheyHearDistribution: howDidTheyHearCount,
+    bestTimeToCallDistribution: bestTimeToCallCount,
+    indoorGolfFamiliarityDistribution: indoorGolfFamiliarityCount,
     test: 0, // Test entries are already excluded
   };
 }

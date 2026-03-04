@@ -76,6 +76,7 @@ export const campaigns = mysqlTable("campaigns", {
   kpiActual: decimal("kpiActual", { precision: 12, scale: 4 }),
   kpiUnit: varchar("kpiUnit", { length: 50 }), // e.g., "USD", "%", "ratio"
   performanceScore: int("performanceScore"), // 0-100 score based on goal achievement
+  display_order: int("display_order").default(9999), // Explicit card ordering
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, (table) => ({
@@ -210,6 +211,7 @@ export const members = mysqlTable("members", {
   
   // Boomerangme integration fields
   boomerangCustomerId: varchar("boomerangCustomerId", { length: 100 }),
+  boomerangEmail: varchar("boomerangEmail", { length: 320 }), // Boomerang-issued email (*.membership@boomerang-import.golfvx.com)
   loyaltyPoints: int("loyaltyPoints").default(0).notNull(),
   loyaltyCardStatus: mysqlEnum("loyaltyCardStatus", ["active", "inactive", "none"]).default("none"),
   lastLoyaltySync: timestamp("lastLoyaltySync"),
@@ -491,6 +493,9 @@ export const giveawayApplications = mysqlTable("giveawayApplications", {
   golfExperienceLevel: varchar("golfExperienceLevel", { length: 100 }), // New/Beginner, Intermediate, Advanced
   visitedBefore: varchar("visitedBefore", { length: 50 }), // Yes/No/New
   indoorGolfFamiliarity: varchar("indoorGolfFamiliarity", { length: 100 }), // Never tried before, Tried once or twice, Regular player
+  
+  // Scoring
+  driveDayScore: int("driveDayScore"), // 0-100 score from Drive Day evaluation
   
   // Final details
   bestTimeToCall: varchar("bestTimeToCall", { length: 100 }),
@@ -1179,7 +1184,7 @@ export const autonomousActions = mysqlTable("autonomous_actions", {
   campaignName: varchar("campaignName", { length: 255 }).notNull(),
   actionType: varchar("actionType", { length: 64 }).notNull(), // budget_increase, budget_decrease, send_email, change_targeting, etc.
   riskLevel: mysqlEnum("riskLevel", ["low", "medium", "high", "monitor"]).notNull(),
-  status: mysqlEnum("status", ["auto_executed", "pending_approval", "approved", "rejected", "undone", "monitoring", "execution_failed", "dismissed"]).notNull(),
+  status: mysqlEnum("status", ["auto_executed", "pending_approval", "approved", "rejected", "undone", "monitoring", "execution_failed", "dismissed", "archived"]).notNull(),
   title: varchar("title", { length: 500 }).notNull(),
   description: text("description").notNull(),
   actionParams: json("actionParams").$type<Record<string, unknown>>(),
@@ -1518,6 +1523,8 @@ export const cfFunnels = mysqlTable("cf_funnels", {
   tags: json("tags"),
   optInCount: int("opt_in_count").default(0),
   orderCount: int("order_count").default(0),
+  uniqueVisitors: int("unique_visitors").default(0), // Manual UV input (ClickFunnels dashboard)
+  pageViews: int("page_views").default(0), // Manual PV input (ClickFunnels dashboard)
   lastSyncedAt: timestamp("last_synced_at").defaultNow(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -1558,3 +1565,146 @@ export const cfFormSubmissions = mysqlTable("cf_form_submissions", {
 }));
 export type CfFormSubmission = typeof cfFormSubmissions.$inferSelect;
 export type NewCfFormSubmission = typeof cfFormSubmissions.$inferInsert;
+
+// ─── Influencer Partnerships ───────────────────────────────────────────────
+export const influencerPartnerships = mysqlTable("influencer_partnerships", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  handle: varchar("handle", { length: 128 }).notNull(),
+  platform: mysqlEnum("platform", ["instagram", "tiktok", "youtube", "facebook", "other"]).notNull().default("instagram"),
+  followerCount: int("follower_count"),
+  contactName: varchar("contact_name", { length: 256 }),
+  contactEmail: varchar("contact_email", { length: 512 }),
+  contactPhone: varchar("contact_phone", { length: 64 }),
+  dealDate: date("deal_date"),
+  totalCost: decimal("total_cost", { precision: 10, scale: 2 }).default("0"),
+  deliverables: text("deliverables"),
+  campaignGoal: varchar("campaign_goal", { length: 512 }),
+  targetAudience: varchar("target_audience", { length: 512 }),
+  status: mysqlEnum("status", ["negotiating", "contracted", "in_progress", "completed", "cancelled"]).notNull().default("contracted"),
+  actualReach: int("actual_reach"),
+  actualImpressions: int("actual_impressions"),
+  actualEngagements: int("actual_engagements"),
+  actualLinkClicks: int("actual_link_clicks"),
+  actualLeadsGenerated: int("actual_leads_generated"),
+  actualBookingsGenerated: int("actual_bookings_generated"),
+  actualRevenue: decimal("actual_revenue", { precision: 10, scale: 2 }),
+  contentUrls: json("content_urls"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  handleIdx: index("influencer_handle_idx").on(table.handle),
+  statusIdx: index("influencer_status_idx").on(table.status),
+  dealDateIdx: index("influencer_deal_date_idx").on(table.dealDate),
+}));
+export type InfluencerPartnership = typeof influencerPartnerships.$inferSelect;
+export type NewInfluencerPartnership = typeof influencerPartnerships.$inferInsert;
+
+// ─── Community Outreach (Sponsorship / Donation Requests) ─────────────────
+export const communityOutreach = mysqlTable("community_outreach", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  orgName: varchar("org_name", { length: 512 }).notNull(),
+  orgType: mysqlEnum("org_type", ["school_pta", "school_sports", "nonprofit", "civic", "arts_culture", "sports_league", "religious", "business", "other"]).notNull().default("other"),
+  contactName: varchar("contact_name", { length: 256 }),
+  contactEmail: varchar("contact_email", { length: 512 }),
+  contactPhone: varchar("contact_phone", { length: 64 }),
+  website: varchar("website", { length: 512 }),
+  ein: varchar("ein", { length: 32 }),
+  is501c3: boolean("is_501c3").default(false),
+  requestType: mysqlEnum("request_type", ["cash_donation", "gift_card", "product_donation", "service_donation", "sponsorship", "partnership", "networking"]).notNull().default("gift_card"),
+  requestDate: date("request_date"),
+  eventName: varchar("event_name", { length: 512 }),
+  eventDate: date("event_date"),
+  eventLocation: varchar("event_location", { length: 512 }),
+  estimatedAttendees: int("estimated_attendees"),
+  requestedAmount: decimal("requested_amount", { precision: 10, scale: 2 }),
+  requestDescription: text("request_description"),
+  status: mysqlEnum("status", ["received", "under_review", "approved", "rejected", "fulfilled", "follow_up"]).notNull().default("received"),
+  decisionDate: date("decision_date"),
+  decisionNotes: text("decision_notes"),
+  rejectionReason: varchar("rejection_reason", { length: 512 }),
+  actualDonationType: varchar("actual_donation_type", { length: 256 }),
+  actualCashValue: decimal("actual_cash_value", { precision: 10, scale: 2 }).default("0"),
+  actualPerceivedValue: decimal("actual_perceived_value", { precision: 10, scale: 2 }).default("0"),
+  benefitsReceived: text("benefits_received"),
+  estimatedReach: int("estimated_reach"),
+  actualLeadsGenerated: int("actual_leads_generated"),
+  actualBookingsGenerated: int("actual_bookings_generated"),
+  actualRevenue: decimal("actual_revenue", { precision: 10, scale: 2 }),
+  roiNotes: text("roi_notes"),
+  isRecurring: boolean("is_recurring").default(false),
+  priority: mysqlEnum("priority", ["low", "medium", "high"]).default("medium"),
+  tags: json("tags"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  orgNameIdx: index("outreach_org_name_idx").on(table.orgName),
+  statusIdx: index("outreach_status_idx").on(table.status),
+  requestDateIdx: index("outreach_request_date_idx").on(table.requestDate),
+  eventDateIdx: index("outreach_event_date_idx").on(table.eventDate),
+  orgTypeIdx: index("outreach_org_type_idx").on(table.orgType),
+}));
+export type CommunityOutreach = typeof communityOutreach.$inferSelect;
+export type NewCommunityOutreach = typeof communityOutreach.$inferInsert;
+
+// ─── Print Advertising ────────────────────────────────────────────────────────
+export const printAdvertising = mysqlTable("print_advertising", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  vendorName: varchar("vendor_name", { length: 256 }).notNull(),
+  publicationType: mysqlEnum("publication_type", ["magazine", "newspaper", "flyer", "billboard", "direct_mail", "other"]).notNull().default("magazine"),
+  adSize: varchar("ad_size", { length: 128 }),
+  costPerMonth: decimal("cost_per_month", { precision: 10, scale: 2 }).notNull(),
+  contractMonths: int("contract_months").notNull().default(1),
+  totalContractValue: decimal("total_contract_value", { precision: 10, scale: 2 }),
+  startDate: date("start_date"),
+  endDate: date("end_date"),
+  status: mysqlEnum("status", ["active", "completed", "cancelled", "negotiating"]).notNull().default("active"),
+  qrDestination: varchar("qr_destination", { length: 512 }),
+  qrCodeUrl: varchar("qr_code_url", { length: 512 }),
+  instagramHandle: varchar("instagram_handle", { length: 128 }),
+  website: varchar("website", { length: 512 }),
+  circulation: int("circulation"),
+  targetArea: varchar("target_area", { length: 256 }),
+  notes: text("notes"),
+  createdAt: bigint("created_at", { mode: "number" }).notNull().default(0),
+  updatedAt: bigint("updated_at", { mode: "number" }).notNull().default(0),
+}, (table) => ({
+  printAdStatusIdx: index("print_ad_status_idx").on(table.status),
+  printAdStartDateIdx: index("print_ad_start_date_idx").on(table.startDate),
+}));
+export type PrintAdvertising = typeof printAdvertising.$inferSelect;
+export type NewPrintAdvertising = typeof printAdvertising.$inferInsert;
+
+// ─── Event Advertising (Trade Shows, Expos, Sponsorships) ─────────────────────
+export const eventAdvertising = mysqlTable("event_advertising", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  eventName: varchar("event_name", { length: 256 }).notNull(),
+  eventType: mysqlEnum("event_type", ["trade_show", "expo", "sponsorship", "community_event", "golf_tournament", "other"]).notNull().default("trade_show"),
+  venue: varchar("venue", { length: 256 }),
+  location: varchar("location", { length: 256 }),
+  eventDate: date("event_date"),
+  eventEndDate: date("event_end_date"),
+  status: mysqlEnum("status", ["upcoming", "active", "completed", "cancelled"]).notNull().default("upcoming"),
+  boothCost: decimal("booth_cost", { precision: 10, scale: 2 }),
+  totalCost: decimal("total_cost", { precision: 10, scale: 2 }),
+  expectedVisitors: int("expected_visitors"),
+  actualVisitors: int("actual_visitors"),
+  promosDistributed: int("promos_distributed"),
+  leadsCollected: int("leads_collected"),
+  teamSignups: int("team_signups"),
+  membershipSignups: int("membership_signups"),
+  revenue: decimal("revenue", { precision: 10, scale: 2 }),
+  boothSize: varchar("booth_size", { length: 64 }),
+  boothNumber: varchar("booth_number", { length: 32 }),
+  contactPerson: varchar("contact_person", { length: 128 }),
+  website: varchar("website", { length: 512 }),
+  notes: text("notes"),
+  createdAt: bigint("created_at", { mode: "number" }).notNull().default(0),
+  updatedAt: bigint("updated_at", { mode: "number" }).notNull().default(0),
+}, (table) => ({
+  eventAdStatusIdx: index("event_ad_status_idx").on(table.status),
+  eventAdDateIdx: index("event_ad_date_idx").on(table.eventDate),
+}));
+export type EventAdvertising = typeof eventAdvertising.$inferSelect;
+export type NewEventAdvertising = typeof eventAdvertising.$inferInsert;

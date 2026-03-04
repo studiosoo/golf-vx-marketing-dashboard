@@ -1,20 +1,16 @@
-import { useState } from "react";
+import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TrendingUp, TrendingDown, DollarSign, Target, Users, RefreshCw } from "lucide-react";
+import { DollarSign, BarChart3, ArrowRight, TrendingUp, Activity } from "lucide-react";
 
 export default function Performance() {
-  const [dateRange] = useState(() => ({
-    startDate: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
-    endDate: new Date(),
-  }));
+  const [, navigate] = useLocation();
 
   const { data: campaigns, isLoading: campaignsLoading } = trpc.campaigns.getByStatus.useQuery({ status: "active" });
-  const { data: metaAds, isLoading: metaLoading } = trpc.metaAds.getAllCampaignsWithInsights.useQuery({ datePreset: "last_30d" });
   const { data: channelSummary } = trpc.campaigns.getCategorySummary.useQuery();
+  const { data: revSummary } = trpc.revenue.getSummary.useQuery(undefined);
 
   const formatCurrency = (val: number | string) =>
     `$${parseFloat(String(val || 0)).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -25,6 +21,12 @@ export default function Performance() {
     return s > 0 ? (r / s).toFixed(2) + "x" : "—";
   };
 
+  // Aggregate spend/revenue from active campaigns
+  const campaignList = (campaigns as any[]) ?? [];
+  const totalSpend = campaignList.reduce((s: number, c: any) => s + parseFloat(String(c.actualSpend || 0)), 0);
+  const totalRevenue = parseFloat(String(revSummary?.total || 0));
+  const roas = totalSpend > 0 ? totalRevenue / totalSpend : null;
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -34,10 +36,55 @@ export default function Performance() {
         </div>
       </div>
 
+      {/* KPI Summary Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[
+          {
+            label: "Revenue (MTD)",
+            value: formatCurrency(totalRevenue),
+            icon: DollarSign,
+            color: "text-[#3DB855]",
+            bg: "bg-green-50",
+          },
+          {
+            label: "Ad Spend",
+            value: formatCurrency(totalSpend),
+            icon: TrendingUp,
+            color: "text-[#F5C72C]",
+            bg: "bg-[#F5C72C]/10",
+          },
+          {
+            label: "Active Campaigns",
+            value: String(campaignList.length),
+            icon: Activity,
+            color: "text-blue-600",
+            bg: "bg-blue-50",
+          },
+          {
+            label: "Avg ROAS",
+            value: roas !== null ? `${roas.toFixed(2)}×` : "—",
+            icon: BarChart3,
+            color: "text-[#888888]",
+            bg: "bg-[#F5F5F5]",
+          },
+        ].map(({ label, value, icon: Icon, color, bg }) => (
+          <Card key={label} className="bg-white border-[#E0E0E0] shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className={`w-9 h-9 rounded-lg ${bg} flex items-center justify-center shrink-0`}>
+                <Icon className={`h-4 w-4 ${color}`} />
+              </div>
+              <div>
+                <p className="text-xs text-[#AAAAAA]">{label}</p>
+                <p className="text-lg font-bold text-[#111111] leading-tight">{value}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
       <Tabs defaultValue="campaigns">
         <TabsList className="bg-muted">
           <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
-          <TabsTrigger value="meta-ads">Meta Ads</TabsTrigger>
           <TabsTrigger value="channels">Channels</TabsTrigger>
         </TabsList>
 
@@ -87,57 +134,6 @@ export default function Performance() {
           )}
         </TabsContent>
 
-        {/* Meta Ads Tab */}
-        <TabsContent value="meta-ads" className="mt-4 space-y-4">
-          {metaLoading ? (
-            <div className="space-y-3">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-24 bg-card rounded-xl animate-pulse border border-border" />
-              ))}
-            </div>
-          ) : metaAds && metaAds.length > 0 ? (
-            <div className="space-y-3">
-              {metaAds.map((ad: any) => (
-                <Card key={ad.id} className="bg-card border-border">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <span className="font-medium text-foreground text-sm">{ad.name}</span>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge
-                            variant={ad.status === "ACTIVE" ? "default" : "secondary"}
-                            className="text-xs"
-                          >
-                            {ad.status}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">{ad.objective}</span>
-                        </div>
-                      </div>
-                    </div>
-                    {ad.insights && (
-                      <div className="grid grid-cols-4 gap-3 mt-3">
-                        {[
-                          { label: "Spend", value: formatCurrency(ad.insights.spend || 0) },
-                          { label: "Reach", value: (ad.insights.reach || 0).toLocaleString() },
-                          { label: "Impressions", value: (ad.insights.impressions || 0).toLocaleString() },
-                          { label: "Clicks", value: (ad.insights.clicks || 0).toLocaleString() },
-                        ].map((m) => (
-                          <div key={m.label} className="text-center">
-                            <div className="text-sm font-semibold text-foreground">{m.value}</div>
-                            <div className="text-xs text-muted-foreground">{m.label}</div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12 text-muted-foreground">No Meta Ads data</div>
-          )}
-        </TabsContent>
-
         {/* Channels Tab */}
         <TabsContent value="channels" className="mt-4">
           {channelSummary ? (
@@ -170,6 +166,21 @@ export default function Performance() {
           ) : (
             <div className="text-center py-12 text-muted-foreground">Loading channel data...</div>
           )}
+
+          {/* Meta Ads callout */}
+          <button
+            onClick={() => navigate("/advertising")}
+            className="w-full flex items-center justify-between px-4 py-3 mt-4 bg-[#F5C72C]/10 border border-[#F5C72C]/30 rounded-[10px] hover:bg-[#F5C72C]/20 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <BarChart3 className="h-4 w-4 text-[#F5C72C]" />
+              <div className="text-left">
+                <p className="text-sm font-semibold text-[#111111]">Meta Ads Campaigns</p>
+                <p className="text-xs text-[#888888]">Facebook & Instagram 캠페인 상세 데이터는 Advertising에서 확인하세요</p>
+              </div>
+            </div>
+            <ArrowRight className="h-4 w-4 text-[#888888]" />
+          </button>
         </TabsContent>
       </Tabs>
     </div>

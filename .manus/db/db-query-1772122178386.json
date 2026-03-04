@@ -1,9 +1,0 @@
-{
-  "query": "ALTER TABLE `autonomous_actions` MODIFY COLUMN `status` ENUM('auto_executed', 'pending_approval', 'approved', 'rejected', 'undone', 'monitoring', 'execution_failed', 'dismissed') NOT NULL;",
-  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2R3ugynrRDzjYQU.e9d0c4c091a8 --database A5GjFitCrpqWQ2wnoTJiWm --execute ALTER TABLE `autonomous_actions` MODIFY COLUMN `status` ENUM('auto_executed', 'pending_approval', 'approved', 'rejected', 'undone', 'monitoring', 'execution_failed', 'dismissed') NOT NULL;",
-  "rows": [],
-  "messages": [],
-  "stdout": "",
-  "stderr": "",
-  "execution_time_ms": 570
-}

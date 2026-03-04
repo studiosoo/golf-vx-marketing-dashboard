@@ -132,9 +132,14 @@ export async function getAppointments(params?: {
   appointmentTypeID?: number;
   calendarID?: number;
   canceled?: boolean;
+  max?: number;
 }): Promise<AcuityAppointment[]> {
   const client = createAcuityClient();
-  const response = await client.get<AcuityAppointment[]>("/appointments", { params });
+  // Default max=1000 to avoid Acuity's 100-record default limit cutting off older data
+  // Using 1000 to ensure Jan 2026 events are not truncated when total appointments exceed 500
+  const response = await client.get<AcuityAppointment[]>("/appointments", {
+    params: { max: 1000, ...params },
+  });
   return response.data;
 }
 
@@ -257,12 +262,22 @@ export async function getSundayClinicData(params?: {
   });
 
   // Filter for Sunday Clinic / Drive Day appointments
-  // These typically have "Drive Day" or "Sunday Clinic" in the type name
-  const clinicAppointments = appointments.filter(apt => 
-    apt.type.toLowerCase().includes('drive day') || 
-    apt.type.toLowerCase().includes('sunday clinic') ||
-    apt.type.toLowerCase().includes('public drive')
-  );
+  // Covers all variants: "Drive Day Clinic:", "Drive Day ·", "Sunday Clinic", "Public Drive"
+  const clinicAppointments = appointments.filter(apt => {
+    const t = apt.type.toLowerCase();
+    return t.includes('drive day clinic') || 
+           t.includes('drive day ·') ||
+           t.includes('sunday clinic') ||
+           t.includes('public drive');
+  });
+  
+  // Helper to classify topic from appointment type name
+  const getClinicTopic = (typeName: string): 'drive_day' | 'putting' | 'short_game' => {
+    const t = typeName.toLowerCase();
+    if (t.includes('putting') || t.includes('score low')) return 'putting';
+    if (t.includes('short game') || t.includes('below the hips') || t.includes('swing below')) return 'short_game';
+    return 'drive_day';
+  };
 
   // Group appointments by date (event) and track sources
   const eventsByDate = clinicAppointments.reduce((acc, apt) => {
@@ -294,8 +309,19 @@ export async function getSundayClinicData(params?: {
       eventSourceBreakdown[source] = (eventSourceBreakdown[source] || 0) + 1;
     });
 
+    // Determine topic from appointment type names
+    const topicCounts: Record<string, number> = {};
+    appts.forEach(apt => {
+      const topic = getClinicTopic(apt.type);
+      topicCounts[topic] = (topicCounts[topic] || 0) + 1;
+    });
+    const dominantTopic = (Object.entries(topicCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'drive_day') as 'drive_day' | 'putting' | 'short_game';
+    const topicLabel = dominantTopic === 'putting' ? 'Putting — Score Low' : dominantTopic === 'short_game' ? 'Short Game — Swing Below the Hips' : 'Driving to the Ball';
+
     return {
       date,
+      topic: dominantTopic,
+      topicLabel,
       totalBookings: totalAttendees,
       uniqueAttendees,
       sourceBreakdown: eventSourceBreakdown,
@@ -308,7 +334,13 @@ export async function getSundayClinicData(params?: {
   const repeatAttendees = clinicAppointments.length - allEmails.size;
 
   return {
-    events: events.sort((a, b) => a.date.localeCompare(b.date)),
+    // Sort by actual date using the first appointment's datetime field (ISO format)
+    // Cannot use localeCompare on "January 25, 2026" format — alphabetical order is wrong
+    events: events.sort((a, b) => {
+      const dateA = a.appointments[0]?.datetime ? new Date(a.appointments[0].datetime).getTime() : new Date(a.date).getTime();
+      const dateB = b.appointments[0]?.datetime ? new Date(b.appointments[0].datetime).getTime() : new Date(b.date).getTime();
+      return dateA - dateB;
+    }),
     totalEvents: events.length,
     totalBookings: clinicAppointments.length,
     uniqueAttendees: allEmails.size,
@@ -708,5 +740,106 @@ export async function getJuniorCampData(params?: {
     uniqueParticipants: allEmails.size,
     totalRevenue,
     overallHowHeard,
+  };
+}
+
+// ─── 1-Hour Trial Session Detail ─────────────────────────────────────────────
+// Appointment type IDs for all trial variants
+const TRIAL_TYPE_IDS = {
+  offPeak25: 86461965,          // 1-Hour Trial Session (Off-Peak) @ $25
+  peak35: 86472398,             // 1-Hour Trial Session (Peak) @ $35
+  anniversaryOffPeak9: 89062344, // Anniversary Trial Sessions (Off-Peak) @ $9
+  // $18 Anniversary Peak – add ID here when created in Acuity
+};
+
+export interface TrialBooking {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  datetime: string;
+  price: string;
+  amountPaid: string;
+  paid: string;
+  type: string;
+  appointmentTypeID: number;
+  source: string;
+  calendar: string;
+}
+
+export interface TrialTypeGroup {
+  typeId: number;
+  typeName: string;
+  priceLabel: string;
+  bookings: TrialBooking[];
+  totalRevenue: number;
+  paidCount: number;
+}
+
+export interface TrialSessionDetail {
+  types: TrialTypeGroup[];
+  totalBookings: number;
+  totalRevenue: number;
+  allBookings: TrialBooking[];
+}
+
+function extractTrialSource(apt: AcuityAppointment): string {
+  const allValues = (apt.forms || []).flatMap((f: any) => f.values || []);
+  const sourceField = allValues.find((v: any) =>
+    v.name?.toLowerCase().includes('source') ||
+    v.name?.toLowerCase().includes('hear') ||
+    v.name?.toLowerCase().includes('referral') ||
+    v.name?.toLowerCase().includes('how did')
+  );
+  return sourceField?.value || 'Not specified';
+}
+
+export async function getTrialSessionDetail(): Promise<TrialSessionDetail> {
+  const allAppts = await getAppointments({ max: 1000, canceled: false });
+  const trialTypeIds = new Set(Object.values(TRIAL_TYPE_IDS));
+  const trialAppts = allAppts.filter(a => trialTypeIds.has(a.appointmentTypeID));
+
+  const typeConfig: { typeId: number; typeName: string; priceLabel: string }[] = [
+    { typeId: TRIAL_TYPE_IDS.offPeak25, typeName: '1-Hour Trial Session (Off-Peak)', priceLabel: '$25 Off-Peak Trial' },
+    { typeId: TRIAL_TYPE_IDS.peak35, typeName: '1-Hour Trial Session (Peak)', priceLabel: '$35 Peak Trial' },
+    { typeId: TRIAL_TYPE_IDS.anniversaryOffPeak9, typeName: 'Anniversary Trial Sessions (Off-Peak)', priceLabel: '$9 Anniversary Off-Peak Trial' },
+  ];
+
+  const types: TrialTypeGroup[] = typeConfig.map(cfg => {
+    const bookings: TrialBooking[] = trialAppts
+      .filter(a => a.appointmentTypeID === cfg.typeId)
+      .map(a => ({
+        id: a.id,
+        firstName: a.firstName,
+        lastName: a.lastName,
+        email: a.email,
+        phone: a.phone,
+        datetime: a.datetime,
+        price: a.price,
+        amountPaid: a.amountPaid,
+        paid: a.paid,
+        type: a.type,
+        appointmentTypeID: a.appointmentTypeID,
+        source: extractTrialSource(a),
+        calendar: a.calendar,
+      }))
+      .sort((a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime());
+
+    const totalRevenue = bookings.reduce((sum, b) => sum + parseFloat(b.amountPaid || b.price || '0'), 0);
+    const paidCount = bookings.filter(b => b.paid === 'yes').length;
+
+    return { ...cfg, bookings, totalRevenue, paidCount };
+  });
+
+  const allBookings: TrialBooking[] = types
+    .flatMap(t => t.bookings)
+    .sort((a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime());
+
+  return {
+    types,
+    totalBookings: allBookings.length,
+    totalRevenue: types.reduce((sum, t) => sum + t.totalRevenue, 0),
+    allBookings,
   };
 }

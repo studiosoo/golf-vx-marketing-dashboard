@@ -129,17 +129,16 @@ export default function StrategicCampaigns() {
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Goal/KPI Progress Section */}
+              <CardContent className="space-y-4">
+                {/* PRIMARY KPI — headline metric */}
                 {campaign.id === 'membership_acquisition' && kpiData && (
-                  <div className="p-4 rounded-lg bg-muted/50">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">Membership Goal</span>
-                      <span className="text-sm font-bold">
-                        {kpiData.membershipAcquisition.current} / {kpiData.membershipAcquisition.target} members
-                      </span>
+                  <div className="p-4 rounded-lg border-2 border-primary/20 bg-primary/5">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Primary KPI — Membership Goal</p>
+                    <div className="flex items-end justify-between mb-2">
+                      <span className="text-4xl font-black">{kpiData.membershipAcquisition.current}</span>
+                      <span className="text-sm text-muted-foreground mb-1">/ {kpiData.membershipAcquisition.target} members</span>
                     </div>
-                    <Progress value={kpiData.membershipAcquisition.progress} className="h-2" />
+                    <Progress value={kpiData.membershipAcquisition.progress} className="h-2.5" />
                     <p className="text-xs text-muted-foreground mt-2">
                       {kpiData.membershipAcquisition.progress.toFixed(1)}% to year-end target • Need{' '}
                       {kpiData.membershipAcquisition.target - kpiData.membershipAcquisition.current} more members
@@ -147,14 +146,20 @@ export default function StrategicCampaigns() {
                   </div>
                 )}
                 {campaign.id === 'trial_conversion' && kpiData && (
-                  <div className="p-4 rounded-lg bg-muted/50">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">Trial Conversion Rate</span>
-                      <span className="text-sm font-bold">{kpiData.trialConversion.current.toFixed(1)}%</span>
+                  <div className="p-4 rounded-lg border-2 border-primary/20 bg-primary/5">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Primary KPI — Trial Conversion Rate</p>
+                    <div className="flex items-end justify-between mb-2">
+                      <span className={`text-4xl font-black ${
+                        kpiData.trialConversion.current >= kpiData.trialConversion.target
+                          ? 'text-green-600 dark:text-green-400'
+                          : kpiData.trialConversion.current > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground'
+                      }`}>
+                        {kpiData.trialConversion.current.toFixed(1)}%
+                      </span>
+                      <span className="text-sm text-muted-foreground mb-1">target: {kpiData.trialConversion.target}%</span>
                     </div>
-                    <Progress value={kpiData.trialConversion.progress} className="h-2" />
+                    <Progress value={kpiData.trialConversion.progress} className="h-2.5" />
                     <p className="text-xs text-muted-foreground mt-2">
-                      Target: {kpiData.trialConversion.target}% •{' '}
                       {kpiData.trialConversion.current < kpiData.trialConversion.target
                         ? `${(kpiData.trialConversion.target - kpiData.trialConversion.current).toFixed(1)}% below target`
                         : `${(kpiData.trialConversion.current - kpiData.trialConversion.target).toFixed(1)}% above target`}
@@ -162,20 +167,20 @@ export default function StrategicCampaigns() {
                   </div>
                 )}
                 {campaign.id === 'member_retention' && kpiData && (
-                  <div className="p-4 rounded-lg bg-muted/50">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">Retention Rate</span>
-                      <span className={`text-sm font-bold ${
+                  <div className="p-4 rounded-lg border-2 border-primary/20 bg-primary/5">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Primary KPI — Retention Rate</p>
+                    <div className="flex items-end justify-between mb-2">
+                      <span className={`text-4xl font-black ${
                         kpiData.memberRetention.current >= kpiData.memberRetention.target
                           ? 'text-green-600 dark:text-green-400'
-                          : 'text-orange-600 dark:text-orange-400'
+                          : kpiData.memberRetention.current > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground'
                       }`}>
                         {kpiData.memberRetention.current.toFixed(1)}%
                       </span>
+                      <span className="text-sm text-muted-foreground mb-1">target: {kpiData.memberRetention.target}%</span>
                     </div>
-                    <Progress value={kpiData.memberRetention.progress} className="h-2" />
+                    <Progress value={kpiData.memberRetention.progress} className="h-2.5" />
                     <p className="text-xs text-muted-foreground mt-2">
-                      Target: {kpiData.memberRetention.target}% •{' '}
                       {kpiData.memberRetention.current >= kpiData.memberRetention.target
                         ? `Exceeding goal by ${(kpiData.memberRetention.current - kpiData.memberRetention.target).toFixed(1)}%`
                         : `${(kpiData.memberRetention.target - kpiData.memberRetention.current).toFixed(1)}% below target`}
@@ -183,14 +188,13 @@ export default function StrategicCampaigns() {
                   </div>
                 )}
                 {campaign.id === 'corporate_events' && kpiData && (
-                  <div className="p-4 rounded-lg bg-muted/50">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">B2B Events (This Month)</span>
-                      <span className="text-sm font-bold">
-                        {kpiData.corporateEvents.current} / {kpiData.corporateEvents.target} events
-                      </span>
+                  <div className="p-4 rounded-lg border-2 border-primary/20 bg-primary/5">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Primary KPI — B2B Events This Month</p>
+                    <div className="flex items-end justify-between mb-2">
+                      <span className="text-4xl font-black">{kpiData.corporateEvents.current}</span>
+                      <span className="text-sm text-muted-foreground mb-1">/ {kpiData.corporateEvents.target} events</span>
                     </div>
-                    <Progress value={kpiData.corporateEvents.progress} className="h-2" />
+                    <Progress value={kpiData.corporateEvents.progress} className="h-2.5" />
                     <p className="text-xs text-muted-foreground mt-2">
                       Target: 1 event/week •{' '}
                       {kpiData.corporateEvents.current >= kpiData.corporateEvents.target
@@ -200,36 +204,39 @@ export default function StrategicCampaigns() {
                   </div>
                 )}
 
-                {/* Metrics Grid */}
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Budget</p>
-                    <p className="text-lg font-semibold">${campaign.totalBudget.toFixed(2)}</p>
+                {/* Metrics Grid — Spend / Revenue */}
+                <div className="grid grid-cols-3 gap-3 pt-1">
+                  <div className="p-3 rounded-lg bg-muted/40">
+                    <p className="text-xs text-muted-foreground">Budget</p>
+                    <p className="text-base font-bold mt-0.5">${campaign.totalBudget.toFixed(0)}</p>
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Spend</p>
-                    <p className="text-lg font-semibold">${campaign.totalSpend.toFixed(2)}</p>
+                  <div className="p-3 rounded-lg bg-muted/40">
+                    <p className="text-xs text-muted-foreground">Spend</p>
+                    <p className="text-base font-bold mt-0.5">${campaign.totalSpend.toFixed(0)}</p>
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Revenue</p>
-                    <p className="text-lg font-semibold">${campaign.totalRevenue.toFixed(2)}</p>
+                  <div className="p-3 rounded-lg bg-muted/40">
+                    <p className="text-xs text-muted-foreground">Revenue</p>
+                    <p className="text-base font-bold mt-0.5">${campaign.totalRevenue.toFixed(0)}</p>
                   </div>
                 </div>
 
-                {/* ROI */}
-                <div className="pt-4 border-t">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {campaign.roi >= 0 ? (
-                        <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
-                      ) : (
-                        <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
-                      )}
-                      <span className="text-sm font-medium">Financial ROI</span>
-                    </div>
-                    <span className={`text-lg font-bold ${campaign.roi >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
-                      {campaign.roi >= 0 ? "+" : ""}{campaign.roi.toFixed(1)}%
-                    </span>
+                {/* KPI Secondary Metrics */}
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Cost per Acquisition / Efficiency KPI */}
+                  <div className="p-3 rounded-lg bg-muted/40">
+                    <p className="text-xs text-muted-foreground">Cost per Acquisition</p>
+                    <p className="text-base font-bold mt-0.5">
+                      {campaign.totalSpend > 0 && campaign.totalRevenue > 0
+                        ? `$${(campaign.totalSpend / Math.max(1, campaign.programs.reduce((s, p) => s + (p.revenue > 0 ? 1 : 0), 0))).toFixed(0)}`
+                        : campaign.totalSpend > 0 ? `$${campaign.totalSpend.toFixed(0)} total` : '—'}
+                    </p>
+                  </div>
+                  {/* ROI — kept as supplementary */}
+                  <div className="p-3 rounded-lg bg-muted/40">
+                    <p className="text-xs text-muted-foreground">Financial ROI</p>
+                    <p className={`text-base font-bold mt-0.5 ${campaign.roi >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
+                      {campaign.roi >= 0 ? '+' : ''}{campaign.roi.toFixed(1)}%
+                    </p>
                   </div>
                 </div>
 

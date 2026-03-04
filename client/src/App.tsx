@@ -12,6 +12,7 @@ import Overview from "./pages/Overview";
 
 // ── MARKETING & PROGRAMS / Campaigns ──
 import StrategicCampaigns from "./pages/StrategicCampaigns";
+import Advertising from "./pages/Advertising";
 import MetaAds from "./pages/MetaAds";
 import MetaAdsCampaignDetail from "./pages/MetaAdsCampaignDetail";
 import CampaignDetail from "./pages/CampaignDetail";
@@ -24,6 +25,8 @@ import BudgetManager from "./pages/BudgetManager";
 // ── MARKETING & PROGRAMS / Intelligence ──
 import MarketingIntelligence from "./pages/MarketingIntelligence";
 import AIActions from "./pages/AIActions";
+import MarketResearch from "./pages/MarketResearch";
+import ActionPlan from "./pages/ActionPlan";
 import Performance from "./pages/Performance";
 import ROI from "./pages/ROI";
 import Revenue from "./pages/Revenue";
@@ -46,6 +49,7 @@ import MemberProfile from "./pages/MemberProfile";
 import Duplicates from "./pages/Duplicates";
 import Leads from "./pages/Leads";
 import Guests from "./pages/Guests";
+import ProMembers from "./pages/ProMembers";
 
 // ── AUDIENCE / Communication ──
 import Announcements from "./pages/Announcements";
@@ -76,8 +80,10 @@ import AnniversaryGiveaway from "./pages/AnniversaryGiveaway";
 import AnniversaryGiveawayApplication from "./pages/AnniversaryGiveawayApplication";
 import AnniversaryGiveawayThankYou from "./pages/AnniversaryGiveawayThankYou";
 import AnnualGiveaway from "./pages/AnnualGiveaway";
+import TrialSessionDetail from "./pages/TrialSessionDetail";
 import AnnualGiveawayActions from "./pages/AnnualGiveawayActions";
 import Tasks from "./pages/Tasks";
+import AIWorkspace from "./pages/AIWorkspace";
 
 // Pages that already have DashboardLayout internally — wrap them with a passthrough
 // so we don't double-nest SidebarProvider. We strip their internal layout via a
@@ -91,13 +97,14 @@ function DashboardRoutes() {
       <Switch>
         {/* ── Root → Home ── */}
         <Route path="/" component={Home} />
-        <Route path="/overview" component={Overview} />
+        <Route path="/overview">{() => { window.location.replace('/'); return null; }}</Route>
 
         {/* ── MARKETING & PROGRAMS / Campaigns ── */}
         <Route path="/campaigns" component={StrategicCampaigns} />
         <Route path="/campaigns/strategic" component={StrategicCampaigns} />
         <Route path="/campaigns/meta-ads" component={MetaAds} />
         <Route path="/campaigns/meta-ads/campaign/:id" component={MetaAdsCampaignDetail} />
+        <Route path="/advertising" component={Advertising} />
         <Route path="/campaign/:id" component={CampaignDetail} />
         <Route path="/category/:id" component={CategoryDetail} />
         <Route path="/campaign-visuals" component={CampaignVisuals} />
@@ -108,6 +115,8 @@ function DashboardRoutes() {
         {/* ── MARKETING & PROGRAMS / Intelligence ── */}
         <Route path="/intelligence" component={MarketingIntelligence} />
         <Route path="/intelligence/ai-actions" component={AIActions} />
+        <Route path="/intelligence/market-research" component={MarketResearch} />
+        <Route path="/intelligence/action-plan">{() => { window.location.replace('/workspace'); return null; }}</Route>
         <Route path="/intelligence/performance" component={Performance} />
         <Route path="/intelligence/revenue" component={Revenue} />
         <Route path="/intelligence/reports" component={Reports} />
@@ -120,6 +129,8 @@ function DashboardRoutes() {
         <Route path="/programs/junior-summer-camp" component={JuniorCampDashboard} />
         <Route path="/programs/leagues" component={Leagues} />
         <Route path="/programs/annual-giveaway" component={AnnualGiveaway} />
+        <Route path="/programs/trial-session" component={TrialSessionDetail} />
+        <Route path="/programs/4" component={TrialSessionDetail} />
 
         {/* ── PROMOTIONS ── */}
         <Route path="/promotions/annual-giveaway" component={AnnualGiveaway} />
@@ -131,6 +142,7 @@ function DashboardRoutes() {
         <Route path="/list/members/:id" component={MemberProfile} />
         <Route path="/list/leads" component={Leads} />
         <Route path="/list/guests" component={Guests} />
+        <Route path="/pro-members" component={ProMembers} />
         <Route path="/duplicates" component={Duplicates} />
 
         {/* ── AUDIENCE / Communication ── */}
@@ -149,6 +161,9 @@ function DashboardRoutes() {
         <Route path="/website/instagram/analytics" component={InstagramAnalytics} />
         <Route path="/website/news" component={NewsManager} />
 
+        {/* ── WORKSPACE ── */}
+        <Route path="/workspace" component={AIWorkspace} />
+
         {/* ── SETTINGS ── */}
         <Route path="/settings" component={AccountSettings} />
         <Route path="/settings/integrations" component={Integrations} />
@@ -162,6 +177,7 @@ function DashboardRoutes() {
         <Route path="/channels" component={Channels} />
         <Route path="/members" component={Members} />
         <Route path="/members/:id" component={MemberProfile} />
+        <Route path="/pro-members" component={ProMembers} />
         <Route path="/revenue" component={Revenue} />
         <Route path="/tasks" component={Tasks} />
         <Route path="/reports" component={Reports} />

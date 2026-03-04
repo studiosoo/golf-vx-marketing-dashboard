@@ -108,3 +108,10 @@ temp/
 
 # Webdev artifacts (checkpoint zips, migrations, etc.)
 .webdev/
+
+# Corrupted sandbox dirs
+.manus/db/
+.meta-ads-cache/
+.git_corrupted_backup/
+.git_broken_backup/
+.git_broken_backup2/

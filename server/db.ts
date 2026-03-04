@@ -138,11 +138,9 @@ export async function getAllCampaigns() {
   const db = await getDb();
   if (!db) return [];
   
-  // Sort by status priority (active first, then planned, paused, completed last)
-  // Then by start date descending within each status group
+  // Sort by display_order first (explicit ordering), then status priority, then start date
   const allCampaigns = await db.select().from(campaigns);
   
-  // Sort in JavaScript to avoid SQL syntax issues
   const statusPriority: Record<string, number> = {
     'active': 1,
     'planned': 2,
@@ -151,14 +149,17 @@ export async function getAllCampaigns() {
   };
   
   return allCampaigns.sort((a, b) => {
+    // Primary: display_order (null/undefined goes last)
+    const orderA = a.display_order ?? 9999;
+    const orderB = b.display_order ?? 9999;
+    if (orderA !== orderB) return orderA - orderB;
+    
+    // Secondary: status priority
     const priorityA = statusPriority[a.status] || 5;
     const priorityB = statusPriority[b.status] || 5;
+    if (priorityA !== priorityB) return priorityA - priorityB;
     
-    if (priorityA !== priorityB) {
-      return priorityA - priorityB;
-    }
-    
-    // Within same status, sort by start date descending
+    // Tertiary: start date descending
     const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
     const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
     return dateB - dateA;
@@ -452,9 +453,12 @@ export async function getMemberStats() {
     .select({
       totalMembers: sql<number>`COUNT(*)`,
       activeMembers: sql<number>`SUM(CASE WHEN ${members.status} = 'active' THEN 1 ELSE 0 END)`,
+      // Active paying members = All Access Aces + Swing Savers + Golf VX Pro + Family (all active tiers)
+      activePayingMembers: sql<number>`SUM(CASE WHEN ${members.status} = 'active' AND ${members.membershipTier} IN ('all_access_aces', 'swing_savers', 'golf_vx_pro', 'family', 'monthly', 'annual', 'corporate') THEN 1 ELSE 0 END)`,
       allAccessCount: sql<number>`SUM(CASE WHEN ${members.membershipTier} = 'all_access_aces' AND ${members.status} = 'active' THEN 1 ELSE 0 END)`,
       swingSaversCount: sql<number>`SUM(CASE WHEN ${members.membershipTier} = 'swing_savers' AND ${members.status} = 'active' THEN 1 ELSE 0 END)`,
       golfVxProCount: sql<number>`SUM(CASE WHEN ${members.membershipTier} = 'golf_vx_pro' AND ${members.status} = 'active' THEN 1 ELSE 0 END)`,
+      familyCount: sql<number>`SUM(CASE WHEN ${members.membershipTier} = 'family' AND ${members.status} = 'active' THEN 1 ELSE 0 END)`,
       totalLifetimeValue: sql<string>`SUM(${members.lifetimeValue})`,
       // Actual MRR from Boomerang payment data
       allAccessMRR: sql<string>`SUM(CASE WHEN ${members.membershipTier} = 'all_access_aces' AND ${members.status} = 'active' THEN COALESCE(${members.monthlyAmount}, 0) ELSE 0 END)`,
@@ -1226,13 +1230,15 @@ export async function getCfFunnelSummary() {
       f.name AS funnelName,
       f.archived,
       f.opt_in_count AS optInCount,
+      COALESCE(f.unique_visitors, 0) AS uniqueVisitors,
+      COALESCE(f.page_views, 0) AS pageViews,
       f.last_synced_at AS lastSyncedAt,
       COUNT(DISTINCT s.id) AS submissionCount,
       MAX(s.submitted_at) AS lastSubmission
     FROM cf_funnels f
     LEFT JOIN cf_form_submissions s ON s.funnel_id = f.cf_id
     WHERE f.archived = 0
-    GROUP BY f.cf_id, f.name, f.archived, f.opt_in_count, f.last_synced_at
+    GROUP BY f.cf_id, f.name, f.archived, f.opt_in_count, f.unique_visitors, f.page_views, f.last_synced_at
     ORDER BY submissionCount DESC
   `);
   return rows[0] as unknown as Array<{
@@ -1240,8 +1246,20 @@ export async function getCfFunnelSummary() {
     funnelName: string;
     archived: boolean;
     optInCount: number;
+    uniqueVisitors: number;
+    pageViews: number;
     lastSyncedAt: Date;
     submissionCount: number;
     lastSubmission: Date | null;
   }>;
+}
+
+export async function updateFunnelUvPv(cfId: number, uniqueVisitors: number, pageViews: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db
+    .update(cfFunnels)
+    .set({ uniqueVisitors, pageViews })
+    .where(eq(cfFunnels.cfId, cfId));
+  return { success: true };
 }

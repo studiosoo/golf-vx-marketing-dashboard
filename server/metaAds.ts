@@ -183,37 +183,65 @@ export async function getCampaignInsights(
  * Get all campaigns with their insights
  */
 export async function getAllCampaignsWithInsights(datePreset: string = "last_30d") {
-  // Import cache module
   const { readMetaAdsCache } = await import('./metaAdsCache');
-  
-  // Read all insights from cache
-  const allInsights = readMetaAdsCache();
-  
-  // Transform cache data to match expected campaign format
-  // Status and objective are now stored in the cache from MCP refresh
-  const campaignsWithInsights = allInsights.map((insight: any) => ({
-    id: insight.campaign_id,
-    name: insight.campaign_name,
-    status: insight.effective_status || insight.status || "UNKNOWN",
-    objective: insight.objective || "UNKNOWN",
-    created_time: insight.created_time || "",
-    updated_time: insight.updated_time || "",
-    insights: {
-      campaign_id: insight.campaign_id || "",
-      campaign_name: insight.campaign_name || "",
-      impressions: insight.impressions || "0",
-      clicks: insight.clicks || "0",
-      spend: insight.spend || "0",
-      reach: insight.reach || "0",
-      cpc: insight.cpc || "0",
-      cpm: insight.cpm || "0",
-      ctr: insight.ctr || "0",
-      date_start: insight.date_start || "",
-      date_stop: insight.date_stop || "",
-    },
-  }));
-  
-  return campaignsWithInsights;
+
+  const cachedInsights = readMetaAdsCache();
+
+  // If cache has data, use it
+  if (cachedInsights.length > 0) {
+    return cachedInsights.map((insight: any) => ({
+      id: insight.campaign_id,
+      name: insight.campaign_name,
+      status: insight.effective_status || insight.status || "UNKNOWN",
+      objective: insight.objective || "UNKNOWN",
+      created_time: insight.created_time || "",
+      updated_time: insight.updated_time || "",
+      insights: {
+        campaign_id: insight.campaign_id || "",
+        campaign_name: insight.campaign_name || "",
+        impressions: insight.impressions || "0",
+        clicks: insight.clicks || "0",
+        spend: insight.spend || "0",
+        reach: insight.reach || "0",
+        cpc: insight.cpc || "0",
+        cpm: insight.cpm || "0",
+        ctr: insight.ctr || "0",
+        date_start: insight.date_start || "",
+        date_stop: insight.date_stop || "",
+      },
+    }));
+  }
+
+  // Cache empty — fallback to direct Meta Graph API
+  console.log('[Meta Ads] Cache empty, falling back to direct Graph API...');
+  try {
+    const campaigns = await getCampaigns();
+    const results = await Promise.all(
+      campaigns.map(async (c) => {
+        const insights = await getCampaignInsights(c.id, datePreset).catch(() => null);
+        return {
+          id: c.id,
+          name: c.name,
+          status: c.status,
+          objective: c.objective,
+          created_time: c.created_time,
+          updated_time: c.updated_time,
+          insights: insights ?? {
+            campaign_id: c.id,
+            campaign_name: c.name,
+            impressions: "0", clicks: "0", spend: "0",
+            reach: "0", cpc: "0", cpm: "0", ctr: "0",
+            date_start: "", date_stop: "",
+          },
+        };
+      })
+    );
+    console.log(`[Meta Ads] Direct API returned ${results.length} campaigns`);
+    return results;
+  } catch (err) {
+    console.error('[Meta Ads] Direct API fallback failed:', err);
+    return [];
+  }
 }
 
 /**

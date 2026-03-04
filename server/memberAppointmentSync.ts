@@ -5,8 +5,17 @@ import mysql from "mysql2/promise";
 import { memberAppointments, members, campaigns } from "../drizzle/schema";
 import { eq, and } from "drizzle-orm";
 
-const connection = mysql.createPool(process.env.DATABASE_URL!);
-const dbClient = drizzle(connection);
+// Lazy initialization — DATABASE_URL is injected at runtime by Manus platform
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let _dbClient: any = null;
+
+function getDbClient() {
+  if (!_dbClient && process.env.DATABASE_URL) {
+    const connection = mysql.createPool(process.env.DATABASE_URL);
+    _dbClient = drizzle(connection);
+  }
+  return _dbClient;
+}
 
 /**
  * Sync Acuity appointments with member records
@@ -15,6 +24,12 @@ const dbClient = drizzle(connection);
  * - Tracks appointment history for each member
  */
 export async function syncAcuityAppointments() {
+  const dbClient = getDbClient();
+  if (!dbClient) {
+    console.warn("[memberAppointmentSync] Database not available — skipping sync");
+    return { totalAppointments: 0, newMembers: 0, newAppointments: 0, updatedAppointments: 0 };
+  }
+
   console.log("Starting Acuity appointment sync...");
   
   // Fetch appointments from last 90 days
@@ -143,6 +158,8 @@ export async function syncAcuityAppointments() {
  * Get appointment history for a specific member
  */
 export async function getMemberAppointments(memberId: number) {
+  const dbClient = getDbClient();
+  if (!dbClient) return [];
   return await dbClient.select()
     .from(memberAppointments)
     .where(eq(memberAppointments.memberId, memberId))
@@ -153,6 +170,8 @@ export async function getMemberAppointments(memberId: number) {
  * Get all appointments for a specific campaign
  */
 export async function getCampaignAppointments(campaignId: number) {
+  const dbClient = getDbClient();
+  if (!dbClient) return [];
   return await dbClient.select()
     .from(memberAppointments)
     .where(eq(memberAppointments.campaignId, campaignId))
