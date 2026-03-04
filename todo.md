@@ -874,3 +874,20 @@
 - [x] aiWorkspace.analyze tRPC endpoint with Golf VX context-aware system prompts per analysis type
 - [x] aiWorkspace.analyze: structured output format (Executive Summary, Key Insights, Recommended Actions, KPIs, Risks)
 - [x] AI Workspace registered in sidebar (/workspace) and App.tsx
+
+## Session 2026-03-04 Part 14 — Bug Fixes + Chicago Golf Show Event Advertising
+- [ ] Fix aiWorkspace.analyze tRPC error: "No procedure found on path"
+- [ ] Add event_advertising table + seed Chicago Golf Show 2026 (booth, ~2500 visitors, 50 promos, 1 team signup)
+- [ ] Add Events tab to Advertising page with event cards, KPI metrics, ROI tracking
+- [ ] Fix stale tsc watcher: add drizzle/ to tsconfig includes so schema exports are recognized
+
+## Session 2026-03-04 Part 14 — Bug Fixes + Reorder + Chicago Golf Show
+- [ ] Fix 1-Hour Trial Session bookings showing as "—" (kpiActual not rendering as number)
+- [ ] Reorder Programs: Annual Membership Giveaway first, Winter Clinic second (ongoing)
+- [ ] Add Chicago Golf Show 2026 to print_advertising (trade_show type, ~2500 visitors, 50 promos)
+- [ ] Fix stale tsc watcher: add drizzle/ to tsconfig includes
+- [ ] Fix aiWorkspace.analyze tRPC error (server restart applied)
+
+## Session 2026-03-04 Part 15 — Programs Bug Fixes (Round 2)
+- [x] Fix 1-Hour Trial Session bookings showing as "—" (goalTemplates.ts 'leads' key added, but kpiActual still not rendering)
+- [x] Fix Programs & Events sort order: Annual Membership Giveaway first, Winter Clinic second (display_order column added to DB)

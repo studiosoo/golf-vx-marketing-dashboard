@@ -127,6 +127,13 @@
       "when": 1772581248436,
       "tag": "0017_talented_silver_sable",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1772584909700,
+      "tag": "0018_large_meggan",
+      "breakpoints": true
     }
   ]
 }

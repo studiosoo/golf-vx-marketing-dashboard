@@ -138,11 +138,9 @@ export async function getAllCampaigns() {
   const db = await getDb();
   if (!db) return [];
   
-  // Sort by status priority (active first, then planned, paused, completed last)
-  // Then by start date descending within each status group
+  // Sort by display_order first (explicit ordering), then status priority, then start date
   const allCampaigns = await db.select().from(campaigns);
   
-  // Sort in JavaScript to avoid SQL syntax issues
   const statusPriority: Record<string, number> = {
     'active': 1,
     'planned': 2,
@@ -151,14 +149,17 @@ export async function getAllCampaigns() {
   };
   
   return allCampaigns.sort((a, b) => {
+    // Primary: display_order (null/undefined goes last)
+    const orderA = a.display_order ?? 9999;
+    const orderB = b.display_order ?? 9999;
+    if (orderA !== orderB) return orderA - orderB;
+    
+    // Secondary: status priority
     const priorityA = statusPriority[a.status] || 5;
     const priorityB = statusPriority[b.status] || 5;
+    if (priorityA !== priorityB) return priorityA - priorityB;
     
-    if (priorityA !== priorityB) {
-      return priorityA - priorityB;
-    }
-    
-    // Within same status, sort by start date descending
+    // Tertiary: start date descending
     const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
     const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
     return dateB - dateA;

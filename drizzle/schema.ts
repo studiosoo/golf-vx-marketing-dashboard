@@ -76,6 +76,7 @@ export const campaigns = mysqlTable("campaigns", {
   kpiActual: decimal("kpiActual", { precision: 12, scale: 4 }),
   kpiUnit: varchar("kpiUnit", { length: 50 }), // e.g., "USD", "%", "ratio"
   performanceScore: int("performanceScore"), // 0-100 score based on goal achievement
+  display_order: int("display_order").default(9999), // Explicit card ordering
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, (table) => ({
