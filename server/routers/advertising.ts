@@ -701,21 +701,23 @@ export const revenueRouter = router({
         const t = apt.type.toLowerCase();
         return t.includes('trial') || t.includes('intro') || t.includes('free') || t.includes('guest pass') || t.includes('first visit');
       });
-      const typeMap = new Map<string, { name: string; count: number; paidCount: number; revenue: number; bookings: any[] }>();
+      const { extractAcquisitionSource } = await import('../acuity');
+      const typeMap = new Map<string, { typeId: string; typeName: string; priceLabel: string; name: string; count: number; paidCount: number; revenue: number; totalRevenue: number; bookings: any[] }>();
       for (const apt of trialAppts) {
         const key = apt.type;
-        const paid = parseFloat(apt.amountPaid || '0');
-        if (!typeMap.has(key)) typeMap.set(key, { name: key, count: 0, paidCount: 0, revenue: 0, bookings: [] });
+        const paidAmt = parseFloat(apt.amountPaid || '0');
+        if (!typeMap.has(key)) typeMap.set(key, { typeId: String(apt.appointmentTypeID || key), typeName: key, priceLabel: key, name: key, count: 0, paidCount: 0, revenue: 0, totalRevenue: 0, bookings: [] });
         const entry = typeMap.get(key)!;
         entry.count += 1;
-        entry.revenue += paid;
-        if (paid > 0) entry.paidCount += 1;
-        entry.bookings.push({ id: apt.id, firstName: apt.firstName, lastName: apt.lastName, email: apt.email, date: apt.date, time: apt.time, amountPaid: apt.amountPaid, type: apt.type });
+        entry.revenue += paidAmt;
+        entry.totalRevenue += paidAmt;
+        if (paidAmt > 0) entry.paidCount += 1;
+        entry.bookings.push({ id: apt.id, firstName: apt.firstName, lastName: apt.lastName, email: apt.email, datetime: apt.datetime || apt.date, amountPaid: apt.amountPaid, type: apt.type, paid: apt.paid, source: extractAcquisitionSource(apt), calendar: apt.calendar });
       }
       const types = Array.from(typeMap.values()).map(t => ({ ...t, avgPrice: t.count > 0 ? t.revenue / t.count : 0 }));
       const totalBookings = trialAppts.length;
       const totalRevenue = trialAppts.reduce((s: number, a: any) => s + parseFloat(a.amountPaid || '0'), 0);
-      const allBookings = trialAppts.map((apt: any) => ({ id: apt.id, firstName: apt.firstName, lastName: apt.lastName, email: apt.email, date: apt.date, time: apt.time, amountPaid: apt.amountPaid, type: apt.type }));
+      const allBookings = trialAppts.map((apt: any, idx: number) => ({ id: apt.id ?? idx, firstName: apt.firstName, lastName: apt.lastName, email: apt.email, datetime: apt.datetime || apt.date, amountPaid: apt.amountPaid, type: apt.type, paid: apt.paid, source: extractAcquisitionSource(apt), calendar: apt.calendar }));
       return { types, totalBookings, totalRevenue, allBookings };
     } catch (err) {
       return { types: [], totalBookings: 0, totalRevenue: 0, allBookings: [] };

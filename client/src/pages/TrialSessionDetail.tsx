@@ -86,16 +86,19 @@ function TypeGroupCard({
   totalRevenue,
   paidCount,
 }: {
-  typeName: string;
-  priceLabel: string;
-  bookings: any[];
-  totalRevenue: number;
-  paidCount: number;
+  typeName?: string;
+  priceLabel?: string;
+  bookings?: any[];
+  totalRevenue?: number;
+  paidCount?: number;
 }) {
-  const colors = getTypeColor(priceLabel);
-  const count = bookings.length;
-  const unpaidCount = count - paidCount;
-  const avgPrice = count > 0 ? totalRevenue / count : 0;
+  const safePriceLabel = priceLabel ?? typeName ?? 'Unknown';
+  const safeRevenue = totalRevenue ?? 0;
+  const safePaidCount = paidCount ?? 0;
+  const colors = getTypeColor(safePriceLabel);
+  const count = (bookings ?? []).length;
+  const unpaidCount = count - safePaidCount;
+  const avgPrice = count > 0 ? safeRevenue / count : 0;
 
   return (
     <div className="bg-white rounded-xl border border-[#E0E0E0] p-4 flex flex-col gap-3">
@@ -106,7 +109,7 @@ function TypeGroupCard({
             className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold mb-1"
             style={{ background: colors.bg, color: colors.text, border: `1px solid ${colors.border}` }}
           >
-            {priceLabel}
+            {safePriceLabel}
           </div>
           <h3 className="text-[13px] font-semibold text-[#111111] leading-tight">{typeName}</h3>
         </div>
@@ -119,11 +122,11 @@ function TypeGroupCard({
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 pt-2 border-t border-[#F0F0F0]">
         <div>
-          <p className="text-[13px] font-bold text-[#111111]">{fmtCurrency(totalRevenue)}</p>
+          <p className="text-[13px] font-bold text-[#111111]">{fmtCurrency(safeRevenue)}</p>
           <p className="text-[10px] text-[#AAAAAA]">Revenue</p>
         </div>
         <div>
-          <p className="text-[13px] font-bold text-[#3DB855]">{paidCount}</p>
+          <p className="text-[13px] font-bold text-[#3DB855]">{safePaidCount}</p>
           <p className="text-[10px] text-[#AAAAAA]">Paid</p>
         </div>
         <div>
@@ -235,8 +238,8 @@ export default function TrialSessionDetail() {
       <div>
         <h2 className="text-[15px] font-bold text-[#111111] mb-3">Breakdown by Appointment Type</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {types.map((t: any) => (
-            <TypeGroupCard key={t.typeId} {...t} />
+          {types.map((t: any, i: number) => (
+            <TypeGroupCard key={t.typeId ?? t.name ?? i} {...t} />
           ))}
           {/* Placeholder for $18 Anniversary Peak when added */}
           {types.length < 4 && (
@@ -276,7 +279,7 @@ export default function TrialSessionDetail() {
               const price = parseFloat(booking.amountPaid || booking.price || "0");
               return (
                 <div
-                  key={booking.id}
+                  key={`booking-${booking.id ?? idx}-${idx}`}
                   className={cn(
                     "grid grid-cols-[1fr_1fr_1fr_80px_80px_1fr] gap-3 px-4 py-3 items-center",
                     idx % 2 === 0 ? "bg-white" : "bg-[#FAFAFA]",

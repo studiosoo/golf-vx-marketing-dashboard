@@ -1094,3 +1094,7 @@
 ## Bug Fix: Winter Clinics Email Validation (2026-03-04)
 - [x] Fix invalid_format email validation error on /programs/winter-clinics mutation
 - [x] Relax overly strict email regex to accept all valid email formats
+
+## Bug Fix: Trial Session Page Errors (2026-03-04)
+- [x] Fix TypeError: Cannot read properties of undefined (reading 'toLocaleString') in TypeGroupCard
+- [x] Fix missing key prop warning in TrialSessionDetail list rendering
