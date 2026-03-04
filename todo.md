@@ -891,3 +891,8 @@
 ## Session 2026-03-04 Part 15 — Programs Bug Fixes (Round 2)
 - [x] Fix 1-Hour Trial Session bookings showing as "—" (goalTemplates.ts 'leads' key added, but kpiActual still not rendering)
 - [x] Fix Programs & Events sort order: Annual Membership Giveaway first, Winter Clinic second (display_order column added to DB)
+
+## Session 2026-03-04 Part 16 — Three Improvements
+- [x] Rename Advertising tabs: Meta Ads → Paid Digital, Influencer → Influencer Collabs, Community Outreach → Community Giving, Print / Magazine → Print & Events
+- [x] Add Events tab (Trade Shows) to Advertising page with Chicago Golf Show 2026 seeded (trade show, $1,500 total cost, 2,500 visitors, 50 promos, 12 leads, 1 team signup)
+- [x] Fix stale tsc watcher (confirmed no tsc process running; tsx watch server is clean; stale output is a display artifact in health check tool)

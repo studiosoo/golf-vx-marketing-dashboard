@@ -1671,3 +1671,36 @@ export const printAdvertising = mysqlTable("print_advertising", {
 }));
 export type PrintAdvertising = typeof printAdvertising.$inferSelect;
 export type NewPrintAdvertising = typeof printAdvertising.$inferInsert;
+
+// ─── Event Advertising (Trade Shows, Expos, Sponsorships) ─────────────────────
+export const eventAdvertising = mysqlTable("event_advertising", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  eventName: varchar("event_name", { length: 256 }).notNull(),
+  eventType: mysqlEnum("event_type", ["trade_show", "expo", "sponsorship", "community_event", "golf_tournament", "other"]).notNull().default("trade_show"),
+  venue: varchar("venue", { length: 256 }),
+  location: varchar("location", { length: 256 }),
+  eventDate: date("event_date"),
+  eventEndDate: date("event_end_date"),
+  status: mysqlEnum("event_ad_status", ["upcoming", "active", "completed", "cancelled"]).notNull().default("upcoming"),
+  boothCost: decimal("booth_cost", { precision: 10, scale: 2 }),
+  totalCost: decimal("total_cost", { precision: 10, scale: 2 }),
+  expectedVisitors: int("expected_visitors"),
+  actualVisitors: int("actual_visitors"),
+  promosDistributed: int("promos_distributed"),
+  leadsCollected: int("leads_collected"),
+  teamSignups: int("team_signups"),
+  membershipSignups: int("membership_signups"),
+  revenue: decimal("revenue", { precision: 10, scale: 2 }),
+  boothSize: varchar("booth_size", { length: 64 }),
+  boothNumber: varchar("booth_number", { length: 32 }),
+  contactPerson: varchar("contact_person", { length: 128 }),
+  website: varchar("website", { length: 512 }),
+  notes: text("notes"),
+  createdAt: bigint("created_at", { mode: "number" }).notNull().default(0),
+  updatedAt: bigint("updated_at", { mode: "number" }).notNull().default(0),
+}, (table) => ({
+  eventAdStatusIdx: index("event_ad_status_idx").on(table.status),
+  eventAdDateIdx: index("event_ad_date_idx").on(table.eventDate),
+}));
+export type EventAdvertising = typeof eventAdvertising.$inferSelect;
+export type NewEventAdvertising = typeof eventAdvertising.$inferInsert;

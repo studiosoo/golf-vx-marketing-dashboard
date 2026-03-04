@@ -29,7 +29,7 @@ import * as giveawaySync from "./giveawaySync";
 import { syncGiveawayFromSheets } from "./googleSheetsSync";
 import { calculateCampaignPerformance, GOAL_TEMPLATES } from "./goalTemplates";
 import { eq, desc, sql, inArray, and, gte } from "drizzle-orm";
-import { aiRecommendations, userActions, priorities, influencerPartnerships, communityOutreach, printAdvertising } from "../drizzle/schema";
+import { aiRecommendations, userActions, priorities, influencerPartnerships, communityOutreach, printAdvertising, eventAdvertising } from "../drizzle/schema";
 import { emailCaptureRouter } from "./emailCaptureRouter";
 import { boomerangRouter } from "./boomerangRouter";
 import { communicationRouter } from "./communicationRouter";
@@ -4760,6 +4760,106 @@ When the user provides data (e.g., "we had 12 attendees at Drive Day"), acknowle
         const database = await db.getDb();
         if (!database) throw new Error("DB unavailable");
         await database.delete(printAdvertising).where(eq(printAdvertising.id, input.id));
+        return { success: true };
+      }),
+  }),
+
+  // ─── Event Advertising (Trade Shows, Expos, Sponsorships) ────────────────────
+  eventAd: router({
+    list: protectedProcedure.query(async () => {
+      const database = await getDb();
+      if (!database) throw new Error("DB unavailable");
+      return database.select().from(eventAdvertising).orderBy(desc(eventAdvertising.eventDate));
+    }),
+    create: protectedProcedure
+      .input(z.object({
+        eventName: z.string().min(1),
+        eventType: z.enum(["trade_show","expo","sponsorship","community_event","golf_tournament","other"]).default("trade_show"),
+        venue: z.string().optional(),
+        location: z.string().optional(),
+        eventDate: z.string().optional(),
+        eventEndDate: z.string().optional(),
+        status: z.enum(["upcoming","active","completed","cancelled"]).default("upcoming"),
+        boothCost: z.number().optional(),
+        totalCost: z.number().optional(),
+        expectedVisitors: z.number().int().optional(),
+        actualVisitors: z.number().int().optional(),
+        promosDistributed: z.number().int().optional(),
+        leadsCollected: z.number().int().optional(),
+        teamSignups: z.number().int().optional(),
+        membershipSignups: z.number().int().optional(),
+        revenue: z.number().optional(),
+        boothSize: z.string().optional(),
+        boothNumber: z.string().optional(),
+        contactPerson: z.string().optional(),
+        website: z.string().optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const database = await getDb();
+        if (!database) throw new Error("DB unavailable");
+        const now = Date.now();
+        await database.insert(eventAdvertising).values({
+          eventName: input.eventName,
+          eventType: input.eventType,
+          venue: input.venue,
+          location: input.location,
+          eventDate: input.eventDate || null,
+          eventEndDate: input.eventEndDate || null,
+          status: input.status,
+          boothCost: input.boothCost ? String(input.boothCost) : null,
+          totalCost: input.totalCost ? String(input.totalCost) : null,
+          expectedVisitors: input.expectedVisitors,
+          actualVisitors: input.actualVisitors,
+          promosDistributed: input.promosDistributed,
+          leadsCollected: input.leadsCollected,
+          teamSignups: input.teamSignups,
+          membershipSignups: input.membershipSignups,
+          revenue: input.revenue ? String(input.revenue) : null,
+          boothSize: input.boothSize,
+          boothNumber: input.boothNumber,
+          contactPerson: input.contactPerson,
+          website: input.website,
+          notes: input.notes,
+          createdAt: now,
+          updatedAt: now,
+        });
+        return { success: true };
+      }),
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        actualVisitors: z.number().int().optional(),
+        promosDistributed: z.number().int().optional(),
+        leadsCollected: z.number().int().optional(),
+        teamSignups: z.number().int().optional(),
+        membershipSignups: z.number().int().optional(),
+        revenue: z.number().optional(),
+        status: z.enum(["upcoming","active","completed","cancelled"]).optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const database = await getDb();
+        if (!database) throw new Error("DB unavailable");
+        const { id, ...rest } = input;
+        const updates: Record<string, any> = { updatedAt: Date.now() };
+        if (rest.actualVisitors !== undefined) updates.actualVisitors = rest.actualVisitors;
+        if (rest.promosDistributed !== undefined) updates.promosDistributed = rest.promosDistributed;
+        if (rest.leadsCollected !== undefined) updates.leadsCollected = rest.leadsCollected;
+        if (rest.teamSignups !== undefined) updates.teamSignups = rest.teamSignups;
+        if (rest.membershipSignups !== undefined) updates.membershipSignups = rest.membershipSignups;
+        if (rest.revenue !== undefined) updates.revenue = String(rest.revenue);
+        if (rest.status !== undefined) updates.status = rest.status;
+        if (rest.notes !== undefined) updates.notes = rest.notes;
+        await database.update(eventAdvertising).set(updates).where(eq(eventAdvertising.id, id));
+        return { success: true };
+      }),
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const database = await getDb();
+        if (!database) throw new Error("DB unavailable");
+        await database.delete(eventAdvertising).where(eq(eventAdvertising.id, input.id));
         return { success: true };
       }),
   }),

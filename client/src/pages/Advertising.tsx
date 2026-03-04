@@ -15,7 +15,7 @@ import {
   Building2, School, Trophy, Music, Flame, CheckCircle2,
   XCircle, Clock, AlertCircle, RefreshCw, ExternalLink,
   Edit2, Trash2, ChevronRight, Target, Megaphone, BookOpen,
-  Calendar, QrCode, MapPin, FileText
+  Calendar, QrCode, MapPin, FileText, Ticket, HandHeart, Newspaper
 } from "lucide-react";
 import MetaAds from "./MetaAds";
 
@@ -1148,16 +1148,397 @@ function PrintTab() {
     </div>
   );
 }
+// ─── Events Tab (Trade Shows, Expos, Sponsorships) ───────────────────────────────────
+function EventsTab() {
+  const { data: events, isLoading, refetch } = trpc.eventAd.list.useQuery();
+  const { toast } = useToast();
+  const [showForm, setShowForm] = useState(false);
+  const [editItem, setEditItem] = useState<any>(null);
+  const [form, setForm] = useState({
+    eventName: "", eventType: "trade_show" as const,
+    venue: "", location: "", eventDate: "", eventEndDate: "",
+    status: "upcoming" as const, boothCost: "", totalCost: "",
+    expectedVisitors: "", boothSize: "", contactPerson: "",
+    website: "", notes: "",
+  });
+  const [editForm, setEditForm] = useState({ actualVisitors: "", promosDistributed: "", leadsCollected: "", teamSignups: "", membershipSignups: "", revenue: "", status: "completed" as const, notes: "" });
 
-// ─── Main Advertising Page ─────────────────────────────────────────────────
+  const createMutation = trpc.eventAd.create.useMutation({
+    onSuccess: () => { toast({ title: "Event added" }); setShowForm(false); refetch();
+      setForm({ eventName: "", eventType: "trade_show", venue: "", location: "", eventDate: "", eventEndDate: "", status: "upcoming", boothCost: "", totalCost: "", expectedVisitors: "", boothSize: "", contactPerson: "", website: "", notes: "" }); },
+    onError: (e) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+  });
+  const updateMutation = trpc.eventAd.update.useMutation({
+    onSuccess: () => { toast({ title: "Updated" }); setEditItem(null); refetch(); },
+    onError: (e) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+  });
+  const deleteMutation = trpc.eventAd.delete.useMutation({
+    onSuccess: () => { toast({ title: "Removed" }); refetch(); },
+  });
+
+  const handleCreate = () => {
+    if (!form.eventName) return;
+    createMutation.mutate({
+      eventName: form.eventName, eventType: form.eventType,
+      venue: form.venue || undefined, location: form.location || undefined,
+      eventDate: form.eventDate || undefined, eventEndDate: form.eventEndDate || undefined,
+      status: form.status,
+      boothCost: form.boothCost ? parseFloat(form.boothCost) : undefined,
+      totalCost: form.totalCost ? parseFloat(form.totalCost) : undefined,
+      expectedVisitors: form.expectedVisitors ? parseInt(form.expectedVisitors) : undefined,
+      boothSize: form.boothSize || undefined, contactPerson: form.contactPerson || undefined,
+      website: form.website || undefined, notes: form.notes || undefined,
+    });
+  };
+
+  const handleUpdate = (id: number) => {
+    updateMutation.mutate({
+      id,
+      actualVisitors: editForm.actualVisitors ? parseInt(editForm.actualVisitors) : undefined,
+      promosDistributed: editForm.promosDistributed ? parseInt(editForm.promosDistributed) : undefined,
+      leadsCollected: editForm.leadsCollected ? parseInt(editForm.leadsCollected) : undefined,
+      teamSignups: editForm.teamSignups ? parseInt(editForm.teamSignups) : undefined,
+      membershipSignups: editForm.membershipSignups ? parseInt(editForm.membershipSignups) : undefined,
+      revenue: editForm.revenue ? parseFloat(editForm.revenue) : undefined,
+      status: editForm.status,
+      notes: editForm.notes || undefined,
+    });
+  };
+
+  // KPI summary
+  const totalSpend = events?.reduce((s, e) => s + parseFloat(String(e.totalCost || 0)), 0) ?? 0;
+  const totalVisitors = events?.reduce((s, e) => s + (e.actualVisitors || 0), 0) ?? 0;
+  const totalLeads = events?.reduce((s, e) => s + (e.leadsCollected || 0), 0) ?? 0;
+  const totalPromos = events?.reduce((s, e) => s + (e.promosDistributed || 0), 0) ?? 0;
+
+  const STATUS_COLORS: Record<string, string> = {
+    upcoming: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+    active: "bg-green-500/20 text-green-400 border-green-500/30",
+    completed: "bg-muted/50 text-muted-foreground border-border",
+    cancelled: "bg-red-500/20 text-red-400 border-red-500/30",
+  };
+
+  const EVENT_TYPE_LABELS: Record<string, string> = {
+    trade_show: "Trade Show", expo: "Expo", sponsorship: "Sponsorship",
+    community_event: "Community Event", golf_tournament: "Golf Tournament", other: "Other",
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* KPI row */}
+      <div className="grid grid-cols-4 gap-4">
+        <Card className="bg-card border-border">
+          <CardContent className="pt-5">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-yellow-500/10"><DollarSign size={18} className="text-yellow-400" /></div>
+              <div>
+                <p className="text-xs text-muted-foreground">Total Spend</p>
+                <p className="text-xl font-bold text-foreground">${totalSpend.toLocaleString()}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-card border-border">
+          <CardContent className="pt-5">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-blue-500/10"><Users size={18} className="text-blue-400" /></div>
+              <div>
+                <p className="text-xs text-muted-foreground">Total Visitors Reached</p>
+                <p className="text-xl font-bold text-foreground">{totalVisitors.toLocaleString()}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-card border-border">
+          <CardContent className="pt-5">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-green-500/10"><Target size={18} className="text-green-400" /></div>
+              <div>
+                <p className="text-xs text-muted-foreground">Leads Collected</p>
+                <p className="text-xl font-bold text-foreground">{totalLeads}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-card border-border">
+          <CardContent className="pt-5">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-purple-500/10"><Ticket size={18} className="text-purple-400" /></div>
+              <div>
+                <p className="text-xs text-muted-foreground">Promos Distributed</p>
+                <p className="text-xl font-bold text-foreground">{totalPromos}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Header + Add button */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-foreground">Events & Trade Shows</h2>
+        <Dialog open={showForm} onOpenChange={setShowForm}>
+          <DialogTrigger asChild>
+            <Button size="sm" className="gap-2"><Plus size={14} /> Add Event</Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-lg">
+            <DialogHeader><DialogTitle>New Event / Trade Show</DialogTitle></DialogHeader>
+            <div className="space-y-3 pt-2">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="col-span-2">
+                  <Label>Event Name *</Label>
+                  <Input value={form.eventName} onChange={e => setForm(f => ({...f, eventName: e.target.value}))} placeholder="e.g. Chicago Golf Show 2026" />
+                </div>
+                <div>
+                  <Label>Type</Label>
+                  <Select value={form.eventType} onValueChange={v => setForm(f => ({...f, eventType: v as typeof form.eventType}))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(EVENT_TYPE_LABELS).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Status</Label>
+                  <Select value={form.status} onValueChange={v => setForm(f => ({...f, status: v as typeof form.status}))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {["upcoming","active","completed","cancelled"].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="col-span-2">
+                  <Label>Venue</Label>
+                  <Input value={form.venue} onChange={e => setForm(f => ({...f, venue: e.target.value}))} placeholder="Donald E. Stephens Convention Center" />
+                </div>
+                <div className="col-span-2">
+                  <Label>Location</Label>
+                  <Input value={form.location} onChange={e => setForm(f => ({...f, location: e.target.value}))} placeholder="Rosemont, IL" />
+                </div>
+                <div>
+                  <Label>Start Date</Label>
+                  <Input type="date" value={form.eventDate} onChange={e => setForm(f => ({...f, eventDate: e.target.value}))} />
+                </div>
+                <div>
+                  <Label>End Date</Label>
+                  <Input type="date" value={form.eventEndDate} onChange={e => setForm(f => ({...f, eventEndDate: e.target.value}))} />
+                </div>
+                <div>
+                  <Label>Booth Cost ($)</Label>
+                  <Input type="number" value={form.boothCost} onChange={e => setForm(f => ({...f, boothCost: e.target.value}))} placeholder="1200" />
+                </div>
+                <div>
+                  <Label>Total Cost ($)</Label>
+                  <Input type="number" value={form.totalCost} onChange={e => setForm(f => ({...f, totalCost: e.target.value}))} placeholder="1500" />
+                </div>
+                <div>
+                  <Label>Expected Visitors</Label>
+                  <Input type="number" value={form.expectedVisitors} onChange={e => setForm(f => ({...f, expectedVisitors: e.target.value}))} placeholder="2500" />
+                </div>
+                <div>
+                  <Label>Booth Size</Label>
+                  <Input value={form.boothSize} onChange={e => setForm(f => ({...f, boothSize: e.target.value}))} placeholder="10x10" />
+                </div>
+                <div className="col-span-2">
+                  <Label>Website</Label>
+                  <Input value={form.website} onChange={e => setForm(f => ({...f, website: e.target.value}))} placeholder="https://chicagogolfshow.com" />
+                </div>
+                <div className="col-span-2">
+                  <Label>Notes</Label>
+                  <Textarea value={form.notes} onChange={e => setForm(f => ({...f, notes: e.target.value}))} rows={2} />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-1">
+                <Button variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>
+                <Button onClick={handleCreate} disabled={createMutation.isPending}>
+                  {createMutation.isPending ? "Saving…" : "Save"}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Event cards */}
+      {isLoading ? (
+        <div className="text-muted-foreground text-sm">Loading events…</div>
+      ) : !events?.length ? (
+        <Card className="bg-card border-border">
+          <CardContent className="py-12 text-center">
+            <Ticket size={32} className="mx-auto mb-3 text-muted-foreground" />
+            <p className="text-muted-foreground">No events yet. Click "Add Event" to get started.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {events.map(ev => {
+            const boothCost = parseFloat(String(ev.boothCost || 0));
+            const totalCost = parseFloat(String(ev.totalCost || 0));
+            const costPerVisitor = ev.actualVisitors && totalCost > 0 ? (totalCost / ev.actualVisitors).toFixed(2) : null;
+            const isEditing = editItem?.id === ev.id;
+            return (
+              <Card key={ev.id} className="bg-card border-border">
+                <CardContent className="pt-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="p-2 rounded-lg bg-yellow-500/10">
+                          <Ticket size={16} className="text-yellow-400" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-foreground">{ev.eventName}</h3>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <Badge variant="outline" className="text-xs">{EVENT_TYPE_LABELS[ev.eventType] || ev.eventType}</Badge>
+                            <Badge variant="outline" className={`text-xs border ${STATUS_COLORS[ev.status]}`}>{ev.status}</Badge>
+                            {ev.boothSize && <span className="text-xs text-muted-foreground">Booth: {ev.boothSize}</span>}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Date + location */}
+                      <div className="flex flex-wrap gap-4 text-xs text-muted-foreground mb-3">
+                        {ev.eventDate && (
+                          <span className="flex items-center gap-1">
+                            <Calendar size={11} />
+                            {new Date(ev.eventDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                            {ev.eventEndDate && ev.eventEndDate !== ev.eventDate && (
+                              <> → {new Date(ev.eventEndDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</>
+                            )}
+                          </span>
+                        )}
+                        {ev.venue && <span className="flex items-center gap-1"><Building2 size={11} />{ev.venue}</span>}
+                        {ev.location && <span className="flex items-center gap-1"><MapPin size={11} />{ev.location}</span>}
+                        {ev.website && (
+                          <a href={ev.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-yellow-400 hover:underline">
+                            <Globe size={11} />{ev.website.replace("https://","")}
+                          </a>
+                        )}
+                      </div>
+
+                      {/* Key metrics */}
+                      <div className="grid grid-cols-4 gap-3 mb-3">
+                        <div className="bg-muted/30 rounded-lg p-3">
+                          <p className="text-xs text-muted-foreground">Total Cost</p>
+                          <p className="text-lg font-bold text-foreground">${totalCost.toLocaleString()}</p>
+                          {boothCost > 0 && <p className="text-xs text-muted-foreground">Booth: ${boothCost.toLocaleString()}</p>}
+                        </div>
+                        <div className="bg-muted/30 rounded-lg p-3">
+                          <p className="text-xs text-muted-foreground">Visitors</p>
+                          <p className="text-lg font-bold text-foreground">{(ev.actualVisitors ?? ev.expectedVisitors ?? 0).toLocaleString()}</p>
+                          {ev.expectedVisitors && ev.actualVisitors !== null && ev.actualVisitors !== undefined && (
+                            <p className="text-xs text-muted-foreground">Goal: {ev.expectedVisitors.toLocaleString()}</p>
+                          )}
+                        </div>
+                        <div className="bg-muted/30 rounded-lg p-3">
+                          <p className="text-xs text-muted-foreground">Promos Out</p>
+                          <p className="text-lg font-bold text-foreground">{ev.promosDistributed ?? 0}</p>
+                          {ev.leadsCollected !== null && ev.leadsCollected !== undefined && (
+                            <p className="text-xs text-muted-foreground">{ev.leadsCollected} leads</p>
+                          )}
+                        </div>
+                        <div className="bg-muted/30 rounded-lg p-3">
+                          <p className="text-xs text-muted-foreground">Team Signups</p>
+                          <p className="text-lg font-bold text-yellow-400">{ev.teamSignups ?? 0}</p>
+                          {costPerVisitor && <p className="text-xs text-muted-foreground">${costPerVisitor}/visitor</p>}
+                        </div>
+                      </div>
+
+                      {ev.notes && (
+                        <p className="text-xs text-muted-foreground bg-muted/20 rounded p-2 border border-border">{ev.notes}</p>
+                      )}
+
+                      {/* Inline edit for results */}
+                      {isEditing && (
+                        <div className="mt-4 p-4 bg-muted/20 rounded-lg border border-border space-y-3">
+                          <p className="text-sm font-medium text-foreground">Update Results</p>
+                          <div className="grid grid-cols-3 gap-3">
+                            <div>
+                              <Label className="text-xs">Actual Visitors</Label>
+                              <Input type="number" value={editForm.actualVisitors} onChange={e => setEditForm(f => ({...f, actualVisitors: e.target.value}))} placeholder={String(ev.actualVisitors ?? ev.expectedVisitors ?? "")} />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Promos Distributed</Label>
+                              <Input type="number" value={editForm.promosDistributed} onChange={e => setEditForm(f => ({...f, promosDistributed: e.target.value}))} placeholder={String(ev.promosDistributed ?? "")} />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Leads Collected</Label>
+                              <Input type="number" value={editForm.leadsCollected} onChange={e => setEditForm(f => ({...f, leadsCollected: e.target.value}))} placeholder={String(ev.leadsCollected ?? "")} />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Team Signups</Label>
+                              <Input type="number" value={editForm.teamSignups} onChange={e => setEditForm(f => ({...f, teamSignups: e.target.value}))} placeholder={String(ev.teamSignups ?? "")} />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Membership Signups</Label>
+                              <Input type="number" value={editForm.membershipSignups} onChange={e => setEditForm(f => ({...f, membershipSignups: e.target.value}))} placeholder={String(ev.membershipSignups ?? "")} />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Revenue ($)</Label>
+                              <Input type="number" value={editForm.revenue} onChange={e => setEditForm(f => ({...f, revenue: e.target.value}))} placeholder={String(ev.revenue ?? "0")} />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Status</Label>
+                              <Select value={editForm.status} onValueChange={v => setEditForm(f => ({...f, status: v as typeof editForm.status}))}>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                  {["upcoming","active","completed","cancelled"].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="col-span-2">
+                              <Label className="text-xs">Notes</Label>
+                              <Input value={editForm.notes} onChange={e => setEditForm(f => ({...f, notes: e.target.value}))} placeholder={ev.notes || ""} />
+                            </div>
+                          </div>
+                          <div className="flex gap-2 justify-end">
+                            <Button variant="outline" size="sm" onClick={() => setEditItem(null)}>Cancel</Button>
+                            <Button size="sm" onClick={() => handleUpdate(ev.id)} disabled={updateMutation.isPending}>
+                              {updateMutation.isPending ? "Saving…" : "Save Results"}
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        variant="ghost" size="sm"
+                        onClick={() => {
+                          setEditItem(ev);
+                          setEditForm({ actualVisitors: String(ev.actualVisitors ?? ""), promosDistributed: String(ev.promosDistributed ?? ""), leadsCollected: String(ev.leadsCollected ?? ""), teamSignups: String(ev.teamSignups ?? ""), membershipSignups: String(ev.membershipSignups ?? ""), revenue: String(ev.revenue ?? ""), status: ev.status as any, notes: ev.notes || "" });
+                        }}
+                      >
+                        <Edit2 size={14} />
+                      </Button>
+                      <Button
+                        variant="ghost" size="sm"
+                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                        onClick={() => { if (confirm(`Remove ${ev.eventName}?`)) deleteMutation.mutate({ id: ev.id }); }}
+                      >
+                        <Trash2 size={14} />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Main Advertising Page ──────────────────────────────────────────────────
 export default function Advertising() {
-  const [tab, setTab] = useState<"meta" | "influencer" | "outreach" | "print">("meta");
+  const [tab, setTab] = useState<"meta" | "influencer" | "outreach" | "print" | "events">("meta");
 
   const TABS = [
-    { id: "meta" as const, label: "Meta Ads", icon: <BarChart3 size={15} /> },
-    { id: "influencer" as const, label: "Influencer", icon: <Instagram size={15} /> },
-    { id: "outreach" as const, label: "Community Outreach", icon: <Building2 size={15} /> },
-    { id: "print" as const, label: "Print / Magazine", icon: <BookOpen size={15} /> },
+    { id: "meta" as const, label: "Paid Digital", icon: <BarChart3 size={15} /> },
+    { id: "influencer" as const, label: "Influencer Collabs", icon: <Instagram size={15} /> },
+    { id: "outreach" as const, label: "Community Giving", icon: <HandHeart size={15} /> },
+    { id: "print" as const, label: "Print & Events", icon: <Newspaper size={15} /> },
+    { id: "events" as const, label: "Trade Shows", icon: <Ticket size={15} /> },
   ];
 
   return (
@@ -1165,11 +1546,11 @@ export default function Advertising() {
       {/* Page header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Advertising</h1>
-        <p className="text-muted-foreground text-sm mt-1">Paid media, influencer partnerships, and community sponsorships</p>
+        <p className="text-muted-foreground text-sm mt-1">Paid digital, influencer collabs, community giving, print, and trade shows</p>
       </div>
 
       {/* Tab navigation */}
-      <div className="flex gap-1 bg-muted/30 rounded-lg p-1 w-fit">
+      <div className="flex gap-1 bg-muted/30 rounded-lg p-1 w-fit flex-wrap">
         {TABS.map(t => (
           <button
             key={t.id}
@@ -1190,6 +1571,7 @@ export default function Advertising() {
       {tab === "influencer" && <InfluencerTab />}
       {tab === "outreach" && <OutreachTab />}
       {tab === "print" && <PrintTab />}
+      {tab === "events" && <EventsTab />}
     </div>
   );
 }
