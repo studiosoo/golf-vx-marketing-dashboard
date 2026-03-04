@@ -75,12 +75,12 @@ export function AIInsightsPanel({
   const [insights, setInsights] = useState<any>(null);
   const [expandedSection, setExpandedSection] = useState<string | null>("keyInsights");
 
-  const generateMutation = trpc.campaigns.generateInsights.useMutation({
-    onSuccess: (data) => {
+  const generateMutation = trpc.campaignsAi.generateInsights.useMutation({
+    onSuccess: (data: any) => {
       setInsights(data);
       toast.success("AI analysis complete");
     },
-    onError: (err) => toast.error(`Analysis failed: ${err.message}`),
+    onError: (err: any) => toast.error(`Analysis failed: ${err.message}`),
   });
 
   const toggle = (key: string) =>

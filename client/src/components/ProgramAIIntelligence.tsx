@@ -40,12 +40,12 @@ export function ProgramAIIntelligence({ campaignId, programName }: Props) {
   const [expanded, setExpanded] = useState<string | null>("keyInsights");
   const { toast } = useToast();
 
-  const generateMutation = trpc.campaigns.generateInsights.useMutation({
-    onSuccess: (data) => {
+  const generateMutation = trpc.campaignsAi.generateInsights.useMutation({
+    onSuccess: (data: any) => {
       setInsights(data);
       toast({ title: "Analysis Complete", description: "Marketing intelligence report generated." });
     },
-    onError: (err) => {
+    onError: (err: any) => {
       toast({ title: "Analysis Failed", description: err.message, variant: "destructive" });
     },
   });
