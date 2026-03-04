@@ -1014,3 +1014,7 @@
 - [x] Clean up "(pro membership)" suffix from merged member names
 - [x] Update ProMembers.tsx to display boomerangEmail below primary email with yellow dot indicator
 - [x] TypeScript: 0 errors
+
+## Session 2026-03-04 Part 5 — Danny Wojtowicz Email Fix
+- [x] Fix Danny Wojtowicz email typo: 1dannywojgolf@gmail.com → dannywojgolf@gmail.com
+- [x] Merge Daniel Wojtowicz (inactive, dannywojgolf@gmail.com) into Danny Wojtowicz (active) as same person
