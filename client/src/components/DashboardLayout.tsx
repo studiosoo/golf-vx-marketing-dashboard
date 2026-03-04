@@ -78,12 +78,6 @@ const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
     icon: LayoutDashboard,
   },
   {
-    heading: "Strategic",
-    items: [
-      { label: "Campaigns", path: "/strategic-campaigns", icon: Target },
-    ],
-  },
-  {
     heading: "Intelligence",
     items: [
       {

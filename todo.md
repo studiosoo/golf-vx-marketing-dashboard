@@ -1021,3 +1021,11 @@
 
 ## Session 2026-03-04 Part 6 — Reports Page Bug Fix
 - [x] Fix TypeError: revSummary.map is not a function on /intelligence/reports page
+
+## Session 2026-03-04 Part 7 — Dashboard Restructure
+- [x] Remove AI Actions and Quick Access sections from Dashboard
+- [x] Remove Strategic Campaigns ROI section from Dashboard
+- [x] Merge Revenue section inline into Dashboard (from Revenue page)
+- [x] Move Active Programs section down, add health scores to each program card
+- [x] Merge Campaigns sidebar item into Dashboard (show campaigns inline)
+- [x] Remove Campaigns from sidebar navigation
