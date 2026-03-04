@@ -18,6 +18,7 @@ import {
   CreditCard,
   Award,
   Crosshair,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useMemo } from "react";
@@ -57,6 +58,76 @@ function calcHealth(progress: number): number {
   return 1;
 }
 
+const PLAN_LABEL: Record<string, string> = {
+  all_access_aces: "All Access Ace",
+  swing_savers: "Swing Saver",
+  golf_vx_pro: "Golf VX Pro",
+  monthly: "Monthly",
+  annual: "Annual",
+  trial: "Trial",
+  corporate: "Corporate",
+};
+
+// ── Member List Modal ─────────────────────────────────────────────────────────
+function MemberListModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { data: memberList, isLoading } = trpc.members.list.useQuery(
+    { status: "active" },
+    { enabled: open, staleTime: 2 * 60 * 1000 }
+  );
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
+      <div className="relative bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg sm:mx-4 max-h-[80vh] flex flex-col shadow-2xl">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#E0E0E0]">
+          <div>
+            <h2 className="text-[15px] font-bold text-[#111111]">Active Members</h2>
+            {memberList && <p className="text-[12px] text-[#888888]">{memberList.length} members</p>}
+          </div>
+          <button onClick={onClose} className="p-2 rounded-lg hover:bg-[#F5F5F5] transition-colors">
+            <X className="h-4 w-4 text-[#888888]" />
+          </button>
+        </div>
+        <div className="overflow-y-auto flex-1">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-6 w-6 border-2 border-[#F5C72C] border-t-transparent" />
+            </div>
+          ) : (
+            <div className="divide-y divide-[#F0F0F0]">
+              {(memberList ?? []).map((m: any) => (
+                <div key={m.id} className="flex items-center justify-between px-5 py-3 hover:bg-[#FAFAFA] transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-full bg-[#F5C72C]/20 flex items-center justify-center shrink-0">
+                      <span className="text-[12px] font-bold text-[#8B6E00]">
+                        {m.name?.charAt(0)?.toUpperCase() ?? "?"}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-[13px] font-semibold text-[#111111]">{m.name}</p>
+                      <p className="text-[11px] text-[#888888]">{m.email}</p>
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-[12px] font-medium text-[#111111]">
+                      {PLAN_LABEL[m.membershipTier] ?? m.membershipTier ?? "—"}
+                    </p>
+                    {m.monthlyAmount && parseFloat(String(m.monthlyAmount)) > 0 && (
+                      <p className="text-[11px] text-[#888888]">${parseFloat(String(m.monthlyAmount)).toFixed(0)}/mo</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const CAMPAIGN_META: Record<string, { label: string; color: string; bg: string; icon: React.ElementType; kpiLabel: string }> = {
   trial_conversion: { label: "Trial Conversion", color: "#3DB855", bg: "#E8F5EB", icon: Target, kpiLabel: "Conversion Rate" },
   membership_acquisition: { label: "Membership Acquisition", color: "#E85D8A", bg: "#FDE8F0", icon: UserCheck, kpiLabel: "Members Acquired" },
@@ -91,7 +162,13 @@ export default function Home() {
     { enabled: isAuthenticated, staleTime: 5 * 60 * 1000 }
   );
 
+  const { data: memberStats } = trpc.members.getStats.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 5 * 60 * 1000,
+  });
+
   const [refreshing, setRefreshing] = useState(false);
+  const [memberListOpen, setMemberListOpen] = useState(false);
   const handleRefresh = async () => {
     setRefreshing(true);
     await refetch();
@@ -130,7 +207,6 @@ export default function Home() {
 
   const members = snapshot?.members;
   const revenue = snapshot?.revenue;
-  const budget = snapshot?.budget;
 
   const now = new Date();
   const hour = now.getHours();
@@ -144,15 +220,12 @@ export default function Home() {
   const toastLastMonth = (toastSummary as any)?.lastMonthRevenue ?? 0;
   const acuityTotal = (acuityRevenue as any)?.total ?? 0;
   const acuityBookings = (acuityRevenue as any)?.totalBookings ?? 0;
-  const budgetSpent = budget?.spent ?? 0;
-  const budgetTotal = budget?.total ?? 0;
-  const budgetPct = budget?.utilization ?? 0;
 
-  // Member breakdown
+  // Member breakdown by plan (from getStats)
   const memberBreakdown = [
-    { label: "All Access", count: (snapshot as any)?.membersByType?.allAccess ?? 0 },
-    { label: "Swing Saver", count: (snapshot as any)?.membersByType?.swingSaver ?? 0 },
-    { label: "Pro", count: (snapshot as any)?.membersByType?.pro ?? 0 },
+    { label: "All Access Ace", count: memberStats?.allAccessCount ?? 0 },
+    { label: "Swing Saver", count: memberStats?.swingSaversCount ?? 0 },
+    { label: "Golf VX Pro", count: memberStats?.golfVxProCount ?? 0 },
   ].filter(t => t.count > 0);
 
   const memberTotal = members?.total ?? 0;
@@ -200,9 +273,13 @@ export default function Home() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
             <div className="flex items-end gap-3 mb-2">
-              <span className="text-[42px] font-bold text-[#111111] leading-none tracking-tight">
+              <button
+                onClick={() => setMemberListOpen(true)}
+                className="text-[42px] font-bold text-[#111111] leading-none tracking-tight hover:text-[#F5C72C] transition-colors cursor-pointer"
+                title="View member list"
+              >
                 {snapLoading ? "—" : fmt(memberTotal)}
-              </span>
+              </button>
               {members?.newThisMonth !== undefined && members.newThisMonth !== 0 && (
                 <span className={cn("text-[13px] font-semibold mb-1.5", members.newThisMonth > 0 ? "text-[#3DB855]" : "text-red-500")}>
                   {members.newThisMonth > 0 ? "+" : ""}{members.newThisMonth} this month
@@ -307,29 +384,6 @@ export default function Home() {
           )}
         </div>
 
-        {/* Budget bar */}
-        {budgetSpent > 0 && (
-          <div className="pt-4 border-t border-[#F0F0F0]">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <Target className="h-3.5 w-3.5 text-[#AAAAAA]" />
-                <span className="text-[12px] font-semibold text-[#111111]">Marketing Budget</span>
-              </div>
-              <span className={cn("text-[11px] font-bold px-1.5 py-0.5 rounded-full", budgetPct > 100 ? "text-[#E85D8A] bg-[#FDE8F0]" : budgetPct > 80 ? "text-[#F5A623] bg-[#FEF3E2]" : "text-[#3DB855] bg-[#E8F5EB]")}>
-                {budgetPct.toFixed(0)}%
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="flex-1 h-2 bg-[#F2F2F7] rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all"
-                  style={{ width: `${Math.min(budgetPct, 100)}%`, background: budgetPct > 100 ? "#E85D8A" : budgetPct > 80 ? "#F5A623" : "#3DB855" }}
-                />
-              </div>
-              <span className="text-[12px] text-[#888888] shrink-0">{fmtCurrency(budgetSpent)} / {fmtCurrency(budgetTotal)}</span>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* ── Section 3: Campaigns (merged from sidebar, no ROI) ── */}
@@ -440,6 +494,8 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      <MemberListModal open={memberListOpen} onClose={() => setMemberListOpen(false)} />
     </div>
   );
 }
