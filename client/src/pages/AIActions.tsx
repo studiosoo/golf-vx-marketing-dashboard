@@ -200,7 +200,7 @@ export default function AIActions() {
           )}
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           { label: "Auto-Executed", value: autoExecuted.length, icon: Zap, color: "text-[#F5C72C]", bg: "bg-[#F5C72C]/10" },
           { label: "Awaiting Approval", value: pendingApproval.length, icon: Clock, color: "text-blue-600", bg: "bg-blue-50" },

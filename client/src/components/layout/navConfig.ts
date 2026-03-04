@@ -83,7 +83,6 @@ export const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
     items: [
       { label: "Programs & Events", path: "/programs", icon: Flag },
       { label: "Advertising", path: "/advertising", icon: BarChart3 },
-      { label: "Promotions", path: "/promotions/annual-giveaway", icon: Gift },
       {
         label: "Social & Content",
         path: "/website/instagram",

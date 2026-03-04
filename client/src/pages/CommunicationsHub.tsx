@@ -224,7 +224,7 @@ export default function CommunicationsHub() {
         </div>
 
         {/* Stats */}
-        <div className="grid gap-4 grid-cols-3">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">

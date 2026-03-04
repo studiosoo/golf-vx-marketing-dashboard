@@ -12,7 +12,7 @@ import { DemographicsTab } from "@/components/giveaway/DemographicsTab";
 import { AIIntelligenceTab } from "@/components/giveaway/AIIntelligenceTab";
 import { ApplicationsTab } from "@/components/giveaway/ApplicationsTab";
 
-const ENTRY_GOAL = 250;
+const ENTRY_GOAL = 1500;
 const LONG_FORM_GOAL = 250;
 const TOTAL_AD_SPEND = 467.59;
 const ENTRY_PAGE_UV = 875;

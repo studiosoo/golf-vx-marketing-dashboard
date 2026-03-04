@@ -84,7 +84,7 @@ export function PrintTab() {
   return (
     <div className="space-y-6">
       {/* KPI row */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="bg-card border-border">
           <CardContent className="pt-5">
             <div className="flex items-center gap-3">
@@ -235,7 +235,7 @@ export function PrintTab() {
                       </div>
 
                       {/* Key metrics row */}
-                      <div className="grid grid-cols-3 gap-3 my-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-3">
                         <div className="bg-muted/30 rounded-lg p-3">
                           <p className="text-xs text-muted-foreground">Monthly Cost</p>
                           <p className="text-lg font-bold text-foreground">${monthlySpend.toLocaleString()}</p>

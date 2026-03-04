@@ -133,7 +133,7 @@ export function EventsTab() {
   return (
     <div className="space-y-6">
       {/* KPI row */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { label: "Total Spend", value: `$${totalSpend.toLocaleString()}`, icon: <DollarSign size={18} className="text-yellow-400" />, bg: "bg-yellow-500/10" },
           { label: "Total Visitors Reached", value: totalVisitors.toLocaleString(), icon: <Users size={18} className="text-blue-400" />, bg: "bg-blue-500/10" },
@@ -296,7 +296,7 @@ export function EventsTab() {
                       </div>
 
                       {/* Key metrics */}
-                      <div className="grid grid-cols-4 gap-3 mb-3">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
                         <div className="bg-muted/30 rounded-lg p-3">
                           <p className="text-xs text-muted-foreground">Total Cost</p>
                           <p className="text-lg font-bold text-foreground">${totalCost.toLocaleString()}</p>
@@ -333,7 +333,7 @@ export function EventsTab() {
                       {isEditing && (
                         <div className="mt-4 p-4 bg-muted/20 rounded-lg border border-border space-y-3">
                           <p className="text-sm font-medium text-foreground">Update Results</p>
-                          <div className="grid grid-cols-3 gap-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             <div>
                               <Label className="text-xs">Actual Visitors</Label>
                               <Input type="number" value={editForm.actualVisitors} onChange={setEditField("actualVisitors")} placeholder={String(ev.actualVisitors ?? ev.expectedVisitors ?? "")} />

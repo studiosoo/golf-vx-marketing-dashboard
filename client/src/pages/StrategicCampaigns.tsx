@@ -205,7 +205,7 @@ export default function StrategicCampaigns() {
                 )}
 
                 {/* Metrics Grid — Spend / Revenue */}
-                <div className="grid grid-cols-3 gap-3 pt-1">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
                   <div className="p-3 rounded-lg bg-muted/40">
                     <p className="text-xs text-muted-foreground">Budget</p>
                     <p className="text-base font-bold mt-0.5">${campaign.totalBudget.toFixed(0)}</p>

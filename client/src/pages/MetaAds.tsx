@@ -133,11 +133,11 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
         onClick={() => handleCardClick(c)}
       >
         <CardContent className="p-4">
-          <div className="flex items-start justify-between mb-3">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
             <div className="flex-1 min-w-0">
               <div className="font-medium text-foreground text-sm flex items-center gap-1">
-                {c.name}
-                <ChevronRight size={13} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                <span className="truncate">{c.name}</span>
+                <ChevronRight size={13} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
               </div>
               <div className="flex items-center gap-2 mt-1 flex-wrap">
                 <Badge className={`text-xs border ${statusBadgeClass(effStatus)}`} variant="outline">
@@ -151,7 +151,7 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
                 )}
               </div>
             </div>
-            <div className="flex items-center gap-1.5 ml-3 shrink-0 flex-wrap justify-end">
+            <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
               {!isArchived ? (
                 <>
                   <Button
@@ -209,7 +209,7 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
             </div>
           </div>
           {c.insights ? (
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 { label: "Spend", value: formatCurrency(c.insights.spend || 0) },
                 { label: "Reach", value: formatNum(c.insights.reach || 0) },
@@ -232,7 +232,7 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
 
   return (
     <div className={embedded ? "space-y-6" : "p-6 space-y-6"}>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         {!embedded && <div>
           <h1 className="text-2xl font-bold text-foreground">Meta Ads</h1>
           <p className="text-muted-foreground text-sm mt-1">Facebook & Instagram campaign performance</p>
@@ -355,7 +355,7 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
               <span>{aiCampaign?.objective}</span>
             </div>
             {aiCampaign?.insights && (
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
                   { label: "Spend", value: formatCurrency(aiCampaign.insights.spend || 0) },
                   { label: "Reach", value: formatNum(aiCampaign.insights.reach || 0) },

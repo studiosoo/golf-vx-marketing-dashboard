@@ -134,7 +134,7 @@ function RevenueTabContent() {
                     <Tooltip formatter={(v: any) => fmtCurrency(v)} />
                   </PieChart>
                 </ResponsiveContainer>
-                <div className="grid grid-cols-3 gap-3 pt-2 border-t border-border">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-border">
                   <div className="text-center">
                     <div className="text-xs text-muted-foreground">F&B Revenue</div>
                     <div className="text-base font-bold text-foreground">{fmt(foodBev)}</div>
@@ -612,7 +612,7 @@ export default function Reports() {
 
         {/* Meta Ads Tab */}
         <TabsContent value="meta" className="space-y-4 mt-4">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <StatCard icon={DollarSign} label="Total Spend" value={fmtCurrency(totalMetaSpend)} sub="Feb 2 – Mar 3, 2026" />
             <StatCard icon={Activity} label="Total Impressions" value={`${(totalImpressions / 1000).toFixed(0)}K`} />
             <StatCard icon={Target} label="Avg CTR" value={`${(metaSpend.reduce((s, c) => s + c.ctr, 0) / metaSpend.length).toFixed(2)}%`} />
@@ -664,7 +664,7 @@ export default function Reports() {
 
         {/* Giveaway Funnel Tab */}
         <TabsContent value="funnel" className="space-y-4 mt-4">
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <StatCard icon={Activity} label="Entry Page Views" value="875" sub="Unique: 875" />
             <StatCard icon={Users} label="Opt-ins" value="187" sub="21.4% of views" />
             <StatCard icon={FileText} label="Applications" value="88" sub="47.1% of opt-ins" />

@@ -520,7 +520,7 @@ export default function MarketResearch() {
           <div className="bg-white border border-[#E0E0E0] rounded-xl p-5">
             <h3 className="text-sm font-semibold text-[#111] mb-1">Golf VX AH Positioning</h3>
             <p className="text-xs text-[#888] mb-4">Golf VX sits at the intersection of all three markets — a unique competitive advantage</p>
-            <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
               {[
                 { label: "General Golf", color: "#4CAF50", textColor: "#2E7D32", bg: "#4CAF50", body: "Captures outdoor golfers seeking year-round practice. Complements, not competes with outdoor courses." },
                 { label: "Indoor Golf", color: YELLOW, textColor: "#8B6E00", bg: YELLOW, body: "Only premium indoor simulator membership club within 10 miles. 15% YoY market growth tailwind." },
@@ -680,7 +680,7 @@ export default function MarketResearch() {
           {seasonalView === "promotions" && (
             <>
               {/* Summary KPI strip */}
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
                   { label: "Total Promotions", value: promotions.length, icon: Megaphone, color: "#1877F2" },
                   { label: "Total Budget", value: `$${totalBudget.toLocaleString()}`, icon: DollarSign, color: YELLOW },

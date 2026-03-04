@@ -150,7 +150,7 @@ export function InfluencerForm({ onSuccess, initial }: InfluencerFormProps) {
         <Input placeholder="Arlington Heights families, golf enthusiasts" value={form.targetAudience} onChange={f("targetAudience")} />
       </div>
       <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide pt-2">Performance (fill in after campaign)</p>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {performanceFields.map(({ key, label }) => (
           <div key={key} className="space-y-1">
             <Label>{label}</Label>

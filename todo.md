@@ -1071,3 +1071,8 @@
 - [x] Load more: paginated feed (12 → 24 → 36 posts)
 - [x] Register /website/instagram and /instagram routes in App.tsx → InstagramFeed.tsx
 - [x] 7 vitest tests passing (API connectivity, feed fetch, video thumbnails, token validation, DB CRUD)
+
+## UI Fixes & Updates (2026-03-04 Session 2)
+- [x] Remove Promotions nav item from DashboardLayout sidebar
+- [x] Update Annual Membership Giveaway entry goal from 250 to 1500 (frontend ENTRY_GOAL + backend entryGoal)
+- [x] Fix mobile text overlap on Advertising page and other pages (responsive layout) - fixed grid-cols in 15+ pages/components

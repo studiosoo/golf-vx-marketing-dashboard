@@ -17,7 +17,7 @@ export default function Leads() {
         <h1 className="text-2xl font-bold text-foreground">Leads</h1>
         <p className="text-muted-foreground text-sm mt-1">Prospect and lead management</p>
       </div>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="text-2xl font-bold text-yellow-400">{(stats as any)?.totalMembers || 0}</div>

@@ -196,7 +196,7 @@ function ProgramCard({ program, onClick }: { program: Program; onClick: () => vo
       {/* Metrics row — KPI mode for non-revenue campaigns */}
       {useKpiDisplay ? (
         <div className="flex flex-col gap-2">
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <div>
               <p className="text-[14px] font-bold text-[#111111] leading-none">{fmtCurrency(spend)}</p>
               <p className="text-[10px] text-[#AAAAAA] mt-0.5">Spend</p>
@@ -282,7 +282,7 @@ function ProgramCard({ program, onClick }: { program: Program; onClick: () => vo
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           <div>
             <p className="text-[14px] font-bold text-[#111111] leading-none">{fmtCurrency(spend)}</p>
             <p className="text-[10px] text-[#AAAAAA] mt-0.5">Spend</p>

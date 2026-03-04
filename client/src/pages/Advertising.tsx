@@ -30,12 +30,12 @@ export default function Advertising() {
       </div>
 
       {/* Tab navigation */}
-      <div className="flex gap-1 bg-muted/30 rounded-lg p-1 w-fit flex-wrap">
+      <div className="flex flex-wrap gap-1 bg-muted/30 rounded-lg p-1 w-full sm:w-fit">
         {TABS.map(t => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap ${
               tab === t.id
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"

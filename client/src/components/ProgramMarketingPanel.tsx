@@ -113,7 +113,7 @@ function MetaAdsTab({ programKeywords, programName }: ProgramMarketingPanelProps
                 </div>
                 <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColor}`}>{c.status}</span>
               </div>
-              <div className="grid grid-cols-4 gap-2 text-xs">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                 <div>
                   <div className="text-muted-foreground">Spend</div>
                   <div className="font-semibold">${spend.toFixed(2)}</div>

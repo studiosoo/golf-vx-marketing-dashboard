@@ -286,7 +286,7 @@ Return JSON: { subject: string, preheader: string, body: string (HTML), callToAc
     .mutation(async () => {
       const stats = await giveawaySync.getGiveawayStats();
       const { invokeLLM } = await import('../_core/llm');
-      const entryGoal = 1000;
+      const entryGoal = 1500;
       const longFormGoal = 250;
       const total = stats.totalApplications || 0;
       const progressPct = ((total / entryGoal) * 100).toFixed(1);

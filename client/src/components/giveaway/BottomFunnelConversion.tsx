@@ -34,7 +34,7 @@ export function BottomFunnelConversion({ conversions, totalApplications }: Botto
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
           <div className="text-center p-3 bg-[#F2F2F7] rounded-lg">
             <div className="text-2xl font-bold text-[#111111]">{conversions?.total ?? 0}</div>
             <div className="text-xs text-[#888888] mt-0.5">Total Converted</div>

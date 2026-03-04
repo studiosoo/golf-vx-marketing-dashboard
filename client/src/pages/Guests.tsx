@@ -62,7 +62,7 @@ export default function Guests() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white border border-[#E0E0E0] rounded-xl p-4 flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-[#F5C72C]/10 flex items-center justify-center">
             <Users className="w-4.5 h-4.5 text-[#8B6E00]" />
