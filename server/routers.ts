@@ -2957,5 +2957,426 @@ When the user provides data (e.g., "we had 12 attendees at Drive Day"), acknowle
         return { analysis: result, analysisType: input.analysisType };
       }),
   }),
+
+  // ─── Giveaway Router ──────────────────────────────────────────────────────
+  giveaway: router({
+    // Get all giveaway applications
+    getApplications: protectedProcedure.query(async () => {
+      return await giveawaySync.getGiveawayApplications();
+    }),
+
+    // Get giveaway statistics
+    getStats: protectedProcedure.query(async () => {
+      return await giveawaySync.getGiveawayStats();
+    }),
+
+    // Get last sync info
+    getLastSyncInfo: protectedProcedure.query(async () => {
+      const { getGiveawayCount } = await import('./googleSheetsSync');
+      const count = await getGiveawayCount();
+      return { count, lastChecked: new Date().toISOString(), source: 'database' };
+    }),
+
+    // Get bottom-funnel conversions (applicants who booked Trial or Drive Day)
+    getConversions: protectedProcedure.query(async () => {
+      const database = await db.getDb();
+      if (!database) return { total: 0, trialCount: 0, driveDayCount: 0, conversions: [] };
+      const { giveawayApplications, memberAppointments, members } = await import('../drizzle/schema');
+      const { eq: eqOp, and: andOp, isNotNull, like, or: orOp } = await import('drizzle-orm');
+      const applicants = await database
+        .select({ email: giveawayApplications.email, name: giveawayApplications.name })
+        .from(giveawayApplications)
+        .where(andOp(eqOp(giveawayApplications.isTestEntry, false), isNotNull(giveawayApplications.email)));
+      const applicantEmailMap = new Map(applicants.map(a => [a.email!.toLowerCase().trim(), a.name]));
+      const appts = await database
+        .select({
+          email: members.email,
+          memberName: members.name,
+          appointmentType: memberAppointments.appointmentType,
+          appointmentDate: memberAppointments.appointmentDate,
+        })
+        .from(memberAppointments)
+        .innerJoin(members, eqOp(members.id, memberAppointments.memberId))
+        .where(andOp(
+          eqOp(memberAppointments.canceled, false),
+          orOp(
+            like(memberAppointments.appointmentType, '%Trial%'),
+            like(memberAppointments.appointmentType, '%Drive Day%'),
+          ),
+        ));
+      const seen = new Set<string>();
+      const conversions: Array<{ email: string; applicantName: string; appointmentType: string; appointmentDate: Date | null; conversionType: 'trial' | 'drive_day' }> = [];
+      let trialCount = 0;
+      let driveDayCount = 0;
+      for (const appt of appts) {
+        const emailKey = appt.email?.toLowerCase().trim() ?? '';
+        if (!emailKey || !applicantEmailMap.has(emailKey)) continue;
+        const isDriveDay = appt.appointmentType.toLowerCase().includes('drive day');
+        const conversionType = isDriveDay ? 'drive_day' as const : 'trial' as const;
+        const dedupeKey = `${emailKey}:${conversionType}`;
+        if (seen.has(dedupeKey)) continue;
+        seen.add(dedupeKey);
+        if (isDriveDay) driveDayCount++; else trialCount++;
+        conversions.push({
+          email: emailKey,
+          applicantName: applicantEmailMap.get(emailKey) || appt.memberName || '',
+          appointmentType: appt.appointmentType,
+          appointmentDate: appt.appointmentDate,
+          conversionType,
+        });
+      }
+      return { total: conversions.length, trialCount, driveDayCount, conversions };
+    }),
+
+    // Sync giveaway from Google Sheets
+    sync: protectedProcedure.mutation(async () => {
+      const result = await syncGiveawayFromSheets();
+      return result;
+    }),
+
+    // Sync applicants to Encharge
+    syncToEncharge: protectedProcedure
+      .input(z.object({
+        applicantIds: z.array(z.number()),
+        tags: z.array(z.string()).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { upsertEnchargePerson } = await import('./enchargeSync');
+        const database = await db.getDb();
+        if (!database) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database not available' });
+        const { giveawayApplications } = await import('../drizzle/schema');
+        const { inArray } = await import('drizzle-orm');
+        const applicants = await database
+          .select()
+          .from(giveawayApplications)
+          .where(inArray(giveawayApplications.id, input.applicantIds));
+        let synced = 0;
+        let errors = 0;
+        for (const app of applicants) {
+          if (!app.email) continue;
+          try {
+            const nameParts = (app.name || '').split(' ');
+            await upsertEnchargePerson({
+              email: app.email,
+              firstName: nameParts[0] || undefined,
+              lastName: nameParts.slice(1).join(' ') || undefined,
+              phone: app.phone || undefined,
+              tags: input.tags || ['giveaway-2026'],
+            });
+            synced++;
+          } catch { errors++; }
+        }
+        return { synced, errors };
+      }),
+
+    // Update applicant status
+    updateStatus: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        status: z.enum(['pending', 'contacted', 'scheduled', 'completed', 'declined']),
+      }))
+      .mutation(async ({ input }) => {
+        const database = await db.getDb();
+        if (!database) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database not available' });
+        const { giveawayApplications } = await import('../drizzle/schema');
+        const { eq: eqOp } = await import('drizzle-orm');
+        await database.update(giveawayApplications)
+          .set({ status: input.status, updatedAt: new Date() })
+          .where(eqOp(giveawayApplications.id, input.id));
+        return { success: true };
+      }),
+
+    // Check visit history for an applicant
+    checkVisitHistory: protectedProcedure
+      .input(z.object({ applicantId: z.number() }))
+      .query(async ({ input }) => {
+        const database = await db.getDb();
+        if (!database) return { hasVisited: false, visitCount: 0, lastVisit: null, selfReported: 'Unknown', memberStatus: null, memberTier: null };
+        const { giveawayApplications, memberAppointments, members } = await import('../drizzle/schema');
+        const { eq: eqOp, desc: descOp } = await import('drizzle-orm');
+        const [app] = await database.select().from(giveawayApplications).where(eqOp(giveawayApplications.id, input.applicantId)).limit(1);
+        if (!app) return { hasVisited: false, visitCount: 0, lastVisit: null, selfReported: 'Unknown', memberStatus: null, memberTier: null };
+        // Check if they have appointments in the system
+        const memberRows = app.email
+          ? await database.select().from(members).where(eqOp(members.email, app.email)).limit(1)
+          : [];
+        let visitCount = 0;
+        let lastVisit: Date | null = null;
+        let memberStatus: string | null = null;
+        let memberTier: string | null = null;
+        if (memberRows.length > 0) {
+          const member = memberRows[0];
+          memberStatus = member.status || null;
+          memberTier = member.membershipType || null;
+          const appts = await database
+            .select({ appointmentDate: memberAppointments.appointmentDate })
+            .from(memberAppointments)
+            .where(eqOp(memberAppointments.memberId, member.id))
+            .orderBy(descOp(memberAppointments.appointmentDate));
+          visitCount = appts.length;
+          lastVisit = appts[0]?.appointmentDate || null;
+        }
+        return {
+          hasVisited: visitCount > 0 || app.visitedBefore === 'Yes',
+          visitCount,
+          lastVisit,
+          selfReported: app.visitedBefore || 'Unknown',
+          memberStatus,
+          memberTier,
+        };
+      }),
+
+    // Generate email draft for a specific applicant
+    generateEmailDraft: protectedProcedure
+      .input(z.object({ applicantId: z.number() }))
+      .mutation(async ({ input }) => {
+        const database = await db.getDb();
+        if (!database) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database not available' });
+        const { giveawayApplications } = await import('../drizzle/schema');
+        const { eq: eqOp } = await import('drizzle-orm');
+        const { invokeLLM } = await import('./_core/llm');
+        const [app] = await database.select().from(giveawayApplications).where(eqOp(giveawayApplications.id, input.applicantId)).limit(1);
+        if (!app) throw new TRPCError({ code: 'NOT_FOUND', message: 'Applicant not found' });
+        const prompt = `You are an expert email copywriter for Golf VX Arlington Heights, an indoor golf simulator facility.
+Write a personalized follow-up email for this Annual Membership Giveaway applicant:
+- Name: ${app.name}
+- City: ${app.city || 'Unknown'}
+- Golf experience: ${app.golfExperienceLevel || 'Unknown'}
+- Has visited before: ${app.visitedBefore || 'Unknown'}
+- How they heard: ${app.howDidTheyHear || 'Unknown'}
+- Status: ${app.status}
+
+Write a warm, personalized email that:
+1. Thanks them for applying to the Annual Membership Giveaway
+2. Invites them to visit Golf VX Arlington Heights (644 E Rand Rd, Arlington Heights, IL)
+3. Mentions the $9 Trial Session as a low-barrier way to experience the facility
+4. Mentions the upcoming Drive Day Clinic with Coach Chuck Lynch ($20 for 90 min)
+5. Encourages following @golfvxarlingtonheights on Instagram
+
+Return JSON: { subject: string, preheader: string, body: string (HTML), callToAction: string }`;
+        const response = await invokeLLM({
+          messages: [
+            { role: 'system', content: 'You are an expert email copywriter. Respond with valid JSON only.' },
+            { role: 'user', content: prompt },
+          ],
+          response_format: { type: 'json_object' },
+        });
+        try {
+          const raw = response?.choices?.[0]?.message?.content;
+          return typeof raw === 'string' ? JSON.parse(raw) : raw;
+        } catch {
+          return { subject: 'Thank you for applying!', preheader: 'We appreciate your interest in Golf VX', body: '<p>Thank you for applying to the Golf VX Annual Membership Giveaway!</p>', callToAction: 'Book a Trial Session' };
+        }
+      }),
+
+    // Generate AI program insights for the giveaway
+    generateProgramInsights: protectedProcedure
+      .input(z.object({ programId: z.number().optional() }))
+      .mutation(async () => {
+        // Delegate to the campaigns.generateInsights logic with campaignId=1 (Annual Giveaway)
+        const stats = await giveawaySync.getGiveawayStats();
+        const { invokeLLM } = await import('./_core/llm');
+        const entryGoal = 1000;
+        const longFormGoal = 250;
+        const total = stats.totalApplications || 0;
+        const progressPct = ((total / entryGoal) * 100).toFixed(1);
+        const ageBreakdown = Object.entries(stats.ageRangeDistribution || {}).map(([k, v]) => `${k}: ${v}`).join(', ') || 'No data';
+        const genderBreakdown = Object.entries(stats.genderDistribution || {}).map(([k, v]) => `${k}: ${v}`).join(', ') || 'No data';
+        const topCities = Object.entries(stats.cityDistribution || {}).sort((a, b) => (b[1] as number) - (a[1] as number)).slice(0, 8).map(([k, v]) => `${k}: ${v}`).join(', ') || 'No data';
+        const chicagoCount = (stats.cityDistribution || {})['Chicago'] || 0;
+        const chicagoPct = total > 0 ? ((chicagoCount / total) * 100).toFixed(1) : '0.0';
+        const experienceBreakdown = Object.entries(stats.golfExperienceDistribution || {}).map(([k, v]) => `${k}: ${v}`).join(', ') || 'No data';
+        const visitedBreakdown = Object.entries(stats.visitedBeforeDistribution || {}).map(([k, v]) => `${k}: ${v}`).join(', ') || 'No data';
+        const hearBreakdown = Object.entries(stats.howDidTheyHearDistribution || {}).map(([k, v]) => `${k}: ${v}`).join(', ') || 'No data';
+        const familiarityBreakdown = Object.entries(stats.indoorGolfFamiliarityDistribution || {}).map(([k, v]) => `${k}: ${v}`).join(', ') || 'No data';
+        const prompt = `You are a senior marketing strategist for Golf VX Arlington Heights, an indoor golf simulator facility in the Chicago suburbs (644 E Rand Rd, Arlington Heights, IL — 25 miles northwest of downtown Chicago).
+
+PROGRAM: Annual Membership Giveaway 2026
+Goal: ${entryGoal} entries, ${longFormGoal} long-form applicants
+Current entries: ${total} (${progressPct}% of entry goal)
+Funnel: Entry page 875 UV → Application page 187 UV → 67 form completions (47% completion rate from app page)
+DEMOGRAPHIC DATA:
+- Age distribution: ${ageBreakdown}
+- Gender: ${genderBreakdown}
+- City distribution (top 8): ${topCities}
+- Chicago city applicants: ${chicagoCount} (${chicagoPct}% of total — NOTABLY LOW given Chicago's large young golfer population)
+- Golf experience: ${experienceBreakdown}
+- Visited Golf VX before: ${visitedBreakdown}
+- How they heard: ${hearBreakdown}
+- Indoor golf familiarity: ${familiarityBreakdown}
+KEY STRATEGIC CONTEXT:
+- Chicago city has very few applicants despite being 25 miles away with a large population of young urban golfers aged 25-40
+- Indoor golf simulators are extremely popular with young Chicago city professionals who want year-round golf
+- There is a significant untapped opportunity to target young Chicago city golfers (ages 25-40) who may not know about Golf VX Arlington Heights
+- The commute from Chicago to Arlington Heights is feasible via I-90/I-94 or Metra UP-NW line (40-50 min)
+Provide a comprehensive marketing intelligence report. Respond in JSON:
+{
+  "executiveSummary": "string",
+  "keyInsights": [{ "insight": "string", "implication": "string", "priority": "high|medium|low" }],
+  "chicagoOpportunity": { "summary": "string", "targetNeighborhoods": ["string"], "targetDemographic": "string", "adStrategy": "string", "messagingAngle": "string" },
+  "metaAdsStrategy": { "audienceRecommendations": ["string"], "creativeRecommendations": ["string"], "budgetRecommendations": ["string"], "campaignOptimizations": ["string"] },
+  "multiChannelStrategy": [{ "channel": "string", "strategy": "string", "tactics": ["string"], "expectedImpact": "string", "priority": "high|medium|low" }],
+  "contentStrategy": { "themes": ["string"], "formats": ["string"], "messaging": "string" },
+  "funnelOptimization": ["string"],
+  "sevenDayPlan": [{ "day": "string", "actions": ["string"] }]
+}`;
+        const response = await invokeLLM({
+          messages: [
+            { role: 'system', content: 'You are a senior marketing strategist. Always respond with valid JSON only, no markdown code blocks.' },
+            { role: 'user', content: prompt },
+          ],
+          response_format: { type: 'json_object' },
+        });
+        let insights: any = null;
+        try {
+          const raw = response?.choices?.[0]?.message?.content;
+          insights = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        } catch {
+          insights = { executiveSummary: 'Unable to generate insights at this time.', keyInsights: [], chicagoOpportunity: null, metaAdsStrategy: {}, multiChannelStrategy: [], contentStrategy: {}, funnelOptimization: [], sevenDayPlan: [] };
+        }
+        return { insights, stats: { total, entryGoal, longFormGoal, progressPct: parseFloat(progressPct) } };
+      }),
+  }),
+
+  // ─── Strategic Campaigns Router ───────────────────────────────────────────
+  strategicCampaigns: router({
+    // Get overview grouped by strategic category
+    getOverview: protectedProcedure.query(async () => {
+      const allCampaigns = await db.getAllCampaigns();
+      // Group campaigns by category
+      const categoryConfig: Record<string, { name: string; description: string; color: string; landingPageUrl?: string }> = {
+        membership_acquisition: {
+          name: 'Membership Acquisition',
+          description: 'Campaigns focused on growing the member base through giveaways, promotions, and direct outreach',
+          color: 'yellow',
+          landingPageUrl: 'https://golfvx.com/arlington-heights',
+        },
+        trial_conversion: {
+          name: 'Trial Conversion',
+          description: 'Converting trial session visitors and leads into paying members',
+          color: 'green',
+        },
+        member_retention: {
+          name: 'Member Retention',
+          description: 'Keeping existing members engaged and renewing their memberships',
+          color: 'blue',
+        },
+        corporate_events: {
+          name: 'Corporate & B2B Events',
+          description: 'Attracting corporate groups, private events, and B2B partnerships',
+          color: 'purple',
+        },
+      };
+      const grouped: Record<string, {
+        id: string;
+        name: string;
+        description: string;
+        color: string;
+        landingPageUrl?: string;
+        totalBudget: number;
+        totalSpend: number;
+        totalRevenue: number;
+        totalPrograms: number;
+        roi: number;
+        programs: Array<{ id: number; name: string; spend: number; revenue: number; status: string }>;
+      }> = {};
+      for (const campaign of allCampaigns) {
+        const cat = campaign.category;
+        if (!grouped[cat]) {
+          const config = categoryConfig[cat] || { name: cat, description: '', color: 'gray' };
+          grouped[cat] = {
+            id: cat,
+            name: config.name,
+            description: config.description,
+            color: config.color,
+            landingPageUrl: config.landingPageUrl,
+            totalBudget: 0,
+            totalSpend: 0,
+            totalRevenue: 0,
+            totalPrograms: 0,
+            roi: 0,
+            programs: [],
+          };
+        }
+        const budget = parseFloat(String(campaign.budget || 0));
+        const spend = parseFloat(String(campaign.actualSpend || 0));
+        const revenue = parseFloat(String(campaign.actualRevenue || 0));
+        grouped[cat].totalBudget += budget;
+        grouped[cat].totalSpend += spend;
+        grouped[cat].totalRevenue += revenue;
+        grouped[cat].totalPrograms++;
+        grouped[cat].programs.push({
+          id: campaign.id,
+          name: campaign.name,
+          spend,
+          revenue,
+          status: campaign.status,
+        });
+      }
+      // Calculate ROI per group
+      for (const group of Object.values(grouped)) {
+        group.roi = group.totalSpend > 0
+          ? ((group.totalRevenue - group.totalSpend) / group.totalSpend) * 100
+          : 0;
+      }
+      // Return in a consistent order
+      const order = ['membership_acquisition', 'trial_conversion', 'member_retention', 'corporate_events'];
+      return order.filter(k => grouped[k]).map(k => grouped[k]);
+    }),
+  }),
+
+  // ─── Revenue Router ───────────────────────────────────────────────────────
+  revenue: router({
+    // Get Toast POS revenue summary from database
+    getToastSummary: protectedProcedure.query(async () => {
+      const database = await db.getDb();
+      if (!database) return { totalRevenue: 0, thisMonthRevenue: 0, lastMonthRevenue: 0, allTimeRevenue: 0, avgDailyRevenue: 0, thisMonthOrders: 0 };
+      const { memberTransactions } = await import('../drizzle/schema');
+      const { gte, and: andOp, eq: eqOp } = await import('drizzle-orm');
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+      const allTx = await database.select().from(memberTransactions).where(eqOp(memberTransactions.paymentStatus, 'paid'));
+      const thisMonthTx = allTx.filter(t => new Date(t.transactionDate) >= startOfMonth);
+      const lastMonthTx = allTx.filter(t => {
+        const d = new Date(t.transactionDate);
+        return d >= startOfLastMonth && d <= endOfLastMonth;
+      });
+      const sum = (txs: typeof allTx) => txs.reduce((s, t) => s + parseFloat(String(t.total || 0)), 0);
+      const allTimeRevenue = sum(allTx);
+      const thisMonthRevenue = sum(thisMonthTx);
+      const lastMonthRevenue = sum(lastMonthTx);
+      const daysInMonth = now.getDate();
+      const avgDailyRevenue = daysInMonth > 0 ? thisMonthRevenue / daysInMonth : 0;
+      return {
+        totalRevenue: allTimeRevenue,
+        thisMonthRevenue,
+        lastMonthRevenue,
+        allTimeRevenue,
+        avgDailyRevenue,
+        thisMonthOrders: thisMonthTx.length,
+      };
+    }),
+
+    // Get Acuity Scheduler revenue
+    getAcuityRevenue: protectedProcedure
+      .input(z.object({
+        minDate: z.string().optional(),
+        maxDate: z.string().optional(),
+      }))
+      .query(async ({ input }) => {
+        try {
+          const { getAllRevenueByType } = await import('./acuity');
+          const revenueData = await getAllRevenueByType(input.minDate, input.maxDate);
+          const total = revenueData.reduce((s, r) => s + r.totalRevenue, 0);
+          const totalBookings = revenueData.reduce((s, r) => s + r.bookingCount, 0);
+          return { total, totalBookings, byType: revenueData };
+        } catch (err) {
+          console.error('[Revenue] Acuity revenue error:', err);
+          return { total: 0, totalBookings: 0, byType: [] };
+        }
+      }),
+  }),
 });
 export type AppRouter = typeof appRouter;

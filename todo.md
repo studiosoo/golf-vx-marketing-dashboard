@@ -943,3 +943,8 @@
 - [x] AI Intelligence: Added chicagoOpportunity JSON field to LLM response schema
 - [x] AI Intelligence: Added "Chicago City Opportunity" highlighted card in AnnualGiveaway AI tab
 - [x] AI Intelligence: All program pages already have ProgramAIIntelligence component (SundayClinic, WinterClinic, JuniorCamp, Leagues)
+
+## Bug Fix: Missing tRPC Procedures (2026-03-04)
+- [x] Add giveaway router: getApplications, getStats, getLastSyncInfo, getConversions, sync, syncToEncharge, updateStatus, checkVisitHistory, generateEmailDraft, generateProgramInsights
+- [x] Add strategicCampaigns router: getOverview (groups campaigns by category)
+- [x] Add revenue router: getToastSummary (Toast POS from DB), getAcuityRevenue (Acuity API)
