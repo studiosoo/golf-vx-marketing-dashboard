@@ -574,6 +574,15 @@ export const metaAdsRouter = router({
         return { insights: 'Unable to generate insights at this time.' };
       }
     }),
+  syncCache: protectedProcedure.mutation(async () => {
+    try {
+      const { refreshMetaAdsCache } = await import('../refreshMetaAdsCache');
+      const result = await refreshMetaAdsCache();
+      return result;
+    } catch (err: any) {
+      return { success: false, message: err?.message || 'Unknown error' };
+    }
+  }),
 });
 
 export const revenueRouter = router({

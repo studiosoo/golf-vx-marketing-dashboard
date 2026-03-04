@@ -1040,3 +1040,11 @@
 - [x] Fix Performance.tsx: ch.category was undefined → use ch.id ?? ch.category ?? ch.name as key
 - [x] Fix Performance.tsx: ch.campaignCount → ch.totalCampaigns (correct field name from getCategorySummary)
 - [x] Fix Performance.tsx: display ch.name instead of ch.category (category is an id, name is human-readable)
+
+## Bug Fix: ROI duplicate sidebar + Meta Ads $0 (2026-03-04)
+- [x] Fix ROI.tsx: remove internal DashboardLayout wrapper (was double-nested with App.tsx wrapper)
+- [x] Populate Meta Ads cache: 6 campaigns, $2,053.27 total spend via MCP
+- [x] Add metaAds.syncCache mutation to advertising router (calls refreshMetaAdsCache)
+- [x] Update MetaAds.tsx Sync button to use syncCache mutation (actually refreshes from MCP)
+- [x] Add Meta Ads cache auto-refresh to scheduler every 2 hours (even CST hours)
+- [x] TypeScript: 0 errors

@@ -43,6 +43,9 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
     onSuccess: (data) => { setAiInsight(String(data.insights || "No insights generated.")); setAiLoading(false); },
     onError: () => { setAiInsight("Unable to generate insights at this time."); setAiLoading(false); },
   });
+  const syncCache = trpc.metaAds.syncCache.useMutation({
+    onSuccess: () => { refetch(); },
+  });
 
   const formatCurrency = (val: any) =>
     `$${parseFloat(String(val || 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -96,11 +99,11 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => refetch()}
-            
+            onClick={() => syncCache.mutate()}
+            disabled={syncCache.isPending || isLoading}
           >
-            <RefreshCw size={14} className={isLoading ? "animate-spin" : ""} />
-            Sync
+            <RefreshCw size={14} className={(syncCache.isPending || isLoading) ? "animate-spin" : ""} />
+            {syncCache.isPending ? "Syncing..." : "Sync"}
           </Button>
         </div>
       </div>

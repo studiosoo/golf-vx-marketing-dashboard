@@ -6,6 +6,7 @@
  */
 
 import { runAutonomousCycle } from "./autonomous";
+import { refreshMetaAdsCache } from "./refreshMetaAdsCache";
 
 const CST_OFFSET = -6; // CST is UTC-6
 
@@ -29,6 +30,15 @@ async function checkAndRun() {
   const today = new Date().toISOString().split("T")[0];
   const runKey = `${today}-${cstHour}`;
 
+  // Refresh Meta Ads cache every 2 hours (even hours: 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22)
+  const metaCacheKey = `meta-${today}-${cstHour}`;
+  if (cstHour % 2 === 0 && cstMinute < 5 && lastRunKey !== metaCacheKey) {
+    lastRunKey = metaCacheKey;
+    console.log(`[Scheduler] Refreshing Meta Ads cache at CST hour ${cstHour}`);
+    refreshMetaAdsCache()
+      .then(r => console.log('[Scheduler] Meta Ads cache refresh:', r.message))
+      .catch(e => console.warn('[Scheduler] Meta Ads cache refresh failed:', e));
+  }
   // Run at 8:00 CST or 18:00 CST (within first 5 minutes of the hour)
   if ((cstHour === 8 || cstHour === 18) && cstMinute < 5 && lastRunKey !== runKey) {
     lastRunKey = runKey;

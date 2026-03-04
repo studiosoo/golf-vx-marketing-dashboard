@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
-import DashboardLayout from "@/components/DashboardLayout";
 import { TrendChart } from "@/components/TrendChart";
 import { TrendingUp, DollarSign, BarChart2, Target, AlertCircle } from "lucide-react";
 
@@ -167,8 +166,7 @@ export default function ROI() {
   // ─── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <DashboardLayout>
-      <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6 p-6">
         {/* Header */}
         <div className="flex items-center gap-3">
           <TrendingUp className="h-5 w-5 text-[#F5C72C]" />
@@ -498,7 +496,6 @@ export default function ROI() {
             </div>
           </div>
         )}
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }
