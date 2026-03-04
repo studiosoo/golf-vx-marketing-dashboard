@@ -1,6 +1,7 @@
 import {
   LayoutDashboard,
   BarChart3,
+  BarChart2,
   Instagram,
   Sparkles,
   Bot,
@@ -22,6 +23,9 @@ import {
   Gift,
   Target,
   LineChart,
+  TrendingUp,
+  DollarSign,
+  FileText,
   Wrench,
   Users,
   ClipboardList,
@@ -65,6 +69,10 @@ export const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
         children: [
           { label: "Actions", path: "/intelligence/ai-actions", icon: Zap },
           { label: "Market Research", path: "/intelligence/market-research", icon: Search },
+          { label: "Performance", path: "/intelligence/performance", icon: BarChart2 },
+          { label: "Revenue", path: "/intelligence/revenue", icon: DollarSign },
+          { label: "Reports", path: "/intelligence/reports", icon: FileText },
+          { label: "ROI & KPI", path: "/roi", icon: TrendingUp },
         ],
       },
       { label: "AI Workspace", path: "/workspace", icon: Bot },
@@ -92,6 +100,7 @@ export const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
         icon: MessageSquare,
         children: [
           { label: "Email (Encharge)", path: "/communication/email-marketing", icon: Mail },
+          { label: "Drip Campaigns", path: "/communication/drip", icon: Mail },
           { label: "SMS & Announcements", path: "/communication/announcements", icon: MessageSquare },
           { label: "Automations", path: "/communication/automations", icon: Zap },
         ],

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import PublicLayout from "@/components/PublicLayout";
+import { VENUE_CONFIG } from "@/const";
 
 export default function DriveDay() {
   const trackEvent = trpc.public.trackPageEvent.useMutation({ onError: () => {} });
@@ -130,7 +131,7 @@ export default function DriveDay() {
             <div className="text-sm font-bold tracking-widest mb-4 text-gray-500">LOCATION</div>
             <div className="text-3xl font-black mb-3">Golf VX Arlington Heights</div>
             <div className="text-gray-600">
-              644 E Rand Rd, Arlington Heights, IL
+              {VENUE_CONFIG.address}
             </div>
           </div>
         </div>

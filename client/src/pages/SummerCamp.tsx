@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Users, TrendingUp, Trophy } from "lucide-react";
+import { VENUE_CONFIG } from "@/const";
 
 export default function SummerCamp() {
   const scrollToBooking = () => {
@@ -27,7 +28,7 @@ export default function SummerCamp() {
             <h1 className="text-5xl md:text-7xl font-black tracking-tight">
               GOLF<span className="text-yellow-400">VX</span>
             </h1>
-            <p className="text-xl font-medium tracking-wide">ARLINGTON HEIGHTS</p>
+            <p className="text-xl font-medium tracking-wide">{VENUE_CONFIG.shortName}</p>
           </div>
 
           {/* Main Headline */}
@@ -467,8 +468,8 @@ export default function SummerCamp() {
       {/* Footer */}
       <footer className="py-8 px-4 bg-gray-900 text-white text-center">
         <p className="text-sm">Copyright © Golf VX Corp</p>
-        <p className="text-sm mt-2">644 E Rand Rd • Arlington Heights, IL 60004</p>
-        <p className="text-sm mt-2">(847) 749-1054</p>
+        <p className="text-sm mt-2">{VENUE_CONFIG.address}</p>
+        <p className="text-sm mt-2">{VENUE_CONFIG.phone}</p>
       </footer>
     </div>
   );
