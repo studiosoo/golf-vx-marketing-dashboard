@@ -135,9 +135,10 @@ export async function getAppointments(params?: {
   max?: number;
 }): Promise<AcuityAppointment[]> {
   const client = createAcuityClient();
-  // Default max=500 to avoid Acuity's 100-record default limit cutting off older data
+  // Default max=1000 to avoid Acuity's 100-record default limit cutting off older data
+  // Using 1000 to ensure Jan 2026 events are not truncated when total appointments exceed 500
   const response = await client.get<AcuityAppointment[]>("/appointments", {
-    params: { max: 500, ...params },
+    params: { max: 1000, ...params },
   });
   return response.data;
 }
@@ -795,7 +796,7 @@ function extractTrialSource(apt: AcuityAppointment): string {
 }
 
 export async function getTrialSessionDetail(): Promise<TrialSessionDetail> {
-  const allAppts = await getAppointments({ max: 500, canceled: false });
+  const allAppts = await getAppointments({ max: 1000, canceled: false });
   const trialTypeIds = new Set(Object.values(TRIAL_TYPE_IDS));
   const trialAppts = allAppts.filter(a => trialTypeIds.has(a.appointmentTypeID));
 

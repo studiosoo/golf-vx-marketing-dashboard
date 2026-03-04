@@ -96,7 +96,7 @@ function DashboardRoutes() {
       <Switch>
         {/* ── Root → Home ── */}
         <Route path="/" component={Home} />
-        <Route path="/overview" component={Overview} />
+        <Route path="/overview">{() => { window.location.replace('/'); return null; }}</Route>
 
         {/* ── MARKETING & PROGRAMS / Campaigns ── */}
         <Route path="/campaigns" component={StrategicCampaigns} />

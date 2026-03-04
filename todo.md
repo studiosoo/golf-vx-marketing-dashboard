@@ -896,3 +896,9 @@
 - [x] Rename Advertising tabs: Meta Ads → Paid Digital, Influencer → Influencer Collabs, Community Outreach → Community Giving, Print / Magazine → Print & Events
 - [x] Add Events tab (Trade Shows) to Advertising page with Chicago Golf Show 2026 seeded (trade show, $1,500 total cost, 2,500 visitors, 50 promos, 12 leads, 1 team signup)
 - [x] Fix stale tsc watcher (confirmed no tsc process running; tsx watch server is clean; stale output is a display artifact in health check tool)
+
+## Session 2026-03-04 Part 17 — Dashboard Restructure + Jan 25 Fix
+- [x] Fix missing Jan 25 Drive Day Clinic data: increased Acuity API max from 500 to 1000 in getAppointments() and getTrialSessionDetail() to prevent pagination cutoff
+- [x] Restructure Command Center: added Revenue KPIs inline (Toast MTD, MRR), Active Programs strip, Revenue Snapshot panel
+- [x] Remove/redirect /overview to Command Center; sidebar already clean (no Overview/Revenue items in current nav)
+- [ ] Fix "Top Funnel This Month" showing 0 opt-ins (likely stale ClickFunnels data — deferred)

@@ -20,6 +20,9 @@ import {
   Flag,
   UserCheck,
   Sparkles,
+  ShoppingBag,
+  Activity,
+  Calendar,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -55,6 +58,18 @@ export default function Home() {
       enabled: isAuthenticated,
       staleTime: 60 * 1000,
     });
+
+  // Revenue data
+  const { data: toastSummary } = trpc.revenue.getToastSummary.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Programs data
+  const { data: programs } = trpc.campaigns.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 5 * 60 * 1000,
+  });
 
   const approveMutation = trpc.autonomous.approveAction.useMutation({
     onSuccess: () => utils.autonomous.getApprovalCards.invalidate(),
@@ -117,8 +132,11 @@ export default function Home() {
     corporate_events: { label: "B2B Sales", color: "#F5A623", bg: "#FEF3E2", icon: Flag },
   };
 
+  // Active programs for the strip
+  const activePrograms = (programs ?? []).filter((p: any) => p.status === "active").slice(0, 5);
+
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-5">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
@@ -137,65 +155,145 @@ export default function Home() {
         </button>
       </div>
 
-      {/* Snapshot KPI row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {[
-          {
-            icon: Users, label: "Active Members",
-            value: snapLoading ? "—" : fmt(members?.total ?? 0),
-            sub: members ? `Retention goal: 300 · Acquisition goal: ${fmt(members.acquisitionGoal ?? Math.max(0, 300 - (members.total ?? 0)))} remaining · ${members.newThisMonth} new this month` : undefined,
-            trend: undefined as number | undefined, accent: false, path: "/list/members",
-          },
-          {
-            icon: DollarSign, label: "MRR",
-            value: snapLoading ? "—" : fmtCurrency(members?.mrr ?? 0),
-            sub: revenue ? `Revenue this month: ${fmtCurrency(revenue.thisMonth)}` : undefined,
-            trend: revenue?.mom, accent: false, path: "/revenue",
-          },
-          {
-            icon: Target, label: "Budget Utilization",
-            value: snapLoading ? "—" : `${(budget?.utilization ?? 0).toFixed(0)}%`,
-            sub: budget ? `${fmtCurrency(budget.spent)} of ${fmtCurrency(budget.total)}` : undefined,
-            trend: undefined as number | undefined, accent: false, path: "/campaigns/strategic",
-          },
-          {
-            icon: Sparkles, label: "Pending AI Actions",
-            value: actionsLoading ? "—" : fmt(pendingCount),
-            sub: pendingCount > 0 ? "Awaiting your approval" : "All caught up",
-            trend: undefined as number | undefined, accent: pendingCount > 0, path: "/intelligence/ai-actions",
-          },
-        ].map((card) => {
-          const Icon = card.icon;
-          const TrendIcon = card.trend === undefined ? null : card.trend > 0 ? TrendingUp : card.trend < 0 ? TrendingDown : Minus;
-          return (
-            <button
-              key={card.label}
-              onClick={() => setLocation(card.path)}
-              className={cn(
-                "text-left w-full bg-white rounded-xl border border-[#E0E0E0] p-4 hover:shadow-md transition-shadow duration-150 group",
-                card.accent && "border-[#F5C72C]/60 bg-[#FFFBEA]"
-              )}
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center", card.accent ? "bg-[#F5C72C]/20" : "bg-[#F5F5F5]")}>
-                  <Icon className="h-4 w-4 text-[#111111]" />
-                </div>
-                {TrendIcon && card.trend !== undefined && (
-                  <span className={cn("flex items-center gap-1 text-[11px] font-medium", card.trend > 0 ? "text-[#3DB855]" : card.trend < 0 ? "text-red-500" : "text-[#AAAAAA]")}>
-                    <TrendIcon className="h-3 w-3" />
-                    {Math.abs(card.trend).toFixed(1)}%
-                  </span>
-                )}
-              </div>
-              <p className="text-[28px] font-bold text-[#111111] leading-none tracking-tight">{card.value}</p>
-              <p className="text-[12px] text-[#888888] mt-1">{card.label}</p>
-              {card.sub && <p className="text-[11px] text-[#AAAAAA] mt-0.5">{card.sub}</p>}
-            </button>
-          );
-        })}
+      {/* ── Row 1: Core KPIs (Members + MRR + Revenue + Budget + AI) ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+        {/* Active Members */}
+        <button
+          onClick={() => setLocation("/list/members")}
+          className="text-left bg-white rounded-xl border border-[#E0E0E0] p-4 hover:shadow-md transition-shadow duration-150 group"
+        >
+          <div className="h-8 w-8 rounded-lg bg-[#F5F5F5] flex items-center justify-center mb-3">
+            <Users className="h-4 w-4 text-[#111111]" />
+          </div>
+          <p className="text-[26px] font-bold text-[#111111] leading-none tracking-tight">
+            {snapLoading ? "—" : fmt(members?.total ?? 0)}
+          </p>
+          <p className="text-[12px] text-[#888888] mt-1">Active Members</p>
+          <p className="text-[11px] text-[#AAAAAA] mt-0.5">
+            {members ? `${members.newThisMonth > 0 ? `+${members.newThisMonth}` : members.newThisMonth} this month` : "Goal: 300"}
+          </p>
+        </button>
+
+        {/* MRR */}
+        <button
+          onClick={() => setLocation("/revenue")}
+          className="text-left bg-white rounded-xl border border-[#E0E0E0] p-4 hover:shadow-md transition-shadow duration-150 group"
+        >
+          <div className="flex items-start justify-between mb-3">
+            <div className="h-8 w-8 rounded-lg bg-[#F5F5F5] flex items-center justify-center">
+              <DollarSign className="h-4 w-4 text-[#111111]" />
+            </div>
+            {revenue?.mom !== undefined && (
+              <span className={cn("flex items-center gap-0.5 text-[11px] font-medium", revenue.mom > 0 ? "text-[#3DB855]" : revenue.mom < 0 ? "text-red-500" : "text-[#AAAAAA]")}>
+                {revenue.mom > 0 ? <TrendingUp className="h-3 w-3" /> : revenue.mom < 0 ? <TrendingDown className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
+                {Math.abs(revenue.mom).toFixed(1)}%
+              </span>
+            )}
+          </div>
+          <p className="text-[26px] font-bold text-[#111111] leading-none tracking-tight">
+            {snapLoading ? "—" : fmtCurrency(members?.mrr ?? 0)}
+          </p>
+          <p className="text-[12px] text-[#888888] mt-1">Monthly Recurring Revenue</p>
+          <p className="text-[11px] text-[#AAAAAA] mt-0.5">MoM change</p>
+        </button>
+
+        {/* Toast Revenue MTD */}
+        <button
+          onClick={() => setLocation("/revenue")}
+          className="text-left bg-white rounded-xl border border-[#E0E0E0] p-4 hover:shadow-md transition-shadow duration-150 group"
+        >
+          <div className="h-8 w-8 rounded-lg bg-[#F5F5F5] flex items-center justify-center mb-3">
+            <ShoppingBag className="h-4 w-4 text-[#111111]" />
+          </div>
+          <p className="text-[26px] font-bold text-[#111111] leading-none tracking-tight">
+            {toastSummary ? fmtCurrency((toastSummary as any).thisMonthRevenue ?? 0) : "—"}
+          </p>
+          <p className="text-[12px] text-[#888888] mt-1">Toast Revenue (MTD)</p>
+          <p className="text-[11px] text-[#AAAAAA] mt-0.5">
+            {toastSummary ? `${(toastSummary as any).thisMonthOrders ?? 0} orders this month` : "Updated 5 AM EST"}
+          </p>
+        </button>
+
+        {/* Budget Utilization */}
+        <button
+          onClick={() => setLocation("/campaigns/strategic")}
+          className="text-left bg-white rounded-xl border border-[#E0E0E0] p-4 hover:shadow-md transition-shadow duration-150 group"
+        >
+          <div className="h-8 w-8 rounded-lg bg-[#F5F5F5] flex items-center justify-center mb-3">
+            <Target className="h-4 w-4 text-[#111111]" />
+          </div>
+          <p className="text-[26px] font-bold text-[#111111] leading-none tracking-tight">
+            {snapLoading ? "—" : `${(budget?.utilization ?? 0).toFixed(0)}%`}
+          </p>
+          <p className="text-[12px] text-[#888888] mt-1">Budget Utilization</p>
+          <p className="text-[11px] text-[#AAAAAA] mt-0.5">
+            {budget ? `${fmtCurrency(budget.spent)} of ${fmtCurrency(budget.total)}` : ""}
+          </p>
+        </button>
+
+        {/* Pending AI Actions */}
+        <button
+          onClick={() => setLocation("/intelligence/ai-actions")}
+          className={cn(
+            "text-left rounded-xl border p-4 hover:shadow-md transition-shadow duration-150 group",
+            pendingCount > 0 ? "bg-[#FFFBEA] border-[#F5C72C]/60" : "bg-white border-[#E0E0E0]"
+          )}
+        >
+          <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center mb-3", pendingCount > 0 ? "bg-[#F5C72C]/20" : "bg-[#F5F5F5]")}>
+            <Sparkles className="h-4 w-4 text-[#111111]" />
+          </div>
+          <p className="text-[26px] font-bold text-[#111111] leading-none tracking-tight">
+            {actionsLoading ? "—" : fmt(pendingCount)}
+          </p>
+          <p className="text-[12px] text-[#888888] mt-1">AI Actions Pending</p>
+          <p className="text-[11px] text-[#AAAAAA] mt-0.5">{pendingCount > 0 ? "Awaiting approval" : "All caught up"}</p>
+        </button>
       </div>
 
-      {/* 4-Campaign KPI grid */}
+      {/* ── Row 2: Active Programs Strip ── */}
+      {activePrograms.length > 0 && (
+        <div className="bg-white rounded-xl border border-[#E0E0E0] p-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Flag className="h-4 w-4 text-[#111111]" />
+              <h2 className="text-[14px] font-bold text-[#111111]">Active Programs</h2>
+              <span className="text-[10px] font-bold bg-[#F5F5F5] rounded-full px-1.5 py-0.5 text-[#888888]">{activePrograms.length}</span>
+            </div>
+            <button onClick={() => setLocation("/programs")} className="flex items-center gap-1 text-[12px] text-[#888888] hover:text-[#111111] transition-colors">
+              All programs <ArrowRight className="h-3 w-3" />
+            </button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {activePrograms.map((p: any) => {
+              const progress = p.goalTarget > 0 ? Math.min((p.kpiActual / p.goalTarget) * 100, 100) : 0;
+              const isOnTrack = progress >= 50;
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => setLocation("/programs")}
+                  className="flex items-center gap-3 p-3 rounded-lg bg-[#F9F9F9] hover:bg-[#F0F0F0] transition-colors text-left group"
+                >
+                  <div className={cn("h-2 w-2 rounded-full shrink-0 mt-0.5", isOnTrack ? "bg-[#3DB855]" : "bg-[#F5A623]")} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-semibold text-[#111111] truncate">{p.name}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="flex-1 h-1 bg-[#E8E8E8] rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all"
+                          style={{ width: `${progress}%`, background: isOnTrack ? "#3DB855" : "#F5A623" }}
+                        />
+                      </div>
+                      <span className="text-[10px] text-[#AAAAAA] shrink-0">{progress.toFixed(0)}%</span>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Row 3: Strategic Campaigns ── */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-[15px] font-bold text-[#111111]">Strategic Campaigns</h2>
@@ -256,7 +354,7 @@ export default function Home() {
         )}
       </div>
 
-      {/* Bottom row */}
+      {/* ── Row 4: AI Actions + Revenue Breakdown ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Pending AI Actions */}
         <div className="lg:col-span-2 bg-white rounded-xl border border-[#E0E0E0] p-4">
@@ -313,29 +411,64 @@ export default function Home() {
           )}
         </div>
 
-        {/* Quick links */}
-        <div className="bg-white rounded-xl border border-[#E0E0E0] p-4">
-          <h3 className="text-[14px] font-bold text-[#111111] mb-3">Quick Access</h3>
-          <div className="space-y-1">
-            {[
-              { label: "Programs & Events", path: "/programs", icon: Flag },
-              { label: "Meta Advertising", path: "/campaigns/meta-ads", icon: BarChart3 },
-              { label: "Members", path: "/list/members", icon: UserCheck },
-              { label: "Revenue & Goals", path: "/revenue", icon: DollarSign },
-              { label: "AI Analysis", path: "/intelligence", icon: Sparkles },
-              { label: "AI Workspace", path: "/workspace", icon: Zap },
-            ].map((link) => {
-              const Icon = link.icon;
-              return (
-                <button key={link.path} onClick={() => setLocation(link.path)}
-                  className="flex items-center gap-2.5 w-full rounded-lg px-2.5 py-2 text-[13px] text-[#555555] hover:bg-[#F5F5F5] hover:text-[#111111] transition-colors text-left"
-                >
-                  <Icon className="h-3.5 w-3.5 text-[#AAAAAA]" />
-                  <span>{link.label}</span>
-                  <ArrowRight className="h-3 w-3 text-[#CCCCCC] ml-auto" />
-                </button>
-              );
-            })}
+        {/* Revenue Snapshot + Quick Links */}
+        <div className="space-y-3">
+          {/* Revenue Snapshot */}
+          <div className="bg-white rounded-xl border border-[#E0E0E0] p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Activity className="h-4 w-4 text-[#111111]" />
+                <h3 className="text-[14px] font-bold text-[#111111]">Revenue Snapshot</h3>
+              </div>
+              <button onClick={() => setLocation("/revenue")} className="text-[12px] text-[#888888] hover:text-[#111111] transition-colors flex items-center gap-1">
+                Details <ArrowRight className="h-3 w-3" />
+              </button>
+            </div>
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[12px] text-[#888888]">Memberships (MRR)</span>
+                <span className="text-[13px] font-bold text-[#111111]">{snapLoading ? "—" : fmtCurrency(members?.mrr ?? 0)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[12px] text-[#888888]">Toast POS (MTD)</span>
+                <span className="text-[13px] font-bold text-[#111111]">{toastSummary ? fmtCurrency((toastSummary as any).thisMonthRevenue ?? 0) : "—"}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[12px] text-[#888888]">All-Time Toast</span>
+                <span className="text-[13px] font-bold text-[#111111]">{toastSummary ? fmtCurrency((toastSummary as any).allTimeRevenue ?? 0) : "—"}</span>
+              </div>
+              <div className="pt-2 border-t border-[#F0F0F0] flex items-center justify-between">
+                <span className="text-[12px] font-semibold text-[#111111]">MRR + Toast (MTD)</span>
+                <span className="text-[14px] font-bold text-[#F5C72C]">
+                  {(members?.mrr && toastSummary) ? fmtCurrency((members.mrr) + ((toastSummary as any).thisMonthRevenue ?? 0)) : "—"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div className="bg-white rounded-xl border border-[#E0E0E0] p-4">
+            <h3 className="text-[14px] font-bold text-[#111111] mb-2">Quick Access</h3>
+            <div className="space-y-0.5">
+              {[
+                { label: "Programs & Events", path: "/programs", icon: Flag },
+                { label: "Advertising", path: "/advertising", icon: BarChart3 },
+                { label: "Members", path: "/list/members", icon: UserCheck },
+                { label: "AI Analysis", path: "/intelligence", icon: Sparkles },
+                { label: "Reports", path: "/intelligence/reports", icon: Calendar },
+              ].map((link) => {
+                const Icon = link.icon;
+                return (
+                  <button key={link.path} onClick={() => setLocation(link.path)}
+                    className="flex items-center gap-2.5 w-full rounded-lg px-2 py-1.5 text-[12px] text-[#555555] hover:bg-[#F5F5F5] hover:text-[#111111] transition-colors text-left"
+                  >
+                    <Icon className="h-3.5 w-3.5 text-[#AAAAAA]" />
+                    <span>{link.label}</span>
+                    <ArrowRight className="h-3 w-3 text-[#CCCCCC] ml-auto" />
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
