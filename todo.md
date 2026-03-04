@@ -911,3 +911,11 @@
 - [x] Group MRR + Toast Revenue + Budget together as one Revenue section with combined total
 - [x] Never show $0 or empty/null data — Toast MTD, Toast orders, Budget, member breakdown all hidden when zero
 - [x] Reorder sections: Members → Revenue → Programs → Strategic Campaigns → AI Actions
+
+## Session 2026-03-04 Part 19 — Restore Full Sidebar Navigation
+- [x] Restore all missing sidebar sections: Campaigns, Revenue, Promotions, Site Control, Instagram/Social sub-pages
+- [x] Add AI Workspace as visible top-level item under Intelligence (not hidden under collapse)
+- [x] Add Social & Content as collapsible with Instagram, Instagram Analytics, News/Blog children
+- [x] Add Website section: Site Control
+- [x] Add Settings section: Integrations, Account
+- [x] Restored Strategic section: Revenue, Reports, Campaigns all visible

@@ -31,6 +31,15 @@ import {
   Mail,
   Search,
   Lightbulb,
+  Globe,
+  Newspaper,
+  Megaphone,
+  Gift,
+  Target,
+  LineChart,
+  Wrench,
+  Users,
+  ClipboardList,
 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -71,7 +80,9 @@ const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
   {
     heading: "Strategic",
     items: [
+      { label: "Revenue", path: "/revenue", icon: DollarSign },
       { label: "Reports", path: "/intelligence/reports", icon: FileText },
+      { label: "Campaigns", path: "/strategic-campaigns", icon: Target },
     ],
   },
   {
@@ -84,10 +95,10 @@ const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
         children: [
           { label: "Actions", path: "/intelligence/ai-actions", icon: Zap },
           { label: "Market Research", path: "/intelligence/market-research", icon: Search },
-          { label: "AI Workspace", path: "/workspace", icon: Bot },
           { label: "Action Plan", path: "/intelligence/action-plan", icon: Lightbulb },
         ],
       },
+      { label: "AI Workspace", path: "/workspace", icon: Bot },
     ],
   },
   {
@@ -95,7 +106,17 @@ const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
     items: [
       { label: "Programs & Events", path: "/programs", icon: Flag },
       { label: "Advertising", path: "/advertising", icon: BarChart3 },
-      { label: "Social & Content", path: "/website/instagram", icon: Instagram },
+      { label: "Promotions", path: "/promotions/annual-giveaway", icon: Gift },
+      {
+        label: "Social & Content",
+        path: "/website/instagram",
+        icon: Instagram,
+        children: [
+          { label: "Instagram", path: "/website/instagram", icon: Instagram },
+          { label: "Instagram Analytics", path: "/website/instagram/analytics", icon: LineChart },
+          { label: "News / Blog", path: "/website/news", icon: Newspaper },
+        ],
+      },
       {
         label: "Communications",
         path: "/communication",
@@ -114,6 +135,19 @@ const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
       { label: "Members", path: "/list/members", icon: UserCheck },
       { label: "Pro Members", path: "/pro-members", icon: Trophy },
       { label: "Guests & Leads", path: "/list/guests", icon: UserPlus },
+    ],
+  },
+  {
+    heading: "Website",
+    items: [
+      { label: "Site Control", path: "/website/site-control", icon: Globe },
+    ],
+  },
+  {
+    heading: "Settings",
+    items: [
+      { label: "Integrations", path: "/settings/integrations", icon: Wrench },
+      { label: "Account", path: "/settings/account", icon: Settings },
     ],
   },
 ];
