@@ -119,10 +119,17 @@ export default function ROI() {
 
   // ── Derived: Daily trend ───────────────────────────────────────────────────
 
-  const trendData = ((toastDaily.data as any[]) ?? []).map((row: any) => ({
-    date: String(row.date),
-    value: parseFloat(String(row.netSales ?? row.total_net_sales ?? row.revenue ?? 0)),
-  }));
+  const trendData = ((toastDaily.data as any[]) ?? []).map((row: any) => {
+    // date is stored as YYYYMMDD varchar → convert to YYYY-MM-DD for Date parsing
+    const raw = String(row.date ?? "");
+    const iso = raw.length === 8
+      ? `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}`
+      : raw;
+    return {
+      date: iso,
+      value: parseFloat(String(row.totalRevenue ?? row.netSales ?? row.revenue ?? 0)),
+    };
+  });
 
   // ── Derived: KPI Tracking ──────────────────────────────────────────────────
 

@@ -27,7 +27,12 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { isAuthenticated, loading: isLoading, user, logout } = useAuth();
+  const { isAuthenticated: _isAuthenticated, loading: _isLoading, user: _user, logout } = useAuth();
+  // DEV BYPASS — remove before deploy
+  const DEV_BYPASS = import.meta.env.DEV;
+  const isAuthenticated = DEV_BYPASS || _isAuthenticated;
+  const isLoading = DEV_BYPASS ? false : _isLoading;
+  const user = DEV_BYPASS ? { name: "Dev Preview", email: "dev@local" } : _user;
   const [location, setLocation] = useLocation();
   const isMobile = useIsMobile();
   const activeLabel = getActiveLabel(location);

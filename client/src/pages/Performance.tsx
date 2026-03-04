@@ -1,19 +1,20 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TrendingUp, TrendingDown, DollarSign, Target, Users, RefreshCw } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, Target, Users, RefreshCw, BarChart3, ArrowRight } from "lucide-react";
 
 export default function Performance() {
+  const [, navigate] = useLocation();
   const [dateRange] = useState(() => ({
     startDate: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
     endDate: new Date(),
   }));
 
   const { data: campaigns, isLoading: campaignsLoading } = trpc.campaigns.getByStatus.useQuery({ status: "active" });
-  const { data: metaAds, isLoading: metaLoading } = trpc.metaAds.getAllCampaignsWithInsights.useQuery({ datePreset: "last_30d" });
   const { data: channelSummary } = trpc.campaigns.getCategorySummary.useQuery();
 
   const formatCurrency = (val: number | string) =>
@@ -37,7 +38,6 @@ export default function Performance() {
       <Tabs defaultValue="campaigns">
         <TabsList className="bg-muted">
           <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
-          <TabsTrigger value="meta-ads">Meta Ads</TabsTrigger>
           <TabsTrigger value="channels">Channels</TabsTrigger>
         </TabsList>
 
@@ -87,57 +87,6 @@ export default function Performance() {
           )}
         </TabsContent>
 
-        {/* Meta Ads Tab */}
-        <TabsContent value="meta-ads" className="mt-4 space-y-4">
-          {metaLoading ? (
-            <div className="space-y-3">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-24 bg-card rounded-xl animate-pulse border border-border" />
-              ))}
-            </div>
-          ) : metaAds && metaAds.length > 0 ? (
-            <div className="space-y-3">
-              {metaAds.map((ad: any) => (
-                <Card key={ad.id} className="bg-card border-border">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <span className="font-medium text-foreground text-sm">{ad.name}</span>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge
-                            variant={ad.status === "ACTIVE" ? "default" : "secondary"}
-                            className="text-xs"
-                          >
-                            {ad.status}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">{ad.objective}</span>
-                        </div>
-                      </div>
-                    </div>
-                    {ad.insights && (
-                      <div className="grid grid-cols-4 gap-3 mt-3">
-                        {[
-                          { label: "Spend", value: formatCurrency(ad.insights.spend || 0) },
-                          { label: "Reach", value: (ad.insights.reach || 0).toLocaleString() },
-                          { label: "Impressions", value: (ad.insights.impressions || 0).toLocaleString() },
-                          { label: "Clicks", value: (ad.insights.clicks || 0).toLocaleString() },
-                        ].map((m) => (
-                          <div key={m.label} className="text-center">
-                            <div className="text-sm font-semibold text-foreground">{m.value}</div>
-                            <div className="text-xs text-muted-foreground">{m.label}</div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12 text-muted-foreground">No Meta Ads data</div>
-          )}
-        </TabsContent>
-
         {/* Channels Tab */}
         <TabsContent value="channels" className="mt-4">
           {channelSummary ? (
@@ -170,6 +119,21 @@ export default function Performance() {
           ) : (
             <div className="text-center py-12 text-muted-foreground">Loading channel data...</div>
           )}
+
+          {/* Meta Ads callout */}
+          <button
+            onClick={() => navigate("/advertising")}
+            className="w-full flex items-center justify-between px-4 py-3 mt-4 bg-[#F5C72C]/10 border border-[#F5C72C]/30 rounded-[10px] hover:bg-[#F5C72C]/20 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <BarChart3 className="h-4 w-4 text-[#F5C72C]" />
+              <div className="text-left">
+                <p className="text-sm font-semibold text-[#111111]">Meta Ads Campaigns</p>
+                <p className="text-xs text-[#888888]">Facebook & Instagram 캠페인 상세 데이터는 Advertising에서 확인하세요</p>
+              </div>
+            </div>
+            <ArrowRight className="h-4 w-4 text-[#888888]" />
+          </button>
         </TabsContent>
       </Tabs>
     </div>

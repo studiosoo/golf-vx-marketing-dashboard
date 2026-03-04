@@ -8,10 +8,28 @@ export type TrpcContext = {
   user: User | null;
 };
 
+// DEV BYPASS — remove before deploy
+const DEV_USER: User = {
+  id: 1,
+  openId: "dev-local",
+  name: "Dev Preview",
+  email: "dev@local",
+  loginMethod: "dev",
+  role: "admin",
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  lastSignedIn: new Date(),
+};
+
 export async function createContext(
   opts: CreateExpressContextOptions
 ): Promise<TrpcContext> {
   let user: User | null = null;
+
+  // DEV BYPASS — remove before deploy
+  if (process.env.NODE_ENV === "development") {
+    return { req: opts.req, res: opts.res, user: DEV_USER };
+  }
 
   try {
     user = await sdk.authenticateRequest(opts.req);
