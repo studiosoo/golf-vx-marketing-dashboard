@@ -211,6 +211,7 @@ export const members = mysqlTable("members", {
   
   // Boomerangme integration fields
   boomerangCustomerId: varchar("boomerangCustomerId", { length: 100 }),
+  boomerangEmail: varchar("boomerangEmail", { length: 320 }), // Boomerang-issued email (*.membership@boomerang-import.golfvx.com)
   loyaltyPoints: int("loyaltyPoints").default(0).notNull(),
   loyaltyCardStatus: mysqlEnum("loyaltyCardStatus", ["active", "inactive", "none"]).default("none"),
   lastLoyaltySync: timestamp("lastLoyaltySync"),

@@ -1005,3 +1005,12 @@
 - [x] Make AI Intelligence a standalone yellow-bordered section on Giveaway page
 - [x] Add metaAds.generateCampaignInsights procedure
 - [x] Update AGENT_REFERENCE.md with Section 10 QA Checklist
+
+## Session 2026-03-04 Part 4 — Pro Members Duplicate Merge
+- [x] Add boomerangEmail column to members table schema
+- [x] Run DB migration to add boomerangEmail column
+- [x] Merge 5 duplicate pro member pairs (Ben Lee, Chuck Lynch, Danny Wojtowicz, Nick Kirsch, Steve Hagan)
+- [x] Preserve both personal email (primary) and Boomerang-issued email (boomerangEmail field)
+- [x] Clean up "(pro membership)" suffix from merged member names
+- [x] Update ProMembers.tsx to display boomerangEmail below primary email with yellow dot indicator
+- [x] TypeScript: 0 errors

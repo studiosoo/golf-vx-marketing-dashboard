@@ -159,6 +159,12 @@ export default function ProMembers() {
                         )}
                       </div>
                       <div className="text-xs text-muted-foreground">{m.email}</div>
+                      {m.boomerangEmail && (
+                        <div className="text-xs text-muted-foreground/60 flex items-center gap-1 mt-0.5">
+                          <span className="inline-block w-1.5 h-1.5 rounded-full bg-yellow-500/60 flex-shrink-0" />
+                          <span title="Boomerang-issued email">{m.boomerangEmail}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-3 text-right">
