@@ -485,3 +485,20 @@ const count = stats.activeMembers; // correct!
 | 2026-03-04 | Made AI Intelligence a standalone yellow-bordered section on Giveaway page | User requested it be more prominent |
 | 2026-03-04 | Added `metaAds.generateCampaignInsights` procedure | New AI Insights button needed backend support |
 | 2026-03-04 | Added Section 10 QA Checklist to AGENT_REFERENCE.md | User requested automatic QA verification |
+
+## 11. 환경 변수 및 DB 마이그레이션 주의사항
+
+### DATABASE_URL
+- Manus 런타임이 앱 실행 시 자동 주입 — `.env` 파일에 없는 것이 정상
+- `pnpm db:push`는 Manus 플랫폼 실행 환경에서만 동작
+- Claude/로컬 환경에서는 DB 마이그레이션 불가 (코드 수정만 가능)
+
+### 새 테이블 추가 워크플로우
+1. `drizzle/schema.ts`에 테이블 정의 추가
+2. `server/routers/*.ts`에 라우터 코드 작성
+3. TypeScript 오류 없는지 확인 (`pnpm check`)
+4. GitHub에 commit & push
+5. Manus가 `pnpm db:push` 실행하여 DB에 테이블 생성
+
+### 현재 DB에 생성 필요한 테이블
+- `event_advertising` — schema.ts에 정의 완료, DB 생성 대기 중

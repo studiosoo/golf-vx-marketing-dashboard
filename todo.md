@@ -1029,3 +1029,9 @@
 - [x] Move Active Programs section down, add health scores to each program card
 - [x] Merge Campaigns sidebar item into Dashboard (show campaigns inline)
 - [x] Remove Campaigns from sidebar navigation
+
+## Manus 재개 시 필수 작업 (Claude 코드 수정 완료 후)
+- [ ] pnpm db:push 실행 (event_advertising 테이블 생성)
+- [ ] /advertising 페이지 정상 동작 확인
+- [ ] /programs/summer-camp 페이지 정상 동작 확인
+- [ ] TypeScript: pnpm check → 0 errors 확인
