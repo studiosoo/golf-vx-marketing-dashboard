@@ -948,3 +948,17 @@
 - [x] Add giveaway router: getApplications, getStats, getLastSyncInfo, getConversions, sync, syncToEncharge, updateStatus, checkVisitHistory, generateEmailDraft, generateProgramInsights
 - [x] Add strategicCampaigns router: getOverview (groups campaigns by category)
 - [x] Add revenue router: getToastSummary (Toast POS from DB), getAcuityRevenue (Acuity API)
+
+## Bug Fix Round 2: Missing tRPC Procedures (2026-03-04)
+
+- [x] Add giveaway router: getApplications, getStats, getLastSyncInfo, getConversions, sync, syncToEncharge, updateStatus, checkVisitHistory, generateEmailDraft, generateProgramInsights
+- [x] Add giveaway.getApplicationsFiltered procedure
+- [x] Add strategicCampaigns router: getOverview
+- [x] Add revenue router extensions: getSummary, getToastDaily, getTrialSessionDetail
+- [x] Add members router: list, getStats, getById, getGuestContacts, findDuplicates, mergeMembers
+- [x] Add metaAds router: getAllCampaignsWithInsights, getCampaignDailyInsights, getCampaignCreatives, getCampaignAudience
+- [x] Add encharge router: getAccount, getMetrics, getPeople, getSegments
+- [x] Add budgets router: getCampaignBudgetSummary, getCampaignExpenses, syncMetaAdsBudgets, autoLinkMetaAdsCampaigns, addExpense, deleteExpense
+- [x] Add dashboard router: getOverview
+- [x] Add conversion router: getMemberAppointments
+- [x] Generate AGENT_REFERENCE.md with router map, error patterns, and prevention rules

@@ -3234,7 +3234,63 @@ Provide a comprehensive marketing intelligence report. Respond in JSON:
         } catch {
           insights = { executiveSummary: 'Unable to generate insights at this time.', keyInsights: [], chicagoOpportunity: null, metaAdsStrategy: {}, multiChannelStrategy: [], contentStrategy: {}, funnelOptimization: [], sevenDayPlan: [] };
         }
-        return { insights, stats: { total, entryGoal, longFormGoal, progressPct: parseFloat(progressPct) } };
+         return { insights, stats: { total, entryGoal, longFormGoal, progressPct: parseFloat(progressPct) } };
+      }),
+    getApplicationsFiltered: protectedProcedure
+      .input(z.object({
+        search: z.string().optional(),
+        gender: z.string().optional(),
+        ageRange: z.string().optional(),
+        golfExperience: z.string().optional(),
+        status: z.enum(['pending', 'contacted', 'scheduled', 'completed', 'declined']).optional(),
+        illinoisResident: z.boolean().optional(),
+        showTestEntries: z.boolean().optional(),
+        sortBy: z.string().optional(),
+        sortDir: z.enum(['asc', 'desc']).optional(),
+        page: z.number().optional(),
+        pageSize: z.number().optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        const database = await db.getDb();
+        if (!database) return { applications: [], total: 0, page: 1, pageSize: 50, totalPages: 0 };
+        const { giveawayApplications } = await import('../drizzle/schema');
+        const { like, eq: eqOp, and: andOp } = await import('drizzle-orm');
+        const conditions: any[] = [];
+        if (!input?.showTestEntries) conditions.push(eqOp(giveawayApplications.isTestEntry, false));
+        if (input?.status) conditions.push(eqOp(giveawayApplications.status, input.status));
+        if (input?.gender) conditions.push(eqOp(giveawayApplications.gender, input.gender));
+        if (input?.ageRange) conditions.push(eqOp(giveawayApplications.ageRange, input.ageRange));
+        if (input?.golfExperience) conditions.push(eqOp(giveawayApplications.golfExperienceLevel, input.golfExperience));
+        if (input?.illinoisResident !== undefined && input.illinoisResident !== null) {
+          conditions.push(eqOp(giveawayApplications.illinoisResident, input.illinoisResident));
+        }
+        const allRows = conditions.length > 0
+          ? await database.select().from(giveawayApplications).where(andOp(...conditions as [any, ...any[]]))
+          : await database.select().from(giveawayApplications);
+        let filtered = allRows;
+        if (input?.search) {
+          const q = input.search.toLowerCase();
+          filtered = allRows.filter(r =>
+            r.name.toLowerCase().includes(q) ||
+            r.email.toLowerCase().includes(q) ||
+            (r.phone || '').includes(q)
+          );
+        }
+        // Sort
+        const sortBy = input?.sortBy || 'submissionTimestamp';
+        const sortDir = input?.sortDir || 'desc';
+        filtered.sort((a: any, b: any) => {
+          const av = a[sortBy] ?? '';
+          const bv = b[sortBy] ?? '';
+          return sortDir === 'asc' ? (av > bv ? 1 : -1) : (av < bv ? 1 : -1);
+        });
+        // Paginate
+        const page = input?.page || 1;
+        const pageSize = input?.pageSize || 50;
+        const total = filtered.length;
+        const totalPages = Math.ceil(total / pageSize);
+        const applications = filtered.slice((page - 1) * pageSize, page * pageSize);
+        return { applications, total, page, pageSize, totalPages };
       }),
   }),
 
@@ -3359,6 +3415,74 @@ Provide a comprehensive marketing intelligence report. Respond in JSON:
       };
     }),
 
+    // Get revenue summary for a date range
+    getSummary: protectedProcedure
+      .input(z.object({ startDate: z.date(), endDate: z.date() }).optional())
+      .query(async ({ input }) => {
+        const database = await db.getDb();
+        if (!database) return { total: 0, toastRevenue: 0, acuityRevenue: 0, memberCount: 0 };
+        const { memberTransactions } = await import('../drizzle/schema');
+        const { gte: gteOp, lte: lteOp, and: andOp, eq: eqOp } = await import('drizzle-orm');
+        const now = new Date();
+        const start = input?.startDate || new Date(now.getFullYear(), now.getMonth(), 1);
+        const end = input?.endDate || now;
+        const txs = await database.select().from(memberTransactions)
+          .where(andOp(
+            eqOp(memberTransactions.paymentStatus, 'paid'),
+            gteOp(memberTransactions.transactionDate, start),
+            lteOp(memberTransactions.transactionDate, end)
+          ));
+        const total = txs.reduce((s, t) => s + parseFloat(String(t.total || 0)), 0);
+        return { total, toastRevenue: total, acuityRevenue: 0, memberCount: txs.length };
+      }),
+    // Get Toast POS daily summary rows
+    getToastDaily: protectedProcedure
+      .input(z.object({ startDate: z.string().optional(), endDate: z.string().optional() }).optional())
+      .query(async ({ input }) => {
+        const database = await db.getDb();
+        if (!database) return [];
+        const { toastDailySummary } = await import('../drizzle/schema');
+        const { gte: gteOp, lte: lteOp, and: andOp } = await import('drizzle-orm');
+        const conditions = [];
+        if (input?.startDate) conditions.push(gteOp(toastDailySummary.date, input.startDate));
+        if (input?.endDate) conditions.push(lteOp(toastDailySummary.date, input.endDate));
+        const rows = conditions.length > 0
+          ? await database.select().from(toastDailySummary).where(andOp(...conditions as [any, ...any[]])).orderBy(toastDailySummary.date)
+          : await database.select().from(toastDailySummary).orderBy(toastDailySummary.date);
+        return rows;
+      }),
+    // Get trial session detail data from Acuity
+    getTrialSessionDetail: protectedProcedure.query(async () => {
+      try {
+        const { getAppointments } = await import('./acuity');
+        const appointments = await getAppointments({ canceled: false, max: 1000 });
+        // Filter for trial/intro sessions
+        const trialAppts = appointments.filter((apt: any) => {
+          const t = apt.type.toLowerCase();
+          return t.includes('trial') || t.includes('intro') || t.includes('free') || t.includes('guest pass') || t.includes('first visit');
+        });
+        // Group by appointment type
+        const typeMap = new Map<string, { name: string; count: number; paidCount: number; revenue: number; bookings: any[] }>();
+        for (const apt of trialAppts) {
+          const key = apt.type;
+          const paid = parseFloat(apt.amountPaid || '0');
+          if (!typeMap.has(key)) typeMap.set(key, { name: key, count: 0, paidCount: 0, revenue: 0, bookings: [] });
+          const entry = typeMap.get(key)!;
+          entry.count += 1;
+          entry.revenue += paid;
+          if (paid > 0) entry.paidCount += 1;
+          entry.bookings.push({ id: apt.id, firstName: apt.firstName, lastName: apt.lastName, email: apt.email, date: apt.date, time: apt.time, amountPaid: apt.amountPaid, type: apt.type });
+        }
+        const types = Array.from(typeMap.values()).map(t => ({ ...t, avgPrice: t.count > 0 ? t.revenue / t.count : 0 }));
+        const totalBookings = trialAppts.length;
+        const totalRevenue = trialAppts.reduce((s: number, a: any) => s + parseFloat(a.amountPaid || '0'), 0);
+        const allBookings = trialAppts.map((apt: any) => ({ id: apt.id, firstName: apt.firstName, lastName: apt.lastName, email: apt.email, date: apt.date, time: apt.time, amountPaid: apt.amountPaid, type: apt.type }));
+        return { types, totalBookings, totalRevenue, allBookings };
+      } catch (err) {
+        console.error('[revenue.getTrialSessionDetail]', err);
+        return { types: [], totalBookings: 0, totalRevenue: 0, allBookings: [] };
+      }
+    }),
     // Get Acuity Scheduler revenue
     getAcuityRevenue: protectedProcedure
       .input(z.object({
@@ -3375,6 +3499,308 @@ Provide a comprehensive marketing intelligence report. Respond in JSON:
         } catch (err) {
           console.error('[Revenue] Acuity revenue error:', err);
           return { total: 0, totalBookings: 0, byType: [] };
+        }
+      }),
+  }),
+  // ─── Members Router ───────────────────────────────────────────────────────
+  members: router({
+    list: protectedProcedure
+      .input(z.object({
+        search: z.string().optional(),
+        status: z.enum(['active', 'inactive', 'cancelled', 'trial']).optional(),
+        membershipTier: z.enum(['trial', 'monthly', 'annual', 'corporate', 'none', 'all_access_aces', 'swing_savers', 'golf_vx_pro']).optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return await db.getAllMembers(input || {});
+      }),
+    getStats: protectedProcedure.query(async () => {
+      return await db.getMemberStats();
+    }),
+    getById: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        const member = await db.getMemberById(input.id);
+        if (!member) throw new TRPCError({ code: 'NOT_FOUND', message: 'Member not found' });
+        return member;
+      }),
+    getGuestContacts: protectedProcedure
+      .input(z.object({ search: z.string().optional() }).optional())
+      .query(async ({ input }) => {
+        try {
+          const { getAppointments } = await import('./acuity');
+          const sixMonthsAgo = new Date();
+          sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+          const minDate = sixMonthsAgo.toISOString().split('T')[0];
+          const appointments = await getAppointments({ minDate, canceled: false });
+          // Group by email
+          const contactMap = new Map<string, {
+            email: string; firstName: string; lastName: string;
+            visitCount: number; totalPaid: number; lastVisit: string;
+            programs: string[];
+          }>();
+          for (const apt of appointments) {
+            const email = apt.email.toLowerCase();
+            if (!email) continue;
+            const existing = contactMap.get(email);
+            if (existing) {
+              existing.visitCount += 1;
+              existing.totalPaid += parseFloat(apt.amountPaid || '0');
+              if (apt.date > existing.lastVisit) existing.lastVisit = apt.date;
+              existing.programs.push(apt.type);
+            } else {
+              contactMap.set(email, {
+                email,
+                firstName: apt.firstName,
+                lastName: apt.lastName,
+                visitCount: 1,
+                totalPaid: parseFloat(apt.amountPaid || '0'),
+                lastVisit: apt.date,
+                programs: [apt.type],
+              });
+            }
+          }
+          let contacts = Array.from(contactMap.values()).sort((a, b) => b.lastVisit.localeCompare(a.lastVisit));
+          if (input?.search) {
+            const q = input.search.toLowerCase();
+            contacts = contacts.filter(c =>
+              c.firstName.toLowerCase().includes(q) ||
+              c.lastName.toLowerCase().includes(q) ||
+              c.email.includes(q)
+            );
+          }
+          return contacts;
+        } catch (err) {
+          console.error('[members.getGuestContacts]', err);
+          return [];
+        }
+      }),
+    findDuplicates: protectedProcedure.query(async () => {
+      const allMembers = await db.getAllMembers();
+      // Group by normalized email to find duplicates
+      const emailGroups = new Map<string, typeof allMembers>();
+      for (const m of allMembers) {
+        const key = m.email.toLowerCase().trim();
+        if (!emailGroups.has(key)) emailGroups.set(key, []);
+        emailGroups.get(key)!.push(m);
+      }
+      return Array.from(emailGroups.values()).filter(g => g.length > 1);
+    }),
+    mergeMembers: protectedProcedure
+      .input(z.object({ primaryId: z.number(), duplicateIds: z.array(z.number()) }))
+      .mutation(async ({ input }) => {
+        const database = await db.getDb();
+        if (!database) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
+        const { members: membersTable } = await import('../drizzle/schema');
+        // Delete duplicate members (primary keeps its record)
+        for (const dupId of input.duplicateIds) {
+          await database.delete(membersTable).where(eq(membersTable.id, dupId));
+        }
+        return { success: true, mergedCount: input.duplicateIds.length };
+      }),
+  }),
+
+  // ─── Meta Ads Router ──────────────────────────────────────────────────────
+  metaAds: router({
+    getAllCampaignsWithInsights: protectedProcedure
+      .input(z.object({ datePreset: z.string().optional() }).optional())
+      .query(async ({ input }) => {
+        try {
+          return await metaAds.getAllCampaignsWithInsights(input?.datePreset || 'last_30d');
+        } catch (err) {
+          console.error('[metaAds.getAllCampaignsWithInsights]', err);
+          return [];
+        }
+      }),
+    getCampaignDailyInsights: protectedProcedure
+      .input(z.object({ campaignId: z.string(), datePreset: z.string().optional() }))
+      .query(async ({ input }) => {
+        try {
+          return await metaAds.getCampaignDailyInsights(input.campaignId, input.datePreset || 'last_30d');
+        } catch (err) {
+          console.error('[metaAds.getCampaignDailyInsights]', err);
+          return [];
+        }
+      }),
+    getCampaignCreatives: protectedProcedure
+      .input(z.object({ campaignId: z.string() }))
+      .query(async ({ input }) => {
+        try {
+          return await metaAds.getCampaignCreatives(input.campaignId);
+        } catch (err) {
+          console.error('[metaAds.getCampaignCreatives]', err);
+          return [];
+        }
+      }),
+    getCampaignAudience: protectedProcedure
+      .input(z.object({ campaignId: z.string(), datePreset: z.string().optional() }))
+      .query(async ({ input }) => {
+        try {
+          return await metaAds.getCampaignAudience(input.campaignId, input.datePreset || 'last_30d');
+        } catch (err) {
+          console.error('[metaAds.getCampaignAudience]', err);
+          return null;
+        }
+      }),
+  }),
+
+  // ─── Encharge Router ──────────────────────────────────────────────────────
+  encharge: router({
+    getAccount: protectedProcedure.query(async () => {
+      try {
+        return await encharge.getEnchargeAccount();
+      } catch (err) {
+        console.error('[encharge.getAccount]', err);
+        return null;
+      }
+    }),
+    getMetrics: protectedProcedure.query(async () => {
+      try {
+        return await encharge.getSubscriberMetrics();
+      } catch (err) {
+        console.error('[encharge.getMetrics]', err);
+        return { totalSubscribers: 0, activeSubscribers: 0, unsubscribed: 0, bounced: 0 };
+      }
+    }),
+    getPeople: protectedProcedure
+      .input(z.object({ limit: z.number().optional() }).optional())
+      .query(async ({ input }) => {
+        try {
+          return await encharge.getEnchargePeople(input?.limit || 100);
+        } catch (err) {
+          console.error('[encharge.getPeople]', err);
+          return [];
+        }
+      }),
+    getSegments: protectedProcedure.query(async () => {
+      try {
+        return await encharge.getEnchargeSegments();
+      } catch (err) {
+        console.error('[encharge.getSegments]', err);
+        return [];
+      }
+    }),
+  }),
+
+  // ─── Budgets Router ───────────────────────────────────────────────────────
+  budgets: router({
+    getCampaignBudgetSummary: protectedProcedure
+      .input(z.object({ campaignId: z.number() }))
+      .query(async ({ input }) => {
+        const campaign = await db.getCampaignById(input.campaignId);
+        if (!campaign) throw new TRPCError({ code: 'NOT_FOUND', message: 'Campaign not found' });
+        const manualExpenses = await db.getTotalCampaignExpenses(input.campaignId);
+        const plannedBudget = campaign.budget || '0';
+        const metaAdsSpend = campaign.metaAdsSpend || '0';
+        const totalActualSpend = (parseFloat(metaAdsSpend) + parseFloat(manualExpenses)).toFixed(2);
+        const remaining = (parseFloat(plannedBudget) - parseFloat(totalActualSpend)).toFixed(2);
+        const utilization = parseFloat(plannedBudget) > 0
+          ? ((parseFloat(totalActualSpend) / parseFloat(plannedBudget)) * 100).toFixed(1)
+          : '0';
+        return { plannedBudget, metaAdsSpend, manualExpenses, totalActualSpend, remaining, utilization };
+      }),
+    getCampaignExpenses: protectedProcedure
+      .input(z.object({ campaignId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getCampaignExpenses(input.campaignId);
+      }),
+    syncMetaAdsBudgets: protectedProcedure.mutation(async () => {
+      try {
+        const result = await metaAds.syncMetaAdsBudgets();
+        return result;
+      } catch (err) {
+        console.error('[budgets.syncMetaAdsBudgets]', err);
+        return { syncedCampaigns: [] };
+      }
+    }),
+    autoLinkMetaAdsCampaigns: protectedProcedure.mutation(async () => {
+      try {
+        const result = await metaAds.autoLinkMetaAdsCampaigns();
+        return result;
+      } catch (err) {
+        console.error('[budgets.autoLinkMetaAdsCampaigns]', err);
+        return { linkedCampaigns: [] };
+      }
+    }),
+    addExpense: protectedProcedure
+      .input(z.object({
+        campaignId: z.number(),
+        date: z.date(),
+        category: z.enum(['meta_ads', 'google_ads', 'print', 'event', 'production', 'other']),
+        amount: z.string(),
+        description: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const id = await db.createCampaignExpense({
+          campaignId: input.campaignId,
+          date: input.date,
+          category: input.category,
+          amount: input.amount,
+          description: input.description || '',
+        });
+        // Update campaign actual spend
+        const metaAdsSpend = (await db.getCampaignById(input.campaignId))?.metaAdsSpend || '0';
+        await db.syncMetaAdsSpend(input.campaignId, metaAdsSpend);
+        return { id };
+      }),
+    deleteExpense: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.deleteCampaignExpense(input.id);
+        return { success: true };
+      }),
+  }),
+
+  // ─── Dashboard Router ─────────────────────────────────────────────────────
+  dashboard: router({
+    getOverview: protectedProcedure
+      .input(z.object({ startDate: z.date(), endDate: z.date() }).optional())
+      .query(async ({ input }) => {
+        const [memberStats, activeCampaigns] = await Promise.all([
+          db.getMemberStats(),
+          db.getCampaignsByStatus('active'),
+        ]);
+        const totalMembers = memberStats?.totalMembers || 0;
+        const activeMembers = memberStats?.activeMembers || 0;
+        const allAccessMRR = parseFloat(memberStats?.allAccessMRR || '0');
+        const swingSaversMRR = parseFloat(memberStats?.swingSaversMRR || '0');
+        const golfVxProMRR = parseFloat(memberStats?.golfVxProMRR || '0');
+        const monthlyRecurringRevenue = allAccessMRR + swingSaversMRR + golfVxProMRR;
+        const activeCampaignsCount = activeCampaigns.length;
+        // Get total marketing spend from active campaigns
+        const marketingSpend = activeCampaigns
+          .reduce((s, c) => s + parseFloat(c.actualSpend || '0'), 0)
+          .toFixed(2);
+        // Integration statuses
+        const integrationStatuses = {
+          metaAds: { status: process.env.META_ADS_ACCESS_TOKEN ? 'connected' : 'error', lastSync: new Date().toISOString() },
+          encharge: { status: process.env.ENCHARGE_API_KEY ? 'connected' : 'error', lastSync: new Date().toISOString() },
+          acuity: { status: process.env.ACUITY_API_KEY ? 'connected' : 'error', lastSync: new Date().toISOString() },
+          clickfunnels: { status: process.env.CLICKFUNNELS_API_KEY ? 'connected' : 'error', lastSync: new Date().toISOString() },
+          boomerang: { status: process.env.BOOMERANG_API_TOKEN ? 'connected' : 'error', lastSync: new Date().toISOString() },
+          toast: { status: 'connected', lastSync: new Date().toISOString(), count: 0 },
+        };
+        return {
+          totalMembers,
+          activeMembers,
+          monthlyRecurringRevenue,
+          activeCampaignsCount,
+          marketingSpend,
+          overallROI: 0,
+          ...integrationStatuses,
+        };
+      }),
+  }),
+
+  // ─── Conversion Router ────────────────────────────────────────────────────
+  conversion: router({
+    getMemberAppointments: protectedProcedure
+      .input(z.object({ memberId: z.number() }))
+      .query(async ({ input }) => {
+        try {
+          return await memberAppointmentSync.getMemberAppointments(input.memberId);
+        } catch (err) {
+          console.error('[conversion.getMemberAppointments]', err);
+          return [];
         }
       }),
   }),
