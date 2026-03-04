@@ -902,3 +902,12 @@
 - [x] Restructure Command Center: added Revenue KPIs inline (Toast MTD, MRR), Active Programs strip, Revenue Snapshot panel
 - [x] Remove/redirect /overview to Command Center; sidebar already clean (no Overview/Revenue items in current nav)
 - [ ] Fix "Top Funnel This Month" showing 0 opt-ins (likely stale ClickFunnels data — deferred)
+
+## Session 2026-03-04 Part 18 — Command Center Redesign
+- [x] Remove "Last Email Sent" card (shows "No emails sent yet") — was on old published site, not in current dev
+- [x] Remove "Top Funnel This Month" card (shows 0 opt-ins) — was on old published site, not in current dev
+- [x] Remove "Running campaigns" card (redundant) — was on old published site, not in current dev
+- [x] Group Members + Member Goal Progress together as one section (large number + progress bar side by side)
+- [x] Group MRR + Toast Revenue + Budget together as one Revenue section with combined total
+- [x] Never show $0 or empty/null data — Toast MTD, Toast orders, Budget, member breakdown all hidden when zero
+- [x] Reorder sections: Members → Revenue → Programs → Strategic Campaigns → AI Actions

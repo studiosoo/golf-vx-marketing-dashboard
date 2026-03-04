@@ -59,13 +59,11 @@ export default function Home() {
       staleTime: 60 * 1000,
     });
 
-  // Revenue data
   const { data: toastSummary } = trpc.revenue.getToastSummary.useQuery(undefined, {
     enabled: isAuthenticated,
     staleTime: 5 * 60 * 1000,
   });
 
-  // Programs data
   const { data: programs } = trpc.campaigns.list.useQuery(undefined, {
     enabled: isAuthenticated,
     staleTime: 5 * 60 * 1000,
@@ -133,7 +131,31 @@ export default function Home() {
   };
 
   // Active programs for the strip
-  const activePrograms = (programs ?? []).filter((p: any) => p.status === "active").slice(0, 5);
+  const activePrograms = (programs ?? []).filter((p: any) => p.status === "active").slice(0, 6);
+
+  // Revenue values — only show if non-zero
+  const mrr = members?.mrr ?? 0;
+  const toastMTD = (toastSummary as any)?.thisMonthRevenue ?? 0;
+  const toastOrders = (toastSummary as any)?.thisMonthOrders ?? 0;
+  const toastAllTime = (toastSummary as any)?.allTimeRevenue ?? 0;
+  const budgetSpent = budget?.spent ?? 0;
+  const budgetTotal = budget?.total ?? 0;
+  const budgetPct = budget?.utilization ?? 0;
+
+  // Member breakdown — only show tiers with members
+  const memberBreakdown = [
+    { label: "All Access", count: (snapshot as any)?.membersByType?.allAccess ?? 0 },
+    { label: "Swing Saver", count: (snapshot as any)?.membersByType?.swingSaver ?? 0 },
+    { label: "Pro", count: (snapshot as any)?.membersByType?.pro ?? 0 },
+  ].filter(t => t.count > 0);
+
+  // Member goal progress
+  const memberTotal = members?.total ?? 0;
+  const memberGoal = 300;
+  const memberGoalPct = memberGoal > 0 ? Math.min((memberTotal / memberGoal) * 100, 100) : 0;
+
+  // Strategic campaigns — filter out those with $0 spend AND $0 revenue
+  const activeCampaigns = (strategicOverview ?? []).filter((c: any) => c.totalSpend > 0 || c.totalRevenue > 0);
 
   return (
     <div className="max-w-6xl mx-auto space-y-5">
@@ -155,105 +177,159 @@ export default function Home() {
         </button>
       </div>
 
-      {/* ── Row 1: Core KPIs (Members + MRR + Revenue + Budget + AI) ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-        {/* Active Members */}
-        <button
-          onClick={() => setLocation("/list/members")}
-          className="text-left bg-white rounded-xl border border-[#E0E0E0] p-4 hover:shadow-md transition-shadow duration-150 group"
-        >
-          <div className="h-8 w-8 rounded-lg bg-[#F5F5F5] flex items-center justify-center mb-3">
+      {/* ── Section 1: Members + Goal Progress (grouped) ── */}
+      <div className="bg-white rounded-xl border border-[#E0E0E0] p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
             <Users className="h-4 w-4 text-[#111111]" />
+            <h2 className="text-[14px] font-bold text-[#111111]">Members</h2>
           </div>
-          <p className="text-[26px] font-bold text-[#111111] leading-none tracking-tight">
-            {snapLoading ? "—" : fmt(members?.total ?? 0)}
-          </p>
-          <p className="text-[12px] text-[#888888] mt-1">Active Members</p>
-          <p className="text-[11px] text-[#AAAAAA] mt-0.5">
-            {members ? `${members.newThisMonth > 0 ? `+${members.newThisMonth}` : members.newThisMonth} this month` : "Goal: 300"}
-          </p>
-        </button>
+          <button onClick={() => setLocation("/list/members")} className="flex items-center gap-1 text-[12px] text-[#888888] hover:text-[#111111] transition-colors">
+            View all <ArrowRight className="h-3 w-3" />
+          </button>
+        </div>
 
-        {/* MRR */}
-        <button
-          onClick={() => setLocation("/revenue")}
-          className="text-left bg-white rounded-xl border border-[#E0E0E0] p-4 hover:shadow-md transition-shadow duration-150 group"
-        >
-          <div className="flex items-start justify-between mb-3">
-            <div className="h-8 w-8 rounded-lg bg-[#F5F5F5] flex items-center justify-center">
-              <DollarSign className="h-4 w-4 text-[#111111]" />
-            </div>
-            {revenue?.mom !== undefined && (
-              <span className={cn("flex items-center gap-0.5 text-[11px] font-medium", revenue.mom > 0 ? "text-[#3DB855]" : revenue.mom < 0 ? "text-red-500" : "text-[#AAAAAA]")}>
-                {revenue.mom > 0 ? <TrendingUp className="h-3 w-3" /> : revenue.mom < 0 ? <TrendingDown className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
-                {Math.abs(revenue.mom).toFixed(1)}%
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {/* Left: counts */}
+          <div>
+            <div className="flex items-end gap-3 mb-2">
+              <span className="text-[42px] font-bold text-[#111111] leading-none tracking-tight">
+                {snapLoading ? "—" : fmt(memberTotal)}
               </span>
+              {members?.newThisMonth !== undefined && members.newThisMonth !== 0 && (
+                <span className={cn("text-[13px] font-semibold mb-1.5", members.newThisMonth > 0 ? "text-[#3DB855]" : "text-red-500")}>
+                  {members.newThisMonth > 0 ? "+" : ""}{members.newThisMonth} this month
+                </span>
+              )}
+            </div>
+            <p className="text-[13px] text-[#888888]">Active Members</p>
+            {memberBreakdown.length > 0 && (
+              <div className="flex gap-4 mt-3">
+                {memberBreakdown.map(t => (
+                  <div key={t.label}>
+                    <p className="text-[16px] font-bold text-[#111111]">{t.count}</p>
+                    <p className="text-[11px] text-[#AAAAAA]">{t.label}</p>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
-          <p className="text-[26px] font-bold text-[#111111] leading-none tracking-tight">
-            {snapLoading ? "—" : fmtCurrency(members?.mrr ?? 0)}
-          </p>
-          <p className="text-[12px] text-[#888888] mt-1">Monthly Recurring Revenue</p>
-          <p className="text-[11px] text-[#AAAAAA] mt-0.5">MoM change</p>
-        </button>
 
-        {/* Toast Revenue MTD */}
-        <button
-          onClick={() => setLocation("/revenue")}
-          className="text-left bg-white rounded-xl border border-[#E0E0E0] p-4 hover:shadow-md transition-shadow duration-150 group"
-        >
-          <div className="h-8 w-8 rounded-lg bg-[#F5F5F5] flex items-center justify-center mb-3">
-            <ShoppingBag className="h-4 w-4 text-[#111111]" />
+          {/* Right: goal progress */}
+          <div className="flex flex-col justify-center">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[13px] font-semibold text-[#111111]">Member Goal Progress</span>
+              <span className="text-[18px] font-bold text-[#F5C72C]">{memberGoalPct.toFixed(0)}%</span>
+            </div>
+            <div className="h-2.5 bg-[#F2F2F7] rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full bg-[#F5C72C] transition-all"
+                style={{ width: `${memberGoalPct}%` }}
+              />
+            </div>
+            <div className="flex justify-between mt-1.5">
+              <span className="text-[11px] text-[#AAAAAA]">{fmt(memberTotal)} of {fmt(memberGoal)} members</span>
+              <span className="text-[11px] text-[#AAAAAA]">{fmt(memberGoal - memberTotal)} remaining</span>
+            </div>
           </div>
-          <p className="text-[26px] font-bold text-[#111111] leading-none tracking-tight">
-            {toastSummary ? fmtCurrency((toastSummary as any).thisMonthRevenue ?? 0) : "—"}
-          </p>
-          <p className="text-[12px] text-[#888888] mt-1">Toast Revenue (MTD)</p>
-          <p className="text-[11px] text-[#AAAAAA] mt-0.5">
-            {toastSummary ? `${(toastSummary as any).thisMonthOrders ?? 0} orders this month` : "Updated 5 AM EST"}
-          </p>
-        </button>
-
-        {/* Budget Utilization */}
-        <button
-          onClick={() => setLocation("/campaigns/strategic")}
-          className="text-left bg-white rounded-xl border border-[#E0E0E0] p-4 hover:shadow-md transition-shadow duration-150 group"
-        >
-          <div className="h-8 w-8 rounded-lg bg-[#F5F5F5] flex items-center justify-center mb-3">
-            <Target className="h-4 w-4 text-[#111111]" />
-          </div>
-          <p className="text-[26px] font-bold text-[#111111] leading-none tracking-tight">
-            {snapLoading ? "—" : `${(budget?.utilization ?? 0).toFixed(0)}%`}
-          </p>
-          <p className="text-[12px] text-[#888888] mt-1">Budget Utilization</p>
-          <p className="text-[11px] text-[#AAAAAA] mt-0.5">
-            {budget ? `${fmtCurrency(budget.spent)} of ${fmtCurrency(budget.total)}` : ""}
-          </p>
-        </button>
-
-        {/* Pending AI Actions */}
-        <button
-          onClick={() => setLocation("/intelligence/ai-actions")}
-          className={cn(
-            "text-left rounded-xl border p-4 hover:shadow-md transition-shadow duration-150 group",
-            pendingCount > 0 ? "bg-[#FFFBEA] border-[#F5C72C]/60" : "bg-white border-[#E0E0E0]"
-          )}
-        >
-          <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center mb-3", pendingCount > 0 ? "bg-[#F5C72C]/20" : "bg-[#F5F5F5]")}>
-            <Sparkles className="h-4 w-4 text-[#111111]" />
-          </div>
-          <p className="text-[26px] font-bold text-[#111111] leading-none tracking-tight">
-            {actionsLoading ? "—" : fmt(pendingCount)}
-          </p>
-          <p className="text-[12px] text-[#888888] mt-1">AI Actions Pending</p>
-          <p className="text-[11px] text-[#AAAAAA] mt-0.5">{pendingCount > 0 ? "Awaiting approval" : "All caught up"}</p>
-        </button>
+        </div>
       </div>
 
-      {/* ── Row 2: Active Programs Strip ── */}
+      {/* ── Section 2: Revenue (MRR + Toast grouped) ── */}
+      <div className="bg-white rounded-xl border border-[#E0E0E0] p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <DollarSign className="h-4 w-4 text-[#111111]" />
+            <h2 className="text-[14px] font-bold text-[#111111]">Revenue</h2>
+          </div>
+          <button onClick={() => setLocation("/revenue")} className="flex items-center gap-1 text-[12px] text-[#888888] hover:text-[#111111] transition-colors">
+            Details <ArrowRight className="h-3 w-3" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          {/* MRR */}
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              {revenue?.mom !== undefined && revenue.mom !== 0 && (
+                <span className={cn("flex items-center gap-0.5 text-[11px] font-medium px-1.5 py-0.5 rounded-full", revenue.mom > 0 ? "text-[#3DB855] bg-[#E8F5EB]" : "text-red-500 bg-red-50")}>
+                  {revenue.mom > 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                  {Math.abs(revenue.mom).toFixed(1)}% MoM
+                </span>
+              )}
+            </div>
+            <p className="text-[32px] font-bold text-[#F5C72C] leading-none tracking-tight">
+              {snapLoading ? "—" : fmtCurrency(mrr)}
+            </p>
+            <p className="text-[12px] text-[#888888] mt-1">Monthly Recurring Revenue</p>
+            {memberBreakdown.length > 0 && (
+              <div className="flex gap-3 mt-2">
+                {memberBreakdown.map(t => (
+                  <div key={t.label}>
+                    <p className="text-[13px] font-semibold text-[#111111]">{t.count}</p>
+                    <p className="text-[10px] text-[#AAAAAA]">{t.label}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Toast MTD — only show if non-zero */}
+          {toastMTD > 0 ? (
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <ShoppingBag className="h-3.5 w-3.5 text-[#AAAAAA]" />
+                <span className="text-[11px] text-[#AAAAAA]">Toast POS</span>
+              </div>
+              <p className="text-[32px] font-bold text-[#111111] leading-none tracking-tight">
+                {fmtCurrency(toastMTD)}
+              </p>
+              <p className="text-[12px] text-[#888888] mt-1">This month</p>
+              {toastOrders > 0 && (
+                <p className="text-[11px] text-[#AAAAAA] mt-0.5">{toastOrders} orders</p>
+              )}
+            </div>
+          ) : null}
+
+          {/* Budget */}
+          {budgetSpent > 0 ? (
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-2">
+                  <Target className="h-3.5 w-3.5 text-[#AAAAAA]" />
+                  <span className="text-[11px] text-[#AAAAAA]">Marketing Budget</span>
+                </div>
+                <span className={cn("text-[11px] font-bold px-1.5 py-0.5 rounded-full", budgetPct > 100 ? "text-[#E85D8A] bg-[#FDE8F0]" : budgetPct > 80 ? "text-[#F5A623] bg-[#FEF3E2]" : "text-[#3DB855] bg-[#E8F5EB]")}>
+                  {budgetPct.toFixed(0)}%
+                </span>
+              </div>
+              <p className="text-[32px] font-bold text-[#111111] leading-none tracking-tight">
+                {fmtCurrency(budgetSpent)}
+              </p>
+              <p className="text-[12px] text-[#888888] mt-1">of {fmtCurrency(budgetTotal)} budget</p>
+              <div className="h-1.5 bg-[#F2F2F7] rounded-full overflow-hidden mt-2">
+                <div
+                  className="h-full rounded-full transition-all"
+                  style={{ width: `${Math.min(budgetPct, 100)}%`, background: budgetPct > 100 ? "#E85D8A" : budgetPct > 80 ? "#F5A623" : "#3DB855" }}
+                />
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        {/* Combined total — only show if both MRR and Toast have data */}
+        {mrr > 0 && toastMTD > 0 && (
+          <div className="mt-4 pt-4 border-t border-[#F0F0F0] flex items-center justify-between">
+            <span className="text-[13px] font-semibold text-[#111111]">MRR + Toast (MTD)</span>
+            <span className="text-[18px] font-bold text-[#F5C72C]">{fmtCurrency(mrr + toastMTD)}</span>
+          </div>
+        )}
+      </div>
+
+      {/* ── Section 3: Active Programs ── */}
       {activePrograms.length > 0 && (
-        <div className="bg-white rounded-xl border border-[#E0E0E0] p-4">
-          <div className="flex items-center justify-between mb-3">
+        <div className="bg-white rounded-xl border border-[#E0E0E0] p-5">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Flag className="h-4 w-4 text-[#111111]" />
               <h2 className="text-[14px] font-bold text-[#111111]">Active Programs</h2>
@@ -293,70 +369,80 @@ export default function Home() {
         </div>
       )}
 
-      {/* ── Row 3: Strategic Campaigns ── */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-[15px] font-bold text-[#111111]">Strategic Campaigns</h2>
-          <button onClick={() => setLocation("/campaigns/strategic")} className="flex items-center gap-1 text-[12px] text-[#888888] hover:text-[#111111] transition-colors">
-            View all <ArrowRight className="h-3 w-3" />
-          </button>
-        </div>
-        {stratLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {[0,1,2,3].map(i => <div key={i} className="h-36 bg-[#F5F5F5] rounded-xl animate-pulse" />)}
+      {/* ── Section 4: Strategic Campaigns (only non-zero) ── */}
+      {activeCampaigns.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-[15px] font-bold text-[#111111]">Strategic Campaigns</h2>
+            <button onClick={() => setLocation("/campaigns/strategic")} className="flex items-center gap-1 text-[12px] text-[#888888] hover:text-[#111111] transition-colors">
+              View all <ArrowRight className="h-3 w-3" />
+            </button>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {(strategicOverview ?? []).map((c: any) => {
-              const meta = CAMPAIGN_META[c.id] || { label: c.name, color: "#888888", bg: "#F5F5F5", icon: BarChart3 };
-              const Icon = meta.icon;
-              const budgetPct = c.totalBudget > 0 ? Math.min((c.totalSpend / c.totalBudget) * 100, 100) : 0;
-              return (
-                <button key={c.id} onClick={() => setLocation("/campaigns/strategic")}
-                  className="text-left w-full bg-white rounded-xl border border-[#E0E0E0] p-4 hover:shadow-md transition-shadow duration-150 group"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <div className="h-7 w-7 rounded-lg flex items-center justify-center" style={{ background: meta.bg }}>
-                        <Icon className="h-3.5 w-3.5" style={{ color: meta.color }} />
+          {stratLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {[0,1,2,3].map(i => <div key={i} className="h-36 bg-[#F5F5F5] rounded-xl animate-pulse" />)}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {activeCampaigns.map((c: any) => {
+                const meta = CAMPAIGN_META[c.id] || { label: c.name, color: "#888888", bg: "#F5F5F5", icon: BarChart3 };
+                const Icon = meta.icon;
+                const budgetPctC = c.totalBudget > 0 ? Math.min((c.totalSpend / c.totalBudget) * 100, 100) : 0;
+                return (
+                  <button key={c.id} onClick={() => setLocation("/campaigns/strategic")}
+                    className="text-left w-full bg-white rounded-xl border border-[#E0E0E0] p-4 hover:shadow-md transition-shadow duration-150 group"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="h-7 w-7 rounded-lg flex items-center justify-center" style={{ background: meta.bg }}>
+                          <Icon className="h-3.5 w-3.5" style={{ color: meta.color }} />
+                        </div>
+                        <span className="text-[12px] font-semibold text-[#111111]">{meta.label}</span>
                       </div>
-                      <span className="text-[12px] font-semibold text-[#111111]">{meta.label}</span>
+                      <ArrowRight className="h-3.5 w-3.5 text-[#CCCCCC] group-hover:text-[#888888] transition-colors" />
                     </div>
-                    <ArrowRight className="h-3.5 w-3.5 text-[#CCCCCC] group-hover:text-[#888888] transition-colors" />
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 mb-3">
-                    <div>
-                      <p className="text-[16px] font-bold text-[#111111] leading-none">{fmtCurrency(c.totalSpend)}</p>
-                      <p className="text-[10px] text-[#AAAAAA] mt-0.5">Spend</p>
+                    <div className="grid grid-cols-3 gap-2 mb-3">
+                      {c.totalSpend > 0 && (
+                        <div>
+                          <p className="text-[16px] font-bold text-[#111111] leading-none">{fmtCurrency(c.totalSpend)}</p>
+                          <p className="text-[10px] text-[#AAAAAA] mt-0.5">Spend</p>
+                        </div>
+                      )}
+                      {c.totalRevenue > 0 && (
+                        <div>
+                          <p className="text-[16px] font-bold text-[#111111] leading-none">{fmtCurrency(c.totalRevenue)}</p>
+                          <p className="text-[10px] text-[#AAAAAA] mt-0.5">Revenue</p>
+                        </div>
+                      )}
+                      {(c.totalSpend > 0 || c.totalRevenue > 0) && (
+                        <div>
+                          <p className={cn("text-[16px] font-bold leading-none", c.roi >= 0 ? "text-[#3DB855]" : "text-red-500")}>{fmtPct(c.roi)}</p>
+                          <p className="text-[10px] text-[#AAAAAA] mt-0.5">ROI</p>
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <p className="text-[16px] font-bold text-[#111111] leading-none">{fmtCurrency(c.totalRevenue)}</p>
-                      <p className="text-[10px] text-[#AAAAAA] mt-0.5">Revenue</p>
-                    </div>
-                    <div>
-                      <p className={cn("text-[16px] font-bold leading-none", c.roi >= 0 ? "text-[#3DB855]" : "text-red-500")}>{fmtPct(c.roi)}</p>
-                      <p className="text-[10px] text-[#AAAAAA] mt-0.5">ROI</p>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-[10px] text-[#AAAAAA]">{fmtCurrency(c.totalSpend)} / {fmtCurrency(c.totalBudget)}</span>
-                      <span className="text-[10px] text-[#888888]">{c.activePrograms} active</span>
-                    </div>
-                    <div className="h-1.5 bg-[#F2F2F7] rounded-full overflow-hidden">
-                      <div className="h-full rounded-full" style={{ width: `${budgetPct}%`, background: meta.color }} />
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
+                    {c.totalBudget > 0 && (
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-[10px] text-[#AAAAAA]">{fmtCurrency(c.totalSpend)} / {fmtCurrency(c.totalBudget)}</span>
+                          {c.activePrograms > 0 && <span className="text-[10px] text-[#888888]">{c.activePrograms} active</span>}
+                        </div>
+                        <div className="h-1.5 bg-[#F2F2F7] rounded-full overflow-hidden">
+                          <div className="h-full rounded-full" style={{ width: `${budgetPctC}%`, background: meta.color }} />
+                        </div>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
-      {/* ── Row 4: AI Actions + Revenue Breakdown ── */}
+      {/* ── Section 5: AI Actions (only show if there are pending actions or recently completed) ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Pending AI Actions */}
+        {/* AI Actions panel */}
         <div className="lg:col-span-2 bg-white rounded-xl border border-[#E0E0E0] p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -411,64 +497,28 @@ export default function Home() {
           )}
         </div>
 
-        {/* Revenue Snapshot + Quick Links */}
-        <div className="space-y-3">
-          {/* Revenue Snapshot */}
-          <div className="bg-white rounded-xl border border-[#E0E0E0] p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Activity className="h-4 w-4 text-[#111111]" />
-                <h3 className="text-[14px] font-bold text-[#111111]">Revenue Snapshot</h3>
-              </div>
-              <button onClick={() => setLocation("/revenue")} className="text-[12px] text-[#888888] hover:text-[#111111] transition-colors flex items-center gap-1">
-                Details <ArrowRight className="h-3 w-3" />
-              </button>
-            </div>
-            <div className="space-y-2.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[12px] text-[#888888]">Memberships (MRR)</span>
-                <span className="text-[13px] font-bold text-[#111111]">{snapLoading ? "—" : fmtCurrency(members?.mrr ?? 0)}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[12px] text-[#888888]">Toast POS (MTD)</span>
-                <span className="text-[13px] font-bold text-[#111111]">{toastSummary ? fmtCurrency((toastSummary as any).thisMonthRevenue ?? 0) : "—"}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[12px] text-[#888888]">All-Time Toast</span>
-                <span className="text-[13px] font-bold text-[#111111]">{toastSummary ? fmtCurrency((toastSummary as any).allTimeRevenue ?? 0) : "—"}</span>
-              </div>
-              <div className="pt-2 border-t border-[#F0F0F0] flex items-center justify-between">
-                <span className="text-[12px] font-semibold text-[#111111]">MRR + Toast (MTD)</span>
-                <span className="text-[14px] font-bold text-[#F5C72C]">
-                  {(members?.mrr && toastSummary) ? fmtCurrency((members.mrr) + ((toastSummary as any).thisMonthRevenue ?? 0)) : "—"}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Links */}
-          <div className="bg-white rounded-xl border border-[#E0E0E0] p-4">
-            <h3 className="text-[14px] font-bold text-[#111111] mb-2">Quick Access</h3>
-            <div className="space-y-0.5">
-              {[
-                { label: "Programs & Events", path: "/programs", icon: Flag },
-                { label: "Advertising", path: "/advertising", icon: BarChart3 },
-                { label: "Members", path: "/list/members", icon: UserCheck },
-                { label: "AI Analysis", path: "/intelligence", icon: Sparkles },
-                { label: "Reports", path: "/intelligence/reports", icon: Calendar },
-              ].map((link) => {
-                const Icon = link.icon;
-                return (
-                  <button key={link.path} onClick={() => setLocation(link.path)}
-                    className="flex items-center gap-2.5 w-full rounded-lg px-2 py-1.5 text-[12px] text-[#555555] hover:bg-[#F5F5F5] hover:text-[#111111] transition-colors text-left"
-                  >
-                    <Icon className="h-3.5 w-3.5 text-[#AAAAAA]" />
-                    <span>{link.label}</span>
-                    <ArrowRight className="h-3 w-3 text-[#CCCCCC] ml-auto" />
-                  </button>
-                );
-              })}
-            </div>
+        {/* Quick Access */}
+        <div className="bg-white rounded-xl border border-[#E0E0E0] p-4">
+          <h3 className="text-[14px] font-bold text-[#111111] mb-2">Quick Access</h3>
+          <div className="space-y-0.5">
+            {[
+              { label: "Programs & Events", path: "/programs", icon: Flag },
+              { label: "Advertising", path: "/advertising", icon: BarChart3 },
+              { label: "Members", path: "/list/members", icon: UserCheck },
+              { label: "AI Analysis", path: "/intelligence", icon: Sparkles },
+              { label: "Reports", path: "/intelligence/reports", icon: Calendar },
+            ].map((link) => {
+              const Icon = link.icon;
+              return (
+                <button key={link.path} onClick={() => setLocation(link.path)}
+                  className="flex items-center gap-2.5 w-full rounded-lg px-2 py-1.5 text-[12px] text-[#555555] hover:bg-[#F5F5F5] hover:text-[#111111] transition-colors text-left"
+                >
+                  <Icon className="h-3.5 w-3.5 text-[#AAAAAA]" />
+                  <span>{link.label}</span>
+                  <ArrowRight className="h-3 w-3 text-[#CCCCCC] ml-auto" />
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
