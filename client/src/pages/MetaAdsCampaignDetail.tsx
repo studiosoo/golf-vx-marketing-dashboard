@@ -13,9 +13,10 @@ export default function MetaAdsCampaignDetail() {
   const campaignId = params.id as string;
   const [days, setDays] = useState(30);
 
+  const datePresetMap: Record<number, string> = { 7: 'last_7d', 14: 'last_14d', 30: 'last_30d', 90: 'last_90d' };
   const { data: dailyInsights, isLoading: insightsLoading } = trpc.metaAds.getCampaignDailyInsights.useQuery({ 
     campaignId,
-    days 
+    datePreset: datePresetMap[days] ?? 'last_30d',
   });
   
   const { data: creatives, isLoading: creativesLoading } = trpc.metaAds.getCampaignCreatives.useQuery({ 

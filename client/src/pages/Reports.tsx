@@ -390,7 +390,7 @@ export default function Reports() {
   // Revenue chart data (monthly from revenue table)
   const revenueChartData = useMemo(() => {
     if (!revSummary) return [];
-    return (revSummary as any[]).map((r: any) => ({
+    return (revSummary as unknown as any[]).map((r: any) => ({
       month: new Date(r.month + "-01").toLocaleDateString("en-US", { month: "short" }),
       membership: parseFloat(r.membership || '0'),
       events: parseFloat(r.event || '0') + parseFloat(r.bay_rental || '0'),

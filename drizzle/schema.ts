@@ -493,6 +493,9 @@ export const giveawayApplications = mysqlTable("giveawayApplications", {
   visitedBefore: varchar("visitedBefore", { length: 50 }), // Yes/No/New
   indoorGolfFamiliarity: varchar("indoorGolfFamiliarity", { length: 100 }), // Never tried before, Tried once or twice, Regular player
   
+  // Scoring
+  driveDayScore: int("driveDayScore"), // 0-100 score from Drive Day evaluation
+  
   // Final details
   bestTimeToCall: varchar("bestTimeToCall", { length: 100 }),
   howDidTheyHear: text("howDidTheyHear"), // Attribution source
@@ -1681,7 +1684,7 @@ export const eventAdvertising = mysqlTable("event_advertising", {
   location: varchar("location", { length: 256 }),
   eventDate: date("event_date"),
   eventEndDate: date("event_end_date"),
-  status: mysqlEnum("event_ad_status", ["upcoming", "active", "completed", "cancelled"]).notNull().default("upcoming"),
+  status: mysqlEnum("status", ["upcoming", "active", "completed", "cancelled"]).notNull().default("upcoming"),
   boothCost: decimal("booth_cost", { precision: 10, scale: 2 }),
   totalCost: decimal("total_cost", { precision: 10, scale: 2 }),
   expectedVisitors: int("expected_visitors"),

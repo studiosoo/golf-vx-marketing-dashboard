@@ -141,6 +141,13 @@
       "when": 1772587020523,
       "tag": "0019_bouncy_gorgon",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "5",
+      "when": 1772605372077,
+      "tag": "0020_curly_wildside",
+      "breakpoints": true
     }
   ]
 }

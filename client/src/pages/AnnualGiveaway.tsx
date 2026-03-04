@@ -733,7 +733,7 @@ export default function AnnualGiveaway() {
 
   const enchargeSync = trpc.giveaway.syncToEncharge.useMutation({
     onSuccess: (data) => {
-      toast({ title: "Encharge Sync Complete", description: `${data.successCount} synced, ${data.failCount} failed` });
+      toast({ title: "Encharge Sync Complete", description: `${data.synced} synced, ${data.errors} failed` });
       setSelectedIds(new Set());
     },
     onError: (err) => toast({ title: "Sync Failed", description: err.message, variant: "destructive" }),

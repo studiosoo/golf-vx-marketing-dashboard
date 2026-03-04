@@ -1038,7 +1038,7 @@ function PrintTab() {
       ) : (
         <div className="space-y-4">
           {ads.map(ad => {
-            const prog = getContractProgress(ad.startDate, ad.endDate, ad.contractMonths);
+            const prog = getContractProgress(ad.startDate ? String(ad.startDate) : null, ad.endDate ? String(ad.endDate) : null, ad.contractMonths);
             const monthlySpend = parseFloat(String(ad.costPerMonth));
             const totalValue = parseFloat(String(ad.totalContractValue || 0));
             const spentToDate = monthlySpend * prog.elapsed;

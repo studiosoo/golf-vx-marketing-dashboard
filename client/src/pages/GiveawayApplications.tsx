@@ -103,7 +103,7 @@ function ApplicantDrawer({ app, onClose }: { app: Application; onClose: () => vo
           <div className="bg-card border border-border rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-muted-foreground">Drive Day Score</span>
-              <span className={`text-2xl font-bold px-3 py-1 rounded-lg ${scoreColor(app.driveDayScore)}`}>
+              <span className={`text-2xl font-bold px-3 py-1 rounded-lg ${scoreColor(app.driveDayScore ?? 0)}`}>
                 {app.driveDayScore}
               </span>
             </div>
@@ -274,7 +274,7 @@ export default function GiveawayApplications() {
     gender: filterGender || undefined,
     ageRange: filterAge || undefined,
     golfExperience: filterExp || undefined,
-    status: filterStatus || undefined,
+    status: (filterStatus || undefined) as 'pending' | 'contacted' | 'scheduled' | 'completed' | 'declined' | undefined,
     illinoisResident: filterIL,
     showTestEntries: showTest,
     sortBy,
@@ -543,7 +543,7 @@ export default function GiveawayApplications() {
                 apps.map((app) => (
                   <tr
                     key={app.id}
-                    onClick={() => setSelectedApp(app as Application)}
+                    onClick={() => setSelectedApp(app as unknown as Application)}
                     className="border-b border-border/50 hover:bg-muted/30 cursor-pointer transition-colors"
                   >
                     {/* Name */}
@@ -570,7 +570,7 @@ export default function GiveawayApplications() {
                     </td>
                     {/* Drive Day Score */}
                     <td className="px-4 py-3 text-center">
-                      <span className={`inline-block text-xs font-bold px-2 py-0.5 rounded-full ${scoreColor(app.driveDayScore)}`}>
+                      <span className={`inline-block text-xs font-bold px-2 py-0.5 rounded-full ${scoreColor(app.driveDayScore ?? 0)}`}>
                         {app.driveDayScore}
                       </span>
                     </td>

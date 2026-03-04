@@ -635,36 +635,38 @@ PRIORITY: Lead with the upcoming Drive Day Clinic ($20 for 90 min with Coach Chu
         const spent = parseFloat(campaign.actualSpend || '0');
         const budgetUtilization = budget > 0 ? ((spent / budget) * 100).toFixed(1) : '0.0';
 
+        const programName = campaign.name || 'Program';
+        const goalTarget = campaign.goalTarget ? parseFloat(campaign.goalTarget) : 0;
+        const goalActual = campaign.goalActual ? parseFloat(campaign.goalActual) : 0;
+        const goalUnit = campaign.goalUnit || 'units';
+        const primaryKpi = campaign.primaryKpi || 'Conversion Rate';
+        const kpiTarget = campaign.kpiTarget ? parseFloat(campaign.kpiTarget) : 0;
+        const kpiActual = campaign.kpiActual ? parseFloat(campaign.kpiActual) : 0;
+
         const prompt = `You are a senior marketing strategist for Golf VX Arlington Heights, an indoor golf simulator facility in the Chicago suburbs (644 E Rand Rd, Arlington Heights, IL — 25 miles northwest of downtown Chicago).
 
-PROGRAM: Annual Membership Giveaway 2026
-Goal: ${entryGoal} entries, ${longFormGoal} long-form applicants
-Current entries: ${total} (${progressPct}% of entry goal)
-Funnel: Entry page 875 UV → Application page 187 UV → 67 form completions (47% completion rate from app page)
+PROGRAM: ${programName}
+Status: ${campaign.status}
+Budget: $${budget.toFixed(2)} | Spent: $${spent.toFixed(2)} (${budgetUtilization}% utilized)
+Days Running: ${daysRunning}
+Goal: ${goalTarget} ${goalUnit} | Actual: ${goalActual} ${goalUnit} (${progressPct}% of goal)
+Primary KPI: ${primaryKpi} — Target: ${kpiTarget} | Actual: ${kpiActual}
+Description: ${campaign.description || 'No description provided'}
 
-DEMOGRAPHIC DATA:
-- Age distribution: ${ageBreakdown}
-- Gender: ${genderBreakdown}
-- City distribution (top 8): ${topCities}
-- Chicago city applicants: ${chicagoCount} (${chicagoPct}% of total — NOTABLY LOW given Chicago's large young golfer population)
-- Golf experience: ${experienceBreakdown}
-- Visited Golf VX before: ${visitedBreakdown}
-- How they heard: ${hearBreakdown}
-- Indoor golf familiarity: ${familiarityBreakdown}
+KEY CONTEXT:
+- Golf VX is located 25 miles northwest of downtown Chicago in Arlington Heights, IL
+- Target audience: young professionals, golf enthusiasts, families in the Chicago suburbs
+- Chicago city represents an untapped market — young urban golfers (25-40) who want year-round indoor golf
+- Commute from Chicago: 40-50 min via I-90/I-94 or Metra UP-NW line
 
-KEY STRATEGIC CONTEXT:
-- Chicago city has very few applicants despite being 25 miles away with a large population of young urban golfers aged 25-40
-- Indoor golf simulators are extremely popular with young Chicago city professionals who want year-round golf
-- There is a significant untapped opportunity to target young Chicago city golfers (ages 25-40) who may not know about Golf VX Arlington Heights
-- The commute from Chicago to Arlington Heights is feasible via I-90/I-94 or Metra UP-NW line (40-50 min)
-
-Provide a comprehensive marketing intelligence report with:
-1. Key demographic insights — SPECIFICALLY address the Chicago city gap and how to target young urban golfers (25-40)
-2. Current Meta Ads optimization recommendations — include geo-targeting Chicago city neighborhoods (Lincoln Park, Wicker Park, River North, West Loop, Logan Square) with young golfer demographics
-3. Multi-channel marketing strategy (email, SMS, in-venue, social media, partnerships with Chicago golf clubs/courses)
-4. Content strategy — include messaging that speaks to Chicago city golfers (commute-friendly, year-round indoor golf, escape the city)
-5. Conversion optimization suggestions for the funnel
-6. Specific next 7-day action plan with Chicago city targeting as a priority
+Provide a comprehensive marketing intelligence report for this program. Include:
+1. Executive summary of current performance
+2. Key insights and opportunities
+3. Meta Ads optimization recommendations (consider geo-targeting Chicago city neighborhoods: Lincoln Park, Wicker Park, River North, West Loop, Logan Square)
+4. Multi-channel marketing strategy (email, SMS, social media, in-venue)
+5. Content strategy and messaging recommendations
+6. Conversion optimization suggestions
+7. Specific next 7-day action plan
 
 Respond in JSON with this structure:
 {
@@ -673,7 +675,7 @@ Respond in JSON with this structure:
     { "insight": "string", "implication": "string", "priority": "high|medium|low" }
   ],
   "chicagoOpportunity": {
-    "summary": "Why Chicago city is an untapped market for Golf VX",
+    "summary": "Why Chicago city is an untapped market for this program",
     "targetNeighborhoods": ["string"],
     "targetDemographic": "string",
     "adStrategy": "string",
@@ -716,7 +718,7 @@ Respond in JSON with this structure:
           insights = { executiveSummary: 'Unable to generate insights at this time.', keyInsights: [], metaAdsStrategy: {}, multiChannelStrategy: [], contentStrategy: {}, funnelOptimization: [], sevenDayPlan: [] };
         }
 
-        return { insights, stats: { total, entryGoal, longFormGoal, progressPct: parseFloat(progressPct) } };
+        return { insights, stats: { goalTarget, goalActual, goalUnit, progressPct: parseFloat(progressPct), budget, spent, budgetUtilization: parseFloat(budgetUtilization), daysRunning } };
       }),
 
     // Daily Dashboard: AI-driven daily action plan based on application count vs goal
@@ -2741,15 +2743,15 @@ When the user provides data (e.g., "we had 12 attendees at Drive Day"), acknowle
         if (!database) throw new Error("DB unavailable");
         const now = Date.now();
         const totalContractValue = String((input.costPerMonth * input.contractMonths).toFixed(2));
-        await database.insert(printAdvertising).values({
+        await (database.insert(printAdvertising) as any).values({
           vendorName: input.vendorName,
           publicationType: input.publicationType,
           adSize: input.adSize,
           costPerMonth: String(input.costPerMonth),
           contractMonths: input.contractMonths,
           totalContractValue,
-          startDate: input.startDate,
-          endDate: input.endDate,
+          startDate: input.startDate || null,
+          endDate: input.endDate || null,
           status: input.status,
           qrDestination: input.qrDestination,
           qrCodeUrl: input.qrCodeUrl,
@@ -2763,7 +2765,6 @@ When the user provides data (e.g., "we had 12 attendees at Drive Day"), acknowle
         });
         return { success: true };
       }),
-
     update: protectedProcedure
       .input(z.object({
         id: z.number().int(),
@@ -2844,7 +2845,7 @@ When the user provides data (e.g., "we had 12 attendees at Drive Day"), acknowle
         const database = await db.getDb();
         if (!database) throw new Error("DB unavailable");
         const now = Date.now();
-        await database.insert(eventAdvertising).values({
+        await (database.insert(eventAdvertising) as any).values({
           eventName: input.eventName,
           eventType: input.eventType,
           venue: input.venue,
@@ -2953,7 +2954,8 @@ When the user provides data (e.g., "we had 12 attendees at Drive Day"), acknowle
           ],
         });
 
-        const result = response?.choices?.[0]?.message?.content || 'No response generated.';
+        const rawContent = response?.choices?.[0]?.message?.content;
+        const result = typeof rawContent === 'string' ? rawContent : (Array.isArray(rawContent) ? rawContent.map((c: any) => c.text || '').join('') : 'No response generated.');
         return { analysis: result, analysisType: input.analysisType };
       }),
   }),
@@ -3107,7 +3109,7 @@ When the user provides data (e.g., "we had 12 attendees at Drive Day"), acknowle
         if (memberRows.length > 0) {
           const member = memberRows[0];
           memberStatus = member.status || null;
-          memberTier = member.membershipType || null;
+          memberTier = member.membershipTier || null;
           const appts = await database
             .select({ appointmentDate: memberAppointments.appointmentDate })
             .from(memberAppointments)
@@ -3249,7 +3251,7 @@ Provide a comprehensive marketing intelligence report. Respond in JSON:
         sortDir: z.enum(['asc', 'desc']).optional(),
         page: z.number().optional(),
         pageSize: z.number().optional(),
-      }).optional())
+      }))
       .query(async ({ input }) => {
         const database = await db.getDb();
         if (!database) return { applications: [], total: 0, page: 1, pageSize: 50, totalPages: 0 };
@@ -3615,7 +3617,8 @@ Provide a comprehensive marketing intelligence report. Respond in JSON:
       .input(z.object({ campaignId: z.string(), datePreset: z.string().optional() }))
       .query(async ({ input }) => {
         try {
-          return await metaAds.getCampaignDailyInsights(input.campaignId, input.datePreset || 'last_30d');
+          const days = input.datePreset ? parseInt(input.datePreset.replace(/\D/g, '')) || 30 : 30;
+          return await metaAds.getCampaignDailyInsights(input.campaignId, days);
         } catch (err) {
           console.error('[metaAds.getCampaignDailyInsights]', err);
           return [];
@@ -3641,9 +3644,38 @@ Provide a comprehensive marketing intelligence report. Respond in JSON:
           return null;
         }
       }),
+    getActiveAlerts: protectedProcedure.query(async () => {
+      try {
+        // Return performance alerts based on campaign data
+        const campaigns = await metaAds.getAllCampaignsWithInsights('last_7d');
+        const alerts: Array<{ id: number; campaignName: string; severity: string; message: string; threshold: string; actualValue: string; createdAt: number; }> = [];
+        let alertId = 1;
+        for (const c of campaigns) {
+          const ins = (c as any).insights || c;
+          const ctr = parseFloat(String(ins.ctr ?? 0));
+          const spend = parseFloat(String(ins.spend ?? 0));
+          const reach = parseInt(String(ins.reach ?? 0));
+          if (ctr > 0 && ctr < 0.5) {
+            alerts.push({ id: alertId++, campaignName: (c as any).name || 'Unknown', severity: 'medium', message: `CTR is below 0.5% (${ctr.toFixed(2)}%)`, threshold: '0.5%', actualValue: `${ctr.toFixed(2)}%`, createdAt: Date.now() });
+          }
+          if (spend > 0 && reach < 100) {
+            alerts.push({ id: alertId++, campaignName: (c as any).name || 'Unknown', severity: 'high', message: `Very low reach (${reach} people) despite spend`, threshold: '100 reach', actualValue: String(reach), createdAt: Date.now() });
+          }
+        }
+        return alerts;
+      } catch (err) {
+        console.error('[metaAds.getActiveAlerts]', err);
+        return [];
+      }
+    }),
+    acknowledgeAlert: protectedProcedure
+      .input(z.object({ alertId: z.number() }))
+      .mutation(async () => ({ success: true })),
+    resolveAlert: protectedProcedure
+      .input(z.object({ alertId: z.number() }))
+      .mutation(async () => ({ success: true })),
   }),
-
-  // ─── Encharge Router ──────────────────────────────────────────────────────
+  // ─── Encharge Routerr ──────────────────────────────────────────────────────
   encharge: router({
     getAccount: protectedProcedure.query(async () => {
       try {
@@ -3658,7 +3690,7 @@ Provide a comprehensive marketing intelligence report. Respond in JSON:
         return await encharge.getSubscriberMetrics();
       } catch (err) {
         console.error('[encharge.getMetrics]', err);
-        return { totalSubscribers: 0, activeSubscribers: 0, unsubscribed: 0, bounced: 0 };
+        return { totalSubscribers: 0, recentSubscribers: 0, segments: 0, segmentDetails: [] as any[] };
       }
     }),
     getPeople: protectedProcedure
@@ -3705,27 +3737,27 @@ Provide a comprehensive marketing intelligence report. Respond in JSON:
       }),
     syncMetaAdsBudgets: protectedProcedure.mutation(async () => {
       try {
-        const result = await metaAds.syncMetaAdsBudgets();
-        return result;
+        const synced = await metaAds.syncMetaAdsBudgets();
+        return { syncedCampaigns: Array.isArray(synced) ? synced : [] };
       } catch (err) {
         console.error('[budgets.syncMetaAdsBudgets]', err);
-        return { syncedCampaigns: [] };
+        return { syncedCampaigns: [] as number[] };
       }
     }),
     autoLinkMetaAdsCampaigns: protectedProcedure.mutation(async () => {
       try {
-        const result = await metaAds.autoLinkMetaAdsCampaigns();
-        return result;
+        const linked = await metaAds.autoLinkMetaAdsCampaigns();
+        return { linkedCampaigns: Array.isArray(linked) ? linked : [] };
       } catch (err) {
         console.error('[budgets.autoLinkMetaAdsCampaigns]', err);
-        return { linkedCampaigns: [] };
+        return { linkedCampaigns: [] as Array<{ dbCampaignId: number; metaCampaignId: string; name: string }> };
       }
     }),
     addExpense: protectedProcedure
       .input(z.object({
         campaignId: z.number(),
         date: z.date(),
-        category: z.enum(['meta_ads', 'google_ads', 'print', 'event', 'production', 'other']),
+        category: z.enum(['meta_ads', 'venue_rental', 'food_beverage', 'promotional_materials', 'staff_costs', 'equipment', 'other']),
         amount: z.string(),
         description: z.string().optional(),
       }))
