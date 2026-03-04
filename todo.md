@@ -1035,3 +1035,8 @@
 - [ ] /advertising 페이지 정상 동작 확인
 - [ ] /programs/summer-camp 페이지 정상 동작 확인
 - [ ] TypeScript: pnpm check → 0 errors 확인
+
+## Bug Fix: /intelligence/performance key prop warning (2026-03-04)
+- [x] Fix Performance.tsx: ch.category was undefined → use ch.id ?? ch.category ?? ch.name as key
+- [x] Fix Performance.tsx: ch.campaignCount → ch.totalCampaigns (correct field name from getCategorySummary)
+- [x] Fix Performance.tsx: display ch.name instead of ch.category (category is an id, name is human-readable)

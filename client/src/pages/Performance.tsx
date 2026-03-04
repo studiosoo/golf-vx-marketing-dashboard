@@ -139,11 +139,11 @@ export default function Performance() {
           {channelSummary ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {(channelSummary as any[]).map((ch: any) => (
-                <Card key={ch.category} className="bg-card border-border">
+                <Card key={ch.id ?? ch.category ?? ch.name} className="bg-card border-border">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <span className="font-medium text-foreground capitalize">{ch.category}</span>
-                      <Badge variant="outline" className="text-xs">{ch.campaignCount} campaigns</Badge>
+                      <span className="font-medium text-foreground capitalize">{ch.name ?? ch.category}</span>
+                      <Badge variant="outline" className="text-xs">{ch.totalCampaigns ?? ch.campaignCount ?? 0} campaigns</Badge>
                     </div>
                     <div className="grid grid-cols-3 gap-2 text-center">
                       <div>
