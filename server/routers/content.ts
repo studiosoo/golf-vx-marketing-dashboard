@@ -4,6 +4,124 @@ import * as db from "../db";
 import { TRPCError } from "@trpc/server";
 
 export const instagramRouter = router({
+  // ── Live Feed (Instagram Graph API) ─────────────────────────────────────
+  getFeed: protectedProcedure
+    .input(z.object({ limit: z.number().min(1).max(50).default(12) }))
+    .query(async ({ input }) => {
+      const { fetchMediaFeed } = await import("../instagramFeed");
+      return await fetchMediaFeed(input.limit);
+    }),
+
+  getAccountStats: protectedProcedure.query(async () => {
+    const { fetchAccountStats } = await import("../instagramFeed");
+    return await fetchAccountStats();
+  }),
+
+  validateToken: protectedProcedure.query(async () => {
+    const { validateToken } = await import("../instagramFeed");
+    return await validateToken();
+  }),
+
+  // ── Content Scheduler ────────────────────────────────────────────────────
+  getScheduledPosts: protectedProcedure
+    .input(z.object({ includePosted: z.boolean().default(false) }))
+    .query(async ({ input }) => {
+      const { getDb } = await import("../db");
+      const { contentQueue } = await import("../../drizzle/schema");
+      const { desc, eq } = await import("drizzle-orm");
+      const database = await getDb();
+      if (!database) throw new Error('Database connection failed');
+      let q = database.select().from(contentQueue).orderBy(desc(contentQueue.scheduledFor));
+      if (!input.includePosted) {
+        q = q.where(eq(contentQueue.posted, false)) as any;
+      }
+      return await q;
+    }),
+
+  schedulePost: protectedProcedure
+    .input(z.object({
+      caption: z.string().min(1),
+      hashtags: z.string().default(''),
+      imageUrl: z.string().url().optional(),
+      imagePrompt: z.string().optional(),
+      scheduledFor: z.string(), // ISO datetime string
+      contentType: z.enum(['feed_post', 'story', 'reel', 'carousel']).default('feed_post'),
+      campaignId: z.string().default('manual'),
+    }))
+    .mutation(async ({ input }) => {
+      const { getDb } = await import("../db");
+      const { contentQueue } = await import("../../drizzle/schema");
+      const database = await getDb();
+      if (!database) throw new Error('Database connection failed');
+      const [result] = await database.insert(contentQueue).values({
+        campaignId: input.campaignId,
+        contentType: input.contentType,
+        caption: input.caption,
+        hashtags: input.hashtags,
+        imageUrl: input.imageUrl,
+        imagePrompt: input.imagePrompt,
+        scheduledFor: new Date(input.scheduledFor),
+        posted: false,
+      });
+      return { success: true, id: (result as any).insertId };
+    }),
+
+  deleteScheduledPost: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      const { getDb } = await import("../db");
+      const { contentQueue } = await import("../../drizzle/schema");
+      const { eq } = await import("drizzle-orm");
+      const database = await getDb();
+      if (!database) throw new Error('Database connection failed');
+      await database.delete(contentQueue).where(eq(contentQueue.id, input.id));
+      return { success: true };
+    }),
+
+  publishScheduledPost: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      const { getDb } = await import("../db");
+      const { contentQueue } = await import("../../drizzle/schema");
+      const { eq } = await import("drizzle-orm");
+      const { publishPhotoPost } = await import("../instagramFeed");
+      const database = await getDb();
+      if (!database) throw new Error('Database connection failed');
+      const [post] = await database.select().from(contentQueue).where(eq(contentQueue.id, input.id));
+      if (!post) throw new TRPCError({ code: 'NOT_FOUND', message: 'Scheduled post not found' });
+      if (!post.imageUrl) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Post requires an image URL to publish' });
+      const fullCaption = post.hashtags ? `${post.caption}\n\n${post.hashtags}` : post.caption;
+      const igPostId = await publishPhotoPost(post.imageUrl, fullCaption);
+      await database.update(contentQueue)
+        .set({ posted: true, postedAt: new Date(), instagramPostId: igPostId })
+        .where(eq(contentQueue.id, input.id));
+      return { success: true, instagramPostId: igPostId };
+    }),
+
+  generateCaption: protectedProcedure
+    .input(z.object({
+      topic: z.string(),
+      tone: z.enum(['professional', 'casual', 'exciting', 'educational']).default('casual'),
+      includeHashtags: z.boolean().default(true),
+    }))
+    .mutation(async ({ input }) => {
+      const { invokeLLM } = await import("../_core/llm");
+      const systemPrompt = `You are a social media expert for Golf VX Arlington Heights, a premium indoor golf simulator facility. Generate engaging Instagram captions that drive engagement and bookings.`;
+      const userPrompt = `Create an Instagram caption for: "${input.topic}"
+Tone: ${input.tone}
+Business: Golf VX Arlington Heights - indoor golf simulators, lessons, leagues, events
+${input.includeHashtags ? 'Include 10-15 relevant hashtags at the end.' : 'No hashtags needed.'}
+Keep the caption under 300 words. Make it engaging and authentic.`;
+      const response = await invokeLLM({ messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }] });
+      const content = (response.choices[0]?.message?.content ?? '') as string;
+      // Split caption and hashtags
+      const hashtagMatch = content.match(/(#[\w]+[\s#]*)+$/);
+      const hashtags = hashtagMatch ? hashtagMatch[0].trim() : '';
+      const caption = hashtags ? content.replace(hashtags, '').trim() : content.trim();
+      return { caption, hashtags };
+    }),
+
+
   syncInsights: protectedProcedure
     .input(z.object({
       date: z.string(),

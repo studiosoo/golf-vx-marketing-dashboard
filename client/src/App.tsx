@@ -61,6 +61,7 @@ import CommunicationsHub from "./pages/CommunicationsHub";
 
 // ── WEBSITE ──
 import SiteControl from "./pages/SiteControl";
+import InstagramPage from "./pages/InstagramFeed";
 import InstagramViewer from "./pages/InstagramViewer";
 import InstagramSync from "./pages/InstagramSync";
 import InstagramAnalytics from "./pages/InstagramAnalytics";
@@ -156,7 +157,7 @@ function DashboardRoutes() {
         {/* ── WEBSITE ── */}
         <Route path="/website" component={WebsiteViewer} />
         <Route path="/website/site-control" component={SiteControl} />
-        <Route path="/website/instagram" component={InstagramViewer} />
+        <Route path="/website/instagram" component={InstagramPage} />
         <Route path="/website/instagram/sync" component={InstagramSync} />
         <Route path="/website/instagram/analytics" component={InstagramAnalytics} />
         <Route path="/website/news" component={NewsManager} />
@@ -181,7 +182,7 @@ function DashboardRoutes() {
         <Route path="/revenue" component={Revenue} />
         <Route path="/tasks" component={Tasks} />
         <Route path="/reports" component={Reports} />
-        <Route path="/instagram" component={InstagramViewer} />
+        <Route path="/instagram" component={InstagramPage} />
         <Route path="/instagram-sync" component={InstagramSync} />
         <Route path="/instagram-analytics" component={InstagramAnalytics} />
         <Route path="/email-marketing" component={EmailMarketing} />

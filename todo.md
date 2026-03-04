@@ -1058,3 +1058,16 @@
 - [x] Update MetaAds.tsx: Active group at top, Archived/Completed collapsible section
 - [x] Add "Mark as Completed" / "Restore to Active" button per campaign card
 - [x] KPI summary cards count only ACTIVE campaigns
+
+## Instagram Live Feed Page (2026-03-04)
+- [x] server/instagramFeed.ts — Instagram Graph API service (fetchAccountStats, fetchMediaFeed, validateToken)
+- [x] Add instagram.getAccountStats, instagram.getFeed, instagram.getScheduledPosts, instagram.schedulePost, instagram.deleteScheduledPost, instagram.generateCaption endpoints to content router
+- [x] client/src/pages/InstagramFeed.tsx — Live feed page with account stats bar, post grid, content scheduler tab
+- [x] Account stats: followers count, media count, username display
+- [x] Post grid: thumbnails (IMAGE/CAROUSEL), video thumbnails, like count, comment count, media type badge
+- [x] Post detail modal: full caption, permalink link, engagement stats
+- [x] Content scheduler tab: create/delete scheduled posts with caption, hashtag, scheduled time
+- [x] AI caption generator: LLM-powered caption suggestions per post
+- [x] Load more: paginated feed (12 → 24 → 36 posts)
+- [x] Register /website/instagram and /instagram routes in App.tsx → InstagramFeed.tsx
+- [x] 7 vitest tests passing (API connectivity, feed fetch, video thumbnails, token validation, DB CRUD)
