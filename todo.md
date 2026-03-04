@@ -923,3 +923,23 @@
 ## Session 2026-03-04 Part 20 — Advertising Page Error Fixes
 - [x] Fix "getDb is not defined" error: eventAd router used bare getDb() instead of db.getDb() — fixed all 4 occurrences
 - [x] Fix print_advertising query: schema had mysqlEnum("print_ad_status") but DB column is named "status" — fixed column name in schema.ts
+
+## Session 2026-03-04 Part 21 — Five Major Improvements
+- [ ] Fix Giveaway goals: entry goal = 1000, long-form goal = 250 (update DB and any hardcoded values)
+- [ ] Strategic Campaigns: show primary KPI metric (Trial Conversion Rate, Membership Goal, etc.) as headline above Spend/Revenue/ROI
+- [ ] Merge Action Plan sub-item from AI Analysis into AI Workspace as a tab
+- [ ] Add AI Intelligence panel to each Program & Event detail page (demographic analysis + ad targeting suggestions)
+- [ ] Merge Command Center / Revenue / Reports into unified dashboard with tabs or sections showing only significant insights
+
+## User Feedback Round 5 (2026-03-04)
+- [x] Strategic Campaigns: Replace standalone ROI metric with KPI-focused display (Cost per Acquisition + ROI as supplementary)
+- [x] Sidebar: Remove Revenue and Reports from navigation (now accessible from Dashboard)
+- [x] Dashboard: Rename Command Center → Dashboard, add Revenue Snapshot + Reports Summary sections
+- [x] Action Plan tab: Merged into AI Workspace, redirect /intelligence/action-plan → /workspace
+- [x] Annual Giveaway goals: Corrected to Entry Goal=1000 (short-form), Application Goal=250 (long-form)
+- [x] Annual Giveaway progress bars: Entry Goal (Short-Form) uses entryPageUV, Application Goal uses totalApplications
+- [x] Annual Giveaway stat cards: Updated labels to "Applications (Long-Form)" and "Entry Page UV"
+- [x] AI Intelligence: Updated generateProgramInsights prompt to include Chicago city gap analysis
+- [x] AI Intelligence: Added chicagoOpportunity JSON field to LLM response schema
+- [x] AI Intelligence: Added "Chicago City Opportunity" highlighted card in AnnualGiveaway AI tab
+- [x] AI Intelligence: All program pages already have ProgramAIIntelligence component (SundayClinic, WinterClinic, JuniorCamp, Leagues)

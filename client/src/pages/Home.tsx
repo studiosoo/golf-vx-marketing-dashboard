@@ -23,6 +23,9 @@ import {
   ShoppingBag,
   Activity,
   Calendar,
+  FileText,
+  CreditCard,
+  Award,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -100,7 +103,7 @@ export default function Home() {
           </div>
           <div>
             <h1 className="text-xl font-bold text-[#111111]">Golf VX Dashboard</h1>
-            <p className="text-sm text-[#888888] mt-1">Arlington Heights — Marketing Command Center</p>
+            <p className="text-sm text-[#888888] mt-1">Arlington Heights — Marketing Dashboard</p>
           </div>
           <Button
             className="bg-[#F5C72C] text-[#111111] font-semibold hover:brightness-95 active:scale-95 transition-all w-full"
@@ -133,6 +136,16 @@ export default function Home() {
   // Active programs for the strip
   const activePrograms = (programs ?? []).filter((p: any) => p.status === "active").slice(0, 6);
 
+  // Revenue data for snapshot section
+  const { data: acuityRevenue } = trpc.revenue.getAcuityRevenue.useQuery({ minDate: undefined, maxDate: undefined }, {
+    enabled: isAuthenticated,
+    staleTime: 5 * 60 * 1000,
+  });
+  const acuityTotal = (acuityRevenue as any)?.total ?? 0;
+  const acuityBookings = (acuityRevenue as any)?.totalBookings ?? 0;
+  const toastLastMonth = (toastSummary as any)?.lastMonthRevenue ?? 0;
+  const toastAllTimeVal = (toastSummary as any)?.allTimeRevenue ?? 0;
+
   // Revenue values — only show if non-zero
   const mrr = members?.mrr ?? 0;
   const toastMTD = (toastSummary as any)?.thisMonthRevenue ?? 0;
@@ -164,7 +177,7 @@ export default function Home() {
         <div>
           <h1 className="text-[22px] font-bold text-[#111111] leading-tight">{greeting}, {firstName}</h1>
           <p className="text-[13px] text-[#888888] mt-0.5">
-            Golf VX Arlington Heights — {now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+            Golf VX Arlington Heights · {now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
           </p>
         </div>
         <button
@@ -437,6 +450,68 @@ export default function Home() {
               })}
             </div>
           )}
+        </div>
+      )}
+
+      {/* ── Section 4b: Revenue Snapshot (only show if data exists) ── */}
+      {(mrr > 0 || toastMTD > 0 || acuityTotal > 0) && (
+        <div className="bg-white rounded-xl border border-[#E0E0E0] p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <FileText className="h-4 w-4 text-[#111111]" />
+              <h2 className="text-[14px] font-bold text-[#111111]">Revenue & Reports</h2>
+            </div>
+            <div className="flex items-center gap-3">
+              <button onClick={() => setLocation("/revenue")} className="flex items-center gap-1 text-[12px] text-[#888888] hover:text-[#111111] transition-colors">
+                Revenue <ArrowRight className="h-3 w-3" />
+              </button>
+              <button onClick={() => setLocation("/intelligence/reports")} className="flex items-center gap-1 text-[12px] text-[#888888] hover:text-[#111111] transition-colors">
+                Full Report <ArrowRight className="h-3 w-3" />
+              </button>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {mrr > 0 && (
+              <div className="p-3 rounded-lg bg-[#FAFAFA] border border-[#F0F0F0]">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <DollarSign className="h-3.5 w-3.5 text-[#F5C72C]" />
+                  <span className="text-[10px] text-[#AAAAAA] uppercase tracking-wide">MRR</span>
+                </div>
+                <p className="text-[20px] font-bold text-[#F5C72C] leading-none">{fmtCurrency(mrr)}</p>
+                <p className="text-[11px] text-[#AAAAAA] mt-1">Monthly recurring</p>
+              </div>
+            )}
+            {toastMTD > 0 && (
+              <div className="p-3 rounded-lg bg-[#FAFAFA] border border-[#F0F0F0]">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <ShoppingBag className="h-3.5 w-3.5 text-[#AAAAAA]" />
+                  <span className="text-[10px] text-[#AAAAAA] uppercase tracking-wide">Toast MTD</span>
+                </div>
+                <p className="text-[20px] font-bold text-[#111111] leading-none">{fmtCurrency(toastMTD)}</p>
+                {toastOrders > 0 && <p className="text-[11px] text-[#AAAAAA] mt-1">{toastOrders} orders</p>}
+              </div>
+            )}
+            {acuityTotal > 0 && (
+              <div className="p-3 rounded-lg bg-[#FAFAFA] border border-[#F0F0F0]">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <CreditCard className="h-3.5 w-3.5 text-[#AAAAAA]" />
+                  <span className="text-[10px] text-[#AAAAAA] uppercase tracking-wide">Programs</span>
+                </div>
+                <p className="text-[20px] font-bold text-[#111111] leading-none">{fmtCurrency(acuityTotal)}</p>
+                {acuityBookings > 0 && <p className="text-[11px] text-[#AAAAAA] mt-1">{acuityBookings} bookings</p>}
+              </div>
+            )}
+            {(mrr > 0 && toastMTD > 0) && (
+              <div className="p-3 rounded-lg bg-[#F5C72C]/5 border border-[#F5C72C]/20">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Award className="h-3.5 w-3.5 text-[#8B6E00]" />
+                  <span className="text-[10px] text-[#8B6E00] uppercase tracking-wide">Total MTD</span>
+                </div>
+                <p className="text-[20px] font-bold text-[#8B6E00] leading-none">{fmtCurrency(mrr + toastMTD + acuityTotal)}</p>
+                <p className="text-[11px] text-[#AAAAAA] mt-1">All channels</p>
+              </div>
+            )}
+          </div>
         </div>
       )}
 

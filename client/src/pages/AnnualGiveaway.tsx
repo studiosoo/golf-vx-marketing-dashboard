@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import {
   Loader2, RefreshCw, TrendingUp, Users, DollarSign, Target, Mail,
   CheckCircle2, AlertCircle, FileText, Copy, UserCheck, UserX,
-  Sparkles, ChevronDown, ChevronUp, BarChart2, MapPin, Star, Zap
+  Sparkles, ChevronDown, ChevronUp, BarChart2, MapPin, Star, Zap, Building2
 } from "lucide-react";
 import {
   BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid,
@@ -495,6 +495,50 @@ function AIIntelligenceTab({ programId }: { programId?: number }) {
         </CardContent>
       </Card>
 
+      {/* Chicago Opportunity — highlighted callout */}
+      {data.chicagoOpportunity && (
+        <Card className="border-2 border-[#F5C72C] shadow-none bg-[#FFFDF0]">
+          <CardHeader className="pb-2 cursor-pointer" onClick={() => toggle("chicago")}>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-semibold text-[#111111] flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-[#F5C72C]" /> Chicago City Opportunity
+                <span className="text-[10px] font-semibold bg-[#F5C72C] text-[#111111] px-2 py-0.5 rounded-full">Untapped Market</span>
+              </CardTitle>
+              {expandedSection === "chicago" ? <ChevronUp className="h-4 w-4 text-[#AAAAAA]" /> : <ChevronDown className="h-4 w-4 text-[#AAAAAA]" />}
+            </div>
+          </CardHeader>
+          {expandedSection === "chicago" && (
+            <CardContent className="pt-0 space-y-4">
+              <p className="text-sm text-[#545A60] leading-relaxed">{data.chicagoOpportunity.summary}</p>
+              <div className="grid gap-3 md:grid-cols-2">
+                <div>
+                  <p className="text-xs font-semibold text-[#AAAAAA] uppercase tracking-wide mb-2">Target Neighborhoods</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(data.chicagoOpportunity.targetNeighborhoods || []).map((n: string, i: number) => (
+                      <span key={i} className="text-xs bg-[#F5C72C]/20 text-[#8B6E00] px-2 py-0.5 rounded font-medium">{n}</span>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-[#AAAAAA] uppercase tracking-wide mb-2">Target Demographic</p>
+                  <p className="text-xs text-[#545A60]">{data.chicagoOpportunity.targetDemographic}</p>
+                </div>
+              </div>
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className="p-3 rounded-lg bg-white border border-[#F5C72C]/30">
+                  <p className="text-xs font-semibold text-[#AAAAAA] uppercase tracking-wide mb-1">Ad Strategy</p>
+                  <p className="text-xs text-[#545A60]">{data.chicagoOpportunity.adStrategy}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-white border border-[#F5C72C]/30">
+                  <p className="text-xs font-semibold text-[#AAAAAA] uppercase tracking-wide mb-1">Messaging Angle</p>
+                  <p className="text-xs text-[#545A60]">{data.chicagoOpportunity.messagingAngle}</p>
+                </div>
+              </div>
+            </CardContent>
+          )}
+        </Card>
+      )}
+
       {/* Key Insights */}
       <Card className="border border-[#E0E0E0] shadow-none">
         <CardHeader
@@ -722,8 +766,8 @@ export default function AnnualGiveaway() {
   });
 
   const totalApplications = stats?.totalApplications || 0;
-  const ENTRY_GOAL = 1000;
-  const LONG_FORM_GOAL = 250;
+  const ENTRY_GOAL = 1000;   // Short-form entry goal
+  const LONG_FORM_GOAL = 250; // Long-form application goal
   const totalSpend = 467.59;
   const costPerSubmission = totalApplications > 0 ? (totalSpend / totalApplications).toFixed(2) : "0.00";
   const entryPageUV = 875;
@@ -782,18 +826,18 @@ export default function AnnualGiveaway() {
         <Card className="border border-[#E0E0E0] shadow-none">
           <CardContent className="pt-4 pb-4">
             <div className="grid gap-4 md:grid-cols-2">
-              <ProgressBar value={totalApplications} max={ENTRY_GOAL} label="Entry Goal Progress" color="#F5C72C" />
-              <ProgressBar value={totalApplications} max={LONG_FORM_GOAL} label="Long-Form Applications" color="#545A60" />
+              <ProgressBar value={entryPageUV} max={ENTRY_GOAL} label="Entry Goal (Short-Form)" color="#F5C72C" />
+              <ProgressBar value={totalApplications} max={LONG_FORM_GOAL} label="Application Goal (Long-Form)" color="#545A60" />
             </div>
           </CardContent>
         </Card>
 
         {/* Metrics Cards */}
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-          <StatCard title="Total Applications" value={totalApplications} sub={`${ENTRY_GOAL - totalApplications} remaining to goal`} icon={Users} />
-          <StatCard title="Funnel Conversion" value={`${funnelConversionRate}%`} sub={`${totalApplications} / ${entryPageUV} entry UV`} icon={TrendingUp} accent />
-          <StatCard title="Cost per Submission" value={`$${costPerSubmission}`} sub={`$${totalSpend.toFixed(2)} total spend`} icon={DollarSign} />
-          <StatCard title="Long-Form Target" value={`${totalApplications}/${LONG_FORM_GOAL}`} sub={`${Math.max(0, LONG_FORM_GOAL - totalApplications)} more needed`} icon={Target} />
+          <StatCard title="Applications (Long-Form)" value={totalApplications} sub={`Goal: ${LONG_FORM_GOAL} • ${Math.max(0, LONG_FORM_GOAL - totalApplications)} remaining`} icon={Users} />
+          <StatCard title="Entry Page UV" value={entryPageUV} sub={`Goal: ${ENTRY_GOAL} entries • ${Math.max(0, ENTRY_GOAL - entryPageUV)} remaining`} icon={Target} accent />
+          <StatCard title="Funnel Conversion" value={`${funnelConversionRate}%`} sub={`${totalApplications} long-form / ${entryPageUV} entry UV`} icon={TrendingUp} />
+          <StatCard title="Cost per Application" value={`$${costPerSubmission}`} sub={`$${totalSpend.toFixed(2)} total ad spend`} icon={DollarSign} />
         </div>
 
         {/* Bottom Funnel Conversion */}

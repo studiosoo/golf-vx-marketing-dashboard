@@ -115,7 +115,7 @@ function DashboardRoutes() {
         <Route path="/intelligence" component={MarketingIntelligence} />
         <Route path="/intelligence/ai-actions" component={AIActions} />
         <Route path="/intelligence/market-research" component={MarketResearch} />
-        <Route path="/intelligence/action-plan" component={ActionPlan} />
+        <Route path="/intelligence/action-plan">{() => { window.location.replace('/workspace'); return null; }}</Route>
         <Route path="/intelligence/performance" component={Performance} />
         <Route path="/intelligence/revenue" component={Revenue} />
         <Route path="/intelligence/reports" component={Reports} />

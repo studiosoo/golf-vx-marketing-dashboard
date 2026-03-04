@@ -73,15 +73,13 @@ type NavGroup = {
 // ─────────────────────────────────────────────
 const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
   {
-    label: "Command Center",
+    label: "Dashboard",
     path: "/",
     icon: LayoutDashboard,
   },
   {
     heading: "Strategic",
     items: [
-      { label: "Revenue", path: "/revenue", icon: DollarSign },
-      { label: "Reports", path: "/intelligence/reports", icon: FileText },
       { label: "Campaigns", path: "/strategic-campaigns", icon: Target },
     ],
   },
@@ -95,7 +93,6 @@ const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
         children: [
           { label: "Actions", path: "/intelligence/ai-actions", icon: Zap },
           { label: "Market Research", path: "/intelligence/market-research", icon: Search },
-          { label: "Action Plan", path: "/intelligence/action-plan", icon: Lightbulb },
         ],
       },
       { label: "AI Workspace", path: "/workspace", icon: Bot },
