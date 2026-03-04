@@ -853,3 +853,24 @@
 - [x] Seed data: Illinois Sluggers Athletic Association (received, no decision)
 - [x] Seed data: Lake County Symphony Orchestra (follow_up, proactive outreach)
 - [x] 17 vitest unit tests for data model, ROI calculations, status pipeline — all passing
+
+## Session 2026-03-03 Part 12 — Stroll Magazine Print Advertising
+- [x] Asana task checked (MCP timeout, all details captured from user message + ad image)
+- [x] Add print_advertising DB table: vendor_name, publication_type, ad_size, cost_per_month, contract_months, total_contract_value, start_date, end_date, status, qr_destination, instagram_handle, website, circulation, target_area, notes
+- [x] Seed Stroll Magazine: Full Page, $650/mo, 12-month contract ($7,800 total), Jan–Dec 2026, QR → ah.playgolfvx.com (Linktree), @strollscarsdale_arlingtonhts
+- [x] Add tRPC router: printAd.list, printAd.create, printAd.update, printAd.delete
+- [x] Add PrintTab component: KPI cards (monthly spend, contract value, active count), contract progress bar, ad detail cards with QR attribution
+- [x] Add "Print / Magazine" as 4th tab in Advertising page
+- [x] QR code correctly noted as Linktree (ah.playgolfvx.com), not just $25 trial booking
+
+## Session 2026-03-03 Part 13 — Chicago Golf Show + AI Strategy Workspace
+- [x] Seed Chicago Golf Show 2026 in community_outreach: ~2,500 visitors, 50 promos given, 1 team signup, status=fulfilled, org_type=other
+- [x] Build AI Strategy Workspace as 2nd tab in AI Workspace page (Chat + Strategy Workspace)
+- [x] Strategy Workspace: 7 analysis types (Competitive Analysis, Marketing Plan, Event ROI, B2B Strategy, Campaign Brief, Community Outreach, Free Form)
+- [x] Strategy Workspace: 3 quick-start templates (Topgolf B2B, Chicago Golf Show ROI, Windsor PTA Donation)
+- [x] Strategy Workspace: analysis history (last 10 analyses, expandable, deletable, reload)
+- [x] Strategy Workspace: custom instructions field (optional, collapsible)
+- [x] Strategy Workspace: copy-to-clipboard for analysis results
+- [x] aiWorkspace.analyze tRPC endpoint with Golf VX context-aware system prompts per analysis type
+- [x] aiWorkspace.analyze: structured output format (Executive Summary, Key Insights, Recommended Actions, KPIs, Risks)
+- [x] AI Workspace registered in sidebar (/workspace) and App.tsx

@@ -1642,3 +1642,31 @@ export const communityOutreach = mysqlTable("community_outreach", {
 }));
 export type CommunityOutreach = typeof communityOutreach.$inferSelect;
 export type NewCommunityOutreach = typeof communityOutreach.$inferInsert;
+
+// ─── Print Advertising ────────────────────────────────────────────────────────
+export const printAdvertising = mysqlTable("print_advertising", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  vendorName: varchar("vendor_name", { length: 256 }).notNull(),
+  publicationType: mysqlEnum("publication_type", ["magazine", "newspaper", "flyer", "billboard", "direct_mail", "other"]).notNull().default("magazine"),
+  adSize: varchar("ad_size", { length: 128 }),
+  costPerMonth: decimal("cost_per_month", { precision: 10, scale: 2 }).notNull(),
+  contractMonths: int("contract_months").notNull().default(1),
+  totalContractValue: decimal("total_contract_value", { precision: 10, scale: 2 }),
+  startDate: date("start_date"),
+  endDate: date("end_date"),
+  status: mysqlEnum("print_ad_status", ["active", "completed", "cancelled", "negotiating"]).notNull().default("active"),
+  qrDestination: varchar("qr_destination", { length: 512 }),
+  qrCodeUrl: varchar("qr_code_url", { length: 512 }),
+  instagramHandle: varchar("instagram_handle", { length: 128 }),
+  website: varchar("website", { length: 512 }),
+  circulation: int("circulation"),
+  targetArea: varchar("target_area", { length: 256 }),
+  notes: text("notes"),
+  createdAt: bigint("created_at", { mode: "number" }).notNull().default(0),
+  updatedAt: bigint("updated_at", { mode: "number" }).notNull().default(0),
+}, (table) => ({
+  printAdStatusIdx: index("print_ad_status_idx").on(table.status),
+  printAdStartDateIdx: index("print_ad_start_date_idx").on(table.startDate),
+}));
+export type PrintAdvertising = typeof printAdvertising.$inferSelect;
+export type NewPrintAdvertising = typeof printAdvertising.$inferInsert;

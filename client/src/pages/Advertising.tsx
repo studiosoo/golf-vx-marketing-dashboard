@@ -14,7 +14,8 @@ import {
   Plus, Instagram, Youtube, Facebook, Globe, Star, Heart,
   Building2, School, Trophy, Music, Flame, CheckCircle2,
   XCircle, Clock, AlertCircle, RefreshCw, ExternalLink,
-  Edit2, Trash2, ChevronRight, Target, Megaphone
+  Edit2, Trash2, ChevronRight, Target, Megaphone, BookOpen,
+  Calendar, QrCode, MapPin, FileText
 } from "lucide-react";
 import MetaAds from "./MetaAds";
 
@@ -847,14 +848,316 @@ function OutreachTab() {
   );
 }
 
+// ─── Print / Magazine Tab ─────────────────────────────────────────────────
+function PrintTab() {
+  const { data: ads, isLoading, refetch } = trpc.printAd.list.useQuery();
+  const { toast } = useToast();
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({
+    vendorName: "", publicationType: "magazine" as const,
+    adSize: "", costPerMonth: "", contractMonths: "1",
+    startDate: "", endDate: "", status: "active" as const,
+    qrDestination: "", instagramHandle: "", website: "",
+    circulation: "", targetArea: "", notes: "",
+  });
+
+  const createMutation = trpc.printAd.create.useMutation({
+    onSuccess: () => { toast({ title: "Ad placement added" }); setShowForm(false); refetch(); },
+    onError: (e) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+  });
+  const deleteMutation = trpc.printAd.delete.useMutation({
+    onSuccess: () => { toast({ title: "Removed" }); refetch(); },
+  });
+
+  const handleCreate = () => {
+    if (!form.vendorName || !form.costPerMonth) return;
+    createMutation.mutate({
+      vendorName: form.vendorName,
+      publicationType: form.publicationType,
+      adSize: form.adSize || undefined,
+      costPerMonth: parseFloat(form.costPerMonth),
+      contractMonths: parseInt(form.contractMonths) || 1,
+      startDate: form.startDate || undefined,
+      endDate: form.endDate || undefined,
+      status: form.status,
+      qrDestination: form.qrDestination || undefined,
+      instagramHandle: form.instagramHandle || undefined,
+      website: form.website || undefined,
+      circulation: form.circulation ? parseInt(form.circulation) : undefined,
+      targetArea: form.targetArea || undefined,
+      notes: form.notes || undefined,
+    });
+  };
+
+  // KPI summary
+  const totalMonthlySpend = ads?.reduce((s, a) => s + parseFloat(String(a.costPerMonth || 0)), 0) ?? 0;
+  const totalContractValue = ads?.reduce((s, a) => s + parseFloat(String(a.totalContractValue || 0)), 0) ?? 0;
+  const activeCount = ads?.filter(a => a.status === "active").length ?? 0;
+
+  // Contract progress helper
+  const getContractProgress = (startDate: string | null, endDate: string | null, months: number) => {
+    if (!startDate) return { elapsed: 0, remaining: months, pct: 0 };
+    const start = new Date(startDate);
+    const now = new Date();
+    const elapsed = Math.max(0, Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 30.44)));
+    const remaining = Math.max(0, months - elapsed);
+    const pct = Math.min(100, Math.round((elapsed / months) * 100));
+    return { elapsed, remaining, pct };
+  };
+
+  const STATUS_COLORS: Record<string, string> = {
+    active: "bg-green-500/20 text-green-400 border-green-500/30",
+    completed: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+    cancelled: "bg-red-500/20 text-red-400 border-red-500/30",
+    negotiating: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* KPI row */}
+      <div className="grid grid-cols-3 gap-4">
+        <Card className="bg-card border-border">
+          <CardContent className="pt-5">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-yellow-500/10"><DollarSign size={18} className="text-yellow-400" /></div>
+              <div>
+                <p className="text-xs text-muted-foreground">Monthly Spend</p>
+                <p className="text-xl font-bold text-foreground">${totalMonthlySpend.toLocaleString()}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-card border-border">
+          <CardContent className="pt-5">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-blue-500/10"><FileText size={18} className="text-blue-400" /></div>
+              <div>
+                <p className="text-xs text-muted-foreground">Total Contract Value</p>
+                <p className="text-xl font-bold text-foreground">${totalContractValue.toLocaleString()}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-card border-border">
+          <CardContent className="pt-5">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-green-500/10"><BookOpen size={18} className="text-green-400" /></div>
+              <div>
+                <p className="text-xs text-muted-foreground">Active Placements</p>
+                <p className="text-xl font-bold text-foreground">{activeCount}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Header + Add button */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-foreground">Print & Magazine Placements</h2>
+        <Dialog open={showForm} onOpenChange={setShowForm}>
+          <DialogTrigger asChild>
+            <Button size="sm" className="gap-2"><Plus size={14} /> Add Placement</Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-lg">
+            <DialogHeader><DialogTitle>New Print Ad Placement</DialogTitle></DialogHeader>
+            <div className="space-y-3 pt-2">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="col-span-2">
+                  <Label>Vendor / Publication Name *</Label>
+                  <Input value={form.vendorName} onChange={e => setForm(f => ({...f, vendorName: e.target.value}))} placeholder="e.g. Stroll Magazine" />
+                </div>
+                <div>
+                  <Label>Type</Label>
+                  <Select value={form.publicationType} onValueChange={v => setForm(f => ({...f, publicationType: v as typeof form.publicationType}))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {["magazine","newspaper","flyer","billboard","direct_mail","other"].map(t => (
+                        <SelectItem key={t} value={t}>{t.replace("_"," ")}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Ad Size</Label>
+                  <Input value={form.adSize} onChange={e => setForm(f => ({...f, adSize: e.target.value}))} placeholder="Full Page, Half Page…" />
+                </div>
+                <div>
+                  <Label>Cost / Month ($) *</Label>
+                  <Input type="number" value={form.costPerMonth} onChange={e => setForm(f => ({...f, costPerMonth: e.target.value}))} placeholder="650" />
+                </div>
+                <div>
+                  <Label>Contract Months</Label>
+                  <Input type="number" value={form.contractMonths} onChange={e => setForm(f => ({...f, contractMonths: e.target.value}))} placeholder="12" />
+                </div>
+                <div>
+                  <Label>Start Date</Label>
+                  <Input type="date" value={form.startDate} onChange={e => setForm(f => ({...f, startDate: e.target.value}))} />
+                </div>
+                <div>
+                  <Label>End Date</Label>
+                  <Input type="date" value={form.endDate} onChange={e => setForm(f => ({...f, endDate: e.target.value}))} />
+                </div>
+                <div className="col-span-2">
+                  <Label>QR Code Destination URL</Label>
+                  <Input value={form.qrDestination} onChange={e => setForm(f => ({...f, qrDestination: e.target.value}))} placeholder="https://ah.playgolfvx.com" />
+                </div>
+                <div>
+                  <Label>Instagram Handle</Label>
+                  <Input value={form.instagramHandle} onChange={e => setForm(f => ({...f, instagramHandle: e.target.value}))} placeholder="@handle" />
+                </div>
+                <div>
+                  <Label>Target Area</Label>
+                  <Input value={form.targetArea} onChange={e => setForm(f => ({...f, targetArea: e.target.value}))} placeholder="Arlington Heights, IL" />
+                </div>
+                <div className="col-span-2">
+                  <Label>Notes</Label>
+                  <Textarea value={form.notes} onChange={e => setForm(f => ({...f, notes: e.target.value}))} rows={2} />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-1">
+                <Button variant="outline" onClick={() => setShowForm(false)}>Cancel</Button>
+                <Button onClick={handleCreate} disabled={createMutation.isPending}>
+                  {createMutation.isPending ? "Saving…" : "Save"}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Ad cards */}
+      {isLoading ? (
+        <div className="text-muted-foreground text-sm">Loading placements…</div>
+      ) : !ads?.length ? (
+        <Card className="bg-card border-border">
+          <CardContent className="py-12 text-center">
+            <BookOpen size={32} className="mx-auto mb-3 text-muted-foreground" />
+            <p className="text-muted-foreground">No print placements yet. Click "Add Placement" to get started.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {ads.map(ad => {
+            const prog = getContractProgress(ad.startDate, ad.endDate, ad.contractMonths);
+            const monthlySpend = parseFloat(String(ad.costPerMonth));
+            const totalValue = parseFloat(String(ad.totalContractValue || 0));
+            const spentToDate = monthlySpend * prog.elapsed;
+            return (
+              <Card key={ad.id} className="bg-card border-border">
+                <CardContent className="pt-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="p-2 rounded-lg bg-yellow-500/10">
+                          <BookOpen size={16} className="text-yellow-400" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-foreground">{ad.vendorName}</h3>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <Badge variant="outline" className="text-xs capitalize">{ad.publicationType}</Badge>
+                            {ad.adSize && <span className="text-xs text-muted-foreground">{ad.adSize}</span>}
+                            <Badge variant="outline" className={`text-xs border ${STATUS_COLORS[ad.status]}`}>{ad.status}</Badge>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Key metrics row */}
+                      <div className="grid grid-cols-3 gap-3 my-3">
+                        <div className="bg-muted/30 rounded-lg p-3">
+                          <p className="text-xs text-muted-foreground">Monthly Cost</p>
+                          <p className="text-lg font-bold text-foreground">${monthlySpend.toLocaleString()}</p>
+                        </div>
+                        <div className="bg-muted/30 rounded-lg p-3">
+                          <p className="text-xs text-muted-foreground">Contract Value</p>
+                          <p className="text-lg font-bold text-foreground">${totalValue.toLocaleString()}</p>
+                          <p className="text-xs text-muted-foreground">{ad.contractMonths} months</p>
+                        </div>
+                        <div className="bg-muted/30 rounded-lg p-3">
+                          <p className="text-xs text-muted-foreground">Spent to Date</p>
+                          <p className="text-lg font-bold text-yellow-400">${spentToDate.toLocaleString()}</p>
+                          <p className="text-xs text-muted-foreground">{prog.elapsed} of {ad.contractMonths} mo</p>
+                        </div>
+                      </div>
+
+                      {/* Contract progress bar */}
+                      <div className="mb-3">
+                        <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                          <span>Contract Progress</span>
+                          <span>{prog.pct}% — {prog.remaining} months remaining</span>
+                        </div>
+                        <div className="h-2 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-yellow-400 rounded-full transition-all"
+                            style={{ width: `${prog.pct}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Details row */}
+                      <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                        {ad.startDate && (
+                          <span className="flex items-center gap-1">
+                            <Calendar size={11} />
+                            {new Date(ad.startDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+                            {" → "}
+                            {ad.endDate ? new Date(ad.endDate).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "ongoing"}
+                          </span>
+                        )}
+                        {ad.targetArea && (
+                          <span className="flex items-center gap-1"><MapPin size={11} />{ad.targetArea}</span>
+                        )}
+                        {ad.instagramHandle && (
+                          <span className="flex items-center gap-1"><Instagram size={11} />{ad.instagramHandle}</span>
+                        )}
+                        {ad.qrDestination && (
+                          <a href={ad.qrDestination} target="_blank" rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-yellow-400 hover:underline">
+                            <QrCode size={11} />QR → {ad.qrDestination}
+                          </a>
+                        )}
+                        {ad.website && (
+                          <a href={ad.website} target="_blank" rel="noopener noreferrer"
+                            className="flex items-center gap-1 hover:underline">
+                            <Globe size={11} />{ad.website.replace("https://","")}
+                          </a>
+                        )}
+                      </div>
+
+                      {ad.notes && (
+                        <p className="mt-3 text-xs text-muted-foreground bg-muted/20 rounded p-2 border border-border">{ad.notes}</p>
+                      )}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        variant="ghost" size="sm"
+                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                        onClick={() => { if (confirm(`Remove ${ad.vendorName}?`)) deleteMutation.mutate({ id: ad.id }); }}
+                      >
+                        <Trash2 size={14} />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main Advertising Page ─────────────────────────────────────────────────
 export default function Advertising() {
-  const [tab, setTab] = useState<"meta" | "influencer" | "outreach">("meta");
+  const [tab, setTab] = useState<"meta" | "influencer" | "outreach" | "print">("meta");
 
   const TABS = [
     { id: "meta" as const, label: "Meta Ads", icon: <BarChart3 size={15} /> },
     { id: "influencer" as const, label: "Influencer", icon: <Instagram size={15} /> },
     { id: "outreach" as const, label: "Community Outreach", icon: <Building2 size={15} /> },
+    { id: "print" as const, label: "Print / Magazine", icon: <BookOpen size={15} /> },
   ];
 
   return (
@@ -886,6 +1189,7 @@ export default function Advertising() {
       {tab === "meta" && <MetaAds embedded />}
       {tab === "influencer" && <InfluencerTab />}
       {tab === "outreach" && <OutreachTab />}
+      {tab === "print" && <PrintTab />}
     </div>
   );
 }

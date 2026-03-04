@@ -29,7 +29,7 @@ import * as giveawaySync from "./giveawaySync";
 import { syncGiveawayFromSheets } from "./googleSheetsSync";
 import { calculateCampaignPerformance, GOAL_TEMPLATES } from "./goalTemplates";
 import { eq, desc, sql, inArray, and, gte } from "drizzle-orm";
-import { aiRecommendations, userActions, priorities, influencerPartnerships, communityOutreach } from "../drizzle/schema";
+import { aiRecommendations, userActions, priorities, influencerPartnerships, communityOutreach, printAdvertising } from "../drizzle/schema";
 import { emailCaptureRouter } from "./emailCaptureRouter";
 import { boomerangRouter } from "./boomerangRouter";
 import { communicationRouter } from "./communicationRouter";
@@ -4663,6 +4663,154 @@ When the user provides data (e.g., "we had 12 attendees at Drive Day"), acknowle
       }
       return { total: rows.length, totalCashValue, totalPerceivedValue, totalEstimatedReach, byStatus, byType };
     }),
+  }),
+
+  // ─── Print Advertising Router ─────────────────────────────────────────────
+  printAd: router({
+    list: protectedProcedure.query(async () => {
+      const database = await db.getDb();
+      if (!database) return [];
+      return database.select().from(printAdvertising).orderBy(desc(printAdvertising.startDate));
+    }),
+
+    create: protectedProcedure
+      .input(z.object({
+        vendorName: z.string().min(1),
+        publicationType: z.enum(["magazine", "newspaper", "flyer", "billboard", "direct_mail", "other"]).default("magazine"),
+        adSize: z.string().optional(),
+        costPerMonth: z.number().positive(),
+        contractMonths: z.number().int().positive().default(1),
+        startDate: z.string().optional(),
+        endDate: z.string().optional(),
+        status: z.enum(["active", "completed", "cancelled", "negotiating"]).default("active"),
+        qrDestination: z.string().optional(),
+        qrCodeUrl: z.string().optional(),
+        instagramHandle: z.string().optional(),
+        website: z.string().optional(),
+        circulation: z.number().int().optional(),
+        targetArea: z.string().optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const database = await db.getDb();
+        if (!database) throw new Error("DB unavailable");
+        const now = Date.now();
+        const totalContractValue = String((input.costPerMonth * input.contractMonths).toFixed(2));
+        await database.insert(printAdvertising).values({
+          vendorName: input.vendorName,
+          publicationType: input.publicationType,
+          adSize: input.adSize,
+          costPerMonth: String(input.costPerMonth),
+          contractMonths: input.contractMonths,
+          totalContractValue,
+          startDate: input.startDate,
+          endDate: input.endDate,
+          status: input.status,
+          qrDestination: input.qrDestination,
+          qrCodeUrl: input.qrCodeUrl,
+          instagramHandle: input.instagramHandle,
+          website: input.website,
+          circulation: input.circulation,
+          targetArea: input.targetArea,
+          notes: input.notes,
+          createdAt: now,
+          updatedAt: now,
+        });
+        return { success: true };
+      }),
+
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number().int(),
+        vendorName: z.string().optional(),
+        adSize: z.string().optional(),
+        costPerMonth: z.number().optional(),
+        contractMonths: z.number().int().optional(),
+        startDate: z.string().optional(),
+        endDate: z.string().optional(),
+        status: z.enum(["active", "completed", "cancelled", "negotiating"]).optional(),
+        qrDestination: z.string().optional(),
+        qrCodeUrl: z.string().optional(),
+        instagramHandle: z.string().optional(),
+        website: z.string().optional(),
+        circulation: z.number().int().optional(),
+        targetArea: z.string().optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const database = await db.getDb();
+        if (!database) throw new Error("DB unavailable");
+        const { id, costPerMonth, contractMonths, ...rest } = input;
+        const updates: Record<string, unknown> = { ...rest, updatedAt: Date.now() };
+        if (costPerMonth !== undefined) updates.costPerMonth = String(costPerMonth);
+        if (costPerMonth !== undefined || contractMonths !== undefined) {
+          const [existing] = await database.select().from(printAdvertising).where(eq(printAdvertising.id, id));
+          const finalCost = costPerMonth ?? parseFloat(String(existing?.costPerMonth || 0));
+          const finalMonths = contractMonths ?? existing?.contractMonths ?? 1;
+          updates.totalContractValue = String((finalCost * finalMonths).toFixed(2));
+          if (contractMonths !== undefined) updates.contractMonths = contractMonths;
+        }
+        await database.update(printAdvertising).set(updates).where(eq(printAdvertising.id, id));
+        return { success: true };
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number().int() }))
+      .mutation(async ({ input }) => {
+        const database = await db.getDb();
+        if (!database) throw new Error("DB unavailable");
+        await database.delete(printAdvertising).where(eq(printAdvertising.id, input.id));
+        return { success: true };
+      }),
+  }),
+
+  // ─── AI Strategy Workspace ──────────────────────────────────────────────────
+  aiWorkspace: router({
+    analyze: protectedProcedure
+      .input(z.object({
+        content: z.string().min(10).max(50000),
+        analysisType: z.enum([
+          'competitive_analysis',
+          'marketing_plan',
+          'event_roi',
+          'b2b_strategy',
+          'campaign_brief',
+          'community_outreach',
+          'free_form',
+        ]),
+        customPrompt: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { invokeLLM } = await import("./_core/llm");
+
+        const GOLF_VX_CONTEXT = `Golf VX Arlington Heights is an indoor golf simulator venue located at 644 E Rand Rd, Arlington Heights, IL. It offers: hourly bay rentals ($45 off-peak / $65 peak), memberships (All Access Ace, Swing Saver, Golf VX Pro), leagues, lessons, clinics, junior programs (Junior Summer Camp), food & beverage, and private/corporate events. The venue targets local Arlington Heights and Chicago suburb residents. Key programs: $25 Trial Session (off-peak), $35 Trial Session (peak), Winter Clinics, Sunday Clinics (PBGA), Drive Day Clinics, Junior Summer Camp. Website: playgolfvx.com. Linktree: ah.playgolfvx.com.`;
+
+        const typeInstructions: Record<string, string> = {
+          competitive_analysis: `You are a golf industry marketing strategist. Analyze the provided content for competitive intelligence relevant to Golf VX Arlington Heights. Identify what competitors are doing, what Golf VX can learn, and specific tactics to adopt or counter. Context: ${GOLF_VX_CONTEXT}`,
+          marketing_plan: `You are the marketing director for Golf VX Arlington Heights. Create a detailed, actionable marketing plan based on the provided content. Include specific channels, messaging, timing, budget estimates, and KPIs. Focus on the local Arlington Heights / Chicago suburb audience. Context: ${GOLF_VX_CONTEXT}`,
+          event_roi: `You are a marketing ROI analyst specializing in event marketing. Evaluate the event or sponsorship described in the provided content for Golf VX Arlington Heights. Calculate or estimate ROI, identify what worked and what didn't, and provide specific recommendations to improve future events. Context: ${GOLF_VX_CONTEXT}`,
+          b2b_strategy: `You are a B2B sales and marketing strategist. Analyze the provided content and develop a corporate events and B2B partnership strategy for Golf VX Arlington Heights. Include target companies, outreach tactics, pricing packages, and competitive positioning vs. Topgolf and other venues. Context: ${GOLF_VX_CONTEXT}`,
+          campaign_brief: `You are a creative marketing director. Based on the provided content, write a complete campaign brief for Golf VX Arlington Heights. Include: campaign objective, target audience, key message, creative direction, channels, timeline, budget range, and success metrics. Context: ${GOLF_VX_CONTEXT}`,
+          community_outreach: `You are the community relations manager for Golf VX Arlington Heights. Evaluate the sponsorship or donation request in the provided content. Recommend whether to approve or decline, what to offer, how to maximize brand visibility, and what ROI to expect. Consider the local Arlington Heights community context. Context: ${GOLF_VX_CONTEXT}`,
+          free_form: `You are a strategic marketing AI assistant for Golf VX Arlington Heights. Context: ${GOLF_VX_CONTEXT}. Analyze the provided content and give actionable marketing insights, strategic recommendations, and specific next steps.`,
+        };
+
+        const systemPrompt = typeInstructions[input.analysisType] || typeInstructions.free_form;
+
+        const userPrompt = input.customPrompt
+          ? `${input.customPrompt}\n\n---\n\nCONTENT TO ANALYZE:\n${input.content}`
+          : `Please analyze the following content and provide a structured response with these sections:\n\n## Executive Summary\n(2-3 sentences capturing the key takeaway)\n\n## Key Insights\n(3-5 specific, data-driven observations)\n\n## Recommended Actions\n(Prioritized list of specific, actionable steps with owner and timeline)\n\n## KPIs to Track\n(Measurable success metrics with target values where possible)\n\n## Risks & Considerations\n(What to watch out for, potential downsides)\n\n---\n\nCONTENT TO ANALYZE:\n${input.content}`;
+
+        const response = await invokeLLM({
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+        });
+
+        const result = response?.choices?.[0]?.message?.content || 'No response generated.';
+        return { analysis: result, analysisType: input.analysisType };
+      }),
   }),
 });
 export type AppRouter = typeof appRouter;
