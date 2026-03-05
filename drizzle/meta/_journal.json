@@ -162,6 +162,13 @@
       "when": 1772648342682,
       "tag": "0022_tricky_grim_reaper",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "5",
+      "when": 1772747566049,
+      "tag": "0023_massive_wallflower",
+      "breakpoints": true
     }
   ]
 }
