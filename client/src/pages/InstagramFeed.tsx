@@ -230,7 +230,7 @@ function DailyAnalysisTab() {
   const followerPct = Math.min(100, Math.round((metrics.followers / followerGoal) * 100));
   const engagementNum = parseFloat(metrics.avgEngagement);
   const engagementLabel = engagementNum >= 3 ? "Excellent" : engagementNum >= 1 ? "Good" : "Needs Work";
-  const engagementColor = engagementNum >= 3 ? "text-green-400" : engagementNum >= 1 ? "text-[#F5C72C]" : "text-red-400";
+  const engagementColor = engagementNum >= 3 ? "text-[#3DB855]" : engagementNum >= 1 ? "text-[#F5C72C]" : "text-[#E8453C]";
 
   return (
     <div className="space-y-5">
@@ -380,7 +380,7 @@ function DailyAnalysisTab() {
         <Card className="bg-[#1a1a1a] border-[#2a2a2a]">
           <CardHeader className="pb-2 pt-4 px-4">
             <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-400" />
+              <CheckCircle2 className="h-4 w-4 text-[#3DB855]" />
               Quick Win (15 min)
             </CardTitle>
           </CardHeader>
@@ -780,12 +780,8 @@ export default function InstagramDashboard() {
       )}
 
       {/* Tabs: Daily Analysis | Feed | Scheduler */}
-      <Tabs defaultValue="analysis" className="space-y-4">
+      <Tabs defaultValue="feed" className="space-y-4">
         <TabsList className="bg-[#1a1a1a] border border-[#2a2a2a]">
-          <TabsTrigger value="analysis" className="data-[state=active]:bg-[#F5C72C] data-[state=active]:text-black">
-            <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-            Daily Analysis
-          </TabsTrigger>
           <TabsTrigger value="feed" className="data-[state=active]:bg-[#F5C72C] data-[state=active]:text-black">
             <Instagram className="h-3.5 w-3.5 mr-1.5" />
             Live Feed
@@ -799,12 +795,11 @@ export default function InstagramDashboard() {
               </Badge>
             )}
           </TabsTrigger>
+          <TabsTrigger value="analysis" className="data-[state=active]:bg-[#F5C72C] data-[state=active]:text-black">
+            <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+            Daily Analysis
+          </TabsTrigger>
         </TabsList>
-
-        {/* ── Daily Analysis Tab ── */}
-        <TabsContent value="analysis">
-          <DailyAnalysisTab />
-        </TabsContent>
 
         {/* ── Feed Tab ── */}
         <TabsContent value="feed" className="space-y-4">
@@ -867,6 +862,11 @@ export default function InstagramDashboard() {
               </Button>
             </div>
           )}
+        </TabsContent>
+
+        {/* ── Daily Analysis Tab ── */}
+        <TabsContent value="analysis">
+          <DailyAnalysisTab />
         </TabsContent>
       </Tabs>
 

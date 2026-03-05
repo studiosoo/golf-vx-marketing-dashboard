@@ -1110,3 +1110,8 @@
 - [x] Replace InstagramFeed with unified Instagram page (Daily Analysis + Live Feed + Scheduler tabs)
 - [x] Token expiry warning banner: red if expired, yellow if expiring within 7 days
 - [x] AI daily content strategy: analyzes recent post performance, generates today's caption + best time + quick win
+
+## Redesign: Instagram + Programs & Events + Social & Content (2026-03-05)
+- [x] Instagram: restored Live Feed as default tab (Feed → Scheduler → Daily Analysis order)
+- [x] Programs & Events: replaced blue/green/orange Tailwind colors with Golf VX palette in SundayClinicDetail + WinterClinicDetail
+- [x] Social & Content: updated InstagramAnalytics + InstagramFeed to Golf VX palette (#3DB855, #E8453C, #F5C72C)

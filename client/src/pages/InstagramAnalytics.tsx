@@ -123,7 +123,7 @@ export default function InstagramAnalytics() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="text-3xl font-bold mb-1">{latest.followersCount.toLocaleString()}</div>
-          <div className={`flex items-center text-sm ${followerGrowth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+          <div className={`flex items-center text-sm ${followerGrowth >= 0 ? 'text-[#3DB855]' : 'text-[#E8453C]'}`}>
             {followerGrowth >= 0 ? <TrendingUp className="h-4 w-4 mr-1" /> : <TrendingDown className="h-4 w-4 mr-1" />}
             {followerGrowth >= 0 ? '+' : ''}{followerGrowth} ({followerGrowthPercent}%) from last sync
           </div>

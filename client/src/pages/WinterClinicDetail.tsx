@@ -108,7 +108,7 @@ function WinterClinicAttendeeModal({
                       </button>
                     )}
                     {parseFloat(a.amountPaid || '0') > 0 && (
-                      <span className="text-xs font-medium text-green-600">${parseFloat(a.amountPaid || '0').toFixed(0)}</span>
+                      <span className="text-xs font-medium text-[#3DB855]">${parseFloat(a.amountPaid || '0').toFixed(0)}</span>
                     )}
                   </div>
                 </div>
@@ -207,25 +207,25 @@ export default function WinterClinicDetail() {
     .sort(([, a], [, b]) => b - a);
   const totalExperience = sortedExperience.reduce((sum, [, count]) => sum + count, 0);
 
-  // Source colors
+  // Source colors — Golf VX palette
   const sourceColors: Record<string, string> = {
-    "PBGA Links & Tees": "bg-emerald-500",
-    "Social Media": "bg-blue-500",
+    "PBGA Links & Tees": "bg-[#F5C72C]",
+    "Social Media": "bg-[#111111]",
     "Golf VX": "bg-primary",
-    "Google Search": "bg-[#a87fbe]",
-    "Friend / Family": "bg-[#ef9253]",
-    "Flyer / Signage": "bg-pink-500",
-    "Unknown": "bg-gray-400",
+    "Google Search": "bg-[#555555]",
+    "Friend / Family": "bg-[#888888]",
+    "Flyer / Signage": "bg-[#AAAAAA]",
+    "Unknown": "bg-[#CCCCCC]",
   };
 
-  // Experience colors
+  // Experience colors — Golf VX palette
   const experienceColors: Record<string, string> = {
-    "Beginner": "bg-green-500",
-    "Intermediate": "bg-blue-500",
-    "Advanced": "bg-[#a87fbe]",
-    "beginner": "bg-[#5daf68]",
-    "intermediate": "bg-[#76addc]",
-    "advanced": "bg-[#a87fbe]",
+    "Beginner": "bg-[#3DB855]",
+    "Intermediate": "bg-[#F5C72C]",
+    "Advanced": "bg-[#111111]",
+    "beginner": "bg-[#3DB855]",
+    "intermediate": "bg-[#F5C72C]",
+    "advanced": "bg-[#111111]",
   };
 
   const getCategoryIcon = (category: string) => {
@@ -239,10 +239,10 @@ export default function WinterClinicDetail() {
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'kids': return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'adults': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-      case 'family': return 'bg-purple-100 text-purple-700 border-purple-200';
-      default: return 'bg-gray-100 text-gray-700 border-gray-200';
+      case 'kids': return 'bg-[#FFFBEA] text-[#111111] border-[#F5C72C]/40';
+      case 'adults': return 'bg-[#F5F5F5] text-[#111111] border-[#E0E0E0]';
+      case 'family': return 'bg-[#F5F5F5] text-[#555555] border-[#E0E0E0]';
+      default: return 'bg-[#F5F5F5] text-[#888888] border-[#E0E0E0]';
     }
   };
 
@@ -262,7 +262,7 @@ export default function WinterClinicDetail() {
             4-Week Golf Clinic Programs — Jan to Mar 2026
           </p>
         </div>
-        <span className="px-3 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-full border border-green-200">
+        <span className="px-3 py-1 text-xs font-medium bg-[#E8F5EB] text-[#3DB855] rounded-full border border-[#3DB855]/30">
           Active
         </span>
       </div>
@@ -283,7 +283,7 @@ export default function WinterClinicDetail() {
             <span className="text-sm text-muted-foreground">Total Revenue</span>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </div>
-          <p className="text-2xl font-bold text-green-600">${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+          <p className="text-2xl font-bold text-[#3DB855]">${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
           <p className="text-xs text-muted-foreground mt-1">
             ${uniqueStudents > 0 ? (totalRevenue / uniqueStudents).toFixed(2) : '0'} avg/student
           </p>
@@ -427,7 +427,7 @@ export default function WinterClinicDetail() {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Revenue</p>
-                    <p className="text-lg font-bold text-green-600">${totalRev.toLocaleString('en-US', { minimumFractionDigits: 0 })}</p>
+                    <p className="text-lg font-bold text-[#3DB855]">${totalRev.toLocaleString('en-US', { minimumFractionDigits: 0 })}</p>
                   </div>
                 </div>
               </div>
@@ -486,7 +486,7 @@ export default function WinterClinicDetail() {
                   </div>
                   <div className="bg-muted/50 rounded-lg p-3">
                     <p className="text-xs text-muted-foreground">Revenue</p>
-                    <p className="text-lg font-bold text-green-600">${clinic.totalRevenue.toFixed(0)}</p>
+                    <p className="text-lg font-bold text-[#3DB855]">${clinic.totalRevenue.toFixed(0)}</p>
                     <p className="text-xs text-muted-foreground">${clinic.avgRevenuePerStudent.toFixed(0)} avg</p>
                   </div>
                   <div className="bg-muted/50 rounded-lg p-3">
@@ -498,7 +498,7 @@ export default function WinterClinicDetail() {
                   </div>
                   <div className="bg-muted/50 rounded-lg p-3">
                     <p className="text-xs text-muted-foreground">Rev/Student</p>
-                    <p className="text-lg font-bold text-green-600">
+                    <p className="text-lg font-bold text-[#3DB855]">
                       ${clinic.uniqueStudents > 0 ? (clinic.totalRevenue / clinic.uniqueStudents).toFixed(0) : '0'}
                     </p>
                     <p className="text-xs text-muted-foreground">per unique</p>

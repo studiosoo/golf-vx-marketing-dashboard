@@ -315,20 +315,20 @@ export default function SundayClinicDetail() {
           <p className="text-muted-foreground">6-session public clinic series (Jan 25 – Mar 29, 2026) · Member retention & new visitor acquisition</p>
           {/* Topic Series Overview */}
           <div className="flex flex-wrap gap-2 mt-3">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200">
-              <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
-              <span className="text-xs font-medium text-blue-700">Sessions 1–2: Driving to the Ball</span>
-              <span className="text-xs text-blue-500 ml-1">Jan 25 · Feb 1</span>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F5F5F5] border border-[#E0E0E0]">
+              <span className="w-2 h-2 rounded-full bg-[#111111] inline-block" />
+              <span className="text-xs font-medium text-[#111111]">Sessions 1–2: Driving to the Ball</span>
+              <span className="text-xs text-[#888888] ml-1">Jan 25 · Feb 1</span>
             </div>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-50 border border-green-200">
-              <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
-              <span className="text-xs font-medium text-green-700">Sessions 3–4: Putting — Score Low</span>
-              <span className="text-xs text-green-500 ml-1">Feb 22 · Mar 1</span>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FFFBEA] border border-[#F5C72C]/40">
+              <span className="w-2 h-2 rounded-full bg-[#F5C72C] inline-block" />
+              <span className="text-xs font-medium text-[#111111]">Sessions 3–4: Putting — Score Low</span>
+              <span className="text-xs text-[#888888] ml-1">Feb 22 · Mar 1</span>
             </div>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 border border-orange-200">
-              <span className="w-2 h-2 rounded-full bg-orange-500 inline-block" />
-              <span className="text-xs font-medium text-orange-700">Sessions 5–6: Short Game — Swing Below the Hips</span>
-              <span className="text-xs text-orange-500 ml-1">Mar 22 · Mar 29</span>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F5F5F5] border border-[#E0E0E0]">
+              <span className="w-2 h-2 rounded-full bg-[#555555] inline-block" />
+              <span className="text-xs font-medium text-[#111111]">Sessions 5–6: Short Game — Swing Below the Hips</span>
+              <span className="text-xs text-[#888888] ml-1">Mar 22 · Mar 29</span>
             </div>
           </div>
         </div>
@@ -485,7 +485,7 @@ export default function SundayClinicDetail() {
                         {goal > 0 && (
                           <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
                             <span>Goal: {goal} attendees</span>
-                            <span className={goalProgress >= 100 ? "text-green-600 font-semibold" : ""}>
+                            <span className={goalProgress >= 100 ? "text-[#3DB855] font-semibold" : ""}>
                               {goalProgress.toFixed(0)}% of goal
                             </span>
                           </div>
@@ -514,26 +514,26 @@ export default function SundayClinicDetail() {
             <div className="mb-4 p-3 bg-[#FFFBEA] border border-[#F5C72C]/30 rounded-lg">
               <p className="text-xs font-semibold text-[#B8860B] mb-2">6-Session Schedule</p>
               <div className="grid grid-cols-3 gap-2 text-xs">
-                <div className="text-center p-2 bg-blue-50 rounded border border-blue-100">
-                  <div className="font-semibold text-blue-700 mb-1">Driving to the Ball</div>
-                  <div className="text-blue-500">Jan 25 &amp; Feb 1</div>
+                <div className="text-center p-2 bg-[#F5F5F5] rounded border border-[#E0E0E0]">
+                  <div className="font-semibold text-[#111111] mb-1">Driving to the Ball</div>
+                  <div className="text-[#888888]">Jan 25 &amp; Feb 1</div>
                 </div>
-                <div className="text-center p-2 bg-green-50 rounded border border-green-100">
-                  <div className="font-semibold text-green-700 mb-1">Putting — Score Low</div>
-                  <div className="text-green-500">Feb 22 &amp; Mar 1</div>
+                <div className="text-center p-2 bg-[#FFFBEA] rounded border border-[#F5C72C]/40">
+                  <div className="font-semibold text-[#111111] mb-1">Putting — Score Low</div>
+                  <div className="text-[#888888]">Feb 22 &amp; Mar 1</div>
                 </div>
-                <div className="text-center p-2 bg-orange-50 rounded border border-orange-100">
-                  <div className="font-semibold text-orange-700 mb-1">Short Game — Below the Hips</div>
-                  <div className="text-orange-500">Mar 22 &amp; Mar 29</div>
+                <div className="text-center p-2 bg-[#F5F5F5] rounded border border-[#E0E0E0]">
+                  <div className="font-semibold text-[#111111] mb-1">Short Game — Below the Hips</div>
+                  <div className="text-[#888888]">Mar 22 &amp; Mar 29</div>
                 </div>
               </div>
             </div>
             <div className="space-y-3">
               {metrics.events.map((event, idx) => {
                 const topicColors: Record<string, { bg: string; text: string; dot: string }> = {
-                  drive_day: { bg: 'bg-blue-50 border-blue-200', text: 'text-blue-700', dot: 'bg-blue-500' },
-                  putting: { bg: 'bg-green-50 border-green-200', text: 'text-green-700', dot: 'bg-green-500' },
-                  short_game: { bg: 'bg-orange-50 border-orange-200', text: 'text-orange-700', dot: 'bg-orange-500' },
+                  drive_day: { bg: 'bg-[#F5F5F5] border-[#E0E0E0]', text: 'text-[#111111]', dot: 'bg-[#111111]' },
+                  putting: { bg: 'bg-[#FFFBEA] border-[#F5C72C]/40', text: 'text-[#111111]', dot: 'bg-[#F5C72C]' },
+                  short_game: { bg: 'bg-[#F5F5F5] border-[#E0E0E0]', text: 'text-[#111111]', dot: 'bg-[#555555]' },
                 };
                 const tc = topicColors[(event as any).topic || 'drive_day'];
                 return (
