@@ -40,7 +40,7 @@ export default function AlertsBanner() {
         };
       case "medium":
         return {
-          border: "border-l-yellow-400",
+          border: "border-l-[#F5C72C]",
           badge: "bg-yellow-100 text-yellow-700 border-yellow-300",
           icon: <Info className="h-4 w-4 text-yellow-500" />,
         };

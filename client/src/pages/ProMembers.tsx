@@ -115,7 +115,7 @@ export default function ProMembers() {
             </div>
           </div>
           <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-            <p className="text-xs text-yellow-700 dark:text-yellow-400 font-medium">
+            <p className="text-xs text-yellow-700 dark:text-[#F5C72C] font-medium">
               Note: Chuck Lynch (PBGA Lead Coach) has a customized arrangement. Toast POS = non-member/overage bay usage. Stripe = membership fees.
             </p>
           </div>

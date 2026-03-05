@@ -27,11 +27,11 @@ export function InfluencerTab() {
   const avgCPE = totalEngagements > 0 ? totalSpend / totalEngagements : 0;
 
   const kpis = [
-    { label: "Total Spend", value: fmt$(totalSpend), icon: <DollarSign size={16} />, color: "text-red-400" },
+    { label: "Total Spend", value: fmt$(totalSpend), icon: <DollarSign size={16} />, color: "text-[#E8453C]" },
     { label: "Total Reach", value: fmtNum(totalReach), icon: <Eye size={16} />, color: "text-blue-400" },
     { label: "Engagements", value: fmtNum(totalEngagements), icon: <Heart size={16} />, color: "text-pink-400" },
     { label: "Bookings Generated", value: fmtNum(totalBookings), icon: <Target size={16} />, color: "text-green-400" },
-    { label: "Cost Per Engagement", value: avgCPE > 0 ? `$${avgCPE.toFixed(3)}` : "—", icon: <TrendingUp size={16} />, color: "text-yellow-400" },
+    { label: "Cost Per Engagement", value: avgCPE > 0 ? `$${avgCPE.toFixed(3)}` : "—", icon: <TrendingUp size={16} />, color: "text-[#F5C72C]" },
   ];
 
   return (
@@ -137,7 +137,7 @@ export function InfluencerTab() {
                         </DialogContent>
                       </Dialog>
                       <Button
-                        variant="ghost" size="icon" className="h-7 w-7 text-red-400 hover:text-red-300"
+                        variant="ghost" size="icon" className="h-7 w-7 text-[#E8453C] hover:text-red-300"
                         onClick={() => {
                           if (confirm("Delete this partnership?")) {
                             deleteP.mutate({ id: p.id });
@@ -154,7 +154,7 @@ export function InfluencerTab() {
                   <div className="mt-4 grid grid-cols-3 sm:grid-cols-6 gap-3 pt-3 border-t border-border">
                     {metrics.map(m => (
                       <div key={m.label} className="text-center">
-                        <div className={`text-sm font-semibold ${m.highlight ? "text-yellow-400" : "text-foreground"}`}>
+                        <div className={`text-sm font-semibold ${m.highlight ? "text-[#F5C72C]" : "text-foreground"}`}>
                           {m.value}
                         </div>
                         <div className="text-xs text-muted-foreground">{m.label}</div>

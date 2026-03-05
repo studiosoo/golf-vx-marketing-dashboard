@@ -20,7 +20,7 @@ export default function Leads() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="bg-card border-border">
           <CardContent className="p-4">
-            <div className="text-2xl font-bold text-yellow-400">{(stats as any)?.totalMembers || 0}</div>
+            <div className="text-2xl font-bold text-[#F5C72C]">{(stats as any)?.totalMembers || 0}</div>
             <div className="text-xs text-muted-foreground">Total Members</div>
           </CardContent>
         </Card>

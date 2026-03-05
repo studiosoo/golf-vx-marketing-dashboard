@@ -37,7 +37,7 @@ export default function JuniorSummerCamp() {
             <span className="text-[#FFD700]">SUMMER CAMP</span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-gray-400 mb-20 max-w-2xl mx-auto font-light">
+          <p className="text-xl md:text-2xl text-[#888888] mb-20 max-w-2xl mx-auto font-light">
             Quality-first instruction by PBGA PGA-certified coaches
           </p>
 
@@ -156,7 +156,7 @@ export default function JuniorSummerCamp() {
             SECURE YOUR SPOT
           </h2>
           
-          <p className="text-xl text-gray-400 mb-14 font-light">
+          <p className="text-xl text-[#888888] mb-14 font-light">
             Limited availability • Early registration recommended
           </p>
           

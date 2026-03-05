@@ -76,7 +76,7 @@ interface Program {
 // Constants
 // ─────────────────────────────────────────────
 const STATUS_META: Record<CampaignStatus, { label: string; color: string; bg: string; icon: React.ElementType }> = {
-  active: { label: "Active", color: "#3DB855", bg: "#E8F5EB", icon: PlayCircle },
+  active: { label: "Active", color: "#3DB855", bg: "#F0FAF3", icon: PlayCircle },
   planned: { label: "Planned", color: "#888888", bg: "#F5F5F5", icon: Clock },
   completed: { label: "Completed", color: "#AAAAAA", bg: "#F5F5F5", icon: CheckCircle },
   paused: { label: "Paused", color: "#AAAAAA", bg: "#F5F5F5", icon: PauseCircle },
@@ -383,11 +383,11 @@ function AddProgramDialog({ onSuccess }: { onSuccess: () => void }) {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div>
-            <Label className="text-[12px] font-semibold text-[#555555]">Program Name *</Label>
+            <Label className="text-[12px] font-semibold text-[#888888]">Program Name *</Label>
             <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Spring Drive Day 2026" className="mt-1 text-[13px]" required />
           </div>
           <div>
-            <Label className="text-[12px] font-semibold text-[#555555]">Strategic Campaign</Label>
+            <Label className="text-[12px] font-semibold text-[#888888]">Strategic Campaign</Label>
             <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value as StrategicCampaign }))} className="mt-1 w-full border border-[#E0E0E0] rounded-md px-3 py-2 text-[13px] text-[#111111] bg-white">
               <option value="trial_conversion">Trial Conversion</option>
               <option value="membership_acquisition">Membership Acquisition</option>
@@ -397,20 +397,20 @@ function AddProgramDialog({ onSuccess }: { onSuccess: () => void }) {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-[12px] font-semibold text-[#555555]">Start Date *</Label>
+              <Label className="text-[12px] font-semibold text-[#888888]">Start Date *</Label>
               <Input type="date" value={form.startDate} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))} className="mt-1 text-[13px]" required />
             </div>
             <div>
-              <Label className="text-[12px] font-semibold text-[#555555]">End Date *</Label>
+              <Label className="text-[12px] font-semibold text-[#888888]">End Date *</Label>
               <Input type="date" value={form.endDate} onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))} className="mt-1 text-[13px]" required />
             </div>
           </div>
           <div>
-            <Label className="text-[12px] font-semibold text-[#555555]">Budget ($) *</Label>
+            <Label className="text-[12px] font-semibold text-[#888888]">Budget ($) *</Label>
             <Input type="number" value={form.budget} onChange={e => setForm(f => ({ ...f, budget: e.target.value }))} placeholder="500" className="mt-1 text-[13px]" required />
           </div>
           <div>
-            <Label className="text-[12px] font-semibold text-[#555555]">Description</Label>
+            <Label className="text-[12px] font-semibold text-[#888888]">Description</Label>
             <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Brief description of the program..." className="mt-1 w-full border border-[#E0E0E0] rounded-md px-3 py-2 text-[13px] text-[#111111] resize-none h-20" />
           </div>
           <div className="flex gap-2 pt-1">
@@ -493,7 +493,7 @@ export default function Programs() {
                 "flex items-center gap-1.5 h-7 px-3 rounded-full text-[12px] font-semibold transition-all border",
                 isActive
                   ? "bg-[#111111] text-white border-[#111111]"
-                  : "bg-white text-[#555555] border-[#E0E0E0] hover:border-[#CCCCCC]"
+                  : "bg-white text-[#888888] border-[#E0E0E0] hover:border-[#CCCCCC]"
               )}
             >
               {meta && <meta.icon className="h-3 w-3" style={{ color: isActive ? "white" : meta.color }} />}
@@ -507,7 +507,7 @@ export default function Programs() {
           <select
             value={categoryFilter}
             onChange={e => setCategoryFilter(e.target.value as any)}
-            className="h-7 border border-[#E0E0E0] rounded-full px-3 text-[12px] text-[#555555] bg-white"
+            className="h-7 border border-[#E0E0E0] rounded-full px-3 text-[12px] text-[#888888] bg-white"
           >
             <option value="all">All Campaigns</option>
             <option value="trial_conversion">Trial Conversion</option>

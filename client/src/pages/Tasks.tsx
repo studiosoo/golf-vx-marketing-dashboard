@@ -123,7 +123,7 @@ function ActionCard({ action, onComplete, onSkip, isLoading }: ActionCardProps) 
               </span>
             )}
             {action.status === "skipped" && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-gray-50 text-gray-400 border border-gray-200">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-[#F5F5F5] text-[#888888] border border-[#E0E0E0]">
                 Skipped
               </span>
             )}

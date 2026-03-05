@@ -78,7 +78,7 @@ const ANALYSIS_TYPES: {
     icon: <BarChart3 size={15} />,
     description: "Evaluate event performance and ROI",
     placeholder: "Paste your event recap, notes, or data...\n\nExample: Paste the Chicago Golf Show recap with visitor counts, giveaways distributed, leads captured, and costs.",
-    color: "text-yellow-400",
+    color: "text-[#F5C72C]",
   },
   {
     value: "b2b_strategy",
@@ -327,7 +327,7 @@ function StrategyWorkspaceTab() {
                     onClick={() => { setSelectedType(type.value); setCurrentResult(null); }}
                     className={`flex flex-col items-start gap-1 p-3 rounded-lg border text-left transition-all ${
                       selectedType === type.value
-                        ? "border-yellow-400/60 bg-yellow-400/10"
+                        ? "border-[#F5C72C]/60 bg-[#F5C72C]/10"
                         : "border-border bg-muted/20 hover:bg-muted/40"
                     }`}
                   >
@@ -369,7 +369,7 @@ function StrategyWorkspaceTab() {
                   <FileText size={13} />
                   Content to Analyze
                 </CardTitle>
-                <span className={`text-xs ${charCount > 45000 ? "text-red-400" : "text-muted-foreground"}`}>
+                <span className={`text-xs ${charCount > 45000 ? "text-[#E8453C]" : "text-muted-foreground"}`}>
                   {charCount.toLocaleString()} / 50,000
                 </span>
               </div>
@@ -408,7 +408,7 @@ function StrategyWorkspaceTab() {
                   });
                 }}
                 disabled={!content.trim() || analyzeMutation.isPending}
-                className="w-full bg-yellow-400 text-black hover:bg-yellow-300 font-semibold"
+                className="w-full bg-[#F5C72C] text-black hover:bg-yellow-300 font-semibold"
               >
                 {analyzeMutation.isPending ? (
                   <><Loader2 size={15} className="mr-2 animate-spin" />Analyzing...</>
@@ -417,7 +417,7 @@ function StrategyWorkspaceTab() {
                 )}
               </Button>
               {analyzeMutation.isError && (
-                <p className="text-xs text-red-400">Error: {analyzeMutation.error?.message || "Analysis failed."}</p>
+                <p className="text-xs text-[#E8453C]">Error: {analyzeMutation.error?.message || "Analysis failed."}</p>
               )}
             </CardContent>
           </Card>
@@ -460,7 +460,7 @@ function StrategyWorkspaceTab() {
                           <div className="flex items-center gap-1 shrink-0">
                             <button
                               onClick={e => { e.stopPropagation(); setHistory(prev => prev.filter(h => h.id !== item.id)); }}
-                              className="text-muted-foreground hover:text-red-400 transition-colors p-1"
+                              className="text-muted-foreground hover:text-[#E8453C] transition-colors p-1"
                             >
                               <Trash2 size={11} />
                             </button>
@@ -512,7 +512,7 @@ function StrategyWorkspaceTab() {
                   "Event ROI works great for Chicago Golf Show recap",
                 ].map(tip => (
                   <li key={tip} className="flex gap-2">
-                    <span className="text-yellow-400 shrink-0">•</span>
+                    <span className="text-[#F5C72C] shrink-0">•</span>
                     {tip}
                   </li>
                 ))}
@@ -526,11 +526,11 @@ function StrategyWorkspaceTab() {
       {(analyzeMutation.isPending || currentResult) && (
         <div ref={resultRef}>
           <Separator className="my-2" />
-          <Card className="bg-card border-border border-yellow-400/20">
+          <Card className="bg-card border-border border-[#F5C72C]/20">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
-                  <Brain size={17} className="text-yellow-400" />
+                  <Brain size={17} className="text-[#F5C72C]" />
                   AI Analysis Result
                   {currentResult && (
                     <Badge variant="outline" className={`text-xs ml-2 ${ANALYSIS_TYPES.find(t => t.value === currentResult.analysisType)?.color || ""} border-current`}>
@@ -553,7 +553,7 @@ function StrategyWorkspaceTab() {
             <CardContent>
               {analyzeMutation.isPending ? (
                 <div className="flex items-center gap-3 py-8 justify-center">
-                  <Loader2 size={20} className="animate-spin text-yellow-400" />
+                  <Loader2 size={20} className="animate-spin text-[#F5C72C]" />
                   <span className="text-muted-foreground text-sm">Analyzing content with AI...</span>
                 </div>
               ) : currentResult ? (

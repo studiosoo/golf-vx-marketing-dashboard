@@ -64,8 +64,8 @@ export default function CategoryDetail() {
     const colors: Record<string, string> = {
       active: "bg-green-500/10 text-[#3DB855] dark:text-[#3DB855] border-green-500/20",
       completed: "bg-[#888888]/100/10 text-[#888888] dark:text-[#888888] border-blue-500/20",
-      planned: "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20",
-      paused: "bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-500/20",
+      planned: "bg-yellow-500/10 text-yellow-700 dark:text-[#F5C72C] border-yellow-500/20",
+      paused: "bg-[#F5F5F5] text-[#888888] border-[#E0E0E0]",
     };
     return colors[status] || colors.planned;
   };
@@ -180,11 +180,11 @@ export default function CategoryDetail() {
               {roi >= 0 ? (
                 <TrendingUp className="h-4 w-4 text-[#3DB855] dark:text-[#3DB855]" />
               ) : (
-                <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
+                <TrendingDown className="h-4 w-4 text-red-600 dark:text-[#E8453C]" />
               )}
             </CardHeader>
             <CardContent>
-              <div className={`text-2xl font-bold ${roi >= 0 ? 'text-[#3DB855] dark:text-[#3DB855]' : 'text-red-600 dark:text-red-400'}`}>
+              <div className={`text-2xl font-bold ${roi >= 0 ? 'text-[#3DB855] dark:text-[#3DB855]' : 'text-red-600 dark:text-[#E8453C]'}`}>
                 {formatPercent(roi)}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
@@ -316,7 +316,7 @@ export default function CategoryDetail() {
                         </div>
                         <div>
                           <div className="text-xs text-muted-foreground mb-1">ROI</div>
-                          <div className={`text-sm font-semibold ${campaignRoi >= 0 ? 'text-[#3DB855] dark:text-[#3DB855]' : 'text-red-600 dark:text-red-400'}`}>
+                          <div className={`text-sm font-semibold ${campaignRoi >= 0 ? 'text-[#3DB855] dark:text-[#3DB855]' : 'text-red-600 dark:text-[#E8453C]'}`}>
                             {formatPercent(campaignRoi)}
                           </div>
                         </div>

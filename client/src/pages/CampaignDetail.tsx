@@ -267,8 +267,8 @@ export default function CampaignDetail() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingDown className="h-4 w-4 text-red-500" />
-                <span className="text-red-500">${campaign.cpa.toFixed(2)} per conversion</span>
+                <TrendingDown className="h-4 w-4 text-[#E8453C]" />
+                <span className="text-[#E8453C]">${campaign.cpa.toFixed(2)} per conversion</span>
               </div>
             </CardContent>
           </Card>

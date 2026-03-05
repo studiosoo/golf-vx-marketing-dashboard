@@ -1154,3 +1154,19 @@
 - [x] Update INSTAGRAM_ACCESS_TOKEN secret with new long-lived token
 - [x] Verify all 11 Instagram tests pass (instagram.test.ts, instagram.token.test.ts, instagramFeed.test.ts)
 - [x] Token expiry warning banner already exists in InstagramFeed.tsx (shows when ≤7 days remaining)
+
+## Session: Mar 5, 2026 — Color Audit & Token Fix
+
+- [x] Fix expired Instagram access token (new long-lived token valid until May 3, 2026)
+- [x] Schedule Instagram token refresh reminder for April 26, 2026
+- [x] Fix TrialSessionDetail.tsx: replace non-Golf VX type badge colors (#E8F5EB/#2A7A3B → #F0FAF3/#3DB855, etc.)
+- [x] Fix WinterClinicDetail.tsx: replace gray-400, red-500, yellow-400 with Golf VX palette
+- [x] Fix SundayClinicDetail.tsx: replace #B8860B, #555555, yellow-400 with Golf VX palette
+- [x] Batch replace all remaining non-Golf VX colors across 50+ pages and components
+  - #E8F5EB → #F0FAF3, #2A7A3B → #3DB855
+  - #FFF3E0 → #F5F5F5, #B45309 → #888888
+  - #FFCB00/#FBBF24 → #F5C72C
+  - #555555 → #888888, #333333 → #888888
+  - yellow-400 → text-[#F5C72C], red-500 → [#E8453C], gray-400 → [#888888]
+  - #6D28D9/#B91C1C/#EDE9FE/#FEE2E2 → Golf VX equivalents
+- [x] Zero non-Golf VX colors remaining across all pages and components

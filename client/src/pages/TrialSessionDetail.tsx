@@ -37,13 +37,13 @@ function fmtTime(dt: string) {
 // Type badge colors
 // ─────────────────────────────────────────────
 const TYPE_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  "$25 Off-Peak Trial": { bg: "#E8F5EB", text: "#2A7A3B", border: "#B8DFC0" },
-  "$35 Peak Trial": { bg: "#FFF3E0", text: "#B45309", border: "#FBBF24" },
-  "$9 Anniversary Off-Peak Trial": { bg: "#EDE9FE", text: "#6D28D9", border: "#C4B5FD" },
-  "$18 Anniversary Peak Trial": { bg: "#FEE2E2", text: "#B91C1C", border: "#FCA5A5" },
+  "$25 Off-Peak Trial": { bg: "#F0FAF3", text: "#3DB855", border: "#3DB855" },
+  "$35 Peak Trial": { bg: "#1A1A1A", text: "#F5C72C", border: "#F5C72C" },
+  "$9 Anniversary Off-Peak Trial": { bg: "#F5F5F5", text: "#888888", border: "#E0E0E0" },
+  "$18 Anniversary Peak Trial": { bg: "#1A1A1A", text: "#E8453C", border: "#E8453C" },
 };
 function getTypeColor(priceLabel: string) {
-  return TYPE_COLORS[priceLabel] || { bg: "#F5F5F5", text: "#555555", border: "#DDDDDD" };
+  return TYPE_COLORS[priceLabel] || { bg: "#F5F5F5", text: "#888888", border: "#E0E0E0" };
 }
 
 // ─────────────────────────────────────────────
@@ -139,7 +139,7 @@ function TypeGroupCard({
 
       {/* Avg price */}
       <div className="text-[11px] text-[#AAAAAA]">
-        Avg price: <span className="font-semibold text-[#555555]">{fmtCurrency(avgPrice)}</span>
+        Avg price: <span className="font-semibold text-[#888888]">{fmtCurrency(avgPrice)}</span>
       </div>
     </div>
   );
@@ -156,7 +156,7 @@ export default function TrialSessionDetail() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 rounded-full border-2 border-[#FFCB00] border-t-transparent animate-spin" />
+          <div className="h-8 w-8 rounded-full border-2 border-[#F5C72C] border-t-transparent animate-spin" />
           <p className="text-[13px] text-[#AAAAAA]">Loading trial session data…</p>
         </div>
       </div>
@@ -170,7 +170,7 @@ export default function TrialSessionDetail() {
           <p className="text-[14px] text-[#888888]">Failed to load trial session data.</p>
           <button
             onClick={() => setLocation("/programs")}
-            className="mt-3 text-[12px] text-[#FFCB00] font-semibold hover:underline"
+            className="mt-3 text-[12px] text-[#F5C72C] font-semibold hover:underline"
           >
             ← Back to Programs
           </button>
@@ -298,7 +298,7 @@ export default function TrialSessionDetail() {
 
                   {/* Date + time */}
                   <div>
-                    <p className="text-[12px] text-[#333333]">{fmtDate(booking.datetime)}</p>
+                    <p className="text-[12px] text-[#888888]">{fmtDate(booking.datetime)}</p>
                     <p className="text-[11px] text-[#AAAAAA]">{fmtTime(booking.datetime)}</p>
                   </div>
 
@@ -326,12 +326,12 @@ export default function TrialSessionDetail() {
                   {/* Paid status */}
                   <div className="flex justify-center">
                     {paid ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#E8F5EB] text-[#2A7A3B] text-[10px] font-bold">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#F0FAF3] text-[#3DB855] text-[10px] font-bold">
                         <CheckCircle className="h-3 w-3" />
                         Paid
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FFF3E0] text-[#B45309] text-[10px] font-bold">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#F5F5F5] text-[#888888] text-[10px] font-bold">
                         <Clock className="h-3 w-3" />
                         Unpaid
                       </span>
@@ -340,7 +340,7 @@ export default function TrialSessionDetail() {
 
                   {/* Source */}
                   <div>
-                    <p className="text-[12px] text-[#555555] truncate" title={booking.source}>
+                    <p className="text-[12px] text-[#888888] truncate" title={booking.source}>
                       {booking.source || "Not specified"}
                     </p>
                     {booking.calendar && (

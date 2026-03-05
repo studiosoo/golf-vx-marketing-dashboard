@@ -38,8 +38,8 @@ export default function Revenue() {
       label: "Acuity Bookings",
       value: acuityRevenue ? formatCurrency((acuityRevenue as any).total || 0) : "—",
       icon: <CreditCard size={20} />,
-      color: "text-yellow-400",
-      bg: "bg-yellow-400/10",
+      color: "text-[#F5C72C]",
+      bg: "bg-[#F5C72C]/10",
     },
     {
       label: "Avg Daily Revenue",

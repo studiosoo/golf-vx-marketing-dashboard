@@ -186,7 +186,7 @@ export default function WinterClinicDetail() {
           </button>
           <div>
             <h1 className="text-2xl font-bold">PBGA Winter Clinics</h1>
-            <p className="text-red-500">Error loading data: {error.message}</p>
+            <p className="text-[#E8453C]">Error loading data: {error.message}</p>
           </div>
         </div>
       </div>
@@ -212,7 +212,7 @@ export default function WinterClinicDetail() {
     "PBGA Links & Tees": "bg-[#F5C72C]",
     "Social Media": "bg-[#111111]",
     "Golf VX": "bg-primary",
-    "Google Search": "bg-[#555555]",
+    "Google Search": "bg-[#888888]",
     "Friend / Family": "bg-[#888888]",
     "Flyer / Signage": "bg-[#AAAAAA]",
     "Unknown": "bg-[#CCCCCC]",
@@ -241,7 +241,7 @@ export default function WinterClinicDetail() {
     switch (category) {
       case 'kids': return 'bg-[#FFFBEA] text-[#111111] border-[#F5C72C]/40';
       case 'adults': return 'bg-[#F5F5F5] text-[#111111] border-[#E0E0E0]';
-      case 'family': return 'bg-[#F5F5F5] text-[#555555] border-[#E0E0E0]';
+      case 'family': return 'bg-[#F5F5F5] text-[#888888] border-[#E0E0E0]';
       default: return 'bg-[#F5F5F5] text-[#888888] border-[#E0E0E0]';
     }
   };
@@ -262,7 +262,7 @@ export default function WinterClinicDetail() {
             4-Week Golf Clinic Programs — Jan to Mar 2026
           </p>
         </div>
-        <span className="px-3 py-1 text-xs font-medium bg-[#E8F5EB] text-[#3DB855] rounded-full border border-[#3DB855]/30">
+        <span className="px-3 py-1 text-xs font-medium bg-[#F0FAF3] text-[#3DB855] rounded-full border border-[#3DB855]/30">
           Active
         </span>
       </div>
@@ -326,7 +326,7 @@ export default function WinterClinicDetail() {
           <div className="space-y-3">
             {sortedSources.map(([source, count]) => {
               const pct = totalSourced > 0 ? (count / totalSourced) * 100 : 0;
-              const color = sourceColors[source] || 'bg-gray-400';
+              const color = sourceColors[source] || 'bg-[#CCCCCC]';
               return (
                 <div key={source}>
                   <div className="flex items-center justify-between text-sm mb-1">
@@ -360,7 +360,7 @@ export default function WinterClinicDetail() {
           <div className="space-y-3">
             {sortedExperience.map(([level, count]) => {
               const pct = totalExperience > 0 ? (count / totalExperience) * 100 : 0;
-              const color = experienceColors[level] || experienceColors[level.toLowerCase()] || 'bg-gray-400';
+              const color = experienceColors[level] || experienceColors[level.toLowerCase()] || 'bg-[#CCCCCC]';
               return (
                 <div key={level}>
                   <div className="flex items-center justify-between text-sm mb-1">
@@ -517,7 +517,7 @@ export default function WinterClinicDetail() {
                             key={source}
                             className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-muted border border-border"
                           >
-                            <span className={`w-2 h-2 rounded-full ${sourceColors[source] || 'bg-gray-400'}`} />
+                            <span className={`w-2 h-2 rounded-full ${sourceColors[source] || 'bg-[#CCCCCC]'}`} />
                             {source}: {count}
                           </span>
                         ))}
@@ -535,7 +535,7 @@ export default function WinterClinicDetail() {
                             key={level}
                             className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-muted border border-border"
                           >
-                            <span className={`w-2 h-2 rounded-full ${experienceColors[level] || experienceColors[level.toLowerCase()] || 'bg-gray-400'}`} />
+                            <span className={`w-2 h-2 rounded-full ${experienceColors[level] || experienceColors[level.toLowerCase()] || 'bg-[#CCCCCC]'}`} />
                             {level}: {count}
                           </span>
                         ))}
@@ -571,7 +571,7 @@ export default function WinterClinicDetail() {
       <div className="space-y-4">
         <div>
           <h2 className="text-lg font-semibold flex items-center gap-2">
-            <span className="text-yellow-400">✦</span> AI Marketing Intelligence
+            <span className="text-[#F5C72C]">✦</span> AI Marketing Intelligence
           </h2>
           <p className="text-sm text-muted-foreground mt-1">AI-generated multi-channel marketing strategy based on program performance data.</p>
         </div>

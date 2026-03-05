@@ -38,14 +38,14 @@ export function CollapsibleNavItem({
           "flex items-center gap-2.5 w-full rounded-lg px-2.5 py-2 text-sm transition-colors duration-150 text-left group",
           isActive
             ? "bg-[#F5C72C]/15 text-[#111111] font-semibold"
-            : "text-[#555555] hover:bg-[#F5F5F5] hover:text-[#111111]"
+            : "text-[#888888] hover:bg-[#F5F5F5] hover:text-[#111111]"
         )}
         title={isCollapsed ? item.label : undefined}
       >
         <item.icon
           className={cn(
             "h-4 w-4 shrink-0 transition-colors",
-            isActive ? "text-[#111111]" : "text-[#AAAAAA] group-hover:text-[#555555]"
+            isActive ? "text-[#111111]" : "text-[#AAAAAA] group-hover:text-[#888888]"
           )}
         />
         {!isCollapsed && (
@@ -71,7 +71,7 @@ export function CollapsibleNavItem({
           "flex items-center gap-2.5 w-full rounded-lg px-2.5 py-2 text-sm transition-colors duration-150 text-left group",
           isActive || isChildActive
             ? "text-[#111111] font-semibold"
-            : "text-[#555555] hover:bg-[#F5F5F5] hover:text-[#111111]"
+            : "text-[#888888] hover:bg-[#F5F5F5] hover:text-[#111111]"
         )}
         title={isCollapsed ? item.label : undefined}
       >
@@ -80,7 +80,7 @@ export function CollapsibleNavItem({
             "h-4 w-4 shrink-0",
             isActive || isChildActive
               ? "text-[#111111]"
-              : "text-[#AAAAAA] group-hover:text-[#555555]"
+              : "text-[#AAAAAA] group-hover:text-[#888888]"
           )}
         />
         {!isCollapsed && (

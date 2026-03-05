@@ -8,7 +8,7 @@ export const GVX_COLORS = {
   gray200: "#E0E0E0",
   gray100: "#F2F2F7",
   green: "#3DB855",
-  greenBg: "#E8F5EB",
+  greenBg: "#F0FAF3",
   blue: "#007AFF",
 };
 

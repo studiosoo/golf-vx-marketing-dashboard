@@ -31,8 +31,8 @@ export default function AccountSettings() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-16 h-16 rounded-full bg-yellow-400/20 flex items-center justify-center">
-                  <User size={24} className="text-yellow-400" />
+                <div className="w-16 h-16 rounded-full bg-[#F5C72C]/20 flex items-center justify-center">
+                  <User size={24} className="text-[#F5C72C]" />
                 </div>
                 <div>
                   <div className="font-semibold text-foreground">{(user as any)?.name || "Owner"}</div>
@@ -50,7 +50,7 @@ export default function AccountSettings() {
                   <Input defaultValue={(user as any)?.email || ""} className="mt-1" disabled />
                 </div>
               </div>
-              <Button className="bg-yellow-400 text-black hover:bg-yellow-500" size="sm">Save Profile</Button>
+              <Button className="bg-[#F5C72C] text-black hover:bg-yellow-500" size="sm">Save Profile</Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -70,7 +70,7 @@ export default function AccountSettings() {
                     <div className="text-sm font-medium text-foreground">{item.label}</div>
                     <div className="text-xs text-muted-foreground">{item.description}</div>
                   </div>
-                  <div className="w-10 h-5 bg-yellow-400 rounded-full cursor-pointer relative">
+                  <div className="w-10 h-5 bg-[#F5C72C] rounded-full cursor-pointer relative">
                     <div className="absolute right-0.5 top-0.5 w-4 h-4 bg-black rounded-full" />
                   </div>
                 </div>
@@ -110,7 +110,7 @@ export default function AccountSettings() {
                 <Label>Timezone</Label>
                 <Input defaultValue="America/Chicago (CST)" className="mt-1" />
               </div>
-              <Button className="bg-yellow-400 text-black hover:bg-yellow-500" size="sm">Save Preferences</Button>
+              <Button className="bg-[#F5C72C] text-black hover:bg-yellow-500" size="sm">Save Preferences</Button>
             </CardContent>
           </Card>
         </TabsContent>

@@ -52,9 +52,9 @@ function StatusBadge({ status }: { status: ActionStatus }) {
     approved:         { label: "Approved",          className: "bg-[#3DB855]/10 text-[#3DB855] border border-[#3DB855]/30" },
     rejected:         { label: "Rejected",          className: "bg-red-50 text-red-700 border border-red-200" },
     undone:           { label: "Undone",            className: "bg-gray-50 text-gray-500 border border-gray-200" },
-    dismissed:        { label: "Dismissed",         className: "bg-gray-50 text-gray-400 border border-gray-200" },
+    dismissed:        { label: "Dismissed",         className: "bg-gray-50 text-[#888888] border border-gray-200" },
     execution_failed: { label: "Failed",            className: "bg-red-50 text-red-600 border border-red-200" },
-    archived:         { label: "Archived",          className: "bg-gray-50 text-gray-400 border border-gray-200" },
+    archived:         { label: "Archived",          className: "bg-gray-50 text-[#888888] border border-gray-200" },
   };
   const s = map[status] || map.monitoring;
   return (
@@ -112,7 +112,7 @@ function ActionCard({
             </button>
           )}
           <button onClick={() => onDismiss?.(action.id)} disabled={isLoading}
-            className="p-1.5 text-[#999] hover:text-red-500 hover:bg-red-50 rounded transition-colors" title="Dismiss">
+            className="p-1.5 text-[#999] hover:text-[#E8453C] hover:bg-red-50 rounded transition-colors" title="Dismiss">
             <Trash2 className="w-3.5 h-3.5" />
           </button>
           <button onClick={() => setExpanded(e => !e)}

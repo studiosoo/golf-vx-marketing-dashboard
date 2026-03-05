@@ -138,7 +138,7 @@ export default function AsanaTaskModal({ isOpen, onClose, suggestedTasks, title 
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium text-[#888]">Task {idx + 1}</span>
                   {tasks.length > 1 && (
-                    <button onClick={() => removeTask(task.id)} className="p-1 rounded hover:bg-red-50 text-[#CCC] hover:text-red-400 transition-colors">
+                    <button onClick={() => removeTask(task.id)} className="p-1 rounded hover:bg-red-50 text-[#CCC] hover:text-[#E8453C] transition-colors">
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   )}

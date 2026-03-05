@@ -44,8 +44,8 @@ export function OutreachTab() {
 
   const kpis = summary ? [
     { label: "Total Requests", value: String(summary.total), icon: <Megaphone size={16} />, color: "text-blue-400" },
-    { label: "Cash Donated", value: fmt$(summary.totalCashValue), icon: <DollarSign size={16} />, color: "text-red-400" },
-    { label: "Perceived Value", value: fmt$(summary.totalPerceivedValue), icon: <Star size={16} />, color: "text-yellow-400" },
+    { label: "Cash Donated", value: fmt$(summary.totalCashValue), icon: <DollarSign size={16} />, color: "text-[#E8453C]" },
+    { label: "Perceived Value", value: fmt$(summary.totalPerceivedValue), icon: <Star size={16} />, color: "text-[#F5C72C]" },
     { label: "Est. Total Reach", value: fmtNum(summary.totalEstimatedReach), icon: <Eye size={16} />, color: "text-green-400" },
   ] : [];
 
@@ -149,7 +149,7 @@ export function OutreachTab() {
                             {REQUEST_TYPE_LABELS[r.requestType as OutreachRequestType] || r.requestType}
                           </Badge>
                           {r.priority === "high" && (
-                            <Badge variant="outline" className="text-xs bg-red-500/10 text-red-400 border-red-500/30">High Priority</Badge>
+                            <Badge variant="outline" className="text-xs bg-[#E8453C]/10 text-[#E8453C] border-[#E8453C]/30">High Priority</Badge>
                           )}
                           {r.is501c3 && (
                             <Badge variant="outline" className="text-xs bg-green-500/10 text-green-400 border-green-500/30">501(c)3</Badge>
@@ -183,7 +183,7 @@ export function OutreachTab() {
                           <p className="text-xs text-muted-foreground/60 mt-1 italic">{r.decisionNotes}</p>
                         )}
                         {r.rejectionReason && (
-                          <p className="text-xs text-red-400/70 mt-1">Rejected: {r.rejectionReason}</p>
+                          <p className="text-xs text-[#E8453C]/70 mt-1">Rejected: {r.rejectionReason}</p>
                         )}
                       </div>
                     </div>
@@ -205,7 +205,7 @@ export function OutreachTab() {
                         </DialogContent>
                       </Dialog>
                       <Button
-                        variant="ghost" size="icon" className="h-7 w-7 text-red-400 hover:text-red-300"
+                        variant="ghost" size="icon" className="h-7 w-7 text-[#E8453C] hover:text-red-300"
                         onClick={() => { if (confirm("Delete this request?")) deleteR.mutate({ id: r.id }); }}
                       >
                         <Trash2 size={13} />
@@ -220,11 +220,11 @@ export function OutreachTab() {
                         onClick={() => updateStatus.mutate({ id: r.id, status: "approved" })}>
                         <CheckCircle2 size={11} /> Approve
                       </Button>
-                      <Button size="sm" variant="outline" className="text-xs h-7 gap-1 text-yellow-400 border-yellow-500/30 hover:bg-yellow-500/10"
+                      <Button size="sm" variant="outline" className="text-xs h-7 gap-1 text-[#F5C72C] border-yellow-500/30 hover:bg-yellow-500/10"
                         onClick={() => updateStatus.mutate({ id: r.id, status: "under_review" })}>
                         <AlertCircle size={11} /> Under Review
                       </Button>
-                      <Button size="sm" variant="outline" className="text-xs h-7 gap-1 text-red-400 border-red-500/30 hover:bg-red-500/10"
+                      <Button size="sm" variant="outline" className="text-xs h-7 gap-1 text-[#E8453C] border-[#E8453C]/30 hover:bg-[#E8453C]/10"
                         onClick={() => updateStatus.mutate({ id: r.id, status: "rejected" })}>
                         <XCircle size={11} /> Reject
                       </Button>

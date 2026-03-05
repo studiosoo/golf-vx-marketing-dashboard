@@ -117,7 +117,7 @@ function ThreatBadge({ level }: { level: string }) {
 }
 
 function PriorityDot({ level }: { level: string }) {
-  const map: Record<string, string> = { high: "bg-red-500", medium: "bg-yellow-500", low: "bg-gray-400" };
+  const map: Record<string, string> = { high: "bg-[#E8453C]", medium: "bg-yellow-500", low: "bg-[#AAAAAA]" };
   return <span className={`w-2 h-2 rounded-full ${map[level] || map.low} inline-block flex-shrink-0 mt-1.5`} />;
 }
 
@@ -442,7 +442,7 @@ export default function MarketResearch() {
           {MARKET_CONTEXT.keyInsights.map((insight, i) => (
             <div key={i} className="bg-white border border-[#E0E0E0] rounded-xl overflow-hidden hover:border-[#F5C72C]/50 transition-colors">
               <button className="w-full flex items-start gap-3 p-4 text-left" onClick={() => setExpandedInsight(expandedInsight === i ? null : i)}>
-                <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${insight.urgency === "high" ? "bg-red-500" : insight.urgency === "medium" ? "bg-yellow-500" : "bg-green-500"}`} />
+                <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${insight.urgency === "high" ? "bg-[#E8453C]" : insight.urgency === "medium" ? "bg-yellow-500" : "bg-green-500"}`} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-sm font-semibold text-[#111]">{insight.title}</span>

@@ -135,7 +135,7 @@ export function EventsTab() {
       {/* KPI row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: "Total Spend", value: `$${totalSpend.toLocaleString()}`, icon: <DollarSign size={18} className="text-yellow-400" />, bg: "bg-yellow-500/10" },
+          { label: "Total Spend", value: `$${totalSpend.toLocaleString()}`, icon: <DollarSign size={18} className="text-[#F5C72C]" />, bg: "bg-yellow-500/10" },
           { label: "Total Visitors Reached", value: totalVisitors.toLocaleString(), icon: <Users size={18} className="text-blue-400" />, bg: "bg-blue-500/10" },
           { label: "Leads Collected", value: String(totalLeads), icon: <Target size={18} className="text-green-400" />, bg: "bg-green-500/10" },
           { label: "Promos Distributed", value: String(totalPromos), icon: <Ticket size={18} className="text-purple-400" />, bg: "bg-purple-500/10" },
@@ -263,7 +263,7 @@ export function EventsTab() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <div className="p-2 rounded-lg bg-yellow-500/10">
-                          <Ticket size={16} className="text-yellow-400" />
+                          <Ticket size={16} className="text-[#F5C72C]" />
                         </div>
                         <div>
                           <h3 className="font-semibold text-foreground">{ev.eventName}</h3>
@@ -289,7 +289,7 @@ export function EventsTab() {
                         {ev.venue && <span className="flex items-center gap-1"><Building2 size={11} />{ev.venue}</span>}
                         {ev.location && <span className="flex items-center gap-1"><MapPin size={11} />{ev.location}</span>}
                         {ev.website && (
-                          <a href={ev.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-yellow-400 hover:underline">
+                          <a href={ev.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-[#F5C72C] hover:underline">
                             <Globe size={11} />{ev.website.replace("https://","")}
                           </a>
                         )}
@@ -320,7 +320,7 @@ export function EventsTab() {
                         </div>
                         <div className="bg-muted/30 rounded-lg p-3">
                           <p className="text-xs text-muted-foreground">Team Signups</p>
-                          <p className="text-lg font-bold text-yellow-400">{ev.teamSignups ?? 0}</p>
+                          <p className="text-lg font-bold text-[#F5C72C]">{ev.teamSignups ?? 0}</p>
                           {costPerVisitor && <p className="text-xs text-muted-foreground">${costPerVisitor}/visitor</p>}
                         </div>
                       </div>
@@ -404,7 +404,7 @@ export function EventsTab() {
                       </Button>
                       <Button
                         variant="ghost" size="sm"
-                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                        className="text-[#E8453C] hover:text-red-300 hover:bg-[#E8453C]/10"
                         onClick={() => { if (confirm(`Remove ${ev.eventName}?`)) deleteMutation.mutate({ id: ev.id }); }}
                       >
                         <Trash2 size={14} />

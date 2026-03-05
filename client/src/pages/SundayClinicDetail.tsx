@@ -326,7 +326,7 @@ export default function SundayClinicDetail() {
               <span className="text-xs text-[#888888] ml-1">Feb 22 · Mar 1</span>
             </div>
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F5F5F5] border border-[#E0E0E0]">
-              <span className="w-2 h-2 rounded-full bg-[#555555] inline-block" />
+              <span className="w-2 h-2 rounded-full bg-[#888888] inline-block" />
               <span className="text-xs font-medium text-[#111111]">Sessions 5–6: Short Game — Swing Below the Hips</span>
               <span className="text-xs text-[#888888] ml-1">Mar 22 · Mar 29</span>
             </div>
@@ -512,7 +512,7 @@ export default function SundayClinicDetail() {
           <CardContent>
             {/* 6-Session Schedule — 2 sessions per topic */}
             <div className="mb-4 p-3 bg-[#FFFBEA] border border-[#F5C72C]/30 rounded-lg">
-              <p className="text-xs font-semibold text-[#B8860B] mb-2">6-Session Schedule</p>
+              <p className="text-xs font-semibold text-[#888888] mb-2">6-Session Schedule</p>
               <div className="grid grid-cols-3 gap-2 text-xs">
                 <div className="text-center p-2 bg-[#F5F5F5] rounded border border-[#E0E0E0]">
                   <div className="font-semibold text-[#111111] mb-1">Driving to the Ball</div>
@@ -533,7 +533,7 @@ export default function SundayClinicDetail() {
                 const topicColors: Record<string, { bg: string; text: string; dot: string }> = {
                   drive_day: { bg: 'bg-[#F5F5F5] border-[#E0E0E0]', text: 'text-[#111111]', dot: 'bg-[#111111]' },
                   putting: { bg: 'bg-[#FFFBEA] border-[#F5C72C]/40', text: 'text-[#111111]', dot: 'bg-[#F5C72C]' },
-                  short_game: { bg: 'bg-[#F5F5F5] border-[#E0E0E0]', text: 'text-[#111111]', dot: 'bg-[#555555]' },
+                  short_game: { bg: 'bg-[#F5F5F5] border-[#E0E0E0]', text: 'text-[#111111]', dot: 'bg-[#888888]' },
                 };
                 const tc = topicColors[(event as any).topic || 'drive_day'];
                 return (
@@ -651,7 +651,7 @@ export default function SundayClinicDetail() {
         <div className="space-y-4">
           <div>
             <h2 className="text-xl font-bold flex items-center gap-2">
-              <span className="text-yellow-400">✦</span> AI Marketing Intelligence
+              <span className="text-[#F5C72C]">✦</span> AI Marketing Intelligence
             </h2>
             <p className="text-sm text-muted-foreground mt-1">AI-generated multi-channel marketing strategy based on program performance data.</p>
           </div>

@@ -267,7 +267,7 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Active Spend", value: formatCurrency(totalSpend), icon: <DollarSign size={18} />, color: "text-red-400" },
+          { label: "Active Spend", value: formatCurrency(totalSpend), icon: <DollarSign size={18} />, color: "text-[#E8453C]" },
           { label: "Total Reach", value: formatNum(totalReach), icon: <Eye size={18} />, color: "text-[#888888]" },
           { label: "Impressions", value: formatNum(totalImpressions), icon: <TrendingUp size={18} />, color: "text-[#3DB855]" },
           { label: "Clicks", value: formatNum(totalClicks), icon: <MousePointer size={18} />, color: "text-[#F5C72C]" },

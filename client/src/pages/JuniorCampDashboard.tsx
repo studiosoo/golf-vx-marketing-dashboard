@@ -64,7 +64,7 @@ export default function JuniorCampDashboard() {
           </button>
           <div>
             <h1 className="text-2xl font-bold">PBGA Junior Summer Camp</h1>
-            <p className="text-red-500">Error loading data: {error.message}</p>
+            <p className="text-[#E8453C]">Error loading data: {error.message}</p>
           </div>
         </div>
       </div>

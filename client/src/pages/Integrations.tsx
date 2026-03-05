@@ -18,14 +18,14 @@ export default function Integrations() {
 
   const getStatusBadge = (s: string) => {
     if (s === "connected" || s === "ok") return <Badge className="bg-[#3DB855]/20 text-[#3DB855] border-[#3DB855]/30 text-xs">Connected</Badge>;
-    if (s === "error") return <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs">Error</Badge>;
+    if (s === "error") return <Badge className="bg-[#E8453C]/20 text-[#E8453C] border-[#E8453C]/30 text-xs">Error</Badge>;
     if (s === "syncing") return <Badge className="bg-[#888888]/100/20 text-[#888888] border-blue-500/30 text-xs">Syncing</Badge>;
     return <Badge variant="secondary" className="text-xs">Unknown</Badge>;
   };
 
   const getStatusIcon = (s: string) => {
     if (s === "connected" || s === "ok") return <CheckCircle size={16} className="text-[#3DB855]" />;
-    if (s === "error") return <AlertCircle size={16} className="text-red-400" />;
+    if (s === "error") return <AlertCircle size={16} className="text-[#E8453C]" />;
     return <Clock size={16} className="text-muted-foreground" />;
   };
 
@@ -77,7 +77,7 @@ export default function Integrations() {
                     </div>
                   )}
                   {s.error && (
-                    <div className="mt-2 text-xs text-red-400 bg-red-500/10 rounded p-2">
+                    <div className="mt-2 text-xs text-[#E8453C] bg-[#E8453C]/10 rounded p-2">
                       {s.error}
                     </div>
                   )}

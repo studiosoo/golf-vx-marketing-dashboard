@@ -30,8 +30,8 @@ export default function Overview() {
       label: "Active Campaigns",
       value: dashboardData?.activeCampaignsCount ?? "—",
       icon: <Target size={20} />,
-      color: "text-yellow-400",
-      bg: "bg-yellow-400/10",
+      color: "text-[#F5C72C]",
+      bg: "bg-[#F5C72C]/10",
     },
     {
       label: "Conversion Rate",
@@ -51,7 +51,7 @@ export default function Overview() {
       label: "Ad Spend (30d)",
       value: dashboardData?.marketingSpend ? `$${parseFloat(dashboardData.marketingSpend).toLocaleString()}` : "—",
       icon: <Zap size={20} />,
-      color: "text-red-400",
+      color: "text-[#E8453C]",
       bg: "bg-red-400/10",
     },
   ];

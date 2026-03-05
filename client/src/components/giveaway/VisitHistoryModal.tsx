@@ -47,7 +47,7 @@ export function VisitHistoryModal({ open, visitHistory, onOpenChange }: VisitHis
               </div>
             </div>
             {visitHistory.memberStatus && (
-              <div className="p-3 bg-[#E8F5EB] rounded-lg">
+              <div className="p-3 bg-[#F0FAF3] rounded-lg">
                 <p className="text-sm font-medium text-[#3DB855]">Active Member</p>
                 <p className="text-xs text-[#3DB855]">{visitHistory.memberTier}</p>
               </div>

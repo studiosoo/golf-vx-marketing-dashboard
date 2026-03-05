@@ -21,7 +21,7 @@ const CAMPAIGN_COLORS: Record<string, { bg: string; bar: string; text: string }>
 };
 
 function getColor(campaign: string) {
-  return CAMPAIGN_COLORS[campaign] || { bg: "bg-gray-50", bar: "bg-gray-400", text: "text-gray-700" };
+  return CAMPAIGN_COLORS[campaign] || { bg: "bg-gray-50", bar: "bg-[#AAAAAA]", text: "text-gray-700" };
 }
 
 function parseDate(s: string | null): Date | null {
@@ -124,7 +124,7 @@ export default function AsanaTimeline() {
   if (error) return (
     <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
       <p className="text-sm font-medium text-red-700 mb-1">Could not load Asana timeline</p>
-      <p className="text-xs text-red-500 mb-3">{(error as unknown as Error).message}</p>
+      <p className="text-xs text-[#E8453C] mb-3">{(error as unknown as Error).message}</p>
       <button onClick={() => refetch()} className="text-xs px-3 py-1.5 bg-white border border-red-200 text-red-600 rounded hover:bg-red-50">Retry</button>
     </div>
   );

@@ -28,7 +28,7 @@ export default function NewsManager() {
         </div>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" className="bg-yellow-400 text-black hover:bg-yellow-500">
+            <Button size="sm" className="bg-[#F5C72C] text-black hover:bg-yellow-500">
               <Plus size={14} />
               Add News
             </Button>
@@ -53,7 +53,7 @@ export default function NewsManager() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-              <Button className="bg-yellow-400 text-black hover:bg-yellow-500" onClick={() => setIsOpen(false)}>Publish</Button>
+              <Button className="bg-[#F5C72C] text-black hover:bg-yellow-500" onClick={() => setIsOpen(false)}>Publish</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

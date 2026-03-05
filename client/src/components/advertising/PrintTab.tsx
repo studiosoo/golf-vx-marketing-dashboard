@@ -88,7 +88,7 @@ export function PrintTab() {
         <Card className="bg-card border-border">
           <CardContent className="pt-5">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-yellow-500/10"><DollarSign size={18} className="text-yellow-400" /></div>
+              <div className="p-2 rounded-lg bg-yellow-500/10"><DollarSign size={18} className="text-[#F5C72C]" /></div>
               <div>
                 <p className="text-xs text-muted-foreground">Monthly Spend</p>
                 <p className="text-xl font-bold text-foreground">${totalMonthlySpend.toLocaleString()}</p>
@@ -222,7 +222,7 @@ export function PrintTab() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <div className="p-2 rounded-lg bg-yellow-500/10">
-                          <BookOpen size={16} className="text-yellow-400" />
+                          <BookOpen size={16} className="text-[#F5C72C]" />
                         </div>
                         <div>
                           <h3 className="font-semibold text-foreground">{ad.vendorName}</h3>
@@ -247,7 +247,7 @@ export function PrintTab() {
                         </div>
                         <div className="bg-muted/30 rounded-lg p-3">
                           <p className="text-xs text-muted-foreground">Spent to Date</p>
-                          <p className="text-lg font-bold text-yellow-400">${spentToDate.toLocaleString()}</p>
+                          <p className="text-lg font-bold text-[#F5C72C]">${spentToDate.toLocaleString()}</p>
                           <p className="text-xs text-muted-foreground">{prog.elapsed} of {ad.contractMonths} mo</p>
                         </div>
                       </div>
@@ -259,7 +259,7 @@ export function PrintTab() {
                           <span>{prog.pct}% — {prog.remaining} months remaining</span>
                         </div>
                         <div className="h-2 bg-muted rounded-full overflow-hidden">
-                          <div className="h-full bg-yellow-400 rounded-full transition-all" style={{ width: `${prog.pct}%` }} />
+                          <div className="h-full bg-[#F5C72C] rounded-full transition-all" style={{ width: `${prog.pct}%` }} />
                         </div>
                       </div>
 
@@ -281,7 +281,7 @@ export function PrintTab() {
                         )}
                         {ad.qrDestination && (
                           <a href={ad.qrDestination} target="_blank" rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-yellow-400 hover:underline">
+                            className="flex items-center gap-1 text-[#F5C72C] hover:underline">
                             <QrCode size={11} />QR → {ad.qrDestination}
                           </a>
                         )}
@@ -302,7 +302,7 @@ export function PrintTab() {
                     <div className="flex flex-col gap-2">
                       <Button
                         variant="ghost" size="sm"
-                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                        className="text-[#E8453C] hover:text-red-300 hover:bg-[#E8453C]/10"
                         onClick={() => { if (confirm(`Remove ${ad.vendorName}?`)) deleteMutation.mutate({ id: ad.id }); }}
                       >
                         <Trash2 size={14} />

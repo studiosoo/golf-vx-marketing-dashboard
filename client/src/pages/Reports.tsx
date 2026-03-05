@@ -71,7 +71,7 @@ function StatCard({ icon: Icon, label, value, sub, trend }: any) {
         </div>
         <div className="text-2xl font-bold text-foreground">{value}</div>
         {sub && (
-          <div className={`text-xs mt-1 flex items-center gap-1 ${trend != null && trend >= 0 ? "text-[#3DB855]" : "text-red-400"}`}>
+          <div className={`text-xs mt-1 flex items-center gap-1 ${trend != null && trend >= 0 ? "text-[#3DB855]" : "text-[#E8453C]"}`}>
             {trend != null && (trend >= 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />)}
             {sub}
           </div>
@@ -127,7 +127,7 @@ function RevenueTabContent() {
                     <Pie data={breakdownData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} dataKey="value"
                       label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
                       <Cell fill={YELLOW} />
-                      <Cell fill="#333333" />
+                      <Cell fill="#111111" />
                       <Cell fill="#888888" />
                       <Cell fill="#AAAAAA" />
                     </Pie>

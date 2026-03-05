@@ -412,7 +412,7 @@ function ScheduledPostRow({ post, onRefresh }: { post: any; onRefresh: () => voi
         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
           <Badge variant="outline" className="text-[10px] border-[#E0E0E0] text-[#888]">{post.contentType}</Badge>
           {post.status === 'posted' ? (
-            <Badge className="text-[10px] bg-[#E8F5EB] text-[#3DB855] border-[#3DB855]/30">Posted</Badge>
+            <Badge className="text-[10px] bg-[#F0FAF3] text-[#3DB855] border-[#3DB855]/30">Posted</Badge>
           ) : (
             <span className={`flex items-center gap-1 text-[10px] ${isOverdue ? 'text-[#E8453C]' : 'text-[#888]'}`}>
               <Clock className="h-3 w-3" />

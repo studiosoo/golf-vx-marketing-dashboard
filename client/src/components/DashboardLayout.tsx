@@ -236,7 +236,7 @@ export default function DashboardLayout({
                   logout();
                   setMobileOpen(false);
                 }}
-                className="flex items-center gap-2 text-sm text-red-500 hover:text-red-600"
+                className="flex items-center gap-2 text-sm text-[#E8453C] hover:text-red-600"
               >
                 <LogOut className="h-4 w-4" />
                 <span>Sign out</span>

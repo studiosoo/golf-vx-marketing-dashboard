@@ -29,7 +29,7 @@ export function CampaignKPI({ campaign, className = "" }: CampaignKPIProps) {
       <div className={className}>
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-muted-foreground">ROI</span>
-          <div className={`flex items-center gap-1.5 text-sm font-bold ${roi >= 0 ? 'text-[#3DB855] dark:text-[#3DB855]' : 'text-red-600 dark:text-red-400'}`}>
+          <div className={`flex items-center gap-1.5 text-sm font-bold ${roi >= 0 ? 'text-[#3DB855] dark:text-[#3DB855]' : 'text-red-600 dark:text-[#E8453C]'}`}>
             {roi >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
             {roi >= 0 ? "+" : ""}{roi.toFixed(1)}%
           </div>
@@ -46,7 +46,7 @@ export function CampaignKPI({ campaign, className = "" }: CampaignKPIProps) {
         <div className={`space-y-2 ${className}`}>
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-muted-foreground">ROI</span>
-            <div className={`flex items-center gap-1.5 text-sm font-bold ${roi >= 0 ? 'text-[#3DB855] dark:text-[#3DB855]' : 'text-red-600 dark:text-red-400'}`}>
+            <div className={`flex items-center gap-1.5 text-sm font-bold ${roi >= 0 ? 'text-[#3DB855] dark:text-[#3DB855]' : 'text-red-600 dark:text-[#E8453C]'}`}>
               {roi >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
               {roi >= 0 ? "+" : ""}{roi.toFixed(1)}%
             </div>
@@ -162,7 +162,7 @@ export function CampaignKPI({ campaign, className = "" }: CampaignKPIProps) {
             
             {/* Monthly target */}
             {isChurnMonth ? (
-              <div className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400 font-medium">
+              <div className="flex items-center gap-1.5 text-xs text-red-600 dark:text-[#E8453C] font-medium">
                 ⚠️ Churn season — expect net {monthlyTarget} members
               </div>
             ) : (

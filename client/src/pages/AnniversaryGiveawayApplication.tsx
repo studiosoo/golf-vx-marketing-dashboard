@@ -154,7 +154,7 @@ export default function AnniversaryGiveawayApplication() {
               alt="Golf VX" 
               className="h-8 mb-2"
             />
-            <div className="text-xs text-gray-400 tracking-widest">ARLINGTON HEIGHTS</div>
+            <div className="text-xs text-[#888888] tracking-widest">ARLINGTON HEIGHTS</div>
           </div>
         </div>
       </header>
@@ -759,9 +759,9 @@ export default function AnniversaryGiveawayApplication() {
             />
           </div>
           <p className="text-white font-bold mb-2">Copyright © Golf VX Corp</p>
-          <p className="text-gray-400 text-sm mb-1">644 E Rand Rd • Arlington Heights, IL 60004</p>
-          <p className="text-gray-400 text-sm mb-1">arlingtonheights@playgolfvx.com</p>
-          <p className="text-gray-400 text-sm">(847) 749-1054</p>
+          <p className="text-[#888888] text-sm mb-1">644 E Rand Rd • Arlington Heights, IL 60004</p>
+          <p className="text-[#888888] text-sm mb-1">arlingtonheights@playgolfvx.com</p>
+          <p className="text-[#888888] text-sm">(847) 749-1054</p>
           <p className="text-gray-500 text-xs mt-4">
             Open exclusively to Illinois residents. All prizes redeemable only at Golf VX Arlington Heights.
           </p>

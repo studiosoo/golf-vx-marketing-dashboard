@@ -28,7 +28,7 @@ export default function Automations() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="bg-card border-border">
           <CardContent className="p-4">
-            <div className="text-2xl font-bold text-yellow-400">{(metrics as any)?.totalSubscribers || 0}</div>
+            <div className="text-2xl font-bold text-[#F5C72C]">{(metrics as any)?.totalSubscribers || 0}</div>
             <div className="text-xs text-muted-foreground">Total Subscribers</div>
           </CardContent>
         </Card>
@@ -60,8 +60,8 @@ export default function Automations() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-yellow-400/10 flex items-center justify-center">
-                      <Zap size={16} className="text-yellow-400" />
+                    <div className="w-8 h-8 rounded-lg bg-[#F5C72C]/10 flex items-center justify-center">
+                      <Zap size={16} className="text-[#F5C72C]" />
                     </div>
                     <div>
                       <div className="font-medium text-foreground text-sm">{flow.name}</div>

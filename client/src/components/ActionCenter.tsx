@@ -29,9 +29,9 @@ interface Alert {
 const priorityConfig = {
   urgent: {
     label: "URGENT",
-    color: "bg-red-500 text-white",
+    color: "bg-[#E8453C] text-white",
     icon: AlertTriangle,
-    borderColor: "border-red-500",
+    borderColor: "border-[#E8453C]",
   },
   high: {
     label: "HIGH PRIORITY",
@@ -227,9 +227,9 @@ export function ActionCenter() {
     <div className="space-y-4">
       {/* Summary Banner */}
       {(urgentCount > 0 || highCount > 0) && (
-        <div className="bg-red-50 dark:bg-red-950/20 border-l-4 border-red-500 p-4 rounded-lg">
+        <div className="bg-[#FFF5F5] dark:bg-[#E8453C]/10 border-l-4 border-[#E8453C] p-4 rounded-lg">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
+            <AlertTriangle className="h-5 w-5 text-red-600 dark:text-[#E8453C]" />
             <p className="font-semibold text-red-900 dark:text-red-100">
               {urgentCount > 0 && `${urgentCount} urgent action${urgentCount > 1 ? 's' : ''} required`}
               {urgentCount > 0 && highCount > 0 && " • "}

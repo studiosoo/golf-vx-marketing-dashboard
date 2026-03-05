@@ -129,7 +129,7 @@ function MemberListModal({ open, onClose }: { open: boolean; onClose: () => void
 }
 
 const CAMPAIGN_META: Record<string, { label: string; color: string; bg: string; icon: React.ElementType; kpiLabel: string }> = {
-  trial_conversion: { label: "Trial Conversion", color: "#3DB855", bg: "#E8F5EB", icon: Target, kpiLabel: "Conversion Rate" },
+  trial_conversion: { label: "Trial Conversion", color: "#3DB855", bg: "#F0FAF3", icon: Target, kpiLabel: "Conversion Rate" },
   membership_acquisition: { label: "Membership Acquisition", color: "#E85D8A", bg: "#FDE8F0", icon: UserCheck, kpiLabel: "Members Acquired" },
   member_retention: { label: "Member Retention", color: "#007AFF", bg: "#E5F0FF", icon: Users, kpiLabel: "Retention Rate" },
   corporate_events: { label: "B2B Sales", color: "#F5A623", bg: "#FEF3E2", icon: Flag, kpiLabel: "Events Closed" },
@@ -281,7 +281,7 @@ export default function Home() {
                 {snapLoading ? "—" : fmt(memberTotal)}
               </button>
               {members?.newThisMonth !== undefined && members.newThisMonth !== 0 && (
-                <span className={cn("text-[13px] font-semibold mb-1.5", members.newThisMonth > 0 ? "text-[#3DB855]" : "text-red-500")}>
+                <span className={cn("text-[13px] font-semibold mb-1.5", members.newThisMonth > 0 ? "text-[#3DB855]" : "text-[#E8453C]")}>
                   {members.newThisMonth > 0 ? "+" : ""}{members.newThisMonth} this month
                 </span>
               )}
@@ -332,7 +332,7 @@ export default function Home() {
             <div className="p-3 rounded-lg bg-[#FAFAFA] border border-[#F0F0F0]">
               <div className="flex items-center gap-1.5 mb-1">
                 {revenue?.mom !== undefined && revenue.mom !== 0 && (
-                  <span className={cn("flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full", revenue.mom > 0 ? "text-[#3DB855] bg-[#E8F5EB]" : "text-red-500 bg-red-50")}>
+                  <span className={cn("flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full", revenue.mom > 0 ? "text-[#3DB855] bg-[#F0FAF3]" : "text-[#E8453C] bg-red-50")}>
                     {revenue.mom > 0 ? <TrendingUp className="h-2.5 w-2.5" /> : <TrendingDown className="h-2.5 w-2.5" />}
                     {Math.abs(revenue.mom).toFixed(1)}%
                   </span>

@@ -53,7 +53,7 @@ function StatusBadge({ status }: { status: BroadcastStatus }) {
     },
     scheduled: {
       label: "Scheduled",
-      className: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
+      className: "bg-yellow-500/10 text-[#F5C72C] border-yellow-500/20",
       icon: <Clock size={10} />,
     },
     draft: {
@@ -63,7 +63,7 @@ function StatusBadge({ status }: { status: BroadcastStatus }) {
     },
     failed: {
       label: "Failed",
-      className: "bg-red-500/10 text-red-400 border-red-500/20",
+      className: "bg-[#E8453C]/10 text-[#E8453C] border-[#E8453C]/20",
       icon: <XCircle size={10} />,
     },
   };
@@ -113,7 +113,7 @@ function BroadcastCard({ broadcast }: { broadcast: Broadcast }) {
           <div className="flex items-center gap-2 mb-1">
             <StatusBadge status={broadcast.status} />
             {broadcast.metricsStale && (
-              <span className="text-xs text-yellow-400 flex items-center gap-1">
+              <span className="text-xs text-[#F5C72C] flex items-center gap-1">
                 <AlertCircle size={10} />
                 Stale
               </span>

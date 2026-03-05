@@ -28,7 +28,7 @@ export default function Announcements() {
         </div>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" className="bg-yellow-400 text-black hover:bg-yellow-500">
+            <Button size="sm" className="bg-[#F5C72C] text-black hover:bg-yellow-500">
               <Plus size={14} />
               New Announcement
             </Button>
@@ -51,7 +51,7 @@ export default function Announcements() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-              <Button className="bg-yellow-400 text-black hover:bg-yellow-500" onClick={() => setIsOpen(false)}>Send</Button>
+              <Button className="bg-[#F5C72C] text-black hover:bg-yellow-500" onClick={() => setIsOpen(false)}>Send</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
