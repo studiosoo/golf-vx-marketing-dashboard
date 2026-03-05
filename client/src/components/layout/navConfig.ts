@@ -57,8 +57,6 @@ export const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
     heading: "Intelligence",
     items: [
       { label: "Autopilot", path: "/intelligence/autopilot", icon: Zap },
-      { label: "Assistant", path: "/intelligence/assistant", icon: Bot },
-      { label: "Strategy", path: "/intelligence/strategy", icon: Brain },
       {
         label: "Analytics",
         path: "/intelligence/performance",
@@ -71,6 +69,8 @@ export const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
           { label: "Market Research", path: "/intelligence/market-research", icon: Search },
         ],
       },
+      { label: "Strategy", path: "/intelligence/strategy", icon: Brain },
+      { label: "Assistant", path: "/intelligence/assistant", icon: Bot },
     ],
   },
   {
