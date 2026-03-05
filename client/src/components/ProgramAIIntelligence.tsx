@@ -9,8 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 import {
-  Loader2, RefreshCw, Sparkles, ChevronDown, ChevronUp, Zap
+  Loader2, RefreshCw, Sparkles, ChevronDown, ChevronUp, Zap, ExternalLink
 } from "lucide-react";
 
 interface Props {
@@ -39,6 +40,11 @@ export function ProgramAIIntelligence({ campaignId, programName }: Props) {
   const [insights, setInsights] = useState<any>(null);
   const [expanded, setExpanded] = useState<string | null>("keyInsights");
   const { toast } = useToast();
+  const [, navigate] = useLocation();
+
+  const openInAssistant = () => {
+    navigate(`/intelligence/assistant?program=${campaignId}&context=programs`);
+  };
 
   const generateMutation = trpc.campaignsAi.generateInsights.useMutation({
     onSuccess: (data: any) => {
@@ -64,19 +70,28 @@ export function ProgramAIIntelligence({ campaignId, programName }: Props) {
             Generate a comprehensive multi-channel marketing strategy based on {programName || "this program"}'s performance data.
           </p>
         </div>
-        <Button
-          onClick={() => generateMutation.mutate({ campaignId })}
-          disabled={generateMutation.isPending}
-          className="bg-[#F5C72C] hover:bg-[#e6b820] text-[#111111] font-semibold"
-        >
-          {generateMutation.isPending
-            ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Analyzing...</>
-            : <><Sparkles className="mr-2 h-4 w-4" />Generate Marketing Intelligence</>
-          }
-        </Button>
-        {generateMutation.isPending && (
-          <p className="text-xs text-[#AAAAAA]">This may take 15–30 seconds...</p>
-        )}
+        <div className="flex flex-col items-center gap-2">
+          <Button
+            onClick={() => generateMutation.mutate({ campaignId })}
+            disabled={generateMutation.isPending}
+            className="bg-[#F5C72C] hover:bg-[#e6b820] text-[#111111] font-semibold"
+          >
+            {generateMutation.isPending
+              ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Analyzing...</>
+              : <><Sparkles className="mr-2 h-4 w-4" />Generate Marketing Intelligence</>
+            }
+          </Button>
+          {generateMutation.isPending && (
+            <p className="text-xs text-[#AAAAAA]">This may take 15–30 seconds...</p>
+          )}
+          <button
+            onClick={openInAssistant}
+            className="flex items-center gap-1 text-xs text-[#888888] hover:text-[#111111] transition-colors"
+          >
+            <ExternalLink className="h-3 w-3" />
+            Open in Assistant for deeper analysis
+          </button>
+        </div>
       </div>
     );
   }
@@ -98,16 +113,27 @@ export function ProgramAIIntelligence({ campaignId, programName }: Props) {
             Generated {data.generatedAt ? new Date(data.generatedAt).toLocaleString() : "just now"}
           </p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => generateMutation.mutate({ campaignId })}
-          disabled={generateMutation.isPending}
-          className="border-[#E0E0E0] text-[#545A60] hover:bg-[#F2F2F7]"
-        >
-          {generateMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
-          <span className="ml-1.5 text-xs">Refresh</span>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={openInAssistant}
+            className="border-[#E0E0E0] text-[#545A60] hover:bg-[#F2F2F7]"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+            <span className="ml-1.5 text-xs">Open in Assistant</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => generateMutation.mutate({ campaignId })}
+            disabled={generateMutation.isPending}
+            className="border-[#E0E0E0] text-[#545A60] hover:bg-[#F2F2F7]"
+          >
+            {generateMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+            <span className="ml-1.5 text-xs">Refresh</span>
+          </Button>
+        </div>
       </div>
 
       {/* Executive Summary */}

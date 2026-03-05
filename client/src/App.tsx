@@ -23,8 +23,11 @@ import CampaignTimeline from "./pages/CampaignTimeline";
 import BudgetManager from "./pages/BudgetManager";
 
 // ── MARKETING & PROGRAMS / Intelligence ──
-import MarketingIntelligence from "./pages/MarketingIntelligence";
-import AIActions from "./pages/AIActions";
+import MarketingIntelligence from "./pages/MarketingIntelligence"; // legacy redirect target
+import AIActions from "./pages/AIActions"; // legacy redirect target
+import Autopilot from "./pages/Autopilot";
+import Assistant from "./pages/Assistant";
+import Strategy from "./pages/Strategy";
 import MarketResearch from "./pages/MarketResearch";
 import ActionPlan from "./pages/ActionPlan";
 import Performance from "./pages/Performance";
@@ -113,14 +116,18 @@ function DashboardRoutes() {
         <Route path="/timeline" component={CampaignTimeline} />
         <Route path="/budget" component={BudgetManager} />
 
-        {/* ── MARKETING & PROGRAMS / Intelligence ── */}
-        <Route path="/intelligence" component={MarketingIntelligence} />
-        <Route path="/intelligence/ai-actions" component={AIActions} />
+        {/* ── Intelligence ── */}
+        <Route path="/intelligence/autopilot" component={Autopilot} />
+        <Route path="/intelligence/assistant" component={Assistant} />
+        <Route path="/intelligence/strategy" component={Strategy} />
         <Route path="/intelligence/market-research" component={MarketResearch} />
-        <Route path="/intelligence/action-plan">{() => { window.location.replace('/workspace'); return null; }}</Route>
         <Route path="/intelligence/performance" component={Performance} />
         <Route path="/intelligence/revenue" component={Revenue} />
         <Route path="/intelligence/reports" component={Reports} />
+        {/* legacy redirects */}
+        <Route path="/intelligence">{() => { window.location.replace('/intelligence/autopilot'); return null; }}</Route>
+        <Route path="/intelligence/ai-actions">{() => { window.location.replace('/intelligence/autopilot'); return null; }}</Route>
+        <Route path="/intelligence/action-plan">{() => { window.location.replace('/intelligence/strategy'); return null; }}</Route>
 
         {/* ── MARKETING & PROGRAMS / Programs ── */}
         <Route path="/programs" component={Programs} />
@@ -162,8 +169,8 @@ function DashboardRoutes() {
         <Route path="/website/instagram/analytics" component={InstagramAnalytics} />
         <Route path="/website/news" component={NewsManager} />
 
-        {/* ── WORKSPACE ── */}
-        <Route path="/workspace" component={AIWorkspace} />
+        {/* ── WORKSPACE (legacy redirect) ── */}
+        <Route path="/workspace">{() => { window.location.replace('/intelligence/assistant'); return null; }}</Route>
 
         {/* ── SETTINGS ── */}
         <Route path="/settings" component={AccountSettings} />
@@ -186,7 +193,7 @@ function DashboardRoutes() {
         <Route path="/instagram-sync" component={InstagramSync} />
         <Route path="/instagram-analytics" component={InstagramAnalytics} />
         <Route path="/email-marketing" component={EmailMarketing} />
-        <Route path="/marketing-intelligence" component={MarketingIntelligence} />
+        <Route path="/marketing-intelligence">{() => { window.location.replace('/intelligence/autopilot'); return null; }}</Route>
         <Route path="/drive-day" component={DriveDay} />
         <Route path="/junior-summer-camp" component={JuniorCampDashboard} />
         <Route path="/summer-camp" component={SummerCamp} />

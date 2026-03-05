@@ -3,7 +3,6 @@ import {
   BarChart3,
   BarChart2,
   Instagram,
-  Sparkles,
   Bot,
   Flag,
   UserCheck,
@@ -16,18 +15,14 @@ import {
   Trophy,
   Mail,
   Search,
-  Lightbulb,
+  Brain,
   Newspaper,
-  Megaphone,
-  Gift,
-  Target,
   LineChart,
   TrendingUp,
   DollarSign,
   FileText,
   Wrench,
-  Users,
-  ClipboardList,
+  BarChart,
 } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -61,20 +56,21 @@ export const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
   {
     heading: "Intelligence",
     items: [
+      { label: "Autopilot", path: "/intelligence/autopilot", icon: Zap },
+      { label: "Assistant", path: "/intelligence/assistant", icon: Bot },
+      { label: "Strategy", path: "/intelligence/strategy", icon: Brain },
       {
-        label: "AI Analysis",
-        path: "/intelligence",
-        icon: Sparkles,
+        label: "Analytics",
+        path: "/intelligence/performance",
+        icon: BarChart,
         children: [
-          { label: "Actions", path: "/intelligence/ai-actions", icon: Zap },
-          { label: "Market Research", path: "/intelligence/market-research", icon: Search },
           { label: "Performance", path: "/intelligence/performance", icon: BarChart2 },
           { label: "Revenue", path: "/intelligence/revenue", icon: DollarSign },
           { label: "Reports", path: "/intelligence/reports", icon: FileText },
           { label: "ROI & KPI", path: "/roi", icon: TrendingUp },
+          { label: "Market Research", path: "/intelligence/market-research", icon: Search },
         ],
       },
-      { label: "AI Workspace", path: "/workspace", icon: Bot },
     ],
   },
   {
