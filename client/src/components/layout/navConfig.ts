@@ -17,7 +17,6 @@ import {
   Mail,
   Search,
   Lightbulb,
-  Globe,
   Newspaper,
   Megaphone,
   Gift,
@@ -112,12 +111,6 @@ export const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
       { label: "Members", path: "/list/members", icon: UserCheck },
       { label: "Pro Members", path: "/pro-members", icon: Trophy },
       { label: "Guests & Leads", path: "/list/guests", icon: UserPlus },
-    ],
-  },
-  {
-    heading: "Website",
-    items: [
-      { label: "Site Control", path: "/website/site-control", icon: Globe },
     ],
   },
   {

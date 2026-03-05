@@ -142,6 +142,9 @@ function ProgramCard({ program, onClick }: { program: Program; onClick: () => vo
   const roi = spend > 0 ? ((revenue - spend) / spend) * 100 : 0;
   const hasMetaAds = !!program.metaAdsCampaignId;
   const score = program.performanceScore;
+  // "Ad ended but program still running" — date-based check
+  const isDateActive = program.endDate ? new Date(program.endDate) >= new Date() : false;
+  const adEndedButRunning = isDateActive && (program.status === "paused" || program.status === "completed");
   // KPI display mode for non-revenue campaigns (giveaway, follower growth, trial bookings, etc.)
   const useKpiDisplay = program.goalType === 'leads' || program.goalType === 'followers' ||
     (program.primaryKpi === 'Trial Bookings');
@@ -173,6 +176,12 @@ function ProgramCard({ program, onClick }: { program: Program; onClick: () => vo
             <div className="h-5 px-2 rounded-full bg-[#F5F5F5] border border-[#E0E0E0] flex items-center gap-1">
               <BarChart3 className="h-3 w-3 text-[#888888]" />
               <span className="text-[10px] font-semibold text-[#888888]">Meta</span>
+            </div>
+          )}
+          {adEndedButRunning && (
+            <div className="h-5 px-2 rounded-full bg-[#F0FAF3] flex items-center gap-1">
+              <PlayCircle className="h-3 w-3 text-[#3DB855]" />
+              <span className="text-[10px] font-semibold text-[#3DB855]">Still Running</span>
             </div>
           )}
         </div>
@@ -431,7 +440,7 @@ function AddProgramDialog({ onSuccess }: { onSuccess: () => void }) {
 export default function Programs() {
   const [, setLocation] = useLocation();
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | CampaignStatus>("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "running" | CampaignStatus>("all");
   const [categoryFilter, setCategoryFilter] = useState<"all" | StrategicCampaign>("all");
 
   const { data: programs, isLoading, refetch } = trpc.campaigns.list.useQuery(undefined, {
@@ -440,12 +449,21 @@ export default function Programs() {
 
   const STATUS_ORDER: Record<CampaignStatus, number> = { active: 0, planned: 1, completed: 2, paused: 3 };
 
+  const today = new Date();
+
   const filtered = useMemo(() => {
     if (!programs) return [];
     return programs
       .filter((p: Program) => {
         const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || (p.description || "").toLowerCase().includes(search.toLowerCase());
-        const matchStatus = statusFilter === "all" || p.status === statusFilter;
+        const endDate = p.endDate ? new Date(p.endDate) : null;
+        const startDate = p.startDate ? new Date(p.startDate) : null;
+        const isDateRunning = startDate && endDate && startDate <= today && endDate >= today;
+        const matchStatus = statusFilter === "all"
+          ? true
+          : statusFilter === "running"
+            ? isDateRunning
+            : p.status === statusFilter;
         const matchCategory = categoryFilter === "all" || p.category === categoryFilter;
         return matchSearch && matchStatus && matchCategory;
       })
@@ -481,9 +499,13 @@ export default function Programs() {
 
       {/* Status summary pills */}
       <div className="flex items-center gap-2 flex-wrap">
-        {(["all", "active", "planned", "completed", "paused"] as const).map((s) => {
-          const meta = s === "all" ? null : STATUS_META[s];
-          const count = s === "all" ? (programs?.length ?? 0) : counts[s];
+        {(["all", "running", "active", "planned", "completed", "paused"] as const).map((s) => {
+          const meta = s === "all" || s === "running" ? null : STATUS_META[s];
+          const count = s === "all"
+            ? (programs?.length ?? 0)
+            : s === "running"
+              ? (programs?.filter((p: Program) => { const e = p.endDate ? new Date(p.endDate) : null; const st = p.startDate ? new Date(p.startDate) : null; return st && e && st <= today && e >= today; }).length ?? 0)
+              : counts[s as CampaignStatus];
           const isActive = statusFilter === s;
           return (
             <button
@@ -496,8 +518,9 @@ export default function Programs() {
                   : "bg-white text-[#888888] border-[#E0E0E0] hover:border-[#CCCCCC]"
               )}
             >
+              {s === "running" && <PlayCircle className="h-3 w-3" style={{ color: isActive ? "white" : "#3DB855" }} />}
               {meta && <meta.icon className="h-3 w-3" style={{ color: isActive ? "white" : meta.color }} />}
-              {s === "all" ? "All" : meta!.label}
+              {s === "all" ? "All" : s === "running" ? "Running" : meta!.label}
               <span className={cn("text-[10px]", isActive ? "text-white/70" : "text-[#AAAAAA]")}>{count}</span>
             </button>
           );

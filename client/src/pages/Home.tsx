@@ -233,8 +233,23 @@ export default function Home() {
   const memberGoalPct = memberGoal > 0 ? Math.min((memberTotal / memberGoal) * 100, 100) : 0;
 
   // All programs — active ones for the programs section
+  // Use date-based check so "ad ended" doesn't incorrectly hide running programs
   const allPrograms = (programs ?? []) as any[];
-  const activePrograms = allPrograms.filter((p: any) => p.status === "active");
+  const today = new Date();
+  const activePrograms = allPrograms.filter((p: any) => {
+    if (p.status === "active") return true;
+    // Include programs whose end date hasn't passed yet (ad may have ended but program runs on)
+    const endDate = p.endDate ? new Date(p.endDate) : null;
+    return endDate && endDate >= today && p.status !== "completed" && p.status !== "paused";
+  });
+
+  // Annual revenue goal tracking
+  const ANNUAL_REVENUE_GOAL = 2_000_000;
+  const annualMrrRunRate = mrr * 12;
+  // Estimate YTD revenue using MRR + Toast MTD * 12 as run rate proxy
+  const annualRunRate = annualMrrRunRate + (toastMTD * 12) + (acuityTotal * 12);
+  const annualGoalPct = Math.min((annualRunRate / ANNUAL_REVENUE_GOAL) * 100, 100);
+  const hasAnyRevenue = mrr > 0 || toastMTD > 0 || acuityTotal > 0;
 
   // Strategic campaigns — filter out $0 spend AND $0 revenue
   const activeCampaigns = (strategicOverview ?? []).filter((c: any) => c.totalSpend > 0 || c.totalRevenue > 0 || c.primaryKpi?.current > 0);
@@ -372,7 +387,7 @@ export default function Home() {
               {acuityBookings > 0 && <p className="text-[10px] text-[#AAAAAA] mt-0.5">{acuityBookings} sessions</p>}
             </div>
           )}
-          {(mrr > 0 || toastMTD > 0 || acuityTotal > 0) && (
+          {hasAnyRevenue && (
             <div className="p-3 rounded-lg bg-[#F5C72C]/5 border border-[#F5C72C]/20">
               <div className="flex items-center gap-1.5 mb-1">
                 <Award className="h-3 w-3 text-[#8B6E00]" />
@@ -382,6 +397,42 @@ export default function Home() {
               <p className="text-[11px] text-[#888888] mt-1">All channels</p>
             </div>
           )}
+        </div>
+
+        {/* $0 empty state — APIs not yet connected */}
+        {!snapLoading && !hasAnyRevenue && (
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-[#FAFAFA] border border-dashed border-[#E0E0E0]">
+            <div className="h-7 w-7 rounded-lg bg-[#F5F5F5] flex items-center justify-center shrink-0">
+              <DollarSign className="h-3.5 w-3.5 text-[#AAAAAA]" />
+            </div>
+            <div>
+              <p className="text-[12px] font-semibold text-[#888888]">Revenue data not yet connected</p>
+              <p className="text-[11px] text-[#AAAAAA]">Toast POS and Acuity API connections pending. MRR available once Boomerang syncs.</p>
+            </div>
+          </div>
+        )}
+
+        {/* Annual Revenue Goal — $2M */}
+        <div className="mt-4 pt-4 border-t border-[#F0F0F0]">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-1.5">
+              <TrendingUp className="h-3.5 w-3.5 text-[#111111]" />
+              <span className="text-[13px] font-semibold text-[#111111]">Annual Revenue Goal</span>
+            </div>
+            <div className="text-right">
+              <span className="text-[18px] font-bold text-[#F5C72C]">{annualGoalPct.toFixed(1)}%</span>
+              <span className="text-[11px] text-[#AAAAAA] ml-1">run rate</span>
+            </div>
+          </div>
+          <div className="h-2 bg-[#F2F2F7] rounded-full overflow-hidden">
+            <div className="h-full rounded-full bg-[#F5C72C] transition-all" style={{ width: `${annualGoalPct}%` }} />
+          </div>
+          <div className="flex justify-between mt-1.5">
+            <span className="text-[11px] text-[#AAAAAA]">{fmtCurrency(annualRunRate)} projected / {fmtCurrency(ANNUAL_REVENUE_GOAL)} goal</span>
+            {annualRunRate < ANNUAL_REVENUE_GOAL && (
+              <span className="text-[11px] text-[#AAAAAA]">{fmtCurrency(ANNUAL_REVENUE_GOAL - annualRunRate)} gap</span>
+            )}
+          </div>
         </div>
 
       </div>
