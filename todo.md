@@ -1115,3 +1115,10 @@
 - [x] Instagram: restored Live Feed as default tab (Feed → Scheduler → Daily Analysis order)
 - [x] Programs & Events: replaced blue/green/orange Tailwind colors with Golf VX palette in SundayClinicDetail + WinterClinicDetail
 - [x] Social & Content: updated InstagramAnalytics + InstagramFeed to Golf VX palette (#3DB855, #E8453C, #F5C72C)
+
+## Redesign v2: Instagram Nav + Programs Styling (2026-03-05)
+- [x] Instagram tab (/website/instagram): Live Feed only (Scheduler accessible via header button)
+- [x] Instagram Analytics tab (/website/instagram-analytics): Daily Analysis + Analytics + Scheduler tabs
+- [x] TrialSessionDetail: already using Golf VX palette (no non-Golf VX colors found)
+- [x] Programs main page: added #F5C72C left border accent + replaced blue progress bars with #F5C72C
+- [x] InstagramFeed: converted all dark bg-[#1a1a1a]/bg-[#111]/border-[#2a2a2a] to bg-card/border-border light theme (51 occurrences)

@@ -160,7 +160,7 @@ function ProgramCard({ program, onClick }: { program: Program; onClick: () => vo
   return (
     <button
       onClick={onClick}
-      className="text-left w-full bg-white rounded-xl border border-[#E0E0E0] p-4 hover:shadow-md hover:border-[#CCCCCC] transition-all duration-150 group flex flex-col gap-3"
+      className="text-left w-full bg-white rounded-xl border border-[#E0E0E0] p-4 hover:shadow-md hover:border-[#F5C72C]/50 transition-all duration-150 group flex flex-col gap-3 border-l-4 border-l-[#F5C72C]"
     >
       {/* Top row: status + strategic tag */}
       <div className="flex items-start justify-between gap-2">
@@ -250,10 +250,10 @@ function ProgramCard({ program, onClick }: { program: Program; onClick: () => vo
               <>
                 <div className="flex justify-between items-center mb-1">
                   <span className="text-[10px] text-[#AAAAAA]">{kpiActual.toFixed(0)} / {kpiTarget.toFixed(0)} bookings</span>
-                  <span className="text-[10px] font-semibold text-[#007AFF]">{kpiPct.toFixed(0)}%</span>
+                  <span className="text-[10px] font-semibold text-[#111111]">{kpiPct.toFixed(0)}%</span>
                 </div>
                 <div className="h-1.5 bg-[#F2F2F7] rounded-full overflow-hidden">
-                  <div className="h-full rounded-full bg-[#007AFF]" style={{ width: `${kpiPct}%` }} />
+                  <div className="h-full rounded-full bg-[#F5C72C]" style={{ width: `${kpiPct}%` }} />
                 </div>
               </>
             ) : isEngagements ? (
@@ -272,10 +272,10 @@ function ProgramCard({ program, onClick }: { program: Program; onClick: () => vo
                   <span className="text-[10px] text-[#AAAAAA]">
                     {goalActual.toLocaleString()} / {goalTarget.toLocaleString()} {program.goalUnit}
                   </span>
-                  <span className="text-[10px] font-semibold text-[#007AFF]">{goalPct.toFixed(0)}%</span>
+                  <span className="text-[10px] font-semibold text-[#111111]">{goalPct.toFixed(0)}%</span>
                 </div>
                 <div className="h-1.5 bg-[#F2F2F7] rounded-full overflow-hidden">
-                  <div className="h-full rounded-full bg-[#007AFF]" style={{ width: `${goalPct}%` }} />
+                  <div className="h-full rounded-full bg-[#F5C72C]" style={{ width: `${goalPct}%` }} />
                 </div>
               </>
             )}

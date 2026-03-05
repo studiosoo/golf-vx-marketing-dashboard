@@ -129,9 +129,9 @@ function PostCard({ post }: { post: any }) {
       href={post.permalink}
       target="_blank"
       rel="noopener noreferrer"
-      className="group relative block rounded-xl overflow-hidden bg-[#1a1a1a] border border-[#2a2a2a] hover:border-[#F5C72C]/50 transition-all"
+      className="group relative block rounded-xl overflow-hidden bg-card border border-border hover:border-[#F5C72C]/50 transition-all"
     >
-      <div className="relative aspect-square bg-[#111]">
+      <div className="relative aspect-square bg-muted">
         {imgSrc ? (
           <img
             src={imgSrc}
@@ -144,7 +144,7 @@ function PostCard({ post }: { post: any }) {
             <Instagram className="h-8 w-8 text-[#444]" />
           </div>
         )}
-        <div className="absolute top-2 right-2 bg-black/60 rounded-md px-1.5 py-0.5 flex items-center gap-1 text-white text-xs">
+        <div className="absolute top-2 right-2 bg-black/60 rounded-md px-1.5 py-0.5 flex items-center gap-1 text-foreground text-xs">
           {mediaTypeIcon(post.media_type)}
         </div>
         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
@@ -159,7 +159,7 @@ function PostCard({ post }: { post: any }) {
         </div>
       </div>
       <div className="p-3">
-        <p className="text-xs text-[#aaa] line-clamp-2 leading-relaxed">
+        <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
           {post.caption || <span className="italic text-[#555]">No caption</span>}
         </p>
         <div className="flex items-center justify-between mt-2">
@@ -197,15 +197,15 @@ function DailyAnalysisTab() {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div className="flex items-center gap-3 p-4 bg-[#1a1a1a] rounded-xl border border-[#2a2a2a]">
+        <div className="flex items-center gap-3 p-4 bg-card rounded-xl border border-border">
           <Sparkles className="h-5 w-5 text-[#F5C72C] animate-pulse" />
           <div>
-            <p className="text-sm font-semibold text-white">Analyzing your Instagram performance...</p>
+            <p className="text-sm font-semibold text-foreground">Analyzing your Instagram performance...</p>
             <p className="text-xs text-[#888] mt-0.5">Fetching live data and generating AI insights</p>
           </div>
         </div>
         {[0, 1, 2].map((i) => (
-          <div key={i} className="h-28 rounded-xl bg-[#1a1a1a] animate-pulse border border-[#2a2a2a]" />
+          <div key={i} className="h-28 rounded-xl bg-card animate-pulse border border-border" />
         ))}
       </div>
     );
@@ -247,7 +247,7 @@ function DailyAnalysisTab() {
           variant="outline"
           onClick={() => refetch()}
           disabled={isFetching}
-          className="border-[#333] text-[#aaa] hover:text-white h-7 text-xs"
+          className="border-border text-muted-foreground hover:text-foreground h-7 text-xs"
         >
           {isFetching ? <RefreshCw className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
           <span className="ml-1.5">Refresh</span>
@@ -256,19 +256,19 @@ function DailyAnalysisTab() {
 
       {/* Key Metrics Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Card className="bg-[#1a1a1a] border-[#2a2a2a]">
+        <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-1">
               <Users className="h-3.5 w-3.5 text-[#F5C72C]" />
               <span className="text-[10px] text-[#888] uppercase tracking-wide">Followers</span>
             </div>
-            <p className="text-2xl font-bold text-white">{metrics.followers.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-foreground">{metrics.followers.toLocaleString()}</p>
             <div className="mt-2">
               <div className="flex justify-between text-[10px] text-[#555] mb-1">
                 <span>{followerPct}% of goal</span>
                 <span>{followerGoal}</span>
               </div>
-              <div className="h-1 bg-[#2a2a2a] rounded-full">
+              <div className="h-1 bg-muted rounded-full">
                 <div
                   className="h-1 bg-[#F5C72C] rounded-full transition-all"
                   style={{ width: `${followerPct}%` }}
@@ -278,29 +278,29 @@ function DailyAnalysisTab() {
           </CardContent>
         </Card>
 
-        <Card className="bg-[#1a1a1a] border-[#2a2a2a]">
+        <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-1">
               <Target className="h-3.5 w-3.5 text-[#F5C72C]" />
               <span className="text-[10px] text-[#888] uppercase tracking-wide">Engagement</span>
             </div>
-            <p className="text-2xl font-bold text-white">{metrics.avgEngagement}%</p>
+            <p className="text-2xl font-bold text-foreground">{metrics.avgEngagement}%</p>
             <p className={`text-xs mt-1 ${engagementColor}`}>{engagementLabel}</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-[#1a1a1a] border-[#2a2a2a]">
+        <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-1">
               <Heart className="h-3.5 w-3.5 text-[#F5C72C]" />
               <span className="text-[10px] text-[#888] uppercase tracking-wide">Avg Likes</span>
             </div>
-            <p className="text-2xl font-bold text-white">{metrics.avgLikes}</p>
+            <p className="text-2xl font-bold text-foreground">{metrics.avgLikes}</p>
             <p className="text-xs text-[#555] mt-1">per post</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-[#1a1a1a] border-[#2a2a2a]">
+        <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-1">
               <BarChart3 className="h-3.5 w-3.5 text-[#F5C72C]" />
@@ -310,7 +310,7 @@ function DailyAnalysisTab() {
               {Object.entries(metrics.typeBreakdown).map(([type, count]) => (
                 <div key={type} className="flex justify-between text-xs">
                   <span className="text-[#888]">{type === "CAROUSEL_ALBUM" ? "Carousel" : type === "VIDEO" ? "Video" : "Image"}</span>
-                  <span className="text-white font-medium">{count as number}</span>
+                  <span className="text-foreground font-medium">{count as number}</span>
                 </div>
               ))}
             </div>
@@ -319,9 +319,9 @@ function DailyAnalysisTab() {
       </div>
 
       {/* Today's Post Idea */}
-      <Card className="bg-[#1a1a1a] border-[#F5C72C]/20">
+      <Card className="bg-card border-[#F5C72C]/20">
         <CardHeader className="pb-3 pt-4 px-4">
-          <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
+          <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
             <Zap className="h-4 w-4 text-[#F5C72C]" />
             Today's Post Idea
             <Badge className="ml-auto text-[10px] bg-[#F5C72C]/10 text-[#F5C72C] border-[#F5C72C]/30 font-normal">
@@ -330,7 +330,7 @@ function DailyAnalysisTab() {
           </CardTitle>
         </CardHeader>
         <CardContent className="px-4 pb-4 space-y-3">
-          <div className="bg-[#111] rounded-lg p-3 relative">
+          <div className="bg-muted rounded-lg p-3 relative">
             <p className="text-sm text-[#ddd] leading-relaxed whitespace-pre-wrap">{analysis.todayPostIdea.captionDraft}</p>
             <Button
               size="sm"
@@ -342,7 +342,7 @@ function DailyAnalysisTab() {
             </Button>
           </div>
           {analysis.todayPostIdea.hashtags && (
-            <div className="bg-[#111] rounded-lg p-3 relative">
+            <div className="bg-muted rounded-lg p-3 relative">
               <p className="text-xs text-[#F5C72C]/80 leading-relaxed">{analysis.todayPostIdea.hashtags}</p>
               <Button
                 size="sm"
@@ -364,9 +364,9 @@ function DailyAnalysisTab() {
       {/* Insights Row */}
       <div className="grid sm:grid-cols-2 gap-4">
         {/* Key Insight */}
-        <Card className="bg-[#1a1a1a] border-[#2a2a2a]">
+        <Card className="bg-card border-border">
           <CardHeader className="pb-2 pt-4 px-4">
-            <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
+            <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-[#F5C72C]" />
               Key Insight
             </CardTitle>
@@ -377,9 +377,9 @@ function DailyAnalysisTab() {
         </Card>
 
         {/* Quick Win */}
-        <Card className="bg-[#1a1a1a] border-[#2a2a2a]">
+        <Card className="bg-card border-border">
           <CardHeader className="pb-2 pt-4 px-4">
-            <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
+            <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-[#3DB855]" />
               Quick Win (15 min)
             </CardTitle>
@@ -391,7 +391,7 @@ function DailyAnalysisTab() {
       </div>
 
       {/* Follower Progress */}
-      <Card className="bg-[#1a1a1a] border-[#2a2a2a]">
+      <Card className="bg-card border-border">
         <CardContent className="p-4 flex items-start gap-3">
           <Users className="h-4 w-4 text-[#F5C72C] mt-0.5 flex-shrink-0" />
           <div>
@@ -407,7 +407,7 @@ function DailyAnalysisTab() {
           <h3 className="text-xs font-semibold text-[#888] uppercase tracking-wide mb-3">Top Performing Posts</h3>
           <div className="space-y-2">
             {metrics.topPosts.map((post: any, i: number) => (
-              <div key={i} className="flex items-center gap-3 p-3 bg-[#1a1a1a] rounded-lg border border-[#2a2a2a]">
+              <div key={i} className="flex items-center gap-3 p-3 bg-card rounded-lg border border-border">
                 <div className="w-6 h-6 rounded-full bg-[#F5C72C]/10 flex items-center justify-center text-[#F5C72C] text-xs font-bold flex-shrink-0">
                   {i + 1}
                 </div>
@@ -492,10 +492,10 @@ function SchedulerForm({ onClose }: { onClose: () => void }) {
             placeholder="Topic (e.g., Summer Camp registration open)"
             value={form.topic}
             onChange={(e) => setForm((f) => ({ ...f, topic: e.target.value }))}
-            className="flex-1 text-sm bg-[#111] border-[#333]"
+            className="flex-1 text-sm bg-muted border-border"
           />
           <Select value={form.tone} onValueChange={(v) => setForm((f) => ({ ...f, tone: v as any }))}>
-            <SelectTrigger className="w-32 text-xs bg-[#111] border-[#333]">
+            <SelectTrigger className="w-32 text-xs bg-muted border-border">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -519,41 +519,41 @@ function SchedulerForm({ onClose }: { onClose: () => void }) {
       </div>
 
       <div>
-        <Label className="text-xs text-[#aaa]">Caption *</Label>
+        <Label className="text-xs text-muted-foreground">Caption *</Label>
         <Textarea
           value={form.caption}
           onChange={(e) => setForm((f) => ({ ...f, caption: e.target.value }))}
           placeholder="Write your caption..."
-          className="mt-1 text-sm bg-[#111] border-[#333] min-h-[100px]"
+          className="mt-1 text-sm bg-muted border-border min-h-[100px]"
           required
         />
       </div>
 
       <div>
-        <Label className="text-xs text-[#aaa]">Hashtags</Label>
+        <Label className="text-xs text-muted-foreground">Hashtags</Label>
         <Input
           value={form.hashtags}
           onChange={(e) => setForm((f) => ({ ...f, hashtags: e.target.value }))}
           placeholder="#golfvx #indoorgolf #arlingtonheights"
-          className="mt-1 text-sm bg-[#111] border-[#333]"
+          className="mt-1 text-sm bg-muted border-border"
         />
       </div>
 
       <div>
-        <Label className="text-xs text-[#aaa]">Image URL (required to publish)</Label>
+        <Label className="text-xs text-muted-foreground">Image URL (required to publish)</Label>
         <Input
           value={form.imageUrl}
           onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))}
           placeholder="https://..."
-          className="mt-1 text-sm bg-[#111] border-[#333]"
+          className="mt-1 text-sm bg-muted border-border"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <Label className="text-xs text-[#aaa]">Post Type</Label>
+          <Label className="text-xs text-muted-foreground">Post Type</Label>
           <Select value={form.contentType} onValueChange={(v) => setForm((f) => ({ ...f, contentType: v as any }))}>
-            <SelectTrigger className="mt-1 text-sm bg-[#111] border-[#333]">
+            <SelectTrigger className="mt-1 text-sm bg-muted border-border">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -565,18 +565,18 @@ function SchedulerForm({ onClose }: { onClose: () => void }) {
           </Select>
         </div>
         <div>
-          <Label className="text-xs text-[#aaa]">Schedule For</Label>
+          <Label className="text-xs text-muted-foreground">Schedule For</Label>
           <Input
             type="datetime-local"
             value={form.scheduledFor}
             onChange={(e) => setForm((f) => ({ ...f, scheduledFor: e.target.value }))}
-            className="mt-1 text-sm bg-[#111] border-[#333]"
+            className="mt-1 text-sm bg-muted border-border"
           />
         </div>
       </div>
 
       <div className="flex gap-2 pt-2">
-        <Button type="button" variant="outline" onClick={onClose} className="flex-1 border-[#333]">
+        <Button type="button" variant="outline" onClick={onClose} className="flex-1 border-border">
           Cancel
         </Button>
         <Button
@@ -608,8 +608,8 @@ function ScheduledPostRow({ post, onRefresh }: { post: any; onRefresh: () => voi
   const isOverdue = !post.posted && new Date(post.scheduledFor) < new Date();
 
   return (
-    <div className="flex items-start gap-3 p-3 rounded-lg bg-[#1a1a1a] border border-[#2a2a2a]">
-      <div className="w-12 h-12 rounded-md bg-[#111] border border-[#333] flex-shrink-0 overflow-hidden">
+    <div className="flex items-start gap-3 p-3 rounded-lg bg-card border border-border">
+      <div className="w-12 h-12 rounded-md bg-muted border border-border flex-shrink-0 overflow-hidden">
         {post.imageUrl ? (
           <img src={post.imageUrl} alt="" className="w-full h-full object-cover" />
         ) : (
@@ -619,12 +619,12 @@ function ScheduledPostRow({ post, onRefresh }: { post: any; onRefresh: () => voi
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-white line-clamp-2">{post.caption}</p>
+        <p className="text-sm text-foreground line-clamp-2">{post.caption}</p>
         {post.hashtags && (
           <p className="text-xs text-[#F5C72C]/70 mt-0.5 line-clamp-1">{post.hashtags}</p>
         )}
         <div className="flex items-center gap-2 mt-1.5">
-          <Badge variant="outline" className="text-[10px] border-[#333] text-[#888]">
+          <Badge variant="outline" className="text-[10px] border-border text-[#888]">
             {post.contentType.replace("_", " ")}
           </Badge>
           <span className={`flex items-center gap-1 text-[10px] ${isOverdue ? "text-red-400" : "text-[#888]"}`}>
@@ -691,12 +691,12 @@ export default function InstagramDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <Instagram className="h-6 w-6 text-[#F5C72C]" />
             Instagram
           </h1>
           <p className="text-sm text-[#888] mt-1">
-            @golfvxarlingtonheights · Live feed, AI analysis &amp; content scheduler
+            @golfvxarlingtonheights · Live feed
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -704,7 +704,7 @@ export default function InstagramDashboard() {
             variant="outline"
             size="sm"
             onClick={handleRefresh}
-            className="border-[#333] text-[#aaa] hover:text-white"
+            className="border-border text-muted-foreground hover:text-foreground"
           >
             <RefreshCw className="h-4 w-4 mr-1.5" />
             Refresh
@@ -737,40 +737,40 @@ export default function InstagramDashboard() {
       {/* Account Stats */}
       {!statsLoading && accountStats && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-          <Card className="bg-[#1a1a1a] border-[#2a2a2a]">
+          <Card className="bg-card border-border">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full bg-[#F5C72C]/10 flex items-center justify-center">
                   <Users className="h-4 w-4 text-[#F5C72C]" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-white">{formatCount(accountStats.followers_count)}</p>
+                  <p className="text-2xl font-bold text-foreground">{formatCount(accountStats.followers_count)}</p>
                   <p className="text-xs text-[#888]">Followers</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-[#1a1a1a] border-[#2a2a2a]">
+          <Card className="bg-card border-border">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full bg-[#F5C72C]/10 flex items-center justify-center">
                   <Image className="h-4 w-4 text-[#F5C72C]" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-white">{accountStats.media_count}</p>
+                  <p className="text-2xl font-bold text-foreground">{accountStats.media_count}</p>
                   <p className="text-xs text-[#888]">Total Posts</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-[#1a1a1a] border-[#2a2a2a]">
+          <Card className="bg-card border-border">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full bg-[#F5C72C]/10 flex items-center justify-center">
                   <Calendar className="h-4 w-4 text-[#F5C72C]" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-white">{scheduledPosts?.length ?? 0}</p>
+                  <p className="text-2xl font-bold text-foreground">{scheduledPosts?.length ?? 0}</p>
                   <p className="text-xs text-[#888]">Scheduled</p>
                 </div>
               </div>
@@ -779,100 +779,50 @@ export default function InstagramDashboard() {
         </div>
       )}
 
-      {/* Tabs: Daily Analysis | Feed | Scheduler */}
-      <Tabs defaultValue="feed" className="space-y-4">
-        <TabsList className="bg-[#1a1a1a] border border-[#2a2a2a]">
-          <TabsTrigger value="feed" className="data-[state=active]:bg-[#F5C72C] data-[state=active]:text-black">
-            <Instagram className="h-3.5 w-3.5 mr-1.5" />
-            Live Feed
-          </TabsTrigger>
-          <TabsTrigger value="scheduler" className="data-[state=active]:bg-[#F5C72C] data-[state=active]:text-black">
-            <Calendar className="h-3.5 w-3.5 mr-1.5" />
-            Scheduler
-            {(scheduledPosts?.length ?? 0) > 0 && (
-              <Badge className="ml-1.5 h-4 px-1 text-[10px] bg-[#F5C72C]/20 text-[#F5C72C] border-[#F5C72C]/30">
-                {scheduledPosts!.length}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="analysis" className="data-[state=active]:bg-[#F5C72C] data-[state=active]:text-black">
-            <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-            Daily Analysis
-          </TabsTrigger>
-        </TabsList>
-
-        {/* ── Feed Tab ── */}
-        <TabsContent value="feed" className="space-y-4">
-          {feedLoading ? (
+      {/* Live Feed */}
+      <div className="space-y-4">
+        {feedLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="aspect-square rounded-xl bg-card animate-pulse" />
+            ))}
+          </div>
+        ) : feedError ? (
+          <div className="text-center py-12 text-[#888]">
+            <AlertCircle className="h-8 w-8 mx-auto mb-3 text-red-400" />
+            <p>Could not load feed. Check API token.</p>
+          </div>
+        ) : feed && feed.length > 0 ? (
+          <>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="aspect-square rounded-xl bg-[#1a1a1a] animate-pulse" />
+              {feed.map((post) => (
+                <PostCard key={post.id} post={post} />
               ))}
             </div>
-          ) : feedError ? (
-            <div className="text-center py-12 text-[#888]">
-              <AlertCircle className="h-8 w-8 mx-auto mb-3 text-red-400" />
-              <p>Could not load feed. Check API token.</p>
-            </div>
-          ) : feed && feed.length > 0 ? (
-            <>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                {feed.map((post) => (
-                  <PostCard key={post.id} post={post} />
-                ))}
+            {feed.length >= feedLimit && (
+              <div className="text-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setFeedLimit((l) => l + 12)}
+                  className="border-border text-muted-foreground hover:text-foreground"
+                >
+                  Load More
+                </Button>
               </div>
-              {feed.length >= feedLimit && (
-                <div className="text-center">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setFeedLimit((l) => l + 12)}
-                    className="border-[#333] text-[#aaa] hover:text-white"
-                  >
-                    Load More
-                  </Button>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="text-center py-12 text-[#888]">
-              <Instagram className="h-8 w-8 mx-auto mb-3 text-[#444]" />
-              <p>No posts found.</p>
-            </div>
-          )}
-        </TabsContent>
-
-        {/* ── Scheduler Tab ── */}
-        <TabsContent value="scheduler" className="space-y-3">
-          {scheduledPosts && scheduledPosts.length > 0 ? (
-            scheduledPosts.map((post) => (
-              <ScheduledPostRow key={post.id} post={post} onRefresh={refetchScheduled} />
-            ))
-          ) : (
-            <div className="text-center py-12 text-[#888]">
-              <Calendar className="h-8 w-8 mx-auto mb-3 text-[#444]" />
-              <p className="mb-4">No scheduled posts yet.</p>
-              <Button
-                size="sm"
-                onClick={() => setScheduleOpen(true)}
-                className="bg-[#F5C72C] text-black hover:bg-[#F5C72C]/90"
-              >
-                <Plus className="h-4 w-4 mr-1.5" />
-                Schedule First Post
-              </Button>
-            </div>
-          )}
-        </TabsContent>
-
-        {/* ── Daily Analysis Tab ── */}
-        <TabsContent value="analysis">
-          <DailyAnalysisTab />
-        </TabsContent>
-      </Tabs>
+            )}
+          </>
+        ) : (
+          <div className="text-center py-12 text-[#888]">
+            <Instagram className="h-8 w-8 mx-auto mb-3 text-[#444]" />
+            <p>No posts found.</p>
+          </div>
+        )}
+      </div>
 
       {/* Schedule Post Dialog */}
       <Dialog open={scheduleOpen} onOpenChange={setScheduleOpen}>
-        <DialogContent className="bg-[#111] border-[#2a2a2a] text-white max-w-lg">
+        <DialogContent className="bg-muted border-border text-foreground max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-[#F5C72C]" />
