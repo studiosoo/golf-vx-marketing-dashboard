@@ -204,6 +204,157 @@ Keep the caption under 300 words. Make it engaging and authentic.`;
         .where(eq(instagramRecommendations.id, input.id));
       return { success: true };
     }),
+
+  // ── Token Expiry Check ───────────────────────────────────────────────────
+  checkTokenExpiry: protectedProcedure.query(async () => {
+    const token = process.env.INSTAGRAM_ACCESS_TOKEN ?? '';
+    if (!token) return { valid: false, daysRemaining: 0, expiresAt: null, warning: true };
+    try {
+      const url = `https://graph.facebook.com/debug_token?input_token=${token}&access_token=${token}`;
+      const res = await fetch(url);
+      if (!res.ok) return { valid: false, daysRemaining: 0, expiresAt: null, warning: true };
+      const data = await res.json() as any;
+      const tokenData = data?.data;
+      if (!tokenData?.is_valid) return { valid: false, daysRemaining: 0, expiresAt: null, warning: true };
+      // expires_at = 0 means never expires (system user token)
+      if (!tokenData.expires_at || tokenData.expires_at === 0) {
+        return { valid: true, daysRemaining: 999, expiresAt: null, warning: false };
+      }
+      const expiresAt = new Date(tokenData.expires_at * 1000);
+      const daysRemaining = Math.floor((expiresAt.getTime() - Date.now()) / 86400000);
+      return { valid: true, daysRemaining, expiresAt: expiresAt.toISOString(), warning: daysRemaining <= 7 };
+    } catch {
+      // If debug_token fails, just validate by calling the API
+      try {
+        const { validateToken } = await import('../instagramFeed');
+        const result = await validateToken();
+        return { valid: result.valid, daysRemaining: result.valid ? 60 : 0, expiresAt: null, warning: false };
+      } catch {
+        return { valid: false, daysRemaining: 0, expiresAt: null, warning: true };
+      }
+    }
+  }),
+
+  // ── AI Daily Analysis (from live feed) ──────────────────────────────────
+  getDailyAnalysis: protectedProcedure.query(async () => {
+    const { fetchMediaFeed, fetchAccountStats } = await import('../instagramFeed');
+    const { invokeLLM } = await import('../_core/llm');
+    const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    // Fetch live data
+    const [posts, account] = await Promise.all([
+      fetchMediaFeed(20),
+      fetchAccountStats(),
+    ]);
+
+    // Compute post performance metrics
+    const totalLikes = posts.reduce((s, p) => s + (p.like_count ?? 0), 0);
+    const totalComments = posts.reduce((s, p) => s + (p.comments_count ?? 0), 0);
+    const avgLikes = posts.length > 0 ? Math.round(totalLikes / posts.length) : 0;
+    const avgComments = posts.length > 0 ? Math.round(totalComments / posts.length) : 0;
+    const followers = account.followers_count;
+    const avgEngagement = followers > 0 ? (((totalLikes + totalComments) / posts.length) / followers * 100).toFixed(2) : '0';
+
+    // Top 3 posts by engagement
+    const topPosts = [...posts]
+      .sort((a, b) => (b.like_count + b.comments_count) - (a.like_count + a.comments_count))
+      .slice(0, 3)
+      .map(p => ({
+        caption: p.caption?.slice(0, 120) ?? '(no caption)',
+        likes: p.like_count,
+        comments: p.comments_count,
+        type: p.media_type,
+        daysAgo: Math.floor((Date.now() - new Date(p.timestamp).getTime()) / 86400000),
+      }));
+
+    // Content type breakdown
+    const typeBreakdown = posts.reduce((acc, p) => {
+      acc[p.media_type] = (acc[p.media_type] ?? 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    // Build AI prompt
+    const prompt = `Today is ${today}. You are the Instagram strategist for Golf VX Arlington Heights, a premium indoor golf simulator facility in Arlington Heights, IL.
+
+ACCOUNT SNAPSHOT:
+- Followers: ${followers} (Goal: 500)
+- Total Posts Analyzed: ${posts.length}
+- Avg Likes per Post: ${avgLikes}
+- Avg Comments per Post: ${avgComments}
+- Avg Engagement Rate: ${avgEngagement}%
+- Content Mix: ${JSON.stringify(typeBreakdown)}
+
+TOP PERFORMING POSTS (last 20):
+${topPosts.map((p, i) => `${i + 1}. [${p.type}] ${p.daysAgo}d ago — ${p.likes} likes, ${p.comments} comments\n   Caption: "${p.caption}"`).join('\n')}
+
+GOLF VX CONTEXT:
+- Services: $25/$35 trial sessions, All Access Ace ($399/mo), Swing Saver ($199/mo), Golf VX Pro ($99/mo)
+- Current programs: Sunday Drive Day clinics, Winter Clinics, Junior programs
+- Target: 25-55 year old golfers in Arlington Heights area
+- Goal: Drive trial session bookings + grow to 500 followers
+
+Generate a concise daily Instagram action plan with:
+1. ONE specific post idea for today (caption draft + content type + best posting time)
+2. Key insight from the performance data (what's working, what's not)
+3. One quick win action (under 15 min) to boost engagement today
+4. Token/follower progress note toward 500 goal
+
+Return as JSON.`;
+
+    const response = await invokeLLM({
+      messages: [
+        { role: 'system', content: 'You are an expert Instagram marketing strategist. Return only valid JSON.' },
+        { role: 'user', content: prompt },
+      ],
+      response_format: {
+        type: 'json_schema',
+        json_schema: {
+          name: 'daily_analysis',
+          strict: true,
+          schema: {
+            type: 'object',
+            properties: {
+              todayPostIdea: {
+                type: 'object',
+                properties: {
+                  contentType: { type: 'string' },
+                  captionDraft: { type: 'string' },
+                  bestTime: { type: 'string' },
+                  hashtags: { type: 'string' },
+                },
+                required: ['contentType', 'captionDraft', 'bestTime', 'hashtags'],
+                additionalProperties: false,
+              },
+              keyInsight: { type: 'string' },
+              quickWin: { type: 'string' },
+              followerProgress: { type: 'string' },
+              engagementScore: { type: 'string' },
+            },
+            required: ['todayPostIdea', 'keyInsight', 'quickWin', 'followerProgress', 'engagementScore'],
+            additionalProperties: false,
+          },
+        },
+      },
+    });
+
+    const content = response.choices[0].message.content;
+    if (!content || typeof content !== 'string') throw new Error('No AI response');
+    const analysis = JSON.parse(content);
+
+    return {
+      analysis,
+      metrics: {
+        followers,
+        totalPosts: account.media_count,
+        avgLikes,
+        avgComments,
+        avgEngagement,
+        topPosts,
+        typeBreakdown,
+      },
+      generatedAt: new Date().toISOString(),
+    };
+  }),
 });
 
 export const previewRouter = router({

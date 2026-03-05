@@ -1103,3 +1103,10 @@
 - [x] Update INSTAGRAM_ACCESS_TOKEN secret with new long-lived token
 - [x] Validate token against Graph API (ID: 2130933377721663, Name: Soohyun Kim)
 - [x] Write vitest test for token validation — 2/2 passed
+
+## Feature: Instagram Daily Analysis + Token Auto-Alert (2026-03-05)
+- [x] Add server endpoint: getDailyAnalysis — fetches live feed posts + account stats, runs AI analysis
+- [x] Add server endpoint: checkTokenExpiry — validates token and returns days remaining
+- [x] Replace InstagramFeed with unified Instagram page (Daily Analysis + Live Feed + Scheduler tabs)
+- [x] Token expiry warning banner: red if expired, yellow if expiring within 7 days
+- [x] AI daily content strategy: analyzes recent post performance, generates today's caption + best time + quick win

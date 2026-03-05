@@ -6,7 +6,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +18,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -32,7 +30,6 @@ import {
   Instagram,
   Heart,
   MessageCircle,
-  ExternalLink,
   RefreshCw,
   Users,
   Image,
@@ -41,11 +38,17 @@ import {
   Trash2,
   Send,
   Sparkles,
-  CheckCircle,
   AlertCircle,
   Clock,
   Play,
   Layers,
+  TrendingUp,
+  Zap,
+  Target,
+  AlertTriangle,
+  CheckCircle2,
+  BarChart3,
+  Copy,
 } from "lucide-react";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -71,6 +74,52 @@ function timeAgo(iso: string): string {
   return `${Math.floor(days / 30)}mo ago`;
 }
 
+// ─── Token Warning Banner ─────────────────────────────────────────────────────
+
+function TokenWarningBanner() {
+  const { data: tokenStatus } = trpc.instagram.checkTokenExpiry.useQuery(undefined, {
+    retry: 1,
+    staleTime: 1000 * 60 * 60, // 1 hour
+  });
+
+  if (!tokenStatus || (!tokenStatus.warning && tokenStatus.valid)) return null;
+
+  if (!tokenStatus.valid) {
+    return (
+      <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
+        <AlertTriangle className="h-4 w-4 flex-shrink-0" />
+        <div>
+          <p className="font-semibold">Instagram Token Expired</p>
+          <p className="text-xs mt-0.5 text-red-400/80">
+            Your access token is invalid. Go to{" "}
+            <a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noopener noreferrer" className="underline">
+              Meta Graph API Explorer
+            </a>{" "}
+            to generate a new long-lived token.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (tokenStatus.warning && tokenStatus.daysRemaining <= 7) {
+    return (
+      <div className="flex items-center gap-3 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl text-yellow-400 text-sm">
+        <AlertTriangle className="h-4 w-4 flex-shrink-0" />
+        <div>
+          <p className="font-semibold">Token Expiring Soon — {tokenStatus.daysRemaining} days remaining</p>
+          <p className="text-xs mt-0.5 text-yellow-400/80">
+            Renew your Instagram access token before it expires to avoid interruption.{" "}
+            {tokenStatus.expiresAt && `Expires: ${new Date(tokenStatus.expiresAt).toLocaleDateString()}`}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+}
+
 // ─── Post Card ────────────────────────────────────────────────────────────────
 
 function PostCard({ post }: { post: any }) {
@@ -82,7 +131,6 @@ function PostCard({ post }: { post: any }) {
       rel="noopener noreferrer"
       className="group relative block rounded-xl overflow-hidden bg-[#1a1a1a] border border-[#2a2a2a] hover:border-[#F5C72C]/50 transition-all"
     >
-      {/* Thumbnail */}
       <div className="relative aspect-square bg-[#111]">
         {imgSrc ? (
           <img
@@ -96,11 +144,9 @@ function PostCard({ post }: { post: any }) {
             <Instagram className="h-8 w-8 text-[#444]" />
           </div>
         )}
-        {/* Media type badge */}
         <div className="absolute top-2 right-2 bg-black/60 rounded-md px-1.5 py-0.5 flex items-center gap-1 text-white text-xs">
           {mediaTypeIcon(post.media_type)}
         </div>
-        {/* Hover overlay */}
         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
           <span className="flex items-center gap-1 text-white text-sm font-semibold">
             <Heart className="h-4 w-4 fill-white" />
@@ -112,7 +158,6 @@ function PostCard({ post }: { post: any }) {
           </span>
         </div>
       </div>
-      {/* Caption */}
       <div className="p-3">
         <p className="text-xs text-[#aaa] line-clamp-2 leading-relaxed">
           {post.caption || <span className="italic text-[#555]">No caption</span>}
@@ -132,6 +177,258 @@ function PostCard({ post }: { post: any }) {
         </div>
       </div>
     </a>
+  );
+}
+
+// ─── Daily Analysis Tab ───────────────────────────────────────────────────────
+
+function DailyAnalysisTab() {
+  const { toast } = useToast();
+  const { data, isLoading, error, refetch, isFetching } = trpc.instagram.getDailyAnalysis.useQuery(undefined, {
+    retry: 1,
+    staleTime: 1000 * 60 * 30, // 30 min cache
+  });
+
+  const copyCaption = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({ title: "Copied!", description: "Caption copied to clipboard." });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-3 p-4 bg-[#1a1a1a] rounded-xl border border-[#2a2a2a]">
+          <Sparkles className="h-5 w-5 text-[#F5C72C] animate-pulse" />
+          <div>
+            <p className="text-sm font-semibold text-white">Analyzing your Instagram performance...</p>
+            <p className="text-xs text-[#888] mt-0.5">Fetching live data and generating AI insights</p>
+          </div>
+        </div>
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="h-28 rounded-xl bg-[#1a1a1a] animate-pulse border border-[#2a2a2a]" />
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
+        <AlertCircle className="h-4 w-4 flex-shrink-0" />
+        <div>
+          <p className="font-semibold">Analysis failed</p>
+          <p className="text-xs mt-0.5 text-red-400/80">{error.message}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) return null;
+
+  const { analysis, metrics, generatedAt } = data;
+  const followerGoal = 500;
+  const followerPct = Math.min(100, Math.round((metrics.followers / followerGoal) * 100));
+  const engagementNum = parseFloat(metrics.avgEngagement);
+  const engagementLabel = engagementNum >= 3 ? "Excellent" : engagementNum >= 1 ? "Good" : "Needs Work";
+  const engagementColor = engagementNum >= 3 ? "text-green-400" : engagementNum >= 1 ? "text-[#F5C72C]" : "text-red-400";
+
+  return (
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-4 w-4 text-[#F5C72C]" />
+          <span className="text-xs text-[#888]">
+            Generated {new Date(generatedAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+          </span>
+        </div>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => refetch()}
+          disabled={isFetching}
+          className="border-[#333] text-[#aaa] hover:text-white h-7 text-xs"
+        >
+          {isFetching ? <RefreshCw className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+          <span className="ml-1.5">Refresh</span>
+        </Button>
+      </div>
+
+      {/* Key Metrics Row */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <Card className="bg-[#1a1a1a] border-[#2a2a2a]">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <Users className="h-3.5 w-3.5 text-[#F5C72C]" />
+              <span className="text-[10px] text-[#888] uppercase tracking-wide">Followers</span>
+            </div>
+            <p className="text-2xl font-bold text-white">{metrics.followers.toLocaleString()}</p>
+            <div className="mt-2">
+              <div className="flex justify-between text-[10px] text-[#555] mb-1">
+                <span>{followerPct}% of goal</span>
+                <span>{followerGoal}</span>
+              </div>
+              <div className="h-1 bg-[#2a2a2a] rounded-full">
+                <div
+                  className="h-1 bg-[#F5C72C] rounded-full transition-all"
+                  style={{ width: `${followerPct}%` }}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-[#1a1a1a] border-[#2a2a2a]">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <Target className="h-3.5 w-3.5 text-[#F5C72C]" />
+              <span className="text-[10px] text-[#888] uppercase tracking-wide">Engagement</span>
+            </div>
+            <p className="text-2xl font-bold text-white">{metrics.avgEngagement}%</p>
+            <p className={`text-xs mt-1 ${engagementColor}`}>{engagementLabel}</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-[#1a1a1a] border-[#2a2a2a]">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <Heart className="h-3.5 w-3.5 text-[#F5C72C]" />
+              <span className="text-[10px] text-[#888] uppercase tracking-wide">Avg Likes</span>
+            </div>
+            <p className="text-2xl font-bold text-white">{metrics.avgLikes}</p>
+            <p className="text-xs text-[#555] mt-1">per post</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-[#1a1a1a] border-[#2a2a2a]">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <BarChart3 className="h-3.5 w-3.5 text-[#F5C72C]" />
+              <span className="text-[10px] text-[#888] uppercase tracking-wide">Content Mix</span>
+            </div>
+            <div className="space-y-1 mt-1">
+              {Object.entries(metrics.typeBreakdown).map(([type, count]) => (
+                <div key={type} className="flex justify-between text-xs">
+                  <span className="text-[#888]">{type === "CAROUSEL_ALBUM" ? "Carousel" : type === "VIDEO" ? "Video" : "Image"}</span>
+                  <span className="text-white font-medium">{count as number}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Today's Post Idea */}
+      <Card className="bg-[#1a1a1a] border-[#F5C72C]/20">
+        <CardHeader className="pb-3 pt-4 px-4">
+          <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
+            <Zap className="h-4 w-4 text-[#F5C72C]" />
+            Today's Post Idea
+            <Badge className="ml-auto text-[10px] bg-[#F5C72C]/10 text-[#F5C72C] border-[#F5C72C]/30 font-normal">
+              {analysis.todayPostIdea.contentType}
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="px-4 pb-4 space-y-3">
+          <div className="bg-[#111] rounded-lg p-3 relative">
+            <p className="text-sm text-[#ddd] leading-relaxed whitespace-pre-wrap">{analysis.todayPostIdea.captionDraft}</p>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="absolute top-2 right-2 h-6 w-6 p-0 text-[#555] hover:text-[#F5C72C]"
+              onClick={() => copyCaption(analysis.todayPostIdea.captionDraft)}
+            >
+              <Copy className="h-3 w-3" />
+            </Button>
+          </div>
+          {analysis.todayPostIdea.hashtags && (
+            <div className="bg-[#111] rounded-lg p-3 relative">
+              <p className="text-xs text-[#F5C72C]/80 leading-relaxed">{analysis.todayPostIdea.hashtags}</p>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="absolute top-2 right-2 h-6 w-6 p-0 text-[#555] hover:text-[#F5C72C]"
+                onClick={() => copyCaption(analysis.todayPostIdea.hashtags)}
+              >
+                <Copy className="h-3 w-3" />
+              </Button>
+            </div>
+          )}
+          <div className="flex items-center gap-2 text-xs text-[#888]">
+            <Clock className="h-3.5 w-3.5" />
+            Best time to post: <span className="text-[#F5C72C] font-medium">{analysis.todayPostIdea.bestTime}</span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Insights Row */}
+      <div className="grid sm:grid-cols-2 gap-4">
+        {/* Key Insight */}
+        <Card className="bg-[#1a1a1a] border-[#2a2a2a]">
+          <CardHeader className="pb-2 pt-4 px-4">
+            <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-[#F5C72C]" />
+              Key Insight
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="px-4 pb-4">
+            <p className="text-sm text-[#ccc] leading-relaxed">{analysis.keyInsight}</p>
+          </CardContent>
+        </Card>
+
+        {/* Quick Win */}
+        <Card className="bg-[#1a1a1a] border-[#2a2a2a]">
+          <CardHeader className="pb-2 pt-4 px-4">
+            <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-green-400" />
+              Quick Win (15 min)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="px-4 pb-4">
+            <p className="text-sm text-[#ccc] leading-relaxed">{analysis.quickWin}</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Follower Progress */}
+      <Card className="bg-[#1a1a1a] border-[#2a2a2a]">
+        <CardContent className="p-4 flex items-start gap-3">
+          <Users className="h-4 w-4 text-[#F5C72C] mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="text-xs font-semibold text-[#F5C72C] mb-1">Follower Goal Progress</p>
+            <p className="text-sm text-[#ccc] leading-relaxed">{analysis.followerProgress}</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Top Posts */}
+      {metrics.topPosts.length > 0 && (
+        <div>
+          <h3 className="text-xs font-semibold text-[#888] uppercase tracking-wide mb-3">Top Performing Posts</h3>
+          <div className="space-y-2">
+            {metrics.topPosts.map((post: any, i: number) => (
+              <div key={i} className="flex items-center gap-3 p-3 bg-[#1a1a1a] rounded-lg border border-[#2a2a2a]">
+                <div className="w-6 h-6 rounded-full bg-[#F5C72C]/10 flex items-center justify-center text-[#F5C72C] text-xs font-bold flex-shrink-0">
+                  {i + 1}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-[#ccc] line-clamp-1">{post.caption}</p>
+                  <p className="text-[10px] text-[#555] mt-0.5">{post.daysAgo}d ago · {post.type}</p>
+                </div>
+                <div className="flex items-center gap-3 text-[10px] text-[#777] flex-shrink-0">
+                  <span className="flex items-center gap-1">
+                    <Heart className="h-3 w-3" />{post.likes}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <MessageCircle className="h-3 w-3" />{post.comments}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -185,7 +482,6 @@ function SchedulerForm({ onClose }: { onClose: () => void }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {/* AI Caption Generator */}
       <div className="bg-[#F5C72C]/5 border border-[#F5C72C]/20 rounded-lg p-4">
         <p className="text-xs font-semibold text-[#F5C72C] mb-3 flex items-center gap-1.5">
           <Sparkles className="h-3.5 w-3.5" />
@@ -198,10 +494,7 @@ function SchedulerForm({ onClose }: { onClose: () => void }) {
             onChange={(e) => setForm((f) => ({ ...f, topic: e.target.value }))}
             className="flex-1 text-sm bg-[#111] border-[#333]"
           />
-          <Select
-            value={form.tone}
-            onValueChange={(v) => setForm((f) => ({ ...f, tone: v as any }))}
-          >
+          <Select value={form.tone} onValueChange={(v) => setForm((f) => ({ ...f, tone: v as any }))}>
             <SelectTrigger className="w-32 text-xs bg-[#111] border-[#333]">
               <SelectValue />
             </SelectTrigger>
@@ -217,21 +510,14 @@ function SchedulerForm({ onClose }: { onClose: () => void }) {
             size="sm"
             variant="outline"
             disabled={!form.topic || captionMutation.isPending}
-            onClick={() =>
-              captionMutation.mutate({ topic: form.topic, tone: form.tone, includeHashtags: true })
-            }
+            onClick={() => captionMutation.mutate({ topic: form.topic, tone: form.tone, includeHashtags: true })}
             className="border-[#F5C72C]/40 text-[#F5C72C] hover:bg-[#F5C72C]/10"
           >
-            {captionMutation.isPending ? (
-              <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Sparkles className="h-3.5 w-3.5" />
-            )}
+            {captionMutation.isPending ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
           </Button>
         </div>
       </div>
 
-      {/* Caption */}
       <div>
         <Label className="text-xs text-[#aaa]">Caption *</Label>
         <Textarea
@@ -243,7 +529,6 @@ function SchedulerForm({ onClose }: { onClose: () => void }) {
         />
       </div>
 
-      {/* Hashtags */}
       <div>
         <Label className="text-xs text-[#aaa]">Hashtags</Label>
         <Input
@@ -254,7 +539,6 @@ function SchedulerForm({ onClose }: { onClose: () => void }) {
         />
       </div>
 
-      {/* Image URL */}
       <div>
         <Label className="text-xs text-[#aaa]">Image URL (required to publish)</Label>
         <Input
@@ -265,14 +549,10 @@ function SchedulerForm({ onClose }: { onClose: () => void }) {
         />
       </div>
 
-      {/* Content Type & Schedule */}
       <div className="grid grid-cols-2 gap-3">
         <div>
           <Label className="text-xs text-[#aaa]">Post Type</Label>
-          <Select
-            value={form.contentType}
-            onValueChange={(v) => setForm((f) => ({ ...f, contentType: v as any }))}
-          >
+          <Select value={form.contentType} onValueChange={(v) => setForm((f) => ({ ...f, contentType: v as any }))}>
             <SelectTrigger className="mt-1 text-sm bg-[#111] border-[#333]">
               <SelectValue />
             </SelectTrigger>
@@ -304,11 +584,7 @@ function SchedulerForm({ onClose }: { onClose: () => void }) {
           disabled={scheduleMutation.isPending}
           className="flex-1 bg-[#F5C72C] text-black hover:bg-[#F5C72C]/90"
         >
-          {scheduleMutation.isPending ? (
-            <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-          ) : (
-            <Calendar className="h-4 w-4 mr-2" />
-          )}
+          {scheduleMutation.isPending ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <Calendar className="h-4 w-4 mr-2" />}
           Schedule Post
         </Button>
       </div>
@@ -333,7 +609,6 @@ function ScheduledPostRow({ post, onRefresh }: { post: any; onRefresh: () => voi
 
   return (
     <div className="flex items-start gap-3 p-3 rounded-lg bg-[#1a1a1a] border border-[#2a2a2a]">
-      {/* Thumbnail or placeholder */}
       <div className="w-12 h-12 rounded-md bg-[#111] border border-[#333] flex-shrink-0 overflow-hidden">
         {post.imageUrl ? (
           <img src={post.imageUrl} alt="" className="w-full h-full object-cover" />
@@ -343,8 +618,6 @@ function ScheduledPostRow({ post, onRefresh }: { post: any; onRefresh: () => voi
           </div>
         )}
       </div>
-
-      {/* Content */}
       <div className="flex-1 min-w-0">
         <p className="text-sm text-white line-clamp-2">{post.caption}</p>
         {post.hashtags && (
@@ -363,8 +636,6 @@ function ScheduledPostRow({ post, onRefresh }: { post: any; onRefresh: () => voi
           </span>
         </div>
       </div>
-
-      {/* Actions */}
       <div className="flex items-center gap-1.5 flex-shrink-0">
         {!post.posted && post.imageUrl && (
           <Button
@@ -374,11 +645,7 @@ function ScheduledPostRow({ post, onRefresh }: { post: any; onRefresh: () => voi
             onClick={() => publishMutation.mutate({ id: post.id })}
             className="h-7 px-2 text-xs border-[#F5C72C]/40 text-[#F5C72C] hover:bg-[#F5C72C]/10"
           >
-            {publishMutation.isPending ? (
-              <RefreshCw className="h-3 w-3 animate-spin" />
-            ) : (
-              <Send className="h-3 w-3" />
-            )}
+            {publishMutation.isPending ? <RefreshCw className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
           </Button>
         )}
         <Button
@@ -411,9 +678,6 @@ export default function InstagramDashboard() {
   const { data: scheduledPosts, refetch: refetchScheduled } =
     trpc.instagram.getScheduledPosts.useQuery({ includePosted: false });
 
-  const { data: postedPosts } =
-    trpc.instagram.getScheduledPosts.useQuery({ includePosted: true });
-
   const handleRefresh = () => {
     refetchStats();
     refetchFeed();
@@ -432,7 +696,7 @@ export default function InstagramDashboard() {
             Instagram
           </h1>
           <p className="text-sm text-[#888] mt-1">
-            @golfvxarlingtonheights · Live feed &amp; content scheduler
+            @golfvxarlingtonheights · Live feed, AI analysis &amp; content scheduler
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -456,6 +720,9 @@ export default function InstagramDashboard() {
         </div>
       </div>
 
+      {/* Token Warning Banner */}
+      <TokenWarningBanner />
+
       {/* API Error Banner */}
       {apiError && (
         <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
@@ -468,13 +735,7 @@ export default function InstagramDashboard() {
       )}
 
       {/* Account Stats */}
-      {statsLoading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="h-24 rounded-xl bg-[#1a1a1a] animate-pulse" />
-          ))}
-        </div>
-      ) : accountStats ? (
+      {!statsLoading && accountStats && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <Card className="bg-[#1a1a1a] border-[#2a2a2a]">
             <CardContent className="p-4">
@@ -483,9 +744,7 @@ export default function InstagramDashboard() {
                   <Users className="h-4 w-4 text-[#F5C72C]" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-white">
-                    {formatCount(accountStats.followers_count)}
-                  </p>
+                  <p className="text-2xl font-bold text-white">{formatCount(accountStats.followers_count)}</p>
                   <p className="text-xs text-[#888]">Followers</p>
                 </div>
               </div>
@@ -511,20 +770,22 @@ export default function InstagramDashboard() {
                   <Calendar className="h-4 w-4 text-[#F5C72C]" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-white">
-                    {scheduledPosts?.length ?? 0}
-                  </p>
+                  <p className="text-2xl font-bold text-white">{scheduledPosts?.length ?? 0}</p>
                   <p className="text-xs text-[#888]">Scheduled</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
-      ) : null}
+      )}
 
-      {/* Tabs: Feed | Scheduler */}
-      <Tabs defaultValue="feed" className="space-y-4">
+      {/* Tabs: Daily Analysis | Feed | Scheduler */}
+      <Tabs defaultValue="analysis" className="space-y-4">
         <TabsList className="bg-[#1a1a1a] border border-[#2a2a2a]">
+          <TabsTrigger value="analysis" className="data-[state=active]:bg-[#F5C72C] data-[state=active]:text-black">
+            <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+            Daily Analysis
+          </TabsTrigger>
           <TabsTrigger value="feed" className="data-[state=active]:bg-[#F5C72C] data-[state=active]:text-black">
             <Instagram className="h-3.5 w-3.5 mr-1.5" />
             Live Feed
@@ -539,6 +800,11 @@ export default function InstagramDashboard() {
             )}
           </TabsTrigger>
         </TabsList>
+
+        {/* ── Daily Analysis Tab ── */}
+        <TabsContent value="analysis">
+          <DailyAnalysisTab />
+        </TabsContent>
 
         {/* ── Feed Tab ── */}
         <TabsContent value="feed" className="space-y-4">
@@ -582,85 +848,23 @@ export default function InstagramDashboard() {
         </TabsContent>
 
         {/* ── Scheduler Tab ── */}
-        <TabsContent value="scheduler" className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-semibold text-white">Content Queue</h3>
-              <p className="text-xs text-[#888] mt-0.5">
-                Schedule posts and publish directly to Instagram
-              </p>
-            </div>
-            <Button
-              size="sm"
-              onClick={() => setScheduleOpen(true)}
-              className="bg-[#F5C72C] text-black hover:bg-[#F5C72C]/90"
-            >
-              <Plus className="h-4 w-4 mr-1.5" />
-              New Post
-            </Button>
-          </div>
-
-          {/* Pending */}
+        <TabsContent value="scheduler" className="space-y-3">
           {scheduledPosts && scheduledPosts.length > 0 ? (
-            <div className="space-y-2">
-              <p className="text-xs font-semibold text-[#888] uppercase tracking-wide">
-                Pending ({scheduledPosts.length})
-              </p>
-              {scheduledPosts.map((post) => (
-                <ScheduledPostRow
-                  key={post.id}
-                  post={post}
-                  onRefresh={refetchScheduled}
-                />
-              ))}
-            </div>
+            scheduledPosts.map((post) => (
+              <ScheduledPostRow key={post.id} post={post} onRefresh={refetchScheduled} />
+            ))
           ) : (
-            <div className="text-center py-10 border border-dashed border-[#2a2a2a] rounded-xl">
+            <div className="text-center py-12 text-[#888]">
               <Calendar className="h-8 w-8 mx-auto mb-3 text-[#444]" />
-              <p className="text-sm text-[#888]">No posts scheduled</p>
-              <p className="text-xs text-[#555] mt-1">
-                Click "New Post" to schedule your first Instagram post
-              </p>
-            </div>
-          )}
-
-          {/* Published history */}
-          {postedPosts && postedPosts.filter((p) => p.posted).length > 0 && (
-            <div className="space-y-2 mt-4">
-              <p className="text-xs font-semibold text-[#888] uppercase tracking-wide flex items-center gap-1.5">
-                <CheckCircle className="h-3.5 w-3.5 text-green-400" />
-                Published ({postedPosts.filter((p) => p.posted).length})
-              </p>
-              {postedPosts
-                .filter((p) => p.posted)
-                .slice(0, 5)
-                .map((post) => (
-                  <div
-                    key={post.id}
-                    className="flex items-center gap-3 p-3 rounded-lg bg-[#1a1a1a] border border-[#2a2a2a] opacity-60"
-                  >
-                    <CheckCircle className="h-4 w-4 text-green-400 flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-white line-clamp-1">{post.caption}</p>
-                      <p className="text-[10px] text-[#555] mt-0.5">
-                        Published{" "}
-                        {post.postedAt
-                          ? new Date(post.postedAt).toLocaleDateString()
-                          : ""}
-                      </p>
-                    </div>
-                    {post.instagramPostId && (
-                      <a
-                        href={`https://www.instagram.com/p/${post.instagramPostId}/`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[#F5C72C] hover:text-[#F5C72C]/80"
-                      >
-                        <ExternalLink className="h-3.5 w-3.5" />
-                      </a>
-                    )}
-                  </div>
-                ))}
+              <p className="mb-4">No scheduled posts yet.</p>
+              <Button
+                size="sm"
+                onClick={() => setScheduleOpen(true)}
+                className="bg-[#F5C72C] text-black hover:bg-[#F5C72C]/90"
+              >
+                <Plus className="h-4 w-4 mr-1.5" />
+                Schedule First Post
+              </Button>
             </div>
           )}
         </TabsContent>
@@ -674,9 +878,6 @@ export default function InstagramDashboard() {
               <Calendar className="h-5 w-5 text-[#F5C72C]" />
               Schedule Instagram Post
             </DialogTitle>
-            <DialogDescription className="text-[#888]">
-              Create a post with AI-generated caption and schedule it for publishing.
-            </DialogDescription>
           </DialogHeader>
           <SchedulerForm onClose={() => setScheduleOpen(false)} />
         </DialogContent>
