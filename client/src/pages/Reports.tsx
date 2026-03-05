@@ -255,7 +255,7 @@ function RevenueTabContent() {
                 </div>
               </div>
               {(acuityRevenue as any).byType && (acuityRevenue as any).byType.length > 0 && (
-                <div className="rounded-lg border border-border overflow-hidden">
+                <div className="rounded-lg border border-border overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead><tr className="border-b border-border bg-muted/20">
                       <th className="text-left p-3 text-xs text-muted-foreground font-medium">Appointment Type</th>
@@ -622,7 +622,7 @@ export default function Reports() {
               <CardTitle className="text-sm font-semibold">Campaign Performance</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="rounded-lg border border-border overflow-hidden">
+              <div className="rounded-lg border border-border overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border bg-muted/20">

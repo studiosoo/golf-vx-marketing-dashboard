@@ -356,9 +356,9 @@ export default function Home() {
               <p className="text-[24px] font-bold text-[#F5C72C] leading-none tracking-tight">{snapLoading ? "—" : fmtCurrency(mrr)}</p>
               <p className="text-[11px] text-[#888888] mt-1">Monthly Recurring</p>
               {memberBreakdown.length > 0 && (
-                <div className="flex gap-2 mt-1.5">
+                <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1.5">
                   {memberBreakdown.map(t => (
-                    <span key={t.label} className="text-[10px] text-[#AAAAAA]">{t.count} {t.label}</span>
+                    <span key={t.label} className="text-[10px] text-[#AAAAAA] whitespace-nowrap">{t.count} {t.label}</span>
                   ))}
                 </div>
               )}
