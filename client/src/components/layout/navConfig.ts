@@ -23,6 +23,7 @@ import {
   FileText,
   Wrench,
   BarChart,
+  Tag,
 } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -77,6 +78,7 @@ export const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
     heading: "Marketing",
     items: [
       { label: "Programs & Events", path: "/programs", icon: Flag },
+      { label: "In-Store Promos", path: "/promotions/hub", icon: Tag },
       { label: "Advertising", path: "/advertising", icon: BarChart3 },
       {
         label: "Social & Content",

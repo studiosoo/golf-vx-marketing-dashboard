@@ -16,4 +16,8 @@ export const ENV = {
   // Stripe — configure when Stripe data arrives
   stripeSecretKey: process.env.STRIPE_SECRET_KEY ?? "",
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET ?? "",
+  // SQR.co short link + QR code platform
+  sqrApiKey: process.env.SQR_API_KEY ?? "",
+  // Public base URL (used for promo landing page links)
+  appBaseUrl: process.env.APP_BASE_URL ?? "https://dashboard.playgolfvx.com",
 };

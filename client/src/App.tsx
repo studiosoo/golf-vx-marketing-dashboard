@@ -78,6 +78,10 @@ import AccountSettings from "./pages/AccountSettings";
 // ── Giveaway Applications Detail ──
 import GiveawayApplications from "./pages/GiveawayApplications";
 
+// ── In-Store Promos ──
+import PromotionsHub from "./pages/PromotionsHub";
+import PromoLanding from "./pages/PromoLanding";
+
 // ── Special / Legacy public pages (no sidebar) ──
 import TrialSession from "./pages/TrialSession";
 import AnniversaryGiveaway from "./pages/AnniversaryGiveaway";
@@ -141,6 +145,7 @@ function DashboardRoutes() {
         <Route path="/programs/4" component={TrialSessionDetail} />
 
         {/* ── PROMOTIONS ── */}
+        <Route path="/promotions/hub" component={PromotionsHub} />
         <Route path="/promotions/annual-giveaway" component={AnnualGiveaway} />
         <Route path="/giveaway" component={GiveawayApplications} />
 
@@ -214,6 +219,7 @@ function Router() {
   return (
     <Switch>
       {/* ── Public pages (no sidebar) ── */}
+      <Route path="/p/:slug" component={PromoLanding} />
       <Route path="/trial-session" component={TrialSession} />
       <Route path="/anniversary-giveaway" component={AnniversaryGiveaway} />
       <Route path="/anniversary-giveaway-application" component={AnniversaryGiveawayApplication} />

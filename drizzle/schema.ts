@@ -1744,3 +1744,45 @@ export const newsItems = mysqlTable("news_items", {
 }));
 export type NewsItem = typeof newsItems.$inferSelect;
 export type NewNewsItem = typeof newsItems.$inferInsert;
+
+// ─── In-Store Promotions ──────────────────────────────────────────────────────
+export const promos = mysqlTable("promos", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  venueId: int("venue_id").notNull().default(1),
+  slug: varchar("slug", { length: 128 }).notNull(),
+  title: varchar("title", { length: 256 }).notNull(),
+  offerType: mysqlEnum("offer_type", ["free_session", "discount", "gift_card", "trial", "event", "other"]).notNull().default("trial"),
+  description: text("description"),
+  status: mysqlEnum("status", ["active", "inactive", "expired"]).notNull().default("inactive"),
+  expiresAt: bigint("expires_at", { mode: "number" }),
+  sqrLinkId: varchar("sqr_link_id", { length: 64 }),
+  sqrLinkSlug: varchar("sqr_link_slug", { length: 128 }),
+  sqrShortUrl: varchar("sqr_short_url", { length: 256 }),
+  enchargeTag: varchar("encharge_tag", { length: 128 }).notNull().default("Promo"),
+  landingUrl: varchar("landing_url", { length: 512 }),
+  createdAt: bigint("created_at", { mode: "number" }).notNull().default(0),
+  updatedAt: bigint("updated_at", { mode: "number" }).notNull().default(0),
+}, (table) => ({
+  promoSlugIdx: index("promo_slug_idx").on(table.slug),
+  promoVenueIdx: index("promo_venue_idx").on(table.venueId),
+}));
+export type Promo = typeof promos.$inferSelect;
+export type NewPromo = typeof promos.$inferInsert;
+
+export const promoLeads = mysqlTable("promo_leads", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  promoId: bigint("promo_id", { mode: "number" }).notNull(),
+  venueId: int("venue_id").notNull().default(1),
+  firstName: varchar("first_name", { length: 128 }).notNull(),
+  lastName: varchar("last_name", { length: 128 }).notNull(),
+  phone: varchar("phone", { length: 32 }),
+  email: varchar("email", { length: 256 }).notNull(),
+  submittedAt: bigint("submitted_at", { mode: "number" }).notNull(),
+  enchargeStatus: mysqlEnum("encharge_status", ["pending", "synced", "failed"]).notNull().default("pending"),
+  syncedAt: bigint("synced_at", { mode: "number" }),
+}, (table) => ({
+  promoLeadPromoIdx: index("promo_lead_promo_idx").on(table.promoId),
+  promoLeadEmailIdx: index("promo_lead_email_idx").on(table.email),
+}));
+export type PromoLead = typeof promoLeads.$inferSelect;
+export type NewPromoLead = typeof promoLeads.$inferInsert;

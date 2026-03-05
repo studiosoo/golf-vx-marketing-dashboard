@@ -46,6 +46,7 @@ import {
   revenueRouter,
 } from "./routers/advertising";
 import { asanaRouter } from "./routers/asana";
+import { promosRouter } from "./routers/promos";
 
 export const appRouter = router({
   system: systemRouter,
@@ -91,6 +92,7 @@ export const appRouter = router({
   eventAd: eventAdRouter,
   metaAds: metaAdsRouter,
   asana: asanaRouter,
+  promos: promosRouter,
   revenue: revenueRouter,
 });
 
