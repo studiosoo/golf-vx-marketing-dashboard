@@ -30,6 +30,7 @@ import {
   previewRouter,
   emailCampaignsRouter,
   funnelsRouter,
+  newsRouter,
 } from "./routers/content";
 import {
   dailyActionsRouter,
@@ -78,6 +79,7 @@ export const appRouter = router({
   preview: previewRouter,
   emailCampaigns: emailCampaignsRouter,
   funnels: funnelsRouter,
+  news: newsRouter,
 
   dailyActions: dailyActionsRouter,
   autonomous: autonomousRouter,

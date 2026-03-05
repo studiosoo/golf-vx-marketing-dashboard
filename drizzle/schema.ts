@@ -1726,3 +1726,21 @@ export const metaAdsOverrides = mysqlTable("meta_ads_overrides", {
 }));
 export type MetaAdsOverride = typeof metaAdsOverrides.$inferSelect;
 export type NewMetaAdsOverride = typeof metaAdsOverrides.$inferInsert;
+
+// ─── News & Content Manager ────────────────────────────────────────────────────
+export const newsItems = mysqlTable("news_items", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  title: varchar("title", { length: 512 }).notNull(),
+  source: mysqlEnum("source", ["hq", "studio_soo"]).notNull().default("studio_soo"),
+  category: mysqlEnum("category", ["blog", "announcement", "promotion", "program", "event"]).notNull().default("blog"),
+  status: mysqlEnum("status", ["inbox", "in_progress", "published"]).notNull().default("inbox"),
+  notes: text("notes"),
+  link: varchar("link", { length: 1024 }),
+  createdAt: bigint("created_at", { mode: "number" }).notNull().default(0),
+  updatedAt: bigint("updated_at", { mode: "number" }).notNull().default(0),
+}, (table) => ({
+  newsStatusIdx: index("news_items_status_idx").on(table.status),
+  newsCreatedIdx: index("news_items_created_idx").on(table.createdAt),
+}));
+export type NewsItem = typeof newsItems.$inferSelect;
+export type NewNewsItem = typeof newsItems.$inferInsert;

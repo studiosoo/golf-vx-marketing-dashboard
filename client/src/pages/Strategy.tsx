@@ -304,7 +304,7 @@ function AnalysisTab() {
                         </button>
                         {expandedHistory === item.id && (
                           <div className="border-t border-border p-3 bg-muted/10">
-                            <div className="prose prose-sm prose-invert max-w-none text-xs">
+                            <div className="prose prose-sm max-w-none text-xs">
                               <Streamdown>{item.result}</Streamdown>
                             </div>
                             <Button variant="outline" size="sm" className="mt-2 text-xs h-7"
@@ -374,7 +374,7 @@ function AnalysisTab() {
                   <span className="text-muted-foreground text-sm">Analyzing with Gemini 2.5 Pro<span className="animate-pulse">...</span></span>
                 </div>
               ) : currentResult ? (
-                <div className="prose prose-sm prose-invert max-w-none text-sm leading-relaxed">
+                <div className="prose prose-sm max-w-none text-sm leading-relaxed">
                   <Streamdown>{currentResult.analysis}</Streamdown>
                 </div>
               ) : null}

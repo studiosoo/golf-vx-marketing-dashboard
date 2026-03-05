@@ -530,6 +530,82 @@ export const emailCampaignsRouter = router({
   }),
 });
 
+// ─── News & Content Manager ───────────────────────────────────────────────────
+
+export const newsRouter = router({
+  list: protectedProcedure
+    .input(z.object({ status: z.enum(["inbox", "in_progress", "published"]).optional() }))
+    .query(async ({ input }) => {
+      const { getDb } = await import("../db");
+      const { newsItems } = await import("../../drizzle/schema");
+      const { desc, eq } = await import("drizzle-orm");
+      const database = await getDb();
+      if (!database) throw new Error("Database connection failed");
+      let q = database.select().from(newsItems).orderBy(desc(newsItems.createdAt));
+      if (input.status) {
+        q = q.where(eq(newsItems.status, input.status)) as any;
+      }
+      return await q;
+    }),
+
+  create: protectedProcedure
+    .input(z.object({
+      title: z.string().min(1).max(512),
+      source: z.enum(["hq", "studio_soo"]),
+      category: z.enum(["blog", "announcement", "promotion", "program", "event"]),
+      status: z.enum(["inbox", "in_progress", "published"]),
+      notes: z.string().optional(),
+      link: z.string().url().optional(),
+    }))
+    .mutation(async ({ input }) => {
+      const { getDb } = await import("../db");
+      const { newsItems } = await import("../../drizzle/schema");
+      const database = await getDb();
+      if (!database) throw new Error("Database connection failed");
+      const now = Date.now();
+      const [result] = await database.insert(newsItems).values({
+        title: input.title,
+        source: input.source,
+        category: input.category,
+        status: input.status,
+        notes: input.notes ?? null,
+        link: input.link ?? null,
+        createdAt: now,
+        updatedAt: now,
+      });
+      return { success: true, id: (result as any).insertId };
+    }),
+
+  updateStatus: protectedProcedure
+    .input(z.object({
+      id: z.number(),
+      status: z.enum(["inbox", "in_progress", "published"]),
+    }))
+    .mutation(async ({ input }) => {
+      const { getDb } = await import("../db");
+      const { newsItems } = await import("../../drizzle/schema");
+      const { eq } = await import("drizzle-orm");
+      const database = await getDb();
+      if (!database) throw new Error("Database connection failed");
+      await database.update(newsItems)
+        .set({ status: input.status, updatedAt: Date.now() })
+        .where(eq(newsItems.id, input.id));
+      return { success: true };
+    }),
+
+  delete: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      const { getDb } = await import("../db");
+      const { newsItems } = await import("../../drizzle/schema");
+      const { eq } = await import("drizzle-orm");
+      const database = await getDb();
+      if (!database) throw new Error("Database connection failed");
+      await database.delete(newsItems).where(eq(newsItems.id, input.id));
+      return { success: true };
+    }),
+});
+
 export const funnelsRouter = router({
   list: protectedProcedure
     .input(z.object({ includeArchived: z.boolean().optional().default(false) }).optional())

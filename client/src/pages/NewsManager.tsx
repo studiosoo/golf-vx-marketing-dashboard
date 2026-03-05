@@ -1,26 +1,16 @@
 import { useState } from "react";
 import {
   Newspaper, Plus, Inbox, FileText, CheckCircle2,
-  Clock, Building2, User, ExternalLink, ChevronRight, X,
+  Clock, Building2, User, ExternalLink, ChevronRight, X, Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { trpc } from "@/lib/trpc";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Source = "hq" | "studio_soo";
 type Status = "inbox" | "in_progress" | "published";
 type Category = "blog" | "announcement" | "promotion" | "program" | "event";
-
-interface ContentItem {
-  id: string;
-  title: string;
-  source: Source;
-  category: Category;
-  status: Status;
-  notes: string;
-  link?: string;
-  createdAt: string;
-}
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -44,45 +34,11 @@ const TABS: { key: Status; label: string; icon: React.ElementType }[] = [
   { key: "published",   label: "Published",    icon: CheckCircle2 },
 ];
 
-// ─── Empty state seed data ─────────────────────────────────────────────────────
-// These are examples — replace with DB-backed items when backend is connected.
-
-const SEED_ITEMS: ContentItem[] = [
-  {
-    id: "1",
-    title: "Spring Membership Drive Announcement",
-    source: "hq",
-    category: "announcement",
-    status: "inbox",
-    notes: "HQ wants a location-specific version for Arlington Heights. Deadline: end of month.",
-    createdAt: "2026-03-01",
-  },
-  {
-    id: "2",
-    title: "Junior Summer Camp 2026 — Blog Post",
-    source: "studio_soo",
-    category: "blog",
-    status: "in_progress",
-    notes: "Draft in progress. Include camp dates, pricing, and instructor bios.",
-    createdAt: "2026-02-20",
-  },
-  {
-    id: "3",
-    title: "Drive Day — March Recap",
-    source: "studio_soo",
-    category: "blog",
-    status: "published",
-    notes: "Published on the website. Promoted via Instagram.",
-    link: "https://playgolfvx.com/blog",
-    createdAt: "2026-02-15",
-  },
-];
-
 // ─── Add Item Dialog ───────────────────────────────────────────────────────────
 
-function AddItemDialog({ onAdd, onClose }: {
-  onAdd: (item: ContentItem) => void;
+function AddItemDialog({ onClose, onCreated }: {
   onClose: () => void;
+  onCreated: () => void;
 }) {
   const [form, setForm] = useState({
     title: "",
@@ -93,20 +49,24 @@ function AddItemDialog({ onAdd, onClose }: {
     link: "",
   });
 
+  const createMutation = trpc.news.create.useMutation({
+    onSuccess: () => {
+      onCreated();
+      onClose();
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title.trim()) return;
-    onAdd({
-      id: Date.now().toString(),
+    createMutation.mutate({
       title: form.title,
       source: form.source,
       category: form.category,
       status: form.status,
-      notes: form.notes,
+      notes: form.notes || undefined,
       link: form.link || undefined,
-      createdAt: new Date().toISOString().split("T")[0],
     });
-    onClose();
   };
 
   return (
@@ -227,8 +187,10 @@ function AddItemDialog({ onAdd, onClose }: {
             </button>
             <button
               type="submit"
-              className="flex-1 h-10 bg-[#F5C72C] rounded-lg text-[13px] font-semibold text-[#111111] hover:brightness-95 active:scale-95 transition-all"
+              disabled={createMutation.isPending}
+              className="flex-1 h-10 bg-[#F5C72C] rounded-lg text-[13px] font-semibold text-[#111111] hover:brightness-95 active:scale-95 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
             >
+              {createMutation.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
               Add Item
             </button>
           </div>
@@ -244,10 +206,12 @@ function ContentCard({
   item,
   onStatusChange,
   onDelete,
+  isPending,
 }: {
-  item: ContentItem;
-  onStatusChange: (id: string, status: Status) => void;
-  onDelete: (id: string) => void;
+  item: { id: number; title: string; source: Source; category: Category; status: Status; notes: string | null; link: string | null; createdAt: number };
+  onStatusChange: (id: number, status: Status) => void;
+  onDelete: (id: number) => void;
+  isPending?: boolean;
 }) {
   const cat = CATEGORY_META[item.category];
   const nextStatus: Record<Status, Status | null> = {
@@ -257,9 +221,12 @@ function ContentCard({
   };
   const next = nextStatus[item.status];
   const nextLabel = next === "in_progress" ? "Start" : next === "published" ? "Publish" : null;
+  const createdDate = item.createdAt
+    ? new Date(item.createdAt).toISOString().split("T")[0]
+    : "";
 
   return (
-    <div className="bg-white rounded-xl border border-[#E0E0E0] p-4 hover:shadow-sm transition-shadow">
+    <div className={cn("bg-white rounded-xl border border-[#E0E0E0] p-4 hover:shadow-sm transition-shadow", isPending && "opacity-60")}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           {/* Source + Category */}
@@ -279,7 +246,9 @@ function ContentCard({
             >
               {cat.label}
             </span>
-            <span className="text-[10px] text-[#AAAAAA] ml-auto">{item.createdAt}</span>
+            {createdDate && (
+              <span className="text-[10px] text-[#AAAAAA] ml-auto">{createdDate}</span>
+            )}
           </div>
 
           {/* Title */}
@@ -311,7 +280,8 @@ function ContentCard({
           {nextLabel && (
             <button
               onClick={() => onStatusChange(item.id, next!)}
-              className="flex items-center gap-1 h-7 px-2.5 rounded-lg bg-[#F5C72C] text-[#111111] text-[11px] font-semibold hover:brightness-95 transition-all whitespace-nowrap"
+              disabled={isPending}
+              className="flex items-center gap-1 h-7 px-2.5 rounded-lg bg-[#F5C72C] text-[#111111] text-[11px] font-semibold hover:brightness-95 transition-all whitespace-nowrap disabled:opacity-60"
             >
               {nextLabel}
               <ChevronRight className="h-3 w-3" />
@@ -319,7 +289,8 @@ function ContentCard({
           )}
           <button
             onClick={() => onDelete(item.id)}
-            className="h-7 px-2.5 rounded-lg border border-[#E0E0E0] text-[#AAAAAA] text-[11px] hover:border-red-200 hover:text-red-400 transition-colors"
+            disabled={isPending}
+            className="h-7 px-2.5 rounded-lg border border-[#E0E0E0] text-[#AAAAAA] text-[11px] hover:border-red-200 hover:text-red-400 transition-colors disabled:opacity-60"
           >
             Remove
           </button>
@@ -365,20 +336,21 @@ function EmptyState({ tab }: { tab: Status }) {
 
 export default function NewsManager() {
   const [activeTab, setActiveTab] = useState<Status>("inbox");
-  const [items, setItems] = useState<ContentItem[]>(SEED_ITEMS);
   const [showAdd, setShowAdd] = useState(false);
 
-  const visibleItems = items.filter((i) => i.status === activeTab);
+  const utils = trpc.useUtils();
 
-  const handleAdd = (item: ContentItem) => {
-    setItems((prev) => [item, ...prev]);
-  };
-  const handleStatusChange = (id: string, status: Status) => {
-    setItems((prev) => prev.map((i) => i.id === id ? { ...i, status } : i));
-  };
-  const handleDelete = (id: string) => {
-    setItems((prev) => prev.filter((i) => i.id !== id));
-  };
+  const { data: items = [], isLoading } = trpc.news.list.useQuery({});
+
+  const updateStatusMutation = trpc.news.updateStatus.useMutation({
+    onSuccess: () => utils.news.list.invalidate(),
+  });
+
+  const deleteMutation = trpc.news.delete.useMutation({
+    onSuccess: () => utils.news.list.invalidate(),
+  });
+
+  const visibleItems = items.filter((i) => i.status === activeTab);
 
   const counts: Record<Status, number> = {
     inbox:       items.filter((i) => i.status === "inbox").length,
@@ -404,15 +376,6 @@ export default function NewsManager() {
           <Plus className="h-3.5 w-3.5" />
           Add
         </button>
-      </div>
-
-      {/* Notice: local state only */}
-      <div className="flex items-start gap-2.5 p-3 rounded-lg bg-[#FFFBEB] border border-[#F5C72C]/30">
-        <Building2 className="h-4 w-4 text-[#8B6E00] mt-0.5 shrink-0" />
-        <p className="text-[12px] text-[#8B6E00] leading-relaxed">
-          Items are stored locally (session only). Backend DB integration needed to persist across devices.
-          Use this to track HQ content requests and your own content queue.
-        </p>
       </div>
 
       {/* Tabs */}
@@ -446,23 +409,36 @@ export default function NewsManager() {
       </div>
 
       {/* Content list */}
-      <div className="space-y-3">
-        {visibleItems.length === 0 ? (
-          <EmptyState tab={activeTab} />
-        ) : (
-          visibleItems.map((item) => (
-            <ContentCard
-              key={item.id}
-              item={item}
-              onStatusChange={handleStatusChange}
-              onDelete={handleDelete}
-            />
-          ))
-        )}
-      </div>
+      {isLoading ? (
+        <div className="flex items-center justify-center py-16 gap-3">
+          <Loader2 className="h-5 w-5 animate-spin text-[#F5C72C]" />
+          <span className="text-[13px] text-[#888888]">Loading…</span>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {visibleItems.length === 0 ? (
+            <EmptyState tab={activeTab} />
+          ) : (
+            visibleItems.map((item) => (
+              <ContentCard
+                key={item.id}
+                item={item as any}
+                onStatusChange={(id, status) => updateStatusMutation.mutate({ id, status })}
+                onDelete={(id) => deleteMutation.mutate({ id })}
+                isPending={updateStatusMutation.isPending || deleteMutation.isPending}
+              />
+            ))
+          )}
+        </div>
+      )}
 
       {/* Add dialog */}
-      {showAdd && <AddItemDialog onAdd={handleAdd} onClose={() => setShowAdd(false)} />}
+      {showAdd && (
+        <AddItemDialog
+          onClose={() => setShowAdd(false)}
+          onCreated={() => utils.news.list.invalidate()}
+        />
+      )}
     </div>
   );
 }
