@@ -1098,3 +1098,8 @@
 ## Bug Fix: Trial Session Page Errors (2026-03-04)
 - [x] Fix TypeError: Cannot read properties of undefined (reading 'toLocaleString') in TypeGroupCard
 - [x] Fix missing key prop warning in TrialSessionDetail list rendering
+
+## Bug Fix: Instagram Access Token Expired (2026-03-04)
+- [x] Update INSTAGRAM_ACCESS_TOKEN secret with new long-lived token
+- [x] Validate token against Graph API (ID: 2130933377721663, Name: Soohyun Kim)
+- [x] Write vitest test for token validation — 2/2 passed
