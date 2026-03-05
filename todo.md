@@ -1122,3 +1122,11 @@
 - [x] TrialSessionDetail: already using Golf VX palette (no non-Golf VX colors found)
 - [x] Programs main page: added #F5C72C left border accent + replaced blue progress bars with #F5C72C
 - [x] InstagramFeed: converted all dark bg-[#1a1a1a]/bg-[#111]/border-[#2a2a2a] to bg-card/border-border light theme (51 occurrences)
+
+## Meta Ads Analysis & Optimization (2026-03-05)
+- [x] Fetch live campaign data via Meta MCP (6 campaigns, 30-day insights, ad sets)
+- [x] Analyze performance with Meta Ads Analyzer skill
+- [x] Generate optimization report (golf-vx-meta-ads-analysis.md)
+- [x] Upgrade getActiveAlerts: frequency saturation, ROAS, click-to-LPV, scale opportunities, CPM alerts
+- [x] Add AI Optimization Analysis section to MetaAdsCampaignDetail page
+- [x] Redesign AlertsBanner: severity colors, action field, opportunity alerts, dismiss button

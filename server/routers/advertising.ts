@@ -521,19 +521,44 @@ export const metaAdsRouter = router({
 
   getActiveAlerts: protectedProcedure.query(async () => {
     try {
-      const campaigns = await metaAds.getAllCampaignsWithInsights('last_7d');
-      const alerts: Array<{ id: number; campaignName: string; severity: string; message: string; threshold: string; actualValue: string; createdAt: number }> = [];
+      const campaigns = await metaAds.getAllCampaignsWithInsights('last_30d');
+      const alerts: Array<{ id: number; campaignName: string; severity: string; message: string; threshold: string; actualValue: string; action: string; createdAt: number }> = [];
       let alertId = 1;
       for (const c of campaigns) {
         const ins = (c as any).insights || c;
         const ctr = parseFloat(String(ins.ctr ?? 0));
         const spend = parseFloat(String(ins.spend ?? 0));
         const reach = parseInt(String(ins.reach ?? 0));
-        if (ctr > 0 && ctr < 0.5) {
-          alerts.push({ id: alertId++, campaignName: (c as any).name || 'Unknown', severity: 'medium', message: `CTR is below 0.5% (${ctr.toFixed(2)}%)`, threshold: '0.5%', actualValue: `${ctr.toFixed(2)}%`, createdAt: Date.now() });
+        const frequency = parseFloat(String(ins.frequency ?? 0));
+        const cpm = parseFloat(String(ins.cpm ?? 0));
+        const clicks = parseInt(String(ins.clicks ?? 0));
+        const actions: any[] = ins.actions || [];
+        const lpv = parseInt(String(actions.find((a: any) => a.action_type === 'landing_page_view')?.value ?? 0));
+        const purchaseRoas = parseFloat(String((ins.purchase_roas || []).find((r: any) => r.action_type === 'omni_purchase')?.value ?? 0));
+        const name = (c as any).name || 'Unknown';
+        // CRITICAL: Frequency saturation (>3.5)
+        if (frequency > 3.5 && spend > 50) {
+          alerts.push({ id: alertId++, campaignName: name, severity: 'critical', message: `Audience saturation — frequency ${frequency.toFixed(1)}x. Same accounts seeing this ad ${frequency.toFixed(1)} times on average. Wasting budget on exhausted audience.`, threshold: '3.5x', actualValue: `${frequency.toFixed(1)}x`, action: 'Refresh creative or expand audience radius immediately', createdAt: Date.now() });
         }
-        if (spend > 0 && reach < 100) {
-          alerts.push({ id: alertId++, campaignName: (c as any).name || 'Unknown', severity: 'high', message: `Very low reach (${reach} people) despite spend`, threshold: '100 reach', actualValue: String(reach), createdAt: Date.now() });
+        // CRITICAL: Click-to-LPV discrepancy
+        if (clicks > 50 && lpv > 0 && (lpv / clicks) < 0.05) {
+          alerts.push({ id: alertId++, campaignName: name, severity: 'critical', message: `Tracking discrepancy: ${clicks} clicks but only ${lpv} landing page views (${((lpv/clicks)*100).toFixed(1)}%). Destination URL may be broken or pixel missing.`, threshold: '5% click-to-LPV', actualValue: `${((lpv/clicks)*100).toFixed(1)}%`, action: 'Check destination URL and Meta Pixel installation', createdAt: Date.now() });
+        }
+        // WARNING: Very low ROAS for non-awareness campaigns
+        if (purchaseRoas > 0 && purchaseRoas < 0.1 && spend > 200) {
+          alerts.push({ id: alertId++, campaignName: name, severity: 'high', message: `Near-zero ROAS of ${purchaseRoas.toFixed(3)} — spending $${spend.toFixed(0)} but returning only $${(spend * purchaseRoas).toFixed(2)} in tracked revenue.`, threshold: '0.1 ROAS', actualValue: purchaseRoas.toFixed(3), action: 'Review objective — use Lead Generation if building a list, not conversion', createdAt: Date.now() });
+        }
+        // WARNING: Low CTR with significant spend
+        if (ctr > 0 && ctr < 0.5 && spend > 20) {
+          alerts.push({ id: alertId++, campaignName: name, severity: 'medium', message: `Low CTR of ${ctr.toFixed(2)}% indicates creative fatigue or audience mismatch. Industry benchmark for sports/fitness is 1.5–2.5%.`, threshold: '0.5%', actualValue: `${ctr.toFixed(2)}%`, action: 'Test new creative with stronger CTA or different visual hook', createdAt: Date.now() });
+        }
+        // OPPORTUNITY: High CTR + low frequency = scale up
+        if (ctr > 3.0 && frequency < 1.5 && spend > 20 && spend < 150) {
+          alerts.push({ id: alertId++, campaignName: name, severity: 'opportunity', message: `High-performing campaign with ${ctr.toFixed(2)}% CTR and fresh audience (frequency ${frequency.toFixed(2)}x). Significant headroom to scale.`, threshold: '3% CTR', actualValue: `${ctr.toFixed(2)}% CTR`, action: 'Increase daily budget by 30–50% to scale while audience is fresh', createdAt: Date.now() });
+        }
+        // WARNING: High CPM (>$15) with moderate spend
+        if (cpm > 15 && spend > 50) {
+          alerts.push({ id: alertId++, campaignName: name, severity: 'medium', message: `High CPM of $${cpm.toFixed(2)} — paying above average for impressions. Adding Reels 9:16 vertical video format can lower CPM significantly.`, threshold: '$15 CPM', actualValue: `$${cpm.toFixed(2)}`, action: 'Add 9:16 vertical Reels video creative to reduce CPM', createdAt: Date.now() });
         }
       }
       return alerts;

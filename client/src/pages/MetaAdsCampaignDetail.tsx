@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, TrendingUp, TrendingDown, DollarSign, Eye, MousePointerClick, Target } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft, TrendingUp, TrendingDown, DollarSign, Eye, MousePointerClick, Target, Sparkles, AlertTriangle, CheckCircle, TrendingUp as ScaleIcon, Lightbulb } from "lucide-react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 export default function MetaAdsCampaignDetail() {
@@ -70,6 +71,14 @@ export default function MetaAdsCampaignDetail() {
   })) || [];
 
   const campaignName = (dailyInsights?.[0] as any)?.campaign_name || "Campaign";
+  const { toast } = useToast();
+
+  const [aiInsight, setAiInsight] = useState<string>("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const generateInsights = trpc.metaAds.generateCampaignInsights.useMutation({
+    onSuccess: (data) => { setAiInsight(String(data.insights || "No insights generated.")); setAiLoading(false); },
+    onError: () => { toast({ title: "Error", description: "Unable to generate insights.", variant: "destructive" }); setAiLoading(false); },
+  });
 
   return (
       <div className="space-y-6">
@@ -154,6 +163,43 @@ export default function MetaAdsCampaignDetail() {
             </Card>
           </div>
         ) : null}
+
+        {/* AI Optimization Panel */}
+        <Card className="border-l-4 border-l-[#F5C72C]">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-[#F5C72C]" />
+                AI Optimization Analysis
+              </CardTitle>
+              <CardDescription>AI-powered recommendations based on your campaign performance data</CardDescription>
+            </div>
+            <Button
+              onClick={() => { setAiLoading(true); generateInsights.mutate({ campaignId, datePreset: "last_30d" }); }}
+              disabled={aiLoading}
+              className="bg-[#F5C72C] text-[#111111] hover:bg-[#e6b820] font-semibold"
+            >
+              {aiLoading ? (
+                <><span className="animate-spin mr-2">⟳</span> Analyzing...</>
+              ) : (
+                <><Sparkles className="h-4 w-4 mr-2" /> Generate Analysis</>
+              )}
+            </Button>
+          </CardHeader>
+          <CardContent>
+            {aiInsight ? (
+              <div className="prose prose-sm max-w-none text-foreground whitespace-pre-wrap leading-relaxed">
+                {aiInsight}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <Sparkles className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                <p className="font-medium">Click "Generate Analysis" to get AI-powered optimization recommendations</p>
+                <p className="text-sm mt-1">Analyzes CTR, CPM, frequency, audience saturation, and creative performance vs. industry benchmarks</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Historical Trends */}
         <div className="grid gap-6 md:grid-cols-2">
