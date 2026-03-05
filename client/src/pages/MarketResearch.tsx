@@ -112,7 +112,7 @@ type SeasonalView = "demand" | "promotions";
 // ─── Helper Components ────────────────────────────────────────────────────────
 
 function ThreatBadge({ level }: { level: string }) {
-  const map: Record<string, string> = { high: "bg-red-50 text-red-700 border border-red-200", medium: "bg-yellow-50 text-yellow-700 border border-yellow-200", low: "bg-green-50 text-green-700 border border-green-200" };
+  const map: Record<string, string> = { high: "bg-red-50 text-red-700 border border-red-200", medium: "bg-yellow-50 text-yellow-700 border border-yellow-200", low: "bg-green-50 text-[#3DB855] border border-green-200" };
   return <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${map[level] || map.low}`}>{level} threat</span>;
 }
 
@@ -131,8 +131,8 @@ const CHANNEL_COLORS: Record<PromoChannel, string> = {
 };
 
 const STATUS_STYLES: Record<PromoStatus, string> = {
-  completed: "bg-green-50 text-green-700 border border-green-200",
-  active: "bg-blue-50 text-blue-700 border border-blue-200",
+  completed: "bg-green-50 text-[#3DB855] border border-green-200",
+  active: "bg-[#888888]/10 text-[#888888] border border-blue-200",
   planned: "bg-gray-50 text-gray-600 border border-gray-200",
 };
 
@@ -279,7 +279,7 @@ function GapAnalysis({ promotions }: { promotions: Promotion[] }) {
                 </div>
               </div>
               <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
-                <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${severity === "high" ? "bg-red-50 text-red-700" : severity === "medium" ? "bg-yellow-50 text-yellow-700" : "bg-green-50 text-green-700"}`}>
+                <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${severity === "high" ? "bg-red-50 text-red-700" : severity === "medium" ? "bg-yellow-50 text-yellow-700" : "bg-green-50 text-[#3DB855]"}`}>
                   {severity === "high" ? "⚠ Gap" : severity === "medium" ? "~ Partial" : "✓ Covered"}
                 </span>
               </div>
@@ -446,7 +446,7 @@ export default function MarketResearch() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-sm font-semibold text-[#111]">{insight.title}</span>
-                    <span className={`text-xs px-2 py-0.5 rounded border font-medium ${insight.urgency === "high" ? "bg-red-50 text-red-700 border-red-200" : insight.urgency === "medium" ? "bg-yellow-50 text-yellow-700 border-yellow-200" : "bg-green-50 text-green-700 border-green-200"}`}>{insight.urgency} priority</span>
+                    <span className={`text-xs px-2 py-0.5 rounded border font-medium ${insight.urgency === "high" ? "bg-red-50 text-red-700 border-red-200" : insight.urgency === "medium" ? "bg-yellow-50 text-yellow-700 border-yellow-200" : "bg-[#3DB855]/10 text-[#3DB855] border-[#3DB855]/30"}`}>{insight.urgency} priority</span>
                   </div>
                   {expandedInsight !== i && <p className="text-xs text-[#888] mt-0.5 line-clamp-1">{insight.body}</p>}
                 </div>
@@ -540,8 +540,8 @@ export default function MarketResearch() {
       {activeSection === "competitors" && (
         <div className="space-y-3">
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-            <Star className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
-            <p className="text-xs text-amber-800"><strong>Key differentiator:</strong> Golf VX is the only premium year-round indoor golf membership club within 10 miles. WJ Golf (Buffalo Grove, 8 mi) is the primary competitive threat — same model, but Golf VX has franchise backing, coaching programs, and a stronger community focus.</p>
+            <Star className="w-4 h-4 text-[#F5C72C] mt-0.5 flex-shrink-0" />
+            <p className="text-xs text-[#111111]"><strong>Key differentiator:</strong> Golf VX is the only premium year-round indoor golf membership club within 10 miles. WJ Golf (Buffalo Grove, 8 mi) is the primary competitive threat — same model, but Golf VX has franchise backing, coaching programs, and a stronger community focus.</p>
           </div>
           <div className="bg-white border border-[#E0E0E0] rounded-xl overflow-hidden">
             <div className="px-4 py-3 border-b border-[#F0F0F0]"><h3 className="text-sm font-semibold text-[#111]">Competitive Landscape</h3><p className="text-xs text-[#888] mt-0.5">Click any competitor to see details</p></div>

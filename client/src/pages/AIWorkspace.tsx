@@ -62,7 +62,7 @@ const ANALYSIS_TYPES: {
     icon: <TrendingUp size={15} />,
     description: "Analyze competitor tactics and identify opportunities for Golf VX",
     placeholder: "Paste a competitor email, promotion, article, or any content about what competitors are doing...\n\nExample: Topgolf sent an email about their 'Book Early for a Chance at a New Car' promotion for corporate events. Paste the full content here.",
-    color: "text-blue-400",
+    color: "text-[#888888]",
   },
   {
     value: "marketing_plan",
@@ -70,7 +70,7 @@ const ANALYSIS_TYPES: {
     icon: <Target size={15} />,
     description: "Generate a detailed marketing action plan",
     placeholder: "Describe the situation, goal, or context you want a marketing plan for...\n\nExample: We want to increase trial session bookings by 30% in Q2. We have a $2,000/month budget.",
-    color: "text-green-400",
+    color: "text-[#3DB855]",
   },
   {
     value: "event_roi",
@@ -86,7 +86,7 @@ const ANALYSIS_TYPES: {
     icon: <Building2 size={15} />,
     description: "Develop corporate events and partnership strategy",
     placeholder: "Paste any B2B-related content: competitor promotions, corporate inquiry emails, partnership ideas...\n\nExample: Paste Kyu's forwarded Topgolf email about corporate event promotions.",
-    color: "text-purple-400",
+    color: "text-[#888888]",
   },
   {
     value: "campaign_brief",
@@ -94,7 +94,7 @@ const ANALYSIS_TYPES: {
     icon: <Megaphone size={15} />,
     description: "Write a complete campaign brief",
     placeholder: "Describe the campaign idea or paste relevant context...\n\nExample: We want to run a spring campaign targeting families for our Junior Summer Camp. Budget: $1,500.",
-    color: "text-orange-400",
+    color: "text-[#F5C72C]",
   },
   {
     value: "community_outreach",
@@ -602,13 +602,13 @@ interface ActionPlanData {
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   membership: { bg: "bg-[#F5C72C]/10", text: "text-[#8B6E00]", border: "border-[#F5C72C]/30" },
-  meta_ads: { bg: "bg-blue-50", text: "text-blue-700", border: "border-blue-200" },
-  programs: { bg: "bg-green-50", text: "text-green-700", border: "border-green-200" },
-  retention: { bg: "bg-purple-50", text: "text-purple-700", border: "border-purple-200" },
+  meta_ads: { bg: "bg-[#888888]/10", text: "text-[#888888]", border: "border-blue-200" },
+  programs: { bg: "bg-green-50", text: "text-[#3DB855]", border: "border-green-200" },
+  retention: { bg: "bg-[#888888]/10", text: "text-[#888888]", border: "border-[#888888]/30" },
   content: { bg: "bg-pink-50", text: "text-pink-700", border: "border-pink-200" },
 };
 const EFFORT_COLORS: Record<string, string> = {
-  low: "text-green-600 bg-green-50 border-green-200",
+  low: "text-[#3DB855] bg-green-50 border-green-200",
   medium: "text-yellow-700 bg-yellow-50 border-yellow-200",
   high: "text-red-600 bg-red-50 border-red-200",
 };
@@ -734,7 +734,7 @@ function ActionPlanTab() {
                   <span className={`text-xs font-medium px-2 py-0.5 rounded border ${
                     plan.priority === "high" ? "bg-red-50 text-red-700 border-red-200" :
                     plan.priority === "medium" ? "bg-yellow-50 text-yellow-700 border-yellow-200" :
-                    "bg-green-50 text-green-700 border-green-200"
+                    "bg-[#3DB855]/10 text-[#3DB855] border-[#3DB855]/30"
                   }`}>{plan.priority?.toUpperCase()} PRIORITY</span>
                   <span className="text-xs text-[#AAAAAA] ml-auto">Generated {plan.generatedAt ? new Date(plan.generatedAt).toLocaleString() : "just now"}</span>
                 </div>
@@ -766,20 +766,20 @@ function ActionPlanTab() {
               )}
               {plan.kpiTargets && plan.kpiTargets.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-2 mb-3"><BarChart3 className="w-4 h-4 text-blue-600" /><h2 className="text-sm font-semibold text-[#111]">KPI Targets</h2></div>
+                  <div className="flex items-center gap-2 mb-3"><BarChart3 className="w-4 h-4 text-[#888888]" /><h2 className="text-sm font-semibold text-[#111]">KPI Targets</h2></div>
                   <div className="bg-white border border-[#E0E0E0] rounded-xl overflow-hidden">{plan.kpiTargets.map((kpi, i) => (
                     <div key={i} className={`px-4 py-3 ${i < plan.kpiTargets.length - 1 ? "border-b border-[#F5F5F5]" : ""}`}>
                       <div className="flex items-center justify-between mb-1"><span className="text-xs font-medium text-[#111]">{kpi.metric}</span><span className="text-xs text-[#888]">{kpi.by}</span></div>
-                      <div className="flex items-center gap-2"><span className="text-xs text-[#888]">{kpi.current}</span><span className="text-xs text-[#CCCCCC]">→</span><span className="text-xs font-semibold text-green-700 bg-green-50 px-1.5 py-0.5 rounded">{kpi.target}</span></div>
+                      <div className="flex items-center gap-2"><span className="text-xs text-[#888]">{kpi.current}</span><span className="text-xs text-[#CCCCCC]">→</span><span className="text-xs font-semibold text-[#3DB855] bg-green-50 px-1.5 py-0.5 rounded">{kpi.target}</span></div>
                     </div>
                   ))}</div>
                 </div>
               )}
               {plan.risks && plan.risks.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-2 mb-3"><AlertTriangle className="w-4 h-4 text-amber-600" /><h2 className="text-sm font-semibold text-[#111]">Watch Out For</h2></div>
+                  <div className="flex items-center gap-2 mb-3"><AlertTriangle className="w-4 h-4 text-[#F5C72C]" /><h2 className="text-sm font-semibold text-[#111]">Watch Out For</h2></div>
                   <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 space-y-2">{plan.risks.map((risk, i) => (
-                    <div key={i} className="flex items-start gap-2"><span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 mt-1.5" /><p className="text-xs text-amber-800">{risk}</p></div>
+                    <div key={i} className="flex items-start gap-2"><span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 mt-1.5" /><p className="text-xs text-[#111111]">{risk}</p></div>
                   ))}</div>
                 </div>
               )}

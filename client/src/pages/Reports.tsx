@@ -71,7 +71,7 @@ function StatCard({ icon: Icon, label, value, sub, trend }: any) {
         </div>
         <div className="text-2xl font-bold text-foreground">{value}</div>
         {sub && (
-          <div className={`text-xs mt-1 flex items-center gap-1 ${trend != null && trend >= 0 ? "text-green-500" : "text-red-400"}`}>
+          <div className={`text-xs mt-1 flex items-center gap-1 ${trend != null && trend >= 0 ? "text-[#3DB855]" : "text-red-400"}`}>
             {trend != null && (trend >= 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />)}
             {sub}
           </div>

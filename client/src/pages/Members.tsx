@@ -45,17 +45,17 @@ const TIER_LABELS: Record<MembershipTier, string> = {
 
 const TIER_COLORS: Record<MembershipTier, string> = {
   all_access_aces: "bg-primary/10 text-primary border-primary/20",
-  swing_savers: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  golf_vx_pro: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+  swing_savers: "bg-[#888888]/100/10 text-[#888888] border-blue-500/20",
+  golf_vx_pro: "bg-[#888888]/100/10 text-[#888888] border-purple-500/20",
   trial: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-  monthly: "bg-green-500/10 text-green-400 border-green-500/20",
-  annual: "bg-green-500/10 text-green-400 border-green-500/20",
+  monthly: "bg-green-500/10 text-[#3DB855] border-green-500/20",
+  annual: "bg-green-500/10 text-[#3DB855] border-green-500/20",
   corporate: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
   none: "bg-muted text-muted-foreground border-border",
 };
 
 const STATUS_COLORS: Record<MemberStatus, string> = {
-  active: "bg-green-500/10 text-green-400",
+  active: "bg-green-500/10 text-[#3DB855]",
   inactive: "bg-muted text-muted-foreground",
   cancelled: "bg-red-500/10 text-red-400",
   trial: "bg-yellow-500/10 text-yellow-400",
@@ -151,7 +151,7 @@ export default function Members() {
         </div>
         <div className="bg-card border border-border rounded-lg p-4">
           <div className="text-sm text-muted-foreground mb-1">Active</div>
-          <div className="text-3xl font-bold text-green-400">{activeMembers.length}</div>
+          <div className="text-3xl font-bold text-[#3DB855]">{activeMembers.length}</div>
         </div>
         <div className="bg-card border border-border rounded-lg p-4">
           <div className="text-sm text-muted-foreground mb-1">All Access Ace</div>
@@ -159,7 +159,7 @@ export default function Members() {
         </div>
         <div className="bg-card border border-border rounded-lg p-4">
           <div className="text-sm text-muted-foreground mb-1">Swing Saver</div>
-          <div className="text-3xl font-bold text-blue-400">{swingSaverCount}</div>
+          <div className="text-3xl font-bold text-[#888888]">{swingSaverCount}</div>
         </div>
       </div>
 

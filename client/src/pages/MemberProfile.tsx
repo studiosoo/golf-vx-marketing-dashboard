@@ -351,7 +351,7 @@ export default function MemberProfile() {
 
                 {member.lastEmailOpen && (
                   <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-blue-500" />
+                    <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-[#888888]/100" />
                     <div className="flex-1">
                       <div className="font-medium">Email Opened</div>
                       <div className="text-sm text-muted-foreground">
@@ -363,7 +363,7 @@ export default function MemberProfile() {
 
                 {member.lastLessonDate && (
                   <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-purple-500" />
+                    <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-[#888888]/100" />
                     <div className="flex-1">
                       <div className="font-medium">Last Lesson</div>
                       <div className="text-sm text-muted-foreground">

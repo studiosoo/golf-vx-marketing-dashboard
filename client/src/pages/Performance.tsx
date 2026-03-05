@@ -44,7 +44,7 @@ export default function Performance() {
             value: formatCurrency(totalRevenue),
             icon: DollarSign,
             color: "text-[#3DB855]",
-            bg: "bg-green-50",
+            bg: "bg-[#3DB855]/10",
           },
           {
             label: "Ad Spend",
@@ -57,8 +57,8 @@ export default function Performance() {
             label: "Active Campaigns",
             value: String(campaignList.length),
             icon: Activity,
-            color: "text-blue-600",
-            bg: "bg-blue-50",
+            color: "text-[#888888]",
+            bg: "bg-[#888888]/10",
           },
           {
             label: "Avg ROAS",

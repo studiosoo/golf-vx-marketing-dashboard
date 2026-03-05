@@ -90,7 +90,7 @@ export default function AccountSettings() {
                     <div className="text-sm font-medium text-foreground">{api}</div>
                     <div className="text-xs text-muted-foreground font-mono mt-0.5">••••••••••••••••••••••••••••••••</div>
                   </div>
-                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">Active</Badge>
+                  <Badge className="bg-[#3DB855]/20 text-[#3DB855] border-[#3DB855]/30 text-xs">Active</Badge>
                 </div>
               ))}
             </CardContent>

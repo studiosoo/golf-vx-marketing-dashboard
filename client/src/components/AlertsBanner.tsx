@@ -36,7 +36,7 @@ export default function AlertsBanner() {
         return {
           border: "border-l-orange-500",
           badge: "bg-orange-100 text-orange-700 border-orange-300",
-          icon: <AlertTriangle className="h-4 w-4 text-orange-500" />,
+          icon: <AlertTriangle className="h-4 w-4 text-[#F5C72C]" />,
         };
       case "medium":
         return {

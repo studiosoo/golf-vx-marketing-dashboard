@@ -50,14 +50,14 @@ interface ActionPlanData {
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   membership: { bg: "bg-[#F5C72C]/10", text: "text-[#8B6E00]", border: "border-[#F5C72C]/30" },
-  meta_ads: { bg: "bg-blue-50", text: "text-blue-700", border: "border-blue-200" },
-  programs: { bg: "bg-green-50", text: "text-green-700", border: "border-green-200" },
-  retention: { bg: "bg-purple-50", text: "text-purple-700", border: "border-purple-200" },
+  meta_ads: { bg: "bg-[#888888]/10", text: "text-[#888888]", border: "border-blue-200" },
+  programs: { bg: "bg-green-50", text: "text-[#3DB855]", border: "border-green-200" },
+  retention: { bg: "bg-[#888888]/10", text: "text-[#888888]", border: "border-[#888888]/30" },
   content: { bg: "bg-pink-50", text: "text-pink-700", border: "border-pink-200" },
 };
 
 const EFFORT_COLORS: Record<string, string> = {
-  low: "text-green-600 bg-green-50 border-green-200",
+  low: "text-[#3DB855] bg-green-50 border-green-200",
   medium: "text-yellow-700 bg-yellow-50 border-yellow-200",
   high: "text-red-600 bg-red-50 border-red-200",
 };
@@ -254,7 +254,7 @@ export default function ActionPlan() {
                   <span className={`text-xs font-medium px-2 py-0.5 rounded border ${
                     plan.priority === "high" ? "bg-red-50 text-red-700 border-red-200" :
                     plan.priority === "medium" ? "bg-yellow-50 text-yellow-700 border-yellow-200" :
-                    "bg-green-50 text-green-700 border-green-200"
+                    "bg-[#3DB855]/10 text-[#3DB855] border-[#3DB855]/30"
                   }`}>
                     {plan.priority?.toUpperCase()} PRIORITY
                   </span>
@@ -320,7 +320,7 @@ export default function ActionPlan() {
               {plan.kpiTargets && plan.kpiTargets.length > 0 && (
                 <div>
                   <div className="flex items-center gap-2 mb-3">
-                    <BarChart3 className="w-4 h-4 text-blue-600" />
+                    <BarChart3 className="w-4 h-4 text-[#888888]" />
                     <h2 className="text-sm font-semibold text-[#111]">KPI Targets</h2>
                   </div>
                   <div className="bg-white border border-[#E0E0E0] rounded-xl overflow-hidden">
@@ -333,7 +333,7 @@ export default function ActionPlan() {
                         <div className="flex items-center gap-2">
                           <span className="text-xs text-[#888]">{kpi.current}</span>
                           <span className="text-xs text-[#CCCCCC]">→</span>
-                          <span className="text-xs font-semibold text-green-700 bg-green-50 px-1.5 py-0.5 rounded">{kpi.target}</span>
+                          <span className="text-xs font-semibold text-[#3DB855] bg-green-50 px-1.5 py-0.5 rounded">{kpi.target}</span>
                         </div>
                       </div>
                     ))}
@@ -345,14 +345,14 @@ export default function ActionPlan() {
               {plan.risks && plan.risks.length > 0 && (
                 <div>
                   <div className="flex items-center gap-2 mb-3">
-                    <AlertTriangle className="w-4 h-4 text-amber-600" />
+                    <AlertTriangle className="w-4 h-4 text-[#F5C72C]" />
                     <h2 className="text-sm font-semibold text-[#111]">Watch Out For</h2>
                   </div>
                   <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 space-y-2">
                     {plan.risks.map((risk, i) => (
                       <div key={i} className="flex items-start gap-2">
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 mt-1.5" />
-                        <p className="text-xs text-amber-800">{risk}</p>
+                        <p className="text-xs text-[#111111]">{risk}</p>
                       </div>
                     ))}
                   </div>

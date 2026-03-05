@@ -207,7 +207,7 @@ export default function InstagramSync() {
               </p>
             </div>
 
-            <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg">
+            <div className="bg-[#888888]/10 dark:bg-blue-950 p-4 rounded-lg">
               <h3 className="font-semibold mb-2">🤖 Coming Soon:</h3>
               <p className="text-muted-foreground">
                 Browser bookmarklet to automatically extract and sync Instagram data with one click!

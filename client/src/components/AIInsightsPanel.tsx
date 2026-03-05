@@ -181,7 +181,7 @@ export function AIInsightsPanel({
               {insights.insights?.performanceAssessment && (
                 <div className={`rounded-xl p-3 border ${
                   insights.insights.performanceAssessment.status === "on_track" ? "bg-green-50 border-green-200" :
-                  insights.insights.performanceAssessment.status === "ahead" ? "bg-blue-50 border-blue-200" :
+                  insights.insights.performanceAssessment.status === "ahead" ? "bg-[#888888]/10 border-blue-200" :
                   insights.insights.performanceAssessment.status === "behind" ? "bg-yellow-50 border-yellow-200" :
                   "bg-red-50 border-red-200"
                 }`}>

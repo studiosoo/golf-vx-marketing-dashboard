@@ -250,7 +250,7 @@ export default function CommunicationsHub() {
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <Phone className="h-8 w-8 text-green-500" />
+                <Phone className="h-8 w-8 text-[#3DB855]" />
                 <div>
                   <p className="text-2xl font-bold">{members.filter(m => m.phone).length}</p>
                   <p className="text-sm text-muted-foreground">With Phone</p>
@@ -323,7 +323,7 @@ export default function CommunicationsHub() {
                         </span>
                         {getTierBadge(member.membershipTier)}
                         {member.membershipStatus === 'active' && (
-                          <UserCheck className="h-3 w-3 text-green-500" />
+                          <UserCheck className="h-3 w-3 text-[#3DB855]" />
                         )}
                       </div>
                       <div className="flex items-center gap-3 mt-0.5">
@@ -355,7 +355,7 @@ export default function CommunicationsHub() {
               {composeType === "email" ? (
                 <Mail className="h-5 w-5 text-[#ffcb00]" />
               ) : (
-                <MessageSquare className="h-5 w-5 text-green-500" />
+                <MessageSquare className="h-5 w-5 text-[#3DB855]" />
               )}
               {composeType === "email" ? "Compose Email" : "Compose SMS"}
               <Badge className="ml-2 bg-[#ffcb00]/20 text-[#b8960a] border-[#ffcb00]/30">
@@ -424,7 +424,7 @@ export default function CommunicationsHub() {
 
             {/* Note about SMS */}
             {composeType === "sms" && (
-              <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 text-xs text-amber-600">
+              <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 text-xs text-[#F5C72C]">
                 <strong>Note:</strong> SMS sending requires Twilio credentials to be configured in Settings → Secrets. Once set up, messages will be delivered immediately.
               </div>
             )}

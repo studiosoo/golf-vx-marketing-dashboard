@@ -26,13 +26,13 @@ export default function Leads() {
         </Card>
         <Card className="bg-card border-border">
           <CardContent className="p-4">
-            <div className="text-2xl font-bold text-blue-400">{(stats as any)?.trialMembers || 0}</div>
+            <div className="text-2xl font-bold text-[#888888]">{(stats as any)?.trialMembers || 0}</div>
             <div className="text-xs text-muted-foreground">Trial Members</div>
           </CardContent>
         </Card>
         <Card className="bg-card border-border">
           <CardContent className="p-4">
-            <div className="text-2xl font-bold text-green-400">{(stats as any)?.activeMembers || 0}</div>
+            <div className="text-2xl font-bold text-[#3DB855]">{(stats as any)?.activeMembers || 0}</div>
             <div className="text-xs text-muted-foreground">Active Members</div>
           </CardContent>
         </Card>

@@ -102,7 +102,7 @@ function MetaAdsTab({ programKeywords, programName }: ProgramMarketingPanelProps
           const clicks = parseInt(c.insights?.clicks || "0");
           const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0;
           const cpc = parseFloat(c.insights?.cpc || "0");
-          const statusColor = c.status === "ACTIVE" ? "text-green-400 bg-green-400/10" : c.status === "PAUSED" ? "text-yellow-400 bg-yellow-400/10" : "text-muted-foreground bg-muted/30";
+          const statusColor = c.status === "ACTIVE" ? "text-[#3DB855] bg-green-400/10" : c.status === "PAUSED" ? "text-yellow-400 bg-yellow-400/10" : "text-muted-foreground bg-muted/30";
 
           return (
             <div key={c.id} className="bg-card border border-border rounded-xl p-4">
@@ -166,7 +166,7 @@ function InstagramTab({ programName }: { programName: string }) {
     <div className="space-y-4">
       {/* Note about Instagram filtering */}
       <div className="flex items-start gap-3 bg-blue-400/10 border border-blue-400/30 rounded-xl p-4 text-sm">
-        <Instagram className="h-4 w-4 text-blue-400 mt-0.5 shrink-0" />
+        <Instagram className="h-4 w-4 text-[#888888] mt-0.5 shrink-0" />
         <div>
           <p className="font-medium text-blue-300">Instagram Business Insights</p>
           <p className="text-muted-foreground mt-1">

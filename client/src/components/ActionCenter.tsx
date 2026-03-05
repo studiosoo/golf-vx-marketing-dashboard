@@ -47,7 +47,7 @@ const priorityConfig = {
   },
   low: {
     label: "LOW",
-    color: "bg-blue-500 text-white",
+    color: "bg-[#888888]/100 text-white",
     icon: Lightbulb,
     borderColor: "border-blue-500",
   },
@@ -260,7 +260,7 @@ export function ActionCenter() {
                     </Badge>
                     <span className="text-sm text-muted-foreground">{alert.campaignName}</span>
                     {allCompleted && (
-                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                      <Badge variant="outline" className="bg-green-50 text-[#3DB855] border-green-200">
                         ✓ All actions completed
                       </Badge>
                     )}
@@ -268,7 +268,7 @@ export function ActionCenter() {
                   <CardTitle className="text-xl">{alert.title}</CardTitle>
                   <CardDescription className="text-base">{alert.description}</CardDescription>
                   {alert.impact && (
-                    <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-md p-3 mt-2">
+                    <div className="bg-[#888888]/10 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-md p-3 mt-2">
                       <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
                         💡 {alert.impact}
                       </p>

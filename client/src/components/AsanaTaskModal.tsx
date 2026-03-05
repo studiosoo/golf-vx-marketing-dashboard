@@ -119,14 +119,14 @@ export default function AsanaTaskModal({ isOpen, onClose, suggestedTasks, title 
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
           {isDone ? (
             <div className="space-y-3">
-              <div className="flex items-center gap-2 text-green-600">
+              <div className="flex items-center gap-2 text-[#3DB855]">
                 <CheckCircle2 className="w-5 h-5" />
                 <span className="text-sm font-medium">{createdTasks.length} task{createdTasks.length !== 1 ? "s" : ""} created in Asana</span>
               </div>
               {createdTasks.map((t, i) => (
                 <a key={i} href={t.permalink_url} target="_blank" rel="noopener noreferrer"
                   className="flex items-center gap-2 px-4 py-2.5 bg-[#FAFAFA] border border-[#E0E0E0] rounded-lg hover:bg-[#F0F0F0] transition-colors group">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#3DB855] flex-shrink-0" />
                   <span className="text-sm text-[#333] flex-1 truncate">{t.name}</span>
                   <ExternalLink className="w-3.5 h-3.5 text-[#AAA] group-hover:text-[#666] flex-shrink-0" />
                 </a>

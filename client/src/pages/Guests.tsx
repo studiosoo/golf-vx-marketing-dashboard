@@ -19,9 +19,9 @@ function programLabel(type: string): string {
 }
 
 const PROGRAM_COLORS: Record<string, string> = {
-  "Drive Day": "bg-blue-50 text-blue-700 border-blue-100",
-  "Winter Clinic": "bg-purple-50 text-purple-700 border-purple-100",
-  "Junior Summer Camp": "bg-green-50 text-green-700 border-green-100",
+  "Drive Day": "bg-[#888888]/10 text-[#888888] border-blue-100",
+  "Winter Clinic": "bg-[#888888]/10 text-[#888888] border-purple-100",
+  "Junior Summer Camp": "bg-green-50 text-[#3DB855] border-green-100",
   "Trial Session": "bg-[#F5C72C]/10 text-[#8B6E00] border-[#F5C72C]/30",
   "Watch Party": "bg-orange-50 text-orange-700 border-orange-100",
   "League": "bg-gray-50 text-gray-700 border-gray-200",
@@ -73,8 +73,8 @@ export default function Guests() {
           </div>
         </div>
         <div className="bg-white border border-[#E0E0E0] rounded-xl p-4 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center">
-            <Calendar className="w-4.5 h-4.5 text-blue-600" />
+          <div className="w-9 h-9 rounded-lg bg-[#888888]/10 flex items-center justify-center">
+            <Calendar className="w-4.5 h-4.5 text-[#888888]" />
           </div>
           <div>
             <div className="text-2xl font-bold text-[#111]">{totalVisits}</div>
@@ -83,7 +83,7 @@ export default function Guests() {
         </div>
         <div className="bg-white border border-[#E0E0E0] rounded-xl p-4 flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-green-50 flex items-center justify-center">
-            <DollarSign className="w-4.5 h-4.5 text-green-600" />
+            <DollarSign className="w-4.5 h-4.5 text-[#3DB855]" />
           </div>
           <div>
             <div className="text-2xl font-bold text-[#111]">${totalRevenue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>

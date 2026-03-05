@@ -34,19 +34,19 @@ export default function Automations() {
         </Card>
         <Card className="bg-card border-border">
           <CardContent className="p-4">
-            <div className="text-2xl font-bold text-green-400">{(metrics as any)?.activeSubscribers || 0}</div>
+            <div className="text-2xl font-bold text-[#3DB855]">{(metrics as any)?.activeSubscribers || 0}</div>
             <div className="text-xs text-muted-foreground">Active</div>
           </CardContent>
         </Card>
         <Card className="bg-card border-border">
           <CardContent className="p-4">
-            <div className="text-2xl font-bold text-blue-400">{(segments as any[])?.length || 0}</div>
+            <div className="text-2xl font-bold text-[#888888]">{(segments as any[])?.length || 0}</div>
             <div className="text-xs text-muted-foreground">Segments</div>
           </CardContent>
         </Card>
         <Card className="bg-card border-border">
           <CardContent className="p-4">
-            <div className="text-2xl font-bold text-purple-400">{automationFlows.filter(f => f.status === "active").length}</div>
+            <div className="text-2xl font-bold text-[#888888]">{automationFlows.filter(f => f.status === "active").length}</div>
             <div className="text-xs text-muted-foreground">Active Flows</div>
           </CardContent>
         </Card>
@@ -70,7 +70,7 @@ export default function Automations() {
                   </div>
                   <Badge
                     className={flow.status === "active"
-                      ? "bg-green-500/20 text-green-400 border-green-500/30 text-xs"
+                      ? "bg-[#3DB855]/20 text-[#3DB855] border-[#3DB855]/30 text-xs"
                       : "bg-muted text-muted-foreground text-xs"}
                   >
                     {flow.status}

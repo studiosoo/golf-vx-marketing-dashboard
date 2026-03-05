@@ -33,7 +33,7 @@ interface AutonomousAction {
 
 function RiskBadge({ level }: { level: string }) {
   const styles: Record<string, string> = {
-    low: "bg-green-50 text-green-700 border border-green-200",
+    low: "bg-green-50 text-[#3DB855] border border-green-200",
     medium: "bg-yellow-50 text-yellow-700 border border-yellow-200",
     high: "bg-red-50 text-red-700 border border-red-200",
   };
@@ -86,7 +86,7 @@ function ActionCard({
             <>
               {onApprove && (
                 <button onClick={() => onApprove(action.id)} disabled={isLoading}
-                  className="flex items-center gap-1 px-2.5 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 rounded text-xs font-medium transition-colors disabled:opacity-50">
+                  className="flex items-center gap-1 px-2.5 py-1.5 bg-green-50 text-[#3DB855] hover:bg-green-100 border border-green-200 rounded text-xs font-medium transition-colors disabled:opacity-50">
                   {isLoading ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={12} />} Approve
                 </button>
               )}
@@ -121,13 +121,13 @@ function ActionCard({
         <div className="flex items-center gap-2 text-xs">
           {action.previousValue && <span className="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded font-mono">{action.previousValue}</span>}
           {action.previousValue && action.newValue && <TrendingUp size={12} className="text-[#999]" />}
-          {action.newValue && <span className="px-2 py-1 bg-green-50 text-green-700 border border-green-200 rounded font-mono">{action.newValue}</span>}
+          {action.newValue && <span className="px-2 py-1 bg-green-50 text-[#3DB855] border border-green-200 rounded font-mono">{action.newValue}</span>}
         </div>
       )}
 
       {hasMetaAdsError && (
         <div className="flex items-start gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded text-xs">
-          <AlertTriangle size={14} className="text-amber-600 shrink-0 mt-0.5" />
+          <AlertTriangle size={14} className="text-[#F5C72C] shrink-0 mt-0.5" />
           <div>
             <span className="text-amber-700 font-medium">Meta Ads API Error — </span>
             <span className="text-[#666]">Apply manually in </span>
@@ -243,7 +243,7 @@ export default function MarketingIntelligence() {
           {Object.entries(syncStatus).map(([key, status]: [string, any]) => (
             <div key={key} className="bg-white border border-[#E0E0E0] rounded-xl p-3">
               <div className="text-xs text-[#888] capitalize mb-1">{key.replace(/([A-Z])/g, " $1").trim()}</div>
-              <div className={`text-xs font-semibold ${status?.status === "ok" ? "text-green-600" : status?.status === "error" ? "text-red-600" : "text-yellow-600"}`}>
+              <div className={`text-xs font-semibold ${status?.status === "ok" ? "text-[#3DB855]" : status?.status === "error" ? "text-red-600" : "text-yellow-600"}`}>
                 {status?.status || "unknown"}
               </div>
               {status?.lastSync && <div className="text-xs text-[#AAAAAA] mt-0.5">{new Date(status.lastSync).toLocaleTimeString()}</div>}
@@ -255,7 +255,7 @@ export default function MarketingIntelligence() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           { label: "Auto-Executed", value: autoExecuted.length, icon: Zap, color: "text-[#8B6E00]", bg: "bg-[#F5C72C]/10" },
-          { label: "Awaiting Approval", value: approvalCards.length, icon: Clock, color: "text-blue-600", bg: "bg-blue-50" },
+          { label: "Awaiting Approval", value: approvalCards.length, icon: Clock, color: "text-[#888888]", bg: "bg-[#888888]/10" },
           { label: "Monitoring", value: monitoring.length, icon: Eye, color: "text-[#666]", bg: "bg-[#F5F5F5]" },
         ].map(({ label, value, icon: Icon, color, bg }) => (
           <div key={label} className="bg-white border border-[#E0E0E0] rounded-xl p-4 flex items-center gap-3">
@@ -293,7 +293,7 @@ export default function MarketingIntelligence() {
 
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center"><Clock className="w-4 h-4 text-blue-600" /></div>
+              <div className="w-9 h-9 rounded-lg bg-[#888888]/10 flex items-center justify-center"><Clock className="w-4 h-4 text-[#888888]" /></div>
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-sm font-semibold text-[#111]">Awaiting Approval</h2>

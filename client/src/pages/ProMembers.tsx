@@ -67,7 +67,7 @@ export default function ProMembers() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs text-muted-foreground">Monthly Revenue</span>
-              <DollarSign size={16} className="text-green-500" />
+              <DollarSign size={16} className="text-[#3DB855]" />
             </div>
             <div className="text-3xl font-black text-foreground">
               {kpiLoading ? "—" : formatCurrency(proKpi?.mrr ?? 0)}
@@ -179,7 +179,7 @@ export default function ProMembers() {
                     </div>
                     <Badge
                       variant={m.status === "active" ? "default" : "secondary"}
-                      className={`text-xs ${m.status === "active" ? "bg-green-500/20 text-green-400 border-green-500/30" : ""}`}
+                      className={`text-xs ${m.status === "active" ? "bg-[#3DB855]/20 text-[#3DB855] border-[#3DB855]/30" : ""}`}
                     >
                       {m.status || "unknown"}
                     </Badge>

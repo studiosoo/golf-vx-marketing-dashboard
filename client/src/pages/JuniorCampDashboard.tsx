@@ -17,9 +17,9 @@ import ProgramMarketingPanel from "@/components/ProgramMarketingPanel";
 import { ProgramAIIntelligence } from "@/components/ProgramAIIntelligence";
 
 const TRACK_CONFIG = {
-  full_day: { label: "Full-Day Program", ageGroup: "Ages 7–17", color: "text-yellow-400", bg: "bg-yellow-400/10 border-yellow-400/30" },
-  half_day: { label: "Half-Day Program", ageGroup: "Ages 7–17", color: "text-blue-400", bg: "bg-blue-400/10 border-blue-400/30" },
-  tots: { label: "Tots Program", ageGroup: "Ages 4–6", color: "text-pink-400", bg: "bg-pink-400/10 border-pink-400/30" },
+  full_day: { label: "Full-Day Program", ageGroup: "Ages 7–17", color: "text-[#F5C72C]", bg: "bg-[#F5C72C]/10 border-[#F5C72C]/30" },
+  half_day: { label: "Half-Day Program", ageGroup: "Ages 7–17", color: "text-[#888888]", bg: "bg-[#888888]/10 border-[#888888]/30" },
+  tots: { label: "Tots Program", ageGroup: "Ages 4–6", color: "text-[#E8453C]", bg: "bg-[#E8453C]/10 border-[#E8453C]/30" },
 };
 
 export default function JuniorCampDashboard() {
@@ -107,10 +107,10 @@ export default function JuniorCampDashboard() {
 
       {/* Registration opens notice */}
       {totalRegistrations === 0 && (
-        <div className="flex items-start gap-3 bg-yellow-400/10 border border-yellow-400/30 rounded-xl p-4">
-          <Info className="h-5 w-5 text-yellow-400 mt-0.5 shrink-0" />
+        <div className="flex items-start gap-3 bg-[#F5C72C]/10 border border-[#F5C72C]/30 rounded-xl p-4">
+          <Info className="h-5 w-5 text-[#F5C72C] mt-0.5 shrink-0" />
           <div>
-            <p className="font-semibold text-yellow-300">Registration Not Yet Open</p>
+            <p className="font-semibold text-[#111111]">Registration Not Yet Open</p>
             <p className="text-sm text-muted-foreground mt-1">
               Summer Camp runs Jun–Aug 2026. Once registrations open in Acuity, this dashboard will populate automatically.
               Use the Marketing tab below to track campaign efforts ahead of registration launch.
@@ -206,9 +206,9 @@ export default function JuniorCampDashboard() {
                   <tr key={i} className="border-t border-border hover:bg-muted/20 transition-colors">
                     <td className="px-4 py-3 font-medium">{pd.label}</td>
                     <td className="px-4 py-3 text-muted-foreground">{pd.week}</td>
-                    <td className="px-4 py-3 text-right">{fdCount > 0 ? <span className="text-yellow-400 font-semibold">{fdCount}</span> : <span className="text-muted-foreground/40">—</span>}</td>
-                    <td className="px-4 py-3 text-right">{hdCount > 0 ? <span className="text-blue-400 font-semibold">{hdCount}</span> : <span className="text-muted-foreground/40">—</span>}</td>
-                    <td className="px-4 py-3 text-right">{totsCount > 0 ? <span className="text-pink-400 font-semibold">{totsCount}</span> : <span className="text-muted-foreground/40">—</span>}</td>
+                    <td className="px-4 py-3 text-right">{fdCount > 0 ? <span className="text-[#F5C72C] font-semibold">{fdCount}</span> : <span className="text-muted-foreground/40">—</span>}</td>
+                    <td className="px-4 py-3 text-right">{hdCount > 0 ? <span className="text-[#888888] font-semibold">{hdCount}</span> : <span className="text-muted-foreground/40">—</span>}</td>
+                    <td className="px-4 py-3 text-right">{totsCount > 0 ? <span className="text-[#E8453C] font-semibold">{totsCount}</span> : <span className="text-muted-foreground/40">—</span>}</td>
                     <td className="px-4 py-3 text-right font-semibold">{total > 0 ? total : <span className="text-muted-foreground/40">—</span>}</td>
                   </tr>
                 );
@@ -259,7 +259,7 @@ export default function JuniorCampDashboard() {
       <div className="space-y-4">
         <div>
           <h2 className="text-lg font-semibold flex items-center gap-2">
-            <span className="text-yellow-400">✦</span> AI Marketing Intelligence
+            <span className="text-[#F5C72C]">❖</span> AI Marketing Intelligence
           </h2>
           <p className="text-sm text-muted-foreground mt-1">AI-generated multi-channel marketing strategy based on program performance data.</p>
         </div>

@@ -33,7 +33,7 @@ function StatusBadge({ status }: { status: string }) {
   }
   if (normalized === "scheduled") {
     return (
-      <span className="inline-block px-2 py-0.5 bg-blue-50 text-[#007AFF] text-[11px] font-medium rounded">
+      <span className="inline-block px-2 py-0.5 bg-[#888888]/10 text-[#007AFF] text-[11px] font-medium rounded">
         Scheduled
       </span>
     );

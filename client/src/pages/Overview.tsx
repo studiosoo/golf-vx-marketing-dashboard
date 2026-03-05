@@ -16,14 +16,14 @@ export default function Overview() {
       label: "Total Members",
       value: dashboardData?.totalMembers ?? "—",
       icon: <Users size={20} />,
-      color: "text-blue-400",
+      color: "text-[#888888]",
       bg: "bg-blue-400/10",
     },
     {
       label: "MRR",
       value: dashboardData?.monthlyRecurringRevenue ? `$${Math.round(dashboardData.monthlyRecurringRevenue).toLocaleString()}` : "—",
       icon: <DollarSign size={20} />,
-      color: "text-green-400",
+      color: "text-[#3DB855]",
       bg: "bg-green-400/10",
     },
     {
@@ -37,14 +37,14 @@ export default function Overview() {
       label: "Conversion Rate",
       value: dashboardData?.overallROI ? `${dashboardData.overallROI}%` : "—",
       icon: <TrendingUp size={20} />,
-      color: "text-purple-400",
+      color: "text-[#888888]",
       bg: "bg-purple-400/10",
     },
     {
       label: "New Leads (30d)",
       value: dashboardData?.activeMembers ?? "—",
       icon: <Activity size={20} />,
-      color: "text-orange-400",
+      color: "text-[#F5C72C]",
       bg: "bg-orange-400/10",
     },
     {
@@ -106,7 +106,7 @@ export default function Overview() {
                 <span className="text-sm text-foreground">{item.label}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-xs text-green-400 border-green-400/30">
+                <Badge variant="outline" className="text-xs text-[#3DB855] border-green-400/30">
                   {item.status}
                 </Badge>
                 <span className="text-xs text-muted-foreground">{item.time}</span>

@@ -16,10 +16,10 @@ const CAMPAIGN_COLORS: Record<string, string> = {
 };
 
 const CAMPAIGN_BG_COLORS: Record<string, string> = {
-  emerald: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300",
-  pink: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300",
-  blue: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-  amber: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
+  emerald: "bg-[#3DB855]/10 text-[#3DB855]",
+  pink: "bg-[#E8453C]/10 text-[#E8453C]",
+  blue: "bg-[#888888]/10 text-[#888888]",
+  amber: "bg-[#F5C72C]/10 text-[#111111]",
 };
 
 export default function StrategicCampaigns() {
@@ -175,8 +175,8 @@ export default function StrategicCampaigns() {
                     <div className="flex items-end justify-between mb-2">
                       <span className={`text-4xl font-black ${
                         kpiData.trialConversion.current >= kpiData.trialConversion.target
-                          ? 'text-green-600 dark:text-green-400'
-                          : kpiData.trialConversion.current > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground'
+                          ? 'text-[#3DB855]'
+                          : kpiData.trialConversion.current > 0 ? 'text-[#F5C72C]' : 'text-muted-foreground'
                       }`}>
                         {kpiData.trialConversion.current.toFixed(1)}%
                       </span>
@@ -196,8 +196,8 @@ export default function StrategicCampaigns() {
                     <div className="flex items-end justify-between mb-2">
                       <span className={`text-4xl font-black ${
                         kpiData.memberRetention.current >= kpiData.memberRetention.target
-                          ? 'text-green-600 dark:text-green-400'
-                          : kpiData.memberRetention.current > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground'
+                          ? 'text-[#3DB855]'
+                          : kpiData.memberRetention.current > 0 ? 'text-[#F5C72C]' : 'text-muted-foreground'
                       }`}>
                         {kpiData.memberRetention.current.toFixed(1)}%
                       </span>
@@ -258,7 +258,7 @@ export default function StrategicCampaigns() {
                   {/* ROI — kept as supplementary */}
                   <div className="p-3 rounded-lg bg-muted/40">
                     <p className="text-xs text-muted-foreground">Financial ROI</p>
-                    <p className={`text-base font-bold mt-0.5 ${campaign.roi >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
+                    <p className={`text-base font-bold mt-0.5 ${campaign.roi >= 0 ? 'text-[#3DB855]' : 'text-[#E8453C]'}`}>
                       {campaign.roi >= 0 ? '+' : ''}{campaign.roi.toFixed(1)}%
                     </p>
                   </div>
@@ -308,7 +308,7 @@ export default function StrategicCampaigns() {
                             </div>
                           </div>
                           <div className="flex items-center gap-2 ml-4">
-                            <span className={`text-sm font-semibold ${programRoi >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                            <span className={`text-sm font-semibold ${programRoi >= 0 ? "text-[#3DB855]" : "text-[#E8453C]"}`}>
                               {programRoi >= 0 ? "+" : ""}{programRoi.toFixed(0)}%
                             </span>
                             <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />

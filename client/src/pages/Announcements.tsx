@@ -69,7 +69,7 @@ export default function Announcements() {
                     <span className="text-xs text-muted-foreground">To: {ann.recipients}</span>
                   </div>
                 </div>
-                <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">{ann.status}</Badge>
+                <Badge className="bg-[#3DB855]/20 text-[#3DB855] border-[#3DB855]/30 text-xs">{ann.status}</Badge>
               </div>
             </CardContent>
           </Card>

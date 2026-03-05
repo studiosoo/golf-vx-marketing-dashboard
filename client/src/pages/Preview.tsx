@@ -136,13 +136,13 @@ export default function Preview() {
                     <div className="text-sm text-white/60 mt-1">All Access Ace</div>
                     <div className="text-xs text-white/40">$325/mo</div>
                   </div>
-                  <div className="text-center p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                    <div className="text-3xl font-bold text-blue-400">{members.swingSaver}</div>
+                  <div className="text-center p-4 bg-[#888888]/100/10 rounded-lg border border-blue-500/20">
+                    <div className="text-3xl font-bold text-[#888888]">{members.swingSaver}</div>
                     <div className="text-sm text-white/60 mt-1">Swing Saver</div>
                     <div className="text-xs text-white/40">$225/mo</div>
                   </div>
-                  <div className="text-center p-4 bg-purple-500/10 rounded-lg border border-purple-500/20">
-                    <div className="text-3xl font-bold text-purple-400">{members.pro}</div>
+                  <div className="text-center p-4 bg-[#888888]/100/10 rounded-lg border border-purple-500/20">
+                    <div className="text-3xl font-bold text-[#888888]">{members.pro}</div>
                     <div className="text-sm text-white/60 mt-1">Golf VX Pro</div>
                     <div className="text-xs text-white/40">$500/mo</div>
                   </div>
@@ -180,7 +180,7 @@ export default function Preview() {
                 </div>
                 <div className="text-white/50 text-sm">
                   {members.newThisMonth > 0 && (
-                    <span className="text-green-400">+{members.newThisMonth} new members this month</span>
+                    <span className="text-[#3DB855]">+{members.newThisMonth} new members this month</span>
                   )}
                 </div>
               </div>

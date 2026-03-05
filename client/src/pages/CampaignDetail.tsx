@@ -241,8 +241,8 @@ export default function CampaignDetail() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-1 text-sm">
-                <Users className="h-4 w-4 text-green-500" />
-                <span className="text-green-500">${campaign.cpl.toFixed(2)} per lead</span>
+                <Users className="h-4 w-4 text-[#3DB855]" />
+                <span className="text-[#3DB855]">${campaign.cpl.toFixed(2)} per lead</span>
               </div>
             </CardContent>
           </Card>
@@ -254,8 +254,8 @@ export default function CampaignDetail() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp className="h-4 w-4 text-green-500" />
-                <span className="text-green-500">Above average</span>
+                <TrendingUp className="h-4 w-4 text-[#3DB855]" />
+                <span className="text-[#3DB855]">Above average</span>
               </div>
             </CardContent>
           </Card>
@@ -332,7 +332,7 @@ export default function CampaignDetail() {
                   </p>
                 </div>
 
-                <div className="p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <div className="p-4 bg-[#888888]/10 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                   <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
                     💡 Opportunity: Email Nurture
                   </h4>

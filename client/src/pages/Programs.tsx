@@ -77,16 +77,16 @@ interface Program {
 // ─────────────────────────────────────────────
 const STATUS_META: Record<CampaignStatus, { label: string; color: string; bg: string; icon: React.ElementType }> = {
   active: { label: "Active", color: "#3DB855", bg: "#E8F5EB", icon: PlayCircle },
-  planned: { label: "Planned", color: "#007AFF", bg: "#E5F0FF", icon: Clock },
-  completed: { label: "Completed", color: "#888888", bg: "#F5F5F5", icon: CheckCircle },
-  paused: { label: "Paused", color: "#F5A623", bg: "#FEF3E2", icon: PauseCircle },
+  planned: { label: "Planned", color: "#888888", bg: "#F5F5F5", icon: Clock },
+  completed: { label: "Completed", color: "#AAAAAA", bg: "#F5F5F5", icon: CheckCircle },
+  paused: { label: "Paused", color: "#AAAAAA", bg: "#F5F5F5", icon: PauseCircle },
 };
 
 const STRATEGIC_META: Record<StrategicCampaign, { label: string; color: string }> = {
   trial_conversion: { label: "Trial Conversion", color: "#3DB855" },
-  membership_acquisition: { label: "Membership Acquisition", color: "#E85D8A" },
-  member_retention: { label: "Member Retention", color: "#007AFF" },
-  corporate_events: { label: "B2B Sales", color: "#F5A623" },
+  membership_acquisition: { label: "Membership Acquisition", color: "#F5C72C" },
+  member_retention: { label: "Member Retention", color: "#888888" },
+  corporate_events: { label: "B2B Sales", color: "#111111" },
 };
 
 // Map program names to detail routes
@@ -160,7 +160,7 @@ function ProgramCard({ program, onClick }: { program: Program; onClick: () => vo
   return (
     <button
       onClick={onClick}
-      className="text-left w-full bg-white rounded-xl border border-[#E0E0E0] p-4 hover:shadow-md hover:border-[#F5C72C]/50 transition-all duration-150 group flex flex-col gap-3 border-l-4 border-l-[#F5C72C]"
+      className="text-left w-full bg-white rounded-xl border border-[#E0E0E0] p-4 hover:shadow-[0_2px_16px_rgba(245,199,44,0.18)] hover:border-[#F5C72C] transition-all duration-200 group flex flex-col gap-3 border-l-4 border-l-[#F5C72C]"
     >
       {/* Top row: status + strategic tag */}
       <div className="flex items-start justify-between gap-2">
@@ -170,9 +170,9 @@ function ProgramCard({ program, onClick }: { program: Program; onClick: () => vo
             <span className="text-[10px] font-semibold" style={{ color: status.color }}>{status.label}</span>
           </div>
           {hasMetaAds && (
-            <div className="h-5 px-2 rounded-full bg-[#1877F2]/10 flex items-center gap-1">
-              <BarChart3 className="h-3 w-3 text-[#1877F2]" />
-              <span className="text-[10px] font-semibold text-[#1877F2]">Meta</span>
+            <div className="h-5 px-2 rounded-full bg-[#F5F5F5] border border-[#E0E0E0] flex items-center gap-1">
+              <BarChart3 className="h-3 w-3 text-[#888888]" />
+              <span className="text-[10px] font-semibold text-[#888888]">Meta</span>
             </div>
           )}
         </div>
@@ -292,7 +292,7 @@ function ProgramCard({ program, onClick }: { program: Program; onClick: () => vo
             <p className="text-[10px] text-[#AAAAAA] mt-0.5">Revenue</p>
           </div>
           <div>
-            <p className={cn("text-[14px] font-bold leading-none", roi >= 0 ? "text-[#3DB855]" : "text-red-500")}>
+            <p className={cn("text-[14px] font-bold leading-none", roi >= 0 ? "text-[#3DB855]" : "text-[#E8453C]")}>
               {spend > 0 ? (roi >= 0 ? "+" : "") + roi.toFixed(0) + "%" : "—"}
             </p>
             <p className="text-[10px] text-[#AAAAAA] mt-0.5">ROI</p>
@@ -305,15 +305,15 @@ function ProgramCard({ program, onClick }: { program: Program; onClick: () => vo
         <div className="flex justify-between items-center mb-1">
           <span className="text-[10px] text-[#AAAAAA]">Budget: {fmtCurrency(budget)}</span>
           {score !== null && score !== undefined && (
-            <span className="text-[10px] font-semibold" style={{ color: score >= 70 ? "#3DB855" : score >= 40 ? "#F5A623" : "#E85D8A" }}>
+            <span className="text-[10px] font-semibold" style={{ color: score >= 70 ? "#3DB855" : score >= 40 ? "#F5C72C" : "#AAAAAA" }}>
               Score: {score}/100
             </span>
           )}
         </div>
         <div className="h-1.5 bg-[#F2F2F7] rounded-full overflow-hidden">
           <div
-            className="h-full rounded-full"
-            style={{ width: `${budgetPct}%`, background: strategic.color }}
+            className="h-full rounded-full bg-[#F5C72C]"
+            style={{ width: `${budgetPct}%` }}
           />
         </div>
       </div>

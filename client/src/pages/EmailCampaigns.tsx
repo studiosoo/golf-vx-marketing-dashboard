@@ -43,12 +43,12 @@ function StatusBadge({ status }: { status: BroadcastStatus }) {
   const config: Record<BroadcastStatus, { label: string; className: string; icon: React.ReactNode }> = {
     sent: {
       label: "Sent",
-      className: "bg-green-500/10 text-green-400 border-green-500/20",
+      className: "bg-green-500/10 text-[#3DB855] border-green-500/20",
       icon: <CheckCircle size={10} />,
     },
     sending: {
       label: "Sending",
-      className: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+      className: "bg-[#888888]/100/10 text-[#888888] border-blue-500/20",
       icon: <Loader2 size={10} className="animate-spin" />,
     },
     scheduled: {

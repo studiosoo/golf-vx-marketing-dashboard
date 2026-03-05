@@ -81,10 +81,10 @@ export default function InstagramViewer() {
           </div>
         </div>
 
-        <Card className="border-blue-500/30 bg-blue-500/5">
+        <Card className="border-blue-500/30 bg-[#888888]/100/5">
           <CardContent className="pt-4 pb-4">
             <div className="flex items-start gap-3">
-              <Info className="h-5 w-5 text-blue-400 shrink-0 mt-0.5" />
+              <Info className="h-5 w-5 text-[#888888] shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-foreground">Instagram auto-sync requires additional OAuth permissions</p>
                 <p className="text-xs text-muted-foreground mt-1">
@@ -99,9 +99,9 @@ export default function InstagramViewer() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {([
-            { label: "Followers", value: latestInsight?.followersCount?.toLocaleString() ?? "—", Icon: Users, color: "text-purple-400" },
+            { label: "Followers", value: latestInsight?.followersCount?.toLocaleString() ?? "—", Icon: Users, color: "text-[#888888]" },
             { label: "Reach (28d)", value: latestInsight?.reach?.toLocaleString() ?? "—", Icon: Eye, color: "text-pink-400" },
-            { label: "Impressions (28d)", value: latestInsight?.impressions?.toLocaleString() ?? "—", Icon: BarChart2, color: "text-orange-400" },
+            { label: "Impressions (28d)", value: latestInsight?.impressions?.toLocaleString() ?? "—", Icon: BarChart2, color: "text-[#F5C72C]" },
             { label: "Profile Views (28d)", value: latestInsight?.profileViews?.toLocaleString() ?? "—", Icon: MousePointer, color: "text-yellow-400" },
           ] as const).map((kpi) => (
             <Card key={kpi.label}>

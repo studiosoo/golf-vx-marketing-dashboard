@@ -24,14 +24,14 @@ export default function Revenue() {
       label: "Total Revenue (MTD)",
       value: summary ? formatCurrency((summary as any).total || 0) : "—",
       icon: <DollarSign size={20} />,
-      color: "text-green-400",
+      color: "text-[#3DB855]",
       bg: "bg-green-400/10",
     },
     {
       label: "Toast POS (MTD)",
       value: toastSummary ? formatCurrency((toastSummary as any).totalRevenue || 0) : "—",
       icon: <ShoppingBag size={20} />,
-      color: "text-blue-400",
+      color: "text-[#888888]",
       bg: "bg-blue-400/10",
     },
     {
@@ -45,7 +45,7 @@ export default function Revenue() {
       label: "Avg Daily Revenue",
       value: toastSummary ? formatCurrency((toastSummary as any).avgDailyRevenue || 0) : "—",
       icon: <TrendingUp size={20} />,
-      color: "text-purple-400",
+      color: "text-[#888888]",
       bg: "bg-purple-400/10",
     },
   ];

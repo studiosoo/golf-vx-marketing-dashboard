@@ -66,7 +66,7 @@ const ACTION_ICONS: Record<ActionType, React.ElementType> = {
 const PRIORITY_STYLES: Record<ActionPriority, { label: string; className: string }> = {
   urgent: { label: "Urgent",  className: "bg-red-50 text-red-700 border border-red-200" },
   high:   { label: "High",    className: "bg-orange-50 text-orange-700 border border-orange-200" },
-  medium: { label: "Medium",  className: "bg-blue-50 text-blue-700 border border-blue-200" },
+  medium: { label: "Medium",  className: "bg-[#888888]/10 text-[#888888] border border-blue-200" },
   low:    { label: "Low",     className: "bg-gray-50 text-gray-500 border border-gray-200" },
 };
 
@@ -117,7 +117,7 @@ function ActionCard({ action, onComplete, onSkip, isLoading }: ActionCardProps) 
           <div className="flex flex-wrap items-center gap-2 mb-1">
             <PriorityBadge priority={action.priority} />
             {action.status === "completed" && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-[#3DB855] border border-green-200">
                 <CheckCircle className="w-3 h-3" />
                 Completed
               </span>

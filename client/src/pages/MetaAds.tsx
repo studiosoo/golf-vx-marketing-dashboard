@@ -30,9 +30,9 @@ function getEffectiveStatus(campaign: any, overrideMap: Record<string, string>):
 
 function statusBadgeClass(status: string) {
   switch (status) {
-    case "ACTIVE": return "bg-green-500/20 text-green-600 border-green-500/30";
-    case "PAUSED": return "bg-yellow-500/20 text-yellow-600 border-yellow-500/30";
-    case "COMPLETED": return "bg-blue-500/20 text-blue-600 border-blue-500/30";
+    case "ACTIVE": return "bg-[#3DB855]/20 text-[#3DB855] border-[#3DB855]/30";
+    case "PAUSED": return "bg-[#F5C72C]/20 text-[#111111] border-[#F5C72C]/50";
+    case "COMPLETED": return "bg-[#888888]/20 text-[#888888] border-[#888888]/30";
     case "ARCHIVED": return "bg-gray-500/20 text-gray-500 border-gray-500/30";
     default: return "bg-muted text-muted-foreground";
   }
@@ -175,7 +175,7 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-xs h-7 px-2 gap-1 text-muted-foreground hover:text-orange-500"
+                    className="text-xs h-7 px-2 gap-1 text-muted-foreground hover:text-[#E8453C]"
                     onClick={(e) => handleMarkCompleted(e, c)}
                     title="Mark as Completed"
                   >
@@ -188,7 +188,7 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-xs h-7 px-2 gap-1 text-muted-foreground hover:text-green-600"
+                    className="text-xs h-7 px-2 gap-1 text-muted-foreground hover:text-[#3DB855]"
                     onClick={(e) => handleRestoreActive(e, c)}
                     title="Restore to Active"
                   >
@@ -268,9 +268,9 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: "Active Spend", value: formatCurrency(totalSpend), icon: <DollarSign size={18} />, color: "text-red-400" },
-          { label: "Total Reach", value: formatNum(totalReach), icon: <Eye size={18} />, color: "text-blue-400" },
-          { label: "Impressions", value: formatNum(totalImpressions), icon: <TrendingUp size={18} />, color: "text-green-400" },
-          { label: "Clicks", value: formatNum(totalClicks), icon: <MousePointer size={18} />, color: "text-yellow-400" },
+          { label: "Total Reach", value: formatNum(totalReach), icon: <Eye size={18} />, color: "text-[#888888]" },
+          { label: "Impressions", value: formatNum(totalImpressions), icon: <TrendingUp size={18} />, color: "text-[#3DB855]" },
+          { label: "Clicks", value: formatNum(totalClicks), icon: <MousePointer size={18} />, color: "text-[#F5C72C]" },
         ].map((kpi) => (
           <Card key={kpi.label} className="bg-card border-border">
             <CardContent className="p-4">
@@ -295,7 +295,7 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <span className="text-sm font-semibold text-foreground">Active Campaigns</span>
-              <Badge className="bg-green-500/20 text-green-600 border-green-500/30 text-xs border" variant="outline">
+              <Badge className="bg-[#3DB855]/20 text-[#3DB855] border-[#3DB855]/30 text-xs border" variant="outline">
                 {activeCampaigns.length}
               </Badge>
             </div>

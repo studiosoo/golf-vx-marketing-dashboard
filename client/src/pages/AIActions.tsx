@@ -33,7 +33,7 @@ interface AutonomousAction {
 
 function RiskBadge({ level }: { level: string }) {
   const styles: Record<string, string> = {
-    low: "bg-green-50 text-green-700 border border-green-200",
+    low: "bg-[#3DB855]/10 text-[#3DB855] border border-[#3DB855]/30",
     medium: "bg-yellow-50 text-yellow-700 border border-yellow-200",
     high: "bg-red-50 text-red-700 border border-red-200",
   };
@@ -47,9 +47,9 @@ function RiskBadge({ level }: { level: string }) {
 function StatusBadge({ status }: { status: ActionStatus }) {
   const map: Record<ActionStatus, { label: string; className: string }> = {
     auto_executed:    { label: "Auto-Executed",    className: "bg-[#F5C72C]/10 text-[#8B6E00] border border-[#F5C72C]/40" },
-    pending_approval: { label: "Awaiting Approval", className: "bg-blue-50 text-blue-700 border border-blue-200" },
+    pending_approval: { label: "Awaiting Approval", className: "bg-[#F5C72C]/10 text-[#111111] border border-[#F5C72C]/40" },
     monitoring:       { label: "Monitoring",        className: "bg-gray-50 text-gray-600 border border-gray-200" },
-    approved:         { label: "Approved",          className: "bg-green-50 text-green-700 border border-green-200" },
+    approved:         { label: "Approved",          className: "bg-[#3DB855]/10 text-[#3DB855] border border-[#3DB855]/30" },
     rejected:         { label: "Rejected",          className: "bg-red-50 text-red-700 border border-red-200" },
     undone:           { label: "Undone",            className: "bg-gray-50 text-gray-500 border border-gray-200" },
     dismissed:        { label: "Dismissed",         className: "bg-gray-50 text-gray-400 border border-gray-200" },
@@ -96,7 +96,7 @@ function ActionCard({
           {section === "approval" && (
             <>
               <button onClick={() => onApprove?.(action.id)} disabled={isLoading}
-                className="flex items-center gap-1 px-2.5 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 rounded text-xs font-medium transition-colors disabled:opacity-50">
+                className="flex items-center gap-1 px-2.5 py-1.5 bg-[#3DB855]/10 text-[#3DB855] hover:bg-[#3DB855]/20 border border-[#3DB855]/30 rounded text-xs font-medium transition-colors disabled:opacity-50">
                 <CheckCircle className="w-3.5 h-3.5" />Approve
               </button>
               <button onClick={() => onReject?.(action.id)} disabled={isLoading}
@@ -210,7 +210,7 @@ export default function AIActions() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           { label: "Auto-Executed", value: autoExecuted.length, icon: Zap, color: "text-[#F5C72C]", bg: "bg-[#F5C72C]/10" },
-          { label: "Awaiting Approval", value: pendingApproval.length, icon: Clock, color: "text-blue-600", bg: "bg-blue-50" },
+          { label: "Awaiting Approval", value: pendingApproval.length, icon: Clock, color: "text-[#F5C72C]", bg: "bg-[#F5C72C]/10" },
           { label: "Monitoring", value: monitoring.length, icon: Eye, color: "text-[#666]", bg: "bg-[#F5F5F5]" },
         ].map(({ label, value, icon: Icon, color, bg }) => (
           <div key={label} className="bg-white border border-[#E0E0E0] rounded-xl p-4 flex items-center gap-3">
@@ -259,7 +259,7 @@ export default function AIActions() {
           {pendingApproval.length > 0 && (
             <section>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center"><Clock className="w-4 h-4 text-blue-600" /></div>
+                <div className="w-9 h-9 rounded-lg bg-[#F5C72C]/10 flex items-center justify-center"><Clock className="w-4 h-4 text-[#F5C72C]" /></div>
                 <div>
                   <div className="flex items-center gap-2"><h2 className="text-base font-semibold text-[#111]">Awaiting Your Approval</h2><span className="text-xs bg-[#F5F5F5] border border-[#E0E0E0] text-[#666] px-2 py-0.5 rounded-full font-medium">{pendingApproval.length}</span></div>
                   <p className="text-xs text-[#888]">Medium-to-high risk actions that require your sign-off before execution</p>

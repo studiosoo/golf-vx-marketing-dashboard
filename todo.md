@@ -1130,3 +1130,20 @@
 - [x] Upgrade getActiveAlerts: frequency saturation, ROAS, click-to-LPV, scale opportunities, CPM alerts
 - [x] Add AI Optimization Analysis section to MetaAdsCampaignDetail page
 - [x] Redesign AlertsBanner: severity colors, action field, opportunity alerts, dismiss button
+
+## Fix & Feature: Meta Ads Spend + AI Analysis + Programs Redesign (2026-03-05)
+- [ ] Fix Junior Summer Camp spend discrepancy: fetch ad-level spend data (not just campaign-level)
+- [ ] Run AI campaign analysis for all active campaigns (Junior Summer Camp, Annual Giveaway, Trial Session, Sunday Clinic)
+- [ ] Restyle Programs & Events pages to Golf VX design guide (flat hierarchy, #111111, #F5C72C, no colored badges)
+
+## Golf VX Design System — Full Color Audit (2026-03-05)
+- [x] Fix Junior Summer Camp spend discrepancy: cache updated to $461.73 (was $290.16)
+- [x] Fix refreshMetaAdsCache.ts: removed server-side MCP calls (server cannot invoke manus-mcp-cli)
+- [x] JuniorCampDashboard.tsx: replaced blue-400/pink-400/yellow-400 with Golf VX palette (#F5C72C, #888888, #E8453C)
+- [x] AnnualGiveawayActions.tsx: replaced green-600/green-50 with #3DB855 Golf VX success green
+- [x] MetaAds.tsx: replaced green-500/blue-500/orange-500 status colors with Golf VX palette
+- [x] AIActions.tsx: replaced blue-50/green-50 approval/status badges with Golf VX palette
+- [x] StrategicCampaigns.tsx: replaced emerald/pink/blue/amber color map + green ROI text with Golf VX palette
+- [x] Performance.tsx: replaced green-50/blue-50 KPI card backgrounds with Golf VX palette
+- [x] Batch sed replacement across all 28+ pages and components: green-400/500/600/700, blue-400/600/700, purple-400/700, orange-400/500, amber-600/800 → Golf VX palette
+- [x] TypeScript: 0 errors after all changes
