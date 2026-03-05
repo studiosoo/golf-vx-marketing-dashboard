@@ -276,12 +276,12 @@ const normalizeResponseFormat = ({
   };
 };
 
-// Default model per use-case — callers override via params.model
+// Models resolved from env vars (Manus-configurable) with hardcoded fallbacks
 export const LLM_MODELS = {
-  chat: "gemini-2.0-flash-lite",      // fast, cheap — real-time chat
-  analysis: "gemini-2.5-pro",          // deep reasoning — strategy/analysis
-  structured: "gemini-2.5-flash",      // JSON output — action plans, reports
-} as const;
+  get chat()       { return ENV.llmModelChat       || "gemini-2.0-flash-lite"; },
+  get analysis()   { return ENV.llmModelAnalysis   || "gemini-2.5-pro"; },
+  get structured() { return ENV.llmModelStructured || "gemini-2.5-flash"; },
+};
 
 export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   assertApiKey();
