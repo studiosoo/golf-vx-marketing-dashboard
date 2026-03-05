@@ -1147,3 +1147,10 @@
 - [x] Performance.tsx: replaced green-50/blue-50 KPI card backgrounds with Golf VX palette
 - [x] Batch sed replacement across all 28+ pages and components: green-400/500/600/700, blue-400/600/700, purple-400/700, orange-400/500, amber-600/800 → Golf VX palette
 - [x] TypeScript: 0 errors after all changes
+## Instagram Token Fix (2026-03-05)
+- [x] Diagnose expired Instagram USER token (expired 2026-03-05T04:00:00Z)
+- [x] Generate new long-lived token via Graph API Explorer (expires 2026-05-03)
+- [x] Exchange short-lived token for 60-day long-lived token via fb_exchange_token
+- [x] Update INSTAGRAM_ACCESS_TOKEN secret with new long-lived token
+- [x] Verify all 11 Instagram tests pass (instagram.test.ts, instagram.token.test.ts, instagramFeed.test.ts)
+- [x] Token expiry warning banner already exists in InstagramFeed.tsx (shows when ≤7 days remaining)
