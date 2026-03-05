@@ -57,6 +57,7 @@ export type ToolChoice =
 
 export type InvokeParams = {
   messages: Message[];
+  model?: string;
   tools?: Tool[];
   toolChoice?: ToolChoice;
   tool_choice?: ToolChoice;
@@ -209,14 +210,24 @@ const normalizeToolChoice = (
   return toolChoice;
 };
 
-const resolveApiUrl = () =>
-  ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
+// Resolve API endpoint: Gemini direct > custom forge URL > Manus Forge
+const resolveApiConfig = (): { url: string; apiKey: string; isDirect: boolean } => {
+  if (ENV.geminiApiKey) {
+    return {
+      url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+      apiKey: ENV.geminiApiKey,
+      isDirect: true,
+    };
+  }
+  const url = ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
     ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
     : "https://forge.manus.im/v1/chat/completions";
+  return { url, apiKey: ENV.forgeApiKey, isDirect: false };
+};
 
 const assertApiKey = () => {
-  if (!ENV.forgeApiKey) {
-    throw new Error("OPENAI_API_KEY is not configured");
+  if (!ENV.geminiApiKey && !ENV.forgeApiKey) {
+    throw new Error("No LLM API key configured. Set GEMINI_API_KEY or BUILT_IN_FORGE_API_KEY.");
   }
 };
 
@@ -265,11 +276,19 @@ const normalizeResponseFormat = ({
   };
 };
 
+// Default model per use-case — callers override via params.model
+export const LLM_MODELS = {
+  chat: "gemini-2.0-flash-lite",      // fast, cheap — real-time chat
+  analysis: "gemini-2.5-pro",          // deep reasoning — strategy/analysis
+  structured: "gemini-2.5-flash",      // JSON output — action plans, reports
+} as const;
+
 export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   assertApiKey();
 
   const {
     messages,
+    model,
     tools,
     toolChoice,
     tool_choice,
@@ -279,10 +298,20 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     response_format,
   } = params;
 
+  const { url, apiKey, isDirect } = resolveApiConfig();
+  const resolvedModel = model ?? LLM_MODELS.structured;
+
   const payload: Record<string, unknown> = {
-    model: "gemini-2.5-flash",
+    model: resolvedModel,
     messages: messages.map(normalizeMessage),
+    max_tokens: 8192,
   };
+
+  // thinking extension only supported via Manus Forge proxy
+  if (!isDirect) {
+    payload.thinking = { budget_tokens: 128 };
+    payload.max_tokens = 32768;
+  }
 
   if (tools && tools.length > 0) {
     payload.tools = tools;
@@ -296,11 +325,6 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.tool_choice = normalizedToolChoice;
   }
 
-  payload.max_tokens = 32768
-  payload.thinking = {
-    "budget_tokens": 128
-  }
-
   const normalizedResponseFormat = normalizeResponseFormat({
     responseFormat,
     response_format,
@@ -312,11 +336,11 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.response_format = normalizedResponseFormat;
   }
 
-  const response = await fetch(resolveApiUrl(), {
+  const response = await fetch(url, {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      authorization: `Bearer ${ENV.forgeApiKey}`,
+      authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify(payload),
   });

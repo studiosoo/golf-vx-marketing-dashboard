@@ -281,7 +281,7 @@ export const intelligenceRouter = router({
       focus: z.enum(["all", "membership", "meta_ads", "programs", "retention"]).default("all"),
     }))
     .mutation(async ({ input }) => {
-      const { invokeLLM } = await import("../_core/llm");
+      const { invokeLLM, LLM_MODELS } = await import("../_core/llm");
       const database = await db.getDb();
       let contextData = "";
       try {
@@ -334,6 +334,7 @@ Return ONLY a JSON object (no markdown, no code blocks) with this exact structur
 {"summary":"2-3 sentence executive summary","priority":"high","generatedAt":"${new Date().toISOString()}","timeframe":"${input.timeframe}","focus":"${input.focus}","topPriorities":[{"rank":1,"title":"Action title","category":"membership","description":"What to do and why","expectedImpact":"Specific measurable outcome","effort":"medium","deadline":"This week","steps":["Step 1","Step 2","Step 3"]}],"quickWins":[{"title":"Quick win","action":"Specific action","time":"30 min"}],"kpiTargets":[{"metric":"Metric","current":"value","target":"target","by":"timeframe"}],"risks":["Risk 1"],"insight":"One key strategic insight"}
 Generate 3-5 top priorities and 3-4 quick wins. Be specific to Golf VX Arlington Heights. Focus on the 300 member goal.`;
       const response = await invokeLLM({
+        model: LLM_MODELS.structured,
         messages: [
           { role: "system" as const, content: systemPrompt },
           { role: "user" as const, content: `Generate a ${input.timeframe}ly action plan for Golf VX Arlington Heights, focusing on ${focusLabel}.` },
@@ -603,46 +604,80 @@ export const workspaceRouter = router({
       context: z.enum(["general", "programs", "members", "meta_ads", "revenue"]).optional().default("general"),
     }))
     .mutation(async ({ input }) => {
-      const { invokeLLM } = await import("../_core/llm");
+      const { invokeLLM, LLM_MODELS } = await import("../_core/llm");
+      const { context } = input;
       let contextData = "";
       try {
         const database = await db.getDb();
         if (database) {
-          const memberResult = await database.execute(
-            `SELECT COUNT(*) as total, SUM(CASE WHEN status='active' THEN 1 ELSE 0 END) as active,
-             SUM(CASE WHEN membershipTier IN ('all_access_aces','swing_savers') AND status='active' THEN 1 ELSE 0 END) as customerMembers
-             FROM members`
-          );
-          const campaignResult = await database.execute(
-            `SELECT COUNT(*) as total, SUM(CASE WHEN status='active' THEN 1 ELSE 0 END) as active,
-             SUM(budget) as totalBudget, SUM(actualSpend) as totalSpend, SUM(actualRevenue) as totalRevenue
-             FROM campaigns`
-          );
+          // Base metrics — always included
+          const [memberResult, campaignResult] = await Promise.all([
+            database.execute(
+              `SELECT COUNT(*) as total,
+               SUM(CASE WHEN status='active' THEN 1 ELSE 0 END) as active,
+               SUM(CASE WHEN membershipTier IN ('all_access_aces','swing_savers') AND status='active' THEN 1 ELSE 0 END) as customerMembers,
+               SUM(CASE WHEN membershipTier='pro_members' AND status='active' THEN 1 ELSE 0 END) as proMembers
+               FROM members`
+            ),
+            database.execute(
+              `SELECT COUNT(*) as total, SUM(CASE WHEN status='active' THEN 1 ELSE 0 END) as active,
+               SUM(budget) as totalBudget, SUM(actualSpend) as totalSpend, SUM(actualRevenue) as totalRevenue
+               FROM campaigns`
+            ),
+          ]);
           const m = (memberResult as any)[0];
           const c = (campaignResult as any)[0];
-          contextData = `\nLive Golf VX Arlington Heights snapshot (as of today):\n- Customer members (All Access + Swing Saver): ${m?.customerMembers || 0} / 300 goal\n- Active programs: ${c?.active || 0} of ${c?.total || 0} total\n- Total marketing spend: $${Number(c?.totalSpend || 0).toFixed(0)} / $${Number(c?.totalBudget || 0).toFixed(0)} budget\n- Total program revenue: $${Number(c?.totalRevenue || 0).toFixed(0)}`;
+          contextData = `\nLive Golf VX Arlington Heights snapshot:\n- Customer members: ${m?.customerMembers || 0} / 300 goal (${m?.proMembers || 0} Pro)\n- Active campaigns: ${c?.active || 0} of ${c?.total || 0}\n- Marketing spend: $${Number(c?.totalSpend || 0).toFixed(0)} / $${Number(c?.totalBudget || 0).toFixed(0)} budget\n- Total program revenue tracked: $${Number(c?.totalRevenue || 0).toFixed(0)}`;
+
+          // Context-specific data enrichment
+          if (context === "members") {
+            const tierResult = await database.execute(
+              `SELECT membershipTier, COUNT(*) as count FROM members WHERE status='active' GROUP BY membershipTier ORDER BY count DESC LIMIT 10`
+            );
+            const tiers = (tierResult as any[]).map((r: any) => `${r.membershipTier}: ${r.count}`).join(", ");
+            contextData += `\n- Member tiers: ${tiers}`;
+          } else if (context === "programs") {
+            const programResult = await database.execute(
+              `SELECT name, status, actualRevenue, actualSpend FROM campaigns WHERE status IN ('active','paused') ORDER BY actualRevenue DESC LIMIT 8`
+            );
+            const programs = (programResult as any[]).map((p: any) =>
+              `${p.name} [${p.status}] rev=$${Number(p.actualRevenue || 0).toFixed(0)} spend=$${Number(p.actualSpend || 0).toFixed(0)}`
+            ).join("\n  ");
+            contextData += `\n- Programs:\n  ${programs}`;
+          } else if (context === "revenue") {
+            const revenueResult = await database.execute(
+              `SELECT SUM(mrr) as totalMrr FROM membershipSnapshots ORDER BY snapshotDate DESC LIMIT 1`
+            );
+            const rev = (revenueResult as any)[0];
+            contextData += `\n- Monthly Recurring Revenue (MRR): $${Number(rev?.totalMrr || 0).toFixed(0)}`;
+          } else if (context === "meta_ads") {
+            const adsResult = await database.execute(
+              `SELECT name, actualSpend, impressions, clicks FROM campaigns WHERE metaAdsCampaignId IS NOT NULL AND status='active' ORDER BY actualSpend DESC LIMIT 6`
+            );
+            const ads = (adsResult as any[]).map((a: any) => {
+              const ctr = a.impressions > 0 ? ((a.clicks / a.impressions) * 100).toFixed(2) : "0.00";
+              return `${a.name}: spend=$${Number(a.actualSpend || 0).toFixed(0)} CTR=${ctr}%`;
+            }).join("\n  ");
+            contextData += `\n- Active Meta Ads campaigns:\n  ${ads || "No active Meta campaigns"}`;
+          }
         }
       } catch (_) {}
 
-      const systemPrompt = `You are the Golf VX Arlington Heights AI Marketing Assistant — a strategic partner for the marketing and operations team. You help analyze performance, suggest marketing actions, log data, and provide actionable recommendations.${contextData}
+      const systemPrompt = `You are the Golf VX Arlington Heights AI Marketing Assistant — a strategic partner for the Studio Soo marketing team. You help analyze performance, suggest marketing actions, draft content, and provide actionable recommendations.${contextData}
 
-Your capabilities:
-- Analyze Meta Ads performance and suggest optimizations
-- Recommend follow-up actions for members and leads
-- Help draft email/SMS content for campaigns
-- Log program updates and event notes (acknowledge data and confirm what was logged)
-- Provide strategic insights based on current KPIs
-- Suggest next steps for each of the 4 strategic campaigns: Trial Conversion, Membership Acquisition, Member Retention, B2B Sales
+Active strategic focus areas: Trial Conversion, Membership Acquisition (goal: 300 members), Member Retention, B2B/Corporate Sales.
+Studio Soo's primary channels: Meta Ads → ClickFunnels landing pages → Acuity bookings. Toast POS for revenue. Encharge for email.
 
-When the user provides data (e.g., "we had 12 attendees at Drive Day"), acknowledge it clearly, suggest what action to take, and offer to help draft follow-up content. Be concise, specific, and actionable. Use numbers when available. Keep responses under 300 words unless a longer response is explicitly needed.`;
+When the user provides data (e.g., "Drive Day had 12 attendees"), acknowledge it, suggest a follow-up action, and offer to draft content. Be concise and specific. Use numbers. Keep responses under 400 words unless more depth is explicitly requested.`;
 
       const messages = [
         { role: "system" as const, content: systemPrompt },
-        ...input.messages.map(m => ({ role: m.role as "user" | "assistant" | "system", content: m.content })),
+        ...input.messages.map(msg => ({ role: msg.role as "user" | "assistant" | "system", content: msg.content })),
       ];
-      const response = await invokeLLM({ messages });
+      const model = LLM_MODELS.chat;
+      const response = await invokeLLM({ messages, model });
       const reply = response.choices?.[0]?.message?.content || "I couldn't generate a response. Please try again.";
-      return { reply };
+      return { reply, model };
     }),
 
   getSuggestedPrompts: protectedProcedure.query(async () => {
@@ -675,7 +710,7 @@ export const aiWorkspaceRouter = router({
       customPrompt: z.string().optional(),
     }))
     .mutation(async ({ input }) => {
-      const { invokeLLM } = await import("../_core/llm");
+      const { invokeLLM, LLM_MODELS } = await import("../_core/llm");
       const GOLF_VX_CONTEXT = `Golf VX Arlington Heights is an indoor golf simulator venue located at 644 E Rand Rd, Arlington Heights, IL. It offers: hourly bay rentals ($45 off-peak / $65 peak), memberships (All Access Ace, Swing Saver, Golf VX Pro), leagues, lessons, clinics, junior programs (Junior Summer Camp), food & beverage, and private/corporate events. The venue targets local Arlington Heights and Chicago suburb residents. Key programs: $25 Trial Session (off-peak), $35 Trial Session (peak), Winter Clinics, Sunday Clinics (PBGA), Drive Day Clinics, Junior Summer Camp. Website: playgolfvx.com. Linktree: ah.playgolfvx.com.`;
       const typeInstructions: Record<string, string> = {
         competitive_analysis: `You are a golf industry marketing strategist. Analyze the provided content for competitive intelligence relevant to Golf VX Arlington Heights. Identify what competitors are doing, what Golf VX can learn, and specific tactics to adopt or counter. Context: ${GOLF_VX_CONTEXT}`,
@@ -690,7 +725,9 @@ export const aiWorkspaceRouter = router({
       const userPrompt = input.customPrompt
         ? `${input.customPrompt}\n\n---\n\nCONTENT TO ANALYZE:\n${input.content}`
         : `Please analyze the following content and provide a structured response with these sections:\n\n## Executive Summary\n(2-3 sentences capturing the key takeaway)\n\n## Key Insights\n(3-5 specific, data-driven observations)\n\n## Recommended Actions\n(Prioritized list of specific, actionable steps with owner and timeline)\n\n## KPIs to Track\n(Measurable success metrics with target values where possible)\n\n## Risks & Considerations\n(What to watch out for, potential downsides)\n\n---\n\nCONTENT TO ANALYZE:\n${input.content}`;
+      const model = LLM_MODELS.analysis;
       const response = await invokeLLM({
+        model,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt },
@@ -698,7 +735,7 @@ export const aiWorkspaceRouter = router({
       });
       const rawContent = response?.choices?.[0]?.message?.content;
       const result = typeof rawContent === 'string' ? rawContent : (Array.isArray(rawContent) ? rawContent.map((c: any) => c.text || '').join('') : 'No response generated.');
-      return { analysis: result, analysisType: input.analysisType };
+      return { analysis: result, analysisType: input.analysisType, model };
     }),
 });
 

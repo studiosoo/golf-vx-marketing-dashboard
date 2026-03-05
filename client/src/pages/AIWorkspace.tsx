@@ -817,9 +817,17 @@ export default function AIWorkspace() {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-1.5">
-            <Zap size={12} className="text-[#F5C72C]" />
-            <span className="text-xs text-muted-foreground">Live data connected</span>
+          <div className="flex flex-col items-end gap-1">
+            <div className="flex items-center gap-1.5">
+              <Zap size={12} className="text-[#F5C72C]" />
+              <span className="text-xs text-muted-foreground">Live data connected</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] text-muted-foreground/60">model:</span>
+              <span className="text-[10px] font-medium text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded">
+                {activeTab === "chat" ? "gemini-2.0-flash-lite" : activeTab === "strategy" ? "gemini-2.5-pro" : "gemini-2.5-flash"}
+              </span>
+            </div>
           </div>
         </div>
 
