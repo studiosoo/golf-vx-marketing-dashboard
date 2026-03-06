@@ -19,6 +19,8 @@ import {
   Award,
   Crosshair,
   X,
+  Instagram,
+  Mail,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useMemo } from "react";
@@ -166,6 +168,19 @@ export default function Home() {
     enabled: isAuthenticated,
     staleTime: 5 * 60 * 1000,
   });
+  const { data: ahtilData } = trpc.encharge.getAHTILCount.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 10 * 60 * 1000,
+  });
+  const { data: tokenStatus } = trpc.instagram.checkTokenExpiry.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 60 * 60 * 1000,
+  });
+  const tokenValid = tokenStatus?.valid === true;
+  const { data: igStats } = trpc.instagram.getAccountStats.useQuery(undefined, {
+    enabled: isAuthenticated && tokenValid,
+    staleTime: 30 * 60 * 1000,
+  });
 
   const [refreshing, setRefreshing] = useState(false);
   const [memberListOpen, setMemberListOpen] = useState(false);
@@ -251,8 +266,62 @@ export default function Home() {
   const annualGoalPct = Math.min((annualRunRate / ANNUAL_REVENUE_GOAL) * 100, 100);
   const hasAnyRevenue = mrr > 0 || toastMTD > 0 || acuityTotal > 0;
 
-  // Strategic campaigns — filter out $0 spend AND $0 revenue
-  const activeCampaigns = (strategicOverview ?? []).filter((c: any) => c.totalSpend > 0 || c.totalRevenue > 0 || c.primaryKpi?.current > 0);
+  // Strategic campaigns — enrich membership_acquisition with live member KPI
+  const rawCampaigns = (strategicOverview ?? []) as any[];
+  const enrichedCampaigns = rawCampaigns.map((c: any) => {
+    if (c.id === "membership_acquisition" && memberTotal >= 0) {
+      const remaining = Math.max(0, memberGoal - memberTotal);
+      return {
+        ...c,
+        primaryKpi: { current: memberTotal, target: memberGoal, remaining, unit: "" },
+      };
+    }
+    return c;
+  });
+  const activeCampaigns = enrichedCampaigns.filter((c: any) => c.totalSpend > 0 || c.totalRevenue > 0 || (c.primaryKpi?.current ?? 0) > 0);
+
+  // 2026 Key Goals data
+  const igFollowers = (igStats as any)?.followers ?? (igStats as any)?.followers_count ?? null;
+  const emailSubscribers = ahtilData?.count ?? null;
+
+  const KEY_GOALS = [
+    {
+      label: "Annual Revenue",
+      icon: DollarSign,
+      current: annualRunRate,
+      goal: ANNUAL_REVENUE_GOAL,
+      display: fmtCurrency(annualRunRate),
+      goalDisplay: "$2M",
+      color: "#F5C72C",
+    },
+    {
+      label: "Members",
+      icon: UserCheck,
+      current: memberTotal,
+      goal: memberGoal,
+      display: fmt(memberTotal),
+      goalDisplay: "300",
+      color: "#3DB855",
+    },
+    {
+      label: "Instagram Followers",
+      icon: Instagram,
+      current: igFollowers,
+      goal: 2000,
+      display: igFollowers != null ? fmt(igFollowers) : "—",
+      goalDisplay: "2,000",
+      color: "#E85D8A",
+    },
+    {
+      label: "Email Subscribers",
+      icon: Mail,
+      current: emailSubscribers,
+      goal: 5000,
+      display: emailSubscribers != null ? fmt(emailSubscribers) : "—",
+      goalDisplay: "5,000",
+      color: "#007AFF",
+    },
+  ];
 
   return (
     <div className="max-w-6xl mx-auto space-y-5">
@@ -272,6 +341,47 @@ export default function Home() {
           <RefreshCw className={cn("h-3.5 w-3.5", refreshing && "animate-spin")} />
           Refresh
         </button>
+      </div>
+
+      {/* ── 2026 Key Goals ── */}
+      <div className="bg-white rounded-xl border border-[#E0E0E0] p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Target className="h-4 w-4 text-[#F5C72C]" />
+            <h2 className="text-[14px] font-bold text-[#111111]">2026 Key Goals</h2>
+          </div>
+          <span className="text-[11px] text-[#AAAAAA]">Year-end targets</span>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {KEY_GOALS.map((g) => {
+            const pct = g.current != null && g.goal > 0 ? Math.min((g.current / g.goal) * 100, 100) : null;
+            const Icon = g.icon;
+            return (
+              <div key={g.label} className="rounded-xl border border-[#F0F0F0] bg-[#FAFAFA] p-3">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <div className="h-5 w-5 rounded-md flex items-center justify-center" style={{ background: `${g.color}18` }}>
+                    <Icon className="h-3 w-3" style={{ color: g.color }} />
+                  </div>
+                  <span className="text-[11px] text-[#888888] font-medium truncate">{g.label}</span>
+                </div>
+                <div className="flex items-end gap-1 mb-1.5">
+                  <span className="text-[22px] font-bold text-[#111111] leading-none tracking-tight">{g.display}</span>
+                  <span className="text-[11px] text-[#AAAAAA] mb-0.5">/ {g.goalDisplay}</span>
+                </div>
+                {pct != null ? (
+                  <>
+                    <div className="h-1.5 bg-[#EEEEEE] rounded-full overflow-hidden mb-1">
+                      <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: g.color }} />
+                    </div>
+                    <span className="text-[10px]" style={{ color: g.color }}>{pct.toFixed(1)}%</span>
+                  </>
+                ) : (
+                  <span className="text-[10px] text-[#AAAAAA]">Connecting…</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* ── Section 1: Members + Goal Progress ── */}
@@ -482,6 +592,9 @@ export default function Home() {
                             <span className="text-[11px] text-[#AAAAAA] mb-0.5">/ {fmt(kpi.target)}{kpi.unit || ''}</span>
                           )}
                         </div>
+                        {kpi.remaining != null && kpi.remaining > 0 && (
+                          <p className="text-[10px] text-[#888888] mb-1">{fmt(kpi.remaining)} more needed</p>
+                        )}
                         <p className="text-[10px] text-[#AAAAAA] mb-2">{meta.kpiLabel}</p>
                         {kpi.target > 0 && (
                           <div className="h-1.5 bg-[#EEEEEE] rounded-full overflow-hidden">

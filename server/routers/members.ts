@@ -136,4 +136,12 @@ export const enchargeRouter = router({
       return [];
     }
   }),
+
+  getAHTILCount: protectedProcedure.query(async () => {
+    try {
+      return { count: await encharge.getAHTILTagCount() };
+    } catch (err) {
+      return { count: 0 };
+    }
+  }),
 });

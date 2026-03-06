@@ -139,6 +139,47 @@ export async function updateEnchargePersonByEmail(
 }
 
 /**
+ * Count contacts in Encharge that have the AHTIL tag.
+ */
+export async function getAHTILTagCount(): Promise<number> {
+  if (!ENCHARGE_API_KEY) return 0;
+  try {
+    const url = new URL(`${ENCHARGE_API_BASE}/people`);
+    url.searchParams.set("tag", "AHTIL");
+    url.searchParams.set("limit", "100");
+    url.searchParams.set("page", "1");
+    const res = await fetch(url.toString(), {
+      headers: { "X-Encharge-Token": ENCHARGE_API_KEY, "Content-Type": "application/json" },
+    });
+    if (!res.ok) return 0;
+    const data = await res.json();
+    // Encharge may return total in meta
+    const metaTotal = data?.meta?.total ?? data?.totalCount ?? data?.total;
+    if (typeof metaTotal === "number") return metaTotal;
+    // Otherwise sum up paginated results
+    const firstBatch: any[] = data?.data ?? data?.people ?? [];
+    let count = firstBatch.filter((p: any) => Array.isArray(p.tags) && p.tags.includes("AHTIL")).length;
+    if (firstBatch.length < 100) return count;
+    let page = 2;
+    while (page <= 50) {
+      url.searchParams.set("page", String(page));
+      const r2 = await fetch(url.toString(), {
+        headers: { "X-Encharge-Token": ENCHARGE_API_KEY, "Content-Type": "application/json" },
+      });
+      if (!r2.ok) break;
+      const d2 = await r2.json();
+      const batch: any[] = d2?.data ?? d2?.people ?? [];
+      count += batch.filter((p: any) => Array.isArray(p.tags) && p.tags.includes("AHTIL")).length;
+      if (batch.length < 100) break;
+      page++;
+    }
+    return count;
+  } catch {
+    return 0;
+  }
+}
+
+/**
  * Get subscriber count and growth metrics
  */
 export async function getSubscriberMetrics() {

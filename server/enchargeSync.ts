@@ -226,6 +226,45 @@ export async function getEnchargePersonByEmail(
 }
 
 /**
+ * Returns the count of Encharge contacts that have the AHTIL tag.
+ * Tries the tag filter param first; falls back to full-list count.
+ */
+export async function getAHTILTagCount(): Promise<number> {
+  if (!isReadConfigured()) return 0;
+  try {
+    // Try tag-filtered request — if API supports it, meta.total has count
+    const data = await enchargeGet<any>("/people", { tag: "AHTIL", limit: 100, page: 1 });
+    if (!data) return 0;
+    // Check for total in metadata
+    const metaTotal = data.meta?.total ?? data.totalCount ?? data.total;
+    if (typeof metaTotal === "number") return metaTotal;
+    // Otherwise count from paginated results
+    const firstPage: any[] = data.data ?? data.people ?? [];
+    let count = firstPage.filter((p: any) =>
+      Array.isArray(p.tags) ? p.tags.some((t: string) => t === "AHTIL") : false
+    ).length;
+    if (firstPage.length < 100) return count;
+    // Continue paging
+    let page = 2;
+    while (true) {
+      const more = await enchargeGet<any>("/people", { tag: "AHTIL", limit: 100, page });
+      if (!more) break;
+      const batch: any[] = more.data ?? more.people ?? [];
+      count += batch.filter((p: any) =>
+        Array.isArray(p.tags) ? p.tags.some((t: string) => t === "AHTIL") : false
+      ).length;
+      if (batch.length < 100) break;
+      page++;
+      if (page > 50) break; // safety cap
+    }
+    return count;
+  } catch (err) {
+    console.error("[Encharge] getAHTILTagCount error:", err);
+    return 0;
+  }
+}
+
+/**
  * Returns all segments defined in the Encharge account.
  */
 export async function getEnchargeSegments(): Promise<EnchargeSegment[]> {

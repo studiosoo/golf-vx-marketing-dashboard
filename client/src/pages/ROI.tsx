@@ -138,7 +138,7 @@ export default function ROI() {
   // ─── Render ──────────────────────────────────────────────────────────────
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 p-6">
+    <div className="max-w-5xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
         <TrendingUp className="h-5 w-5 text-[#F5C72C]" />
@@ -149,7 +149,7 @@ export default function ROI() {
       </div>
 
       {/* Tab bar */}
-      <div className="h-11 flex border-b border-[#E0E0E0] bg-white">
+      <div className="h-11 flex border-b border-[#E0E0E0] bg-white overflow-x-auto">
         {TABS.map((tab) => (
           <button
             key={tab}

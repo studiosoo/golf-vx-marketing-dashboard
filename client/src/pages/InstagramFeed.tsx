@@ -226,7 +226,7 @@ function DailyAnalysisTab() {
   if (!data) return null;
 
   const { analysis, metrics, generatedAt } = data;
-  const followerGoal = 500;
+  const followerGoal = 2000;
   const followerPct = Math.min(100, Math.round((metrics.followers / followerGoal) * 100));
   const engagementNum = parseFloat(metrics.avgEngagement);
   const engagementLabel = engagementNum >= 3 ? "Excellent" : engagementNum >= 1 ? "Good" : "Needs Work";
@@ -695,7 +695,7 @@ export default function InstagramDashboard() {
   const apiError = !tokenInvalid ? (statsError || feedError) : null;
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl">
+    <div className="space-y-6 max-w-7xl">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

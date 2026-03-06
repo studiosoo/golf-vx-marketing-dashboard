@@ -421,7 +421,7 @@ export default function Reports() {
   const totalImpressions = metaSpend.reduce((s, c) => s + c.impressions, 0);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -470,13 +470,15 @@ export default function Reports() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-muted/30 border border-border">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="programs">Program Health</TabsTrigger>
-          <TabsTrigger value="meta">Meta Ads</TabsTrigger>
-          <TabsTrigger value="revenue">Revenue</TabsTrigger>
-          <TabsTrigger value="funnel">Giveaway Funnel</TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto pb-px">
+          <TabsList className="bg-muted/30 border border-border min-w-max">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="programs">Program Health</TabsTrigger>
+            <TabsTrigger value="meta">Meta Ads</TabsTrigger>
+            <TabsTrigger value="revenue">Revenue</TabsTrigger>
+            <TabsTrigger value="funnel">Giveaway Funnel</TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-4 mt-4">
