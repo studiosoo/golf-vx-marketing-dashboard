@@ -103,7 +103,7 @@ function MemberListModal({ open, onClose }: { open: boolean; onClose: () => void
                 <div key={m.id} className="flex items-center justify-between px-5 py-3 hover:bg-[#FAFAFA] transition-colors">
                   <div className="flex items-center gap-3">
                     <div className="h-8 w-8 rounded-full bg-[#F5C72C]/20 flex items-center justify-center shrink-0">
-                      <span className="text-[12px] font-bold text-[#8B6E00]">
+                      <span className="text-[12px] font-bold text-[#111111]">
                         {m.name?.charAt(0)?.toUpperCase() ?? "?"}
                       </span>
                     </div>
@@ -132,9 +132,9 @@ function MemberListModal({ open, onClose }: { open: boolean; onClose: () => void
 
 const CAMPAIGN_META: Record<string, { label: string; color: string; bg: string; icon: React.ElementType; kpiLabel: string }> = {
   trial_conversion: { label: "Trial Conversion", color: "#3DB855", bg: "#F0FAF3", icon: Target, kpiLabel: "Conversion Rate" },
-  membership_acquisition: { label: "Membership Acquisition", color: "#E85D8A", bg: "#FDE8F0", icon: UserCheck, kpiLabel: "Members Acquired" },
-  member_retention: { label: "Member Retention", color: "#007AFF", bg: "#E5F0FF", icon: Users, kpiLabel: "Retention Rate" },
-  corporate_events: { label: "B2B Sales", color: "#F5A623", bg: "#FEF3E2", icon: Flag, kpiLabel: "Events Closed" },
+  membership_acquisition: { label: "Membership Acquisition", color: "#007AFF", bg: "#EBF4FF", icon: UserCheck, kpiLabel: "Members Acquired" },
+  member_retention: { label: "Member Retention", color: "#111111", bg: "#F5F5F5", icon: Users, kpiLabel: "Retention Rate" },
+  corporate_events: { label: "B2B Sales", color: "#888888", bg: "#F5F5F5", icon: Flag, kpiLabel: "Events Closed" },
 };
 
 export default function Home() {
@@ -284,7 +284,23 @@ export default function Home() {
   const igFollowers = (igStats as any)?.followers ?? (igStats as any)?.followers_count ?? null;
   const emailSubscribers = ahtilData?.count ?? null;
 
-  const KEY_GOALS = [
+  const igTokenNote = !tokenValid && tokenStatus !== undefined
+    ? "Token refresh needed"
+    : tokenStatus?.warning
+    ? `Token expires in ${tokenStatus.daysRemaining}d`
+    : null;
+
+  const KEY_GOALS: Array<{
+    label: string;
+    icon: React.ElementType;
+    current: number | null;
+    goal: number;
+    display: string;
+    goalDisplay: string;
+    color: string;
+    statusNote?: string | null;
+    statusColor?: string;
+  }> = [
     {
       label: "Annual Revenue",
       icon: DollarSign,
@@ -310,7 +326,9 @@ export default function Home() {
       goal: 2000,
       display: igFollowers != null ? fmt(igFollowers) : "—",
       goalDisplay: "2,000",
-      color: "#E85D8A",
+      color: "#007AFF",
+      statusNote: igTokenNote,
+      statusColor: igTokenNote && !tokenStatus?.warning ? "#FF3B30" : "#F5C72C",
     },
     {
       label: "Email Subscribers",
@@ -319,7 +337,7 @@ export default function Home() {
       goal: 5000,
       display: emailSubscribers != null ? fmt(emailSubscribers) : "—",
       goalDisplay: "5,000",
-      color: "#007AFF",
+      color: "#111111",
     },
   ];
 
@@ -374,9 +392,14 @@ export default function Home() {
                       <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: g.color }} />
                     </div>
                     <span className="text-[10px]" style={{ color: g.color }}>{pct.toFixed(1)}%</span>
+                    {g.statusNote && (
+                      <p className="text-[10px] mt-0.5" style={{ color: g.statusColor ?? "#888888" }}>{g.statusNote}</p>
+                    )}
                   </>
                 ) : (
-                  <span className="text-[10px] text-[#AAAAAA]">Connecting…</span>
+                  <span className="text-[10px]" style={{ color: g.statusNote ? (g.statusColor ?? "#888888") : "#AAAAAA" }}>
+                    {g.statusNote ?? "Connecting…"}
+                  </span>
                 )}
               </div>
             );
@@ -406,7 +429,7 @@ export default function Home() {
                 {snapLoading ? "—" : fmt(memberTotal)}
               </button>
               {members?.newThisMonth !== undefined && members.newThisMonth !== 0 && (
-                <span className={cn("text-[13px] font-semibold mb-1.5", members.newThisMonth > 0 ? "text-[#3DB855]" : "text-[#E8453C]")}>
+                <span className={cn("text-[13px] font-semibold mb-1.5", members.newThisMonth > 0 ? "text-[#3DB855]" : "text-[#FF3B30]")}>
                   {members.newThisMonth > 0 ? "+" : ""}{members.newThisMonth} this month
                 </span>
               )}
@@ -457,7 +480,7 @@ export default function Home() {
             <div className="p-3 rounded-lg bg-[#FAFAFA] border border-[#F0F0F0]">
               <div className="flex items-center gap-1.5 mb-1">
                 {revenue?.mom !== undefined && revenue.mom !== 0 && (
-                  <span className={cn("flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full", revenue.mom > 0 ? "text-[#3DB855] bg-[#F0FAF3]" : "text-[#E8453C] bg-red-50")}>
+                  <span className={cn("flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full", revenue.mom > 0 ? "text-[#3DB855] bg-[#F0FAF3]" : "text-[#FF3B30] bg-red-50")}>
                     {revenue.mom > 0 ? <TrendingUp className="h-2.5 w-2.5" /> : <TrendingDown className="h-2.5 w-2.5" />}
                     {Math.abs(revenue.mom).toFixed(1)}%
                   </span>
@@ -500,10 +523,10 @@ export default function Home() {
           {hasAnyRevenue && (
             <div className="p-3 rounded-lg bg-[#F5C72C]/5 border border-[#F5C72C]/20">
               <div className="flex items-center gap-1.5 mb-1">
-                <Award className="h-3 w-3 text-[#8B6E00]" />
-                <span className="text-[10px] text-[#8B6E00]">Total MTD</span>
+                <Award className="h-3 w-3 text-[#111111]" />
+                <span className="text-[10px] text-[#888888]">Total MTD</span>
               </div>
-              <p className="text-[24px] font-bold text-[#8B6E00] leading-none tracking-tight">{fmtCurrency(mrr + toastMTD + acuityTotal)}</p>
+              <p className="text-[24px] font-bold text-[#111111] leading-none tracking-tight">{fmtCurrency(mrr + toastMTD + acuityTotal)}</p>
               <p className="text-[11px] text-[#888888] mt-1">All channels</p>
             </div>
           )}
@@ -640,13 +663,13 @@ export default function Home() {
                 >
                   <div className="flex items-start justify-between gap-2">
                     <p className="text-[12px] font-semibold text-[#111111] leading-tight">{p.name}</p>
-                    <div className={cn("h-2 w-2 rounded-full shrink-0 mt-1", isOnTrack ? "bg-[#3DB855]" : "bg-[#F5A623]")} />
+                    <div className={cn("h-2 w-2 rounded-full shrink-0 mt-1", isOnTrack ? "bg-[#3DB855]" : "bg-[#E0E0E0]")} />
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex-1 h-1.5 bg-[#E8E8E8] rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all"
-                        style={{ width: `${progress}%`, background: isOnTrack ? "#3DB855" : "#F5A623" }}
+                        style={{ width: `${progress}%`, background: isOnTrack ? "#3DB855" : "#E0E0E0" }}
                       />
                     </div>
                     <span className="text-[10px] text-[#AAAAAA] shrink-0">{progress.toFixed(0)}%</span>

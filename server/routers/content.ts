@@ -277,7 +277,7 @@ Keep the caption under 300 words. Make it engaging and authentic.`;
     const prompt = `Today is ${today}. You are the Instagram strategist for Golf VX Arlington Heights, a premium indoor golf simulator facility in Arlington Heights, IL.
 
 ACCOUNT SNAPSHOT:
-- Followers: ${followers} (Goal: 500)
+- Followers: ${followers} (Goal: 2,000)
 - Total Posts Analyzed: ${posts.length}
 - Avg Likes per Post: ${avgLikes}
 - Avg Comments per Post: ${avgComments}
@@ -288,16 +288,16 @@ TOP PERFORMING POSTS (last 20):
 ${topPosts.map((p, i) => `${i + 1}. [${p.type}] ${p.daysAgo}d ago — ${p.likes} likes, ${p.comments} comments\n   Caption: "${p.caption}"`).join('\n')}
 
 GOLF VX CONTEXT:
-- Services: $25/$35 trial sessions, All Access Ace ($399/mo), Swing Saver ($199/mo), Golf VX Pro ($99/mo)
+- Services: Trial sessions, membership plans, private lessons, leagues, and events
 - Current programs: Sunday Drive Day clinics, Winter Clinics, Junior programs
-- Target: 25-55 year old golfers in Arlington Heights area
-- Goal: Drive trial session bookings + grow to 500 followers
+- Target: 25-55 year old golfers in the local area
+- Goal: Drive trial session bookings + grow to 2,000 followers
 
 Generate a concise daily Instagram action plan with:
 1. ONE specific post idea for today (caption draft + content type + best posting time)
 2. Key insight from the performance data (what's working, what's not)
 3. One quick win action (under 15 min) to boost engagement today
-4. Token/follower progress note toward 500 goal
+4. Follower progress note toward 2,000 goal
 
 Return as JSON.`;
 
