@@ -133,6 +133,13 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html, body {
+    /* Prevent horizontal overflow / floating on mobile touch-scroll */
+    max-width: 100%;
+    overflow-x: hidden;
+    /* Smooth momentum scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
+  }
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;

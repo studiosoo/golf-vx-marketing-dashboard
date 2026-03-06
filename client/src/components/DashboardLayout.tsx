@@ -101,7 +101,7 @@ export default function DashboardLayout({
 
   return (
     <div
-      className="flex h-screen overflow-hidden bg-[#FAFAFA]"
+      className="flex h-screen overflow-hidden bg-[#FAFAFA] max-w-full"
       style={{ fontFamily: "-apple-system, 'SF Pro Text', 'Inter', sans-serif" }}
     >
       {/* ── Desktop Sidebar ── */}
@@ -252,8 +252,9 @@ export default function DashboardLayout({
           "flex-1 min-w-0 flex flex-col overflow-hidden",
           isMobile && "mt-14"
         )}
+        style={{ maxWidth: '100%' }}
       >
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6">{children}</main>
       </div>
     </div>
   );
