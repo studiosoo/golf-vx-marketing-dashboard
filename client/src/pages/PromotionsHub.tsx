@@ -380,32 +380,81 @@ function SqrLinksPanel() {
     return (
       <div className="py-12 text-center">
         <Zap className="h-8 w-8 text-[#CCCCCC] mx-auto mb-3" />
-        <p className="text-[13px] font-semibold text-[#888888]">No SQR links found</p>
-        <p className="text-[11px] text-[#AAAAAA] mt-1">Add SQR_API_KEY to environment to connect</p>
+        <p className="text-[13px] font-semibold text-[#888888]">No SQR links for active promos</p>
+        <p className="text-[11px] text-[#AAAAAA] mt-1">Create a promo with "Create SQR short link" enabled to see it here</p>
       </div>
     );
   }
 
+  const totalScans = links.reduce((s: number, l: any) => s + (l.clicks ?? l.visits ?? 0), 0);
+
   return (
-    <div className="space-y-2">
-      {links.map((link: any) => {
-        const clicks = link.clicks ?? link.visits ?? 0;
-        const alias = link.alias ?? link.short_url?.replace(/.*\//, "") ?? "—";
-        const dest = link.url ?? link.location_url ?? "";
-        return (
-          <div key={link.id} className="bg-white rounded-xl border border-[#E0E0E0] px-4 py-3 flex items-center gap-3">
-            <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-semibold text-[#111111]">sqr.co/{alias}</p>
-              <p className="text-[11px] text-[#888888] truncate">{dest}</p>
+    <div className="space-y-4">
+      {/* Summary */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-white rounded-xl border border-[#E0E0E0] px-4 py-3">
+          <p className="text-[10px] text-[#AAAAAA] uppercase tracking-wide mb-1">Golf VX Links</p>
+          <p className="text-[22px] font-bold text-[#111111]">{links.length}</p>
+        </div>
+        <div className="bg-white rounded-xl border border-[#E0E0E0] px-4 py-3">
+          <p className="text-[10px] text-[#AAAAAA] uppercase tracking-wide mb-1">Total Scans</p>
+          <p className="text-[22px] font-bold text-[#F5C72C]">{totalScans}</p>
+        </div>
+      </div>
+
+      {/* Link list */}
+      <div className="space-y-2">
+        {links.map((link: any) => {
+          const clicks = link.clicks ?? link.visits ?? 0;
+          const alias = link.alias ?? link.short_url?.replace(/.*\//, "") ?? "—";
+          const dest = link.url ?? link.location_url ?? "";
+          const promo = link.promo;
+          const sm = promo ? STATUS_META[promo.status as keyof typeof STATUS_META] ?? STATUS_META.inactive : null;
+
+          return (
+            <div key={link.id} className="bg-white rounded-xl border border-[#E0E0E0] px-4 py-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  {/* Promo title */}
+                  {promo && (
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <span className="text-[11px] font-semibold text-[#111111]">{promo.title}</span>
+                      {sm && (
+                        <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: sm.bg, color: sm.color }}>
+                          {sm.label}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  {/* Short URL */}
+                  <div className="flex items-center gap-1.5">
+                    <a
+                      href={`https://sqr.co/${alias}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[13px] font-semibold text-[#007AFF] hover:underline flex items-center gap-1"
+                    >
+                      sqr.co/{alias}
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                  {/* Destination URL */}
+                  <p className="text-[11px] text-[#AAAAAA] truncate mt-0.5">{dest}</p>
+                </div>
+
+                {/* Scan count */}
+                <div className="shrink-0 text-right">
+                  <div className="flex items-center gap-1 justify-end">
+                    <BarChart2 className="h-3.5 w-3.5 text-[#F5C72C]" />
+                    <span className="text-[16px] font-bold text-[#111111]">{clicks}</span>
+                  </div>
+                  <p className="text-[10px] text-[#AAAAAA]">scans</p>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-1 text-[13px] font-bold text-[#111111]">
-              <BarChart2 className="h-3.5 w-3.5 text-[#F5C72C]" />
-              {clicks}
-              <span className="text-[10px] font-normal text-[#AAAAAA]">scans</span>
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }

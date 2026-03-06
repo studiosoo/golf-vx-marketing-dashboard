@@ -152,7 +152,51 @@ export const promosRouter = router({
 
   getSqrLinks: protectedProcedure.query(async () => {
     const { getSqrLinks } = await import("../sqr");
-    return await getSqrLinks();
+    const { getDb } = await import("../db");
+    const { promos } = await import("../../drizzle/schema");
+    const { isNotNull } = await import("drizzle-orm");
+
+    // Get all SQR links from the API
+    const allLinks = await getSqrLinks();
+
+    // Get promos that have SQR links from our DB
+    const db = await getDb();
+    const promoRows = db
+      ? await db.select({
+          id: promos.id,
+          title: promos.title,
+          slug: promos.slug,
+          sqrLinkSlug: promos.sqrLinkSlug,
+          sqrLinkId: promos.sqrLinkId,
+          status: promos.status,
+        }).from(promos).where(isNotNull(promos.sqrLinkSlug))
+      : [];
+
+    // Build a set of known Golf VX SQR slugs
+    const knownSlugs = new Set(promoRows.map((p) => p.sqrLinkSlug).filter(Boolean));
+
+    // Filter SQR API links to only those that belong to our promos
+    const filteredLinks = allLinks.filter((link) => {
+      const alias = link.alias ?? "";
+      return knownSlugs.has(alias);
+    });
+
+    // Enrich each filtered link with promo metadata from DB
+    const promoBySlug = Object.fromEntries(promoRows.map((p) => [p.sqrLinkSlug, p]));
+
+    return filteredLinks.map((link) => {
+      const alias = link.alias ?? "";
+      const promo = promoBySlug[alias] ?? null;
+      return {
+        ...link,
+        promo: promo ? {
+          id: promo.id,
+          title: promo.title,
+          slug: promo.slug,
+          status: promo.status,
+        } : null,
+      };
+    });
   }),
 
   // ── Public: landing page + lead capture ────────────────────────────────────

@@ -16,6 +16,8 @@ import {
 import ProgramMarketingPanel from "@/components/ProgramMarketingPanel";
 import { ProgramAIIntelligence } from "@/components/ProgramAIIntelligence";
 
+const ENROLLMENT_TARGET = 128; // 8 weeks × 16 students per week
+
 const TRACK_CONFIG = {
   full_day: { label: "Full-Day Program", ageGroup: "Ages 7–17", color: "text-[#F5C72C]", bg: "bg-[#F5C72C]/10 border-[#F5C72C]/30" },
   half_day: { label: "Half-Day Program", ageGroup: "Ages 7–17", color: "text-[#888888]", bg: "bg-[#888888]/10 border-[#888888]/30" },
@@ -124,10 +126,24 @@ export default function JuniorCampDashboard() {
         <div className="bg-card border border-border rounded-xl p-5">
           <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
             <Users className="h-4 w-4" />
-            Total Registrations
+            Enrolled / Goal
           </div>
-          <div className="text-3xl font-bold">{totalRegistrations}</div>
-          <div className="text-xs text-muted-foreground mt-1">{uniqueParticipants} unique participants</div>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-3xl font-bold">{totalRegistrations}</span>
+            <span className="text-base text-muted-foreground font-medium">/ {ENROLLMENT_TARGET}</span>
+          </div>
+          <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full bg-[#F5C72C] transition-all"
+              style={{ width: `${Math.min(100, (totalRegistrations / ENROLLMENT_TARGET) * 100)}%` }}
+            />
+          </div>
+          <div className="text-xs text-muted-foreground mt-1">
+            {ENROLLMENT_TARGET - totalRegistrations > 0
+              ? `${ENROLLMENT_TARGET - totalRegistrations} spots remaining`
+              : "Goal reached!"
+            }
+          </div>
         </div>
         <div className="bg-card border border-border rounded-xl p-5">
           <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
