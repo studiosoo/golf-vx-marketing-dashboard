@@ -87,7 +87,6 @@ export const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
         children: [
           { label: "Instagram", path: "/website/instagram", icon: Instagram },
           { label: "Instagram Analytics", path: "/website/instagram/analytics", icon: LineChart },
-          { label: "News / Blog", path: "/website/news", icon: Newspaper },
         ],
       },
       {
@@ -95,6 +94,7 @@ export const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = [
         path: "/communication",
         icon: MessageSquare,
         children: [
+          { label: "News / Blog", path: "/website/news", icon: Newspaper },
           { label: "Email (Encharge)", path: "/communication/email-marketing", icon: Mail },
           { label: "Drip Campaigns", path: "/communication/drip", icon: Mail },
           { label: "SMS & Announcements", path: "/communication/announcements", icon: MessageSquare },

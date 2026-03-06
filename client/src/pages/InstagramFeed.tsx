@@ -669,11 +669,19 @@ export default function InstagramDashboard() {
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [feedLimit, setFeedLimit] = useState(12);
 
+  // Check token validity first — gate the whole page if expired
+  const { data: tokenStatus } = trpc.instagram.checkTokenExpiry.useQuery(undefined, {
+    retry: 1,
+    staleTime: 1000 * 60 * 60,
+  });
+
+  const tokenInvalid = tokenStatus !== undefined && !tokenStatus.valid;
+
   const { data: accountStats, isLoading: statsLoading, error: statsError, refetch: refetchStats } =
-    trpc.instagram.getAccountStats.useQuery(undefined, { retry: 1 });
+    trpc.instagram.getAccountStats.useQuery(undefined, { retry: 1, enabled: !tokenInvalid });
 
   const { data: feed, isLoading: feedLoading, error: feedError, refetch: refetchFeed } =
-    trpc.instagram.getFeed.useQuery({ limit: feedLimit }, { retry: 1 });
+    trpc.instagram.getFeed.useQuery({ limit: feedLimit }, { retry: 1, enabled: !tokenInvalid });
 
   const { data: scheduledPosts, refetch: refetchScheduled } =
     trpc.instagram.getScheduledPosts.useQuery({ includePosted: false });
@@ -684,7 +692,7 @@ export default function InstagramDashboard() {
     toast({ title: "Refreshed", description: "Instagram data updated." });
   };
 
-  const apiError = statsError || feedError;
+  const apiError = !tokenInvalid ? (statsError || feedError) : null;
 
   return (
     <div className="p-6 space-y-6 max-w-7xl">
@@ -720,22 +728,53 @@ export default function InstagramDashboard() {
         </div>
       </div>
 
-      {/* Token Warning Banner */}
-      <TokenWarningBanner />
-
-      {/* API Error Banner */}
-      {apiError && (
-        <div className="flex items-center gap-3 p-4 bg-[#E8453C]/10 border border-[#E8453C]/30 rounded-xl text-[#E8453C] text-sm">
-          <AlertCircle className="h-4 w-4 flex-shrink-0" />
-          <div>
-            <p className="font-semibold">Instagram API Error</p>
-            <p className="text-xs mt-0.5 text-[#E8453C]/80">{(apiError as any).message}</p>
+      {/* Token expired — show setup card and stop rendering the rest */}
+      {tokenInvalid && (
+        <div className="rounded-xl border border-[#E8453C]/30 bg-[#E8453C]/5 p-6 space-y-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-[#E8453C] shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold text-[#E8453C] text-[15px]">Instagram Access Token Expired</p>
+              <p className="text-[13px] text-[#888888] mt-1">
+                Your Instagram access token is no longer valid. Renew it to restore the live feed, account stats, and AI analysis.
+              </p>
+            </div>
           </div>
+          <div className="bg-white rounded-lg border border-[#E0E0E0] p-4 space-y-3 text-[13px]">
+            <p className="font-semibold text-[#111111]">How to renew your token:</p>
+            <ol className="space-y-2 text-[#555555] list-decimal list-inside">
+              <li>Open <a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noopener noreferrer" className="text-[#007AFF] underline">Meta Graph API Explorer</a></li>
+              <li>Select your app and generate a new <strong>User Access Token</strong> with <code className="bg-[#F5F5F5] px-1 rounded text-[11px]">instagram_basic</code>, <code className="bg-[#F5F5F5] px-1 rounded text-[11px]">pages_read_engagement</code> permissions</li>
+              <li>Exchange for a long-lived token (60 days) via the Token Debugger</li>
+              <li>Update <code className="bg-[#F5F5F5] px-1 rounded text-[11px]">INSTAGRAM_ACCESS_TOKEN</code> in your environment variables</li>
+              <li>Restart the server and return here</li>
+            </ol>
+          </div>
+          <p className="text-[11px] text-[#AAAAAA]">Post scheduling still works — only live data feed and analytics are affected.</p>
         </div>
       )}
 
+      {/* Only render data sections when token is valid */}
+      {!tokenInvalid && (
+        <>
+          {/* Token Warning Banner (expiring soon) */}
+          <TokenWarningBanner />
+
+          {/* API Error Banner */}
+          {apiError && (
+            <div className="flex items-center gap-3 p-4 bg-[#E8453C]/10 border border-[#E8453C]/30 rounded-xl text-[#E8453C] text-sm">
+              <AlertCircle className="h-4 w-4 flex-shrink-0" />
+              <div>
+                <p className="font-semibold">Instagram API Error</p>
+                <p className="text-xs mt-0.5 text-[#E8453C]/80">{(apiError as any).message}</p>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
       {/* Account Stats */}
-      {!statsLoading && accountStats && (
+      {!tokenInvalid && !statsLoading && accountStats && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <Card className="bg-card border-border">
             <CardContent className="p-4">
@@ -780,7 +819,7 @@ export default function InstagramDashboard() {
       )}
 
       {/* Live Feed */}
-      <div className="space-y-4">
+      {!tokenInvalid && <div className="space-y-4">
         {feedLoading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -818,7 +857,7 @@ export default function InstagramDashboard() {
             <p>No posts found.</p>
           </div>
         )}
-      </div>
+      </div>}
 
       {/* Schedule Post Dialog */}
       <Dialog open={scheduleOpen} onOpenChange={setScheduleOpen}>

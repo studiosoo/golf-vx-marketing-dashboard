@@ -1,5 +1,5 @@
 import { trpc } from "@/lib/trpc";
-import { TrendingUp, ShoppingBag, CreditCard, DollarSign, Utensils, BarChart3 } from "lucide-react";
+import { TrendingUp, ShoppingBag, CreditCard, DollarSign, Utensils, BarChart3, Flag, Users, Percent } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -11,27 +11,20 @@ function fmt(n: number) {
   return n.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
 function isoToDisplay(raw: string) {
-  // YYYYMMDD → MM/DD
-  if (raw.length === 8) {
-    return `${raw.slice(4, 6)}/${raw.slice(6, 8)}`;
-  }
+  if (raw.length === 8) return `${raw.slice(4, 6)}/${raw.slice(6, 8)}`;
   return raw;
+}
+function pct(part: number, total: number) {
+  if (total === 0) return "—";
+  return `${((part / total) * 100).toFixed(1)}%`;
 }
 
 // ─── Sub-components ─────────────────────────────────────────────────────────
 
 function KpiCard({
-  label,
-  value,
-  sub,
-  icon,
-  highlight,
+  label, value, sub, icon, highlight,
 }: {
-  label: string;
-  value: string;
-  sub?: string;
-  icon: React.ReactNode;
-  highlight?: boolean;
+  label: string; value: string; sub?: string; icon: React.ReactNode; highlight?: boolean;
 }) {
   return (
     <div className="bg-white rounded-xl border border-[#E0E0E0] p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
@@ -45,6 +38,36 @@ function KpiCard({
         {value}
       </p>
       {sub && <p className="text-[11px] text-[#888888] mt-1">{sub}</p>}
+    </div>
+  );
+}
+
+// ─── Category Donut-style bar ────────────────────────────────────────────────
+
+function CategoryBar({ segments }: { segments: Array<{ label: string; value: number; color: string }> }) {
+  const total = segments.reduce((s, seg) => s + seg.value, 0);
+  if (total === 0) return null;
+  return (
+    <div className="space-y-1.5">
+      <div className="flex h-3 rounded-full overflow-hidden gap-px">
+        {segments.map((seg) => (
+          <div
+            key={seg.label}
+            className="transition-all duration-500"
+            style={{ width: `${(seg.value / total) * 100}%`, background: seg.color }}
+          />
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-x-4 gap-y-1">
+        {segments.map((seg) => (
+          <div key={seg.label} className="flex items-center gap-1.5">
+            <div className="h-2 w-2 rounded-full" style={{ background: seg.color }} />
+            <span className="text-[11px] text-[#555555]">{seg.label}</span>
+            <span className="text-[11px] font-semibold text-[#111111]">{fmtCurrency(seg.value)}</span>
+            <span className="text-[10px] text-[#AAAAAA]">({pct(seg.value, total)})</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -66,17 +89,27 @@ export default function Revenue() {
   const toastLastMonth = (toastSummaryRaw as any)?.lastMonthRevenue ?? 0;
   const acuityTotal = (acuityRaw as any)?.total ?? 0;
   const acuityCount = (acuityRaw as any)?.count ?? (acuityRaw as any)?.totalBookings ?? 0;
-
   const dailyRows = (toastDailyRaw as any[]) ?? [];
 
-  // Current month rows for Bay/F&B breakdown
+  // Current month rows
   const now = new Date();
   const currentMonth = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
   const mtdRows = dailyRows.filter((r: any) => String(r.date ?? "").startsWith(currentMonth));
-  const bayMTD = mtdRows.reduce((s: number, r: any) => s + parseFloat(String(r.bayRevenue ?? 0)), 0);
-  const fbMTD = mtdRows.reduce((s: number, r: any) => s + parseFloat(String(r.foodBevRevenue ?? 0)), 0);
 
-  // Annual run rate: MRR annualized + Toast/Acuity extrapolated from days elapsed this year
+  // MTD by category
+  const sumField = (rows: any[], field: string) =>
+    rows.reduce((s: number, r: any) => s + parseFloat(String(r[field] ?? 0)), 0);
+
+  const bayMTD      = sumField(mtdRows, "bayRevenue");
+  const fbMTD       = sumField(mtdRows, "foodBevRevenue");
+  const golfMTD     = sumField(mtdRows, "golfRevenue");
+  const tipsMTD     = sumField(mtdRows, "totalTips");
+  const discountMTD = sumField(mtdRows, "totalDiscounts");
+  const cashMTD     = sumField(mtdRows, "cashRevenue");
+  const creditMTD   = sumField(mtdRows, "creditRevenue");
+  const guestsMTD   = mtdRows.reduce((s: number, r: any) => s + parseInt(String(r.totalGuests ?? 0)), 0);
+
+  // Annual run rate
   const startOfYear = new Date(now.getFullYear(), 0, 1);
   const daysElapsed = Math.max(1, Math.floor((now.getTime() - startOfYear.getTime()) / 86400000));
   const toastRunRate = toastMTD > 0 ? (toastMTD / now.getDate()) * 365 : 0;
@@ -85,8 +118,18 @@ export default function Revenue() {
   const annualPct = Math.min((annualRunRate / ANNUAL_GOAL) * 100, 100);
   const hasRevenue = mrr > 0 || toastMTD > 0 || acuityTotal > 0;
 
-  // Last 30 days from daily data
   const last30 = dailyRows.slice(-30);
+
+  const revenueSegments = [
+    { label: "Bay", value: bayMTD, color: "#F5C72C" },
+    { label: "Golf", value: golfMTD, color: "#F5C72C99" },
+    { label: "F&B", value: fbMTD, color: "#3DB855" },
+  ].filter((s) => s.value > 0);
+
+  const paymentSegments = [
+    { label: "Credit Card", value: creditMTD, color: "#111111" },
+    { label: "Cash", value: cashMTD, color: "#888888" },
+  ].filter((s) => s.value > 0);
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
@@ -104,7 +147,7 @@ export default function Revenue() {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <TrendingUp className="h-4 w-4 text-[#111111]" />
-            <h2 className="text-[14px] font-bold text-[#111111]">Annual Revenue Goal</h2>
+            <h2 className="text-[14px] font-bold text-[#111111]">Annual Revenue Goal — 2026</h2>
           </div>
           <div className="text-right">
             <span className="text-[22px] font-bold text-[#F5C72C]">{annualPct.toFixed(1)}%</span>
@@ -112,18 +155,12 @@ export default function Revenue() {
           </div>
         </div>
         <div className="h-3 bg-[#F2F2F7] rounded-full overflow-hidden mb-2">
-          <div
-            className="h-full rounded-full bg-[#F5C72C] transition-all duration-700"
-            style={{ width: `${annualPct}%` }}
-          />
+          <div className="h-full rounded-full bg-[#F5C72C] transition-all duration-700" style={{ width: `${annualPct}%` }} />
         </div>
         <div className="flex justify-between text-[11px] text-[#AAAAAA]">
           <span>{fmtCurrency(annualRunRate)} projected / {fmtCurrency(ANNUAL_GOAL)} goal</span>
-          {annualRunRate < ANNUAL_GOAL && (
-            <span>{fmtCurrency(ANNUAL_GOAL - annualRunRate)} gap to close</span>
-          )}
+          {annualRunRate < ANNUAL_GOAL && <span>{fmtCurrency(ANNUAL_GOAL - annualRunRate)} gap to close</span>}
         </div>
-
         {!hasRevenue && (
           <p className="text-[11px] text-[#AAAAAA] mt-3 p-2 rounded-lg bg-[#FAFAFA] border border-dashed border-[#E0E0E0]">
             Revenue APIs pending connection (Toast POS, Acuity). Progress will populate once data syncs.
@@ -132,46 +169,81 @@ export default function Revenue() {
       </div>
 
       {/* ── KPI Cards ───────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-        <KpiCard
-          label="MRR"
-          value={mrr > 0 ? fmtCurrency(mrr) : "—"}
-          sub="Membership recurring"
-          icon={<DollarSign size={14} />}
-          highlight={mrr > 0}
-        />
-        <KpiCard
-          label="Toast MTD"
-          value={toastMTD > 0 ? fmtCurrency(toastMTD) : "—"}
-          sub={toastLastMonth > 0 ? `Last mo: ${fmtCurrency(toastLastMonth)}` : "POS data pending"}
-          icon={<ShoppingBag size={14} />}
-        />
-        <KpiCard
-          label="Bay Revenue"
-          value={bayMTD > 0 ? fmtCurrency(bayMTD) : "—"}
-          sub="Bay bookings MTD"
-          icon={<BarChart3 size={14} />}
-        />
-        <KpiCard
-          label="F&B Revenue"
-          value={fbMTD > 0 ? fmtCurrency(fbMTD) : "—"}
-          sub="Food & beverage MTD"
-          icon={<Utensils size={14} />}
-        />
-        <KpiCard
-          label="Acuity"
-          value={acuityTotal > 0 ? fmtCurrency(acuityTotal) : "—"}
-          sub={acuityCount > 0 ? `${fmt(acuityCount)} bookings` : "API pending"}
-          icon={<CreditCard size={14} />}
-        />
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <KpiCard label="MRR" value={mrr > 0 ? fmtCurrency(mrr) : "—"} sub="Membership recurring" icon={<DollarSign size={14} />} highlight={mrr > 0} />
+        <KpiCard label="Toast MTD" value={toastMTD > 0 ? fmtCurrency(toastMTD) : "—"} sub={toastLastMonth > 0 ? `Last mo: ${fmtCurrency(toastLastMonth)}` : "POS data pending"} icon={<ShoppingBag size={14} />} />
+        <KpiCard label="Bay MTD" value={bayMTD > 0 ? fmtCurrency(bayMTD) : "—"} sub="Bay time revenue" icon={<BarChart3 size={14} />} />
+        <KpiCard label="Golf MTD" value={golfMTD > 0 ? fmtCurrency(golfMTD) : "—"} sub="Lessons / equipment" icon={<BarChart3 size={14} />} />
+        <KpiCard label="F&B MTD" value={fbMTD > 0 ? fmtCurrency(fbMTD) : "—"} sub="Food & beverage" icon={<Utensils size={14} />} />
+        <KpiCard label="Acuity" value={acuityTotal > 0 ? fmtCurrency(acuityTotal) : "—"} sub={acuityCount > 0 ? `${fmt(acuityCount)} bookings` : "API pending"} icon={<CreditCard size={14} />} />
       </div>
+
+      {/* ── Toast POS MTD Breakdown ──────────────────────────────────────────── */}
+      {(bayMTD > 0 || fbMTD > 0 || golfMTD > 0) && (
+        <div className="bg-white rounded-xl border border-[#E0E0E0] p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06)] space-y-5">
+          <h2 className="text-[13px] font-semibold text-[#111111]">In-Store Revenue Breakdown — MTD</h2>
+
+          {/* Revenue by category */}
+          <div>
+            <p className="text-[11px] font-semibold text-[#AAAAAA] uppercase tracking-wide mb-3">By Category</p>
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-4">
+              {[
+                { label: "Bay Time", value: bayMTD, color: "text-[#F5C72C]" },
+                { label: "Golf / Lessons", value: golfMTD, color: "text-[#111111]" },
+                { label: "Food & Bev", value: fbMTD, color: "text-[#3DB855]" },
+                { label: "Tips", value: tipsMTD, color: "text-[#888888]" },
+                { label: "Discounts", value: discountMTD, color: "text-[#E8453C]", negative: true },
+              ].map(({ label, value, color, negative }: any) => (
+                <div key={label} className="bg-[#FAFAFA] rounded-lg border border-[#F0F0F0] p-3">
+                  <p className="text-[10px] text-[#AAAAAA] uppercase tracking-wide mb-1">{label}</p>
+                  <p className={cn("text-[15px] font-bold", color)}>
+                    {value > 0 ? `${negative ? "-" : ""}${fmtCurrency(value)}` : "—"}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <CategoryBar segments={revenueSegments} />
+          </div>
+
+          {/* Payment method breakdown */}
+          {(cashMTD > 0 || creditMTD > 0) && (
+            <div>
+              <p className="text-[11px] font-semibold text-[#AAAAAA] uppercase tracking-wide mb-3">By Payment Method</p>
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                {[
+                  { label: "Credit / Card", value: creditMTD },
+                  { label: "Cash", value: cashMTD },
+                ].map(({ label, value }) => (
+                  <div key={label} className="bg-[#FAFAFA] rounded-lg border border-[#F0F0F0] p-3">
+                    <p className="text-[10px] text-[#AAAAAA] uppercase tracking-wide mb-1">{label}</p>
+                    <p className="text-[15px] font-bold text-[#111111]">{value > 0 ? fmtCurrency(value) : "—"}</p>
+                    <p className="text-[10px] text-[#AAAAAA] mt-0.5">{pct(value, creditMTD + cashMTD)}</p>
+                  </div>
+                ))}
+              </div>
+              <CategoryBar segments={paymentSegments} />
+            </div>
+          )}
+
+          {/* Guests */}
+          {guestsMTD > 0 && (
+            <div className="flex items-center gap-2 text-[12px] text-[#888888] pt-1 border-t border-[#F0F0F0]">
+              <Users size={13} />
+              <span><strong className="text-[#111111]">{fmt(guestsMTD)}</strong> guests served MTD</span>
+              {toastMTD > 0 && guestsMTD > 0 && (
+                <span className="ml-auto text-[#AAAAAA]">{fmtCurrency(toastMTD / guestsMTD)} / guest avg</span>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── Toast POS Daily Table ────────────────────────────────────────────── */}
       <div className="bg-white rounded-xl border border-[#E0E0E0] shadow-[0_1px_4px_rgba(0,0,0,0.06)] overflow-hidden">
         <div className="px-4 py-3 border-b border-[#E0E0E0] flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ShoppingBag className="h-4 w-4 text-[#AAAAAA]" />
-            <h2 className="text-[13px] font-semibold text-[#111111]">Toast POS — Daily Breakdown</h2>
+            <h2 className="text-[13px] font-semibold text-[#111111]">Toast POS — Daily Detail</h2>
           </div>
           <span className="text-[11px] text-[#AAAAAA]">Last 30 days</span>
         </div>
@@ -189,54 +261,42 @@ export default function Revenue() {
             <p className="text-[11px] text-[#AAAAAA] mt-1">Data will appear once the Toast API connection is active.</p>
           </div>
         ) : (
-          <>
-            {/* MTD Bay/F&B split summary */}
-            {(bayMTD > 0 || fbMTD > 0) && (
-              <div className="grid grid-cols-3 gap-px bg-[#F0F0F0] border-b border-[#E0E0E0]">
-                {[
-                  { label: "Bay Revenue MTD", value: fmtCurrency(bayMTD), color: "text-[#111111]" },
-                  { label: "F&B Revenue MTD", value: fmtCurrency(fbMTD), color: "text-[#111111]" },
-                  { label: "Total MTD", value: fmtCurrency(toastMTD), color: "text-[#F5C72C]" },
-                ].map((s) => (
-                  <div key={s.label} className="bg-[#FAFAFA] px-4 py-3">
-                    <p className="text-[10px] text-[#AAAAAA] uppercase tracking-wide mb-0.5">{s.label}</p>
-                    <p className={cn("text-[18px] font-bold leading-none", s.color)}>{s.value}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-[#E0E0E0]">
-                    {["Date", "Total", "Bay", "F&B", "Orders"].map((h, i) => (
-                      <th key={h} className={cn("text-[11px] text-[#AAAAAA] font-normal py-2 px-4", i > 0 ? "text-right" : "text-left")}>
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {[...last30].reverse().map((row: any) => {
-                    const total = parseFloat(String(row.totalRevenue ?? 0));
-                    const bay = parseFloat(String(row.bayRevenue ?? 0));
-                    const fb = parseFloat(String(row.foodBevRevenue ?? 0));
-                    const orders = parseInt(String(row.totalOrders ?? 0));
-                    return (
-                      <tr key={row.date} className="h-11 border-b border-[#F0F0F0] last:border-0 hover:bg-[#FAFAFA]">
-                        <td className="px-4 text-[12px] text-[#888888]">{isoToDisplay(String(row.date ?? ""))}</td>
-                        <td className="px-4 text-right text-[13px] font-semibold text-[#111111]">{total > 0 ? fmtCurrency(total) : "—"}</td>
-                        <td className="px-4 text-right text-[12px] text-[#888888]">{bay > 0 ? fmtCurrency(bay) : "—"}</td>
-                        <td className="px-4 text-right text-[12px] text-[#888888]">{fb > 0 ? fmtCurrency(fb) : "—"}</td>
-                        <td className="px-4 text-right text-[12px] text-[#AAAAAA]">{orders > 0 ? fmt(orders) : "—"}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-[#E0E0E0]">
+                  {["Date", "Total", "Bay", "Golf", "F&B", "Tips", "Guests", "Orders"].map((h, i) => (
+                    <th key={h} className={cn("text-[11px] text-[#AAAAAA] font-normal py-2 px-3", i > 0 ? "text-right" : "text-left")}>
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {[...last30].reverse().map((row: any) => {
+                  const total    = parseFloat(String(row.totalRevenue ?? 0));
+                  const bay      = parseFloat(String(row.bayRevenue ?? 0));
+                  const golf     = parseFloat(String(row.golfRevenue ?? 0));
+                  const fb       = parseFloat(String(row.foodBevRevenue ?? 0));
+                  const tips     = parseFloat(String(row.totalTips ?? 0));
+                  const guests   = parseInt(String(row.totalGuests ?? 0));
+                  const orders   = parseInt(String(row.totalOrders ?? 0));
+                  return (
+                    <tr key={row.date} className="h-10 border-b border-[#F0F0F0] last:border-0 hover:bg-[#FAFAFA]">
+                      <td className="px-3 text-[12px] text-[#888888]">{isoToDisplay(String(row.date ?? ""))}</td>
+                      <td className="px-3 text-right text-[12px] font-semibold text-[#111111]">{total > 0 ? fmtCurrency(total) : "—"}</td>
+                      <td className="px-3 text-right text-[11px] text-[#F5A500]">{bay > 0 ? fmtCurrency(bay) : "—"}</td>
+                      <td className="px-3 text-right text-[11px] text-[#888888]">{golf > 0 ? fmtCurrency(golf) : "—"}</td>
+                      <td className="px-3 text-right text-[11px] text-[#3DB855]">{fb > 0 ? fmtCurrency(fb) : "—"}</td>
+                      <td className="px-3 text-right text-[11px] text-[#AAAAAA]">{tips > 0 ? fmtCurrency(tips) : "—"}</td>
+                      <td className="px-3 text-right text-[11px] text-[#AAAAAA]">{guests > 0 ? fmt(guests) : "—"}</td>
+                      <td className="px-3 text-right text-[11px] text-[#AAAAAA]">{orders > 0 ? fmt(orders) : "—"}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
@@ -255,6 +315,9 @@ export default function Revenue() {
             <div className="p-4 rounded-xl bg-[#FAFAFA] border border-[#F0F0F0]">
               <p className="text-[11px] text-[#AAAAAA] mb-1">Total Bookings</p>
               <p className="text-[24px] font-bold text-[#111111]">{fmt(acuityCount)}</p>
+              {acuityCount > 0 && acuityTotal > 0 && (
+                <p className="text-[11px] text-[#888888] mt-0.5">{fmtCurrency(acuityTotal / acuityCount)} avg/booking</p>
+              )}
             </div>
           </div>
         ) : (
@@ -273,15 +336,20 @@ export default function Revenue() {
           <h2 className="text-[13px] font-semibold text-[#111111]">Membership MRR</h2>
         </div>
         {mrr > 0 ? (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div className="p-4 rounded-xl bg-[#FAFAFA] border border-[#F0F0F0]">
-              <p className="text-[11px] text-[#AAAAAA] mb-1">Monthly Recurring Revenue</p>
+              <p className="text-[11px] text-[#AAAAAA] mb-1">MRR</p>
               <p className="text-[24px] font-bold text-[#F5C72C]">{fmtCurrency(mrr)}</p>
             </div>
             <div className="p-4 rounded-xl bg-[#FAFAFA] border border-[#F0F0F0]">
               <p className="text-[11px] text-[#AAAAAA] mb-1">Annual Run Rate</p>
               <p className="text-[24px] font-bold text-[#111111]">{fmtCurrency(mrr * 12)}</p>
-              <p className="text-[11px] text-[#AAAAAA] mt-0.5">from membership only</p>
+              <p className="text-[11px] text-[#AAAAAA] mt-0.5">membership only</p>
+            </div>
+            <div className="p-4 rounded-xl bg-[#FAFAFA] border border-[#F0F0F0]">
+              <p className="text-[11px] text-[#AAAAAA] mb-1">% of Annual Goal</p>
+              <p className="text-[24px] font-bold text-[#111111]">{pct(mrr * 12, ANNUAL_GOAL)}</p>
+              <p className="text-[11px] text-[#AAAAAA] mt-0.5">of {fmtCurrency(ANNUAL_GOAL)}</p>
             </div>
           </div>
         ) : (

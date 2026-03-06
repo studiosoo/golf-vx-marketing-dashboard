@@ -714,6 +714,12 @@ function AnalyticsTab() {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function InstagramAnalytics() {
+  const { data: tokenStatus } = trpc.instagram.checkTokenExpiry.useQuery(undefined, {
+    retry: 1,
+    staleTime: 1000 * 60 * 60,
+  });
+  const tokenInvalid = tokenStatus !== undefined && !tokenStatus.valid;
+
   return (
     <div className="p-6 space-y-6 max-w-5xl">
       {/* Header */}
@@ -727,8 +733,31 @@ export default function InstagramAnalytics() {
         </p>
       </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="daily" className="space-y-4">
+      {/* Token expired — setup banner */}
+      {tokenInvalid && (
+        <div className="rounded-xl border border-[#E8453C]/30 bg-[#E8453C]/5 p-5 space-y-3">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-[#E8453C] shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold text-[#E8453C]">Instagram Access Token Expired</p>
+              <p className="text-[13px] text-[#888888] mt-1">
+                Analytics and AI analysis require a valid Instagram access token. Renew your token to restore these features.
+              </p>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg border border-[#E0E0E0] p-4 text-[13px] space-y-2">
+            <p className="font-semibold text-[#111111]">To renew:</p>
+            <ol className="space-y-1.5 text-[#555555] list-decimal list-inside">
+              <li>Go to <a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noopener noreferrer" className="text-[#007AFF] underline">Meta Graph API Explorer</a></li>
+              <li>Generate a User Access Token with Instagram permissions</li>
+              <li>Exchange for a long-lived token and update <code className="bg-[#F5F5F5] px-1 rounded text-[11px]">INSTAGRAM_ACCESS_TOKEN</code> in your environment</li>
+            </ol>
+          </div>
+        </div>
+      )}
+
+      {/* Tabs — show Scheduler always, hide data tabs when token invalid */}
+      <Tabs defaultValue={tokenInvalid ? "scheduler" : "daily"} className="space-y-4">
         <TabsList className="bg-[#F5F5F5] border border-[#E0E0E0]">
           <TabsTrigger
             value="daily"
