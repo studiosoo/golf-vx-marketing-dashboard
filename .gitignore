@@ -115,3 +115,4 @@ temp/
 .git_corrupted_backup/
 .git_broken_backup/
 .git_broken_backup2/
+.claude/
