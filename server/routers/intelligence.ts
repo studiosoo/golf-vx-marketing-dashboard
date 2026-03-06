@@ -602,6 +602,12 @@ export const workspaceRouter = router({
         content: z.string(),
       })),
       context: z.enum(["general", "programs", "members", "meta_ads", "revenue"]).optional().default("general"),
+      // Optional file attachment for the latest user message
+      fileDataUrl: z.string().optional(),    // image base64 data URL
+      fileUri: z.string().optional(),        // Gemini File API URI
+      fileMimeType: z.string().optional(),
+      fileType: z.enum(["image", "gemini"]).optional(),
+      fileName: z.string().optional(),
     }))
     .mutation(async ({ input }) => {
       const { invokeLLM, LLM_MODELS } = await import("../_core/llm");
@@ -670,11 +676,34 @@ Studio Soo's primary channels: Meta Ads → ClickFunnels landing pages → Acuit
 
 When the user provides data (e.g., "Drive Day had 12 attendees"), acknowledge it, suggest a follow-up action, and offer to draft content. Be concise and specific. Use numbers. Keep responses under 400 words unless more depth is explicitly requested.`;
 
+      const model = LLM_MODELS.chat;
+
+      // If image attached, build multipart last user message
+      if (input.fileType === "image" && input.fileDataUrl) {
+        const priorMessages = input.messages.slice(0, -1);
+        const lastMsg = input.messages[input.messages.length - 1];
+        const messages = [
+          { role: "system" as const, content: systemPrompt },
+          ...priorMessages.map(msg => ({ role: msg.role as "user" | "assistant" | "system", content: msg.content })),
+          {
+            role: "user" as const,
+            content: [
+              { type: "image_url" as const, image_url: { url: input.fileDataUrl, detail: "high" as const } },
+              { type: "text" as const, text: lastMsg?.content || "Please analyze this image." },
+            ],
+          },
+        ];
+        const response = await invokeLLM({ messages, model });
+        const rawContent = response.choices?.[0]?.message?.content;
+        const reply = typeof rawContent === "string" ? rawContent : (Array.isArray(rawContent) ? rawContent.map((c: any) => c.text || "").join("") : "I couldn't generate a response.");
+        return { reply, model };
+      }
+
+      // Standard text chat
       const messages = [
         { role: "system" as const, content: systemPrompt },
         ...input.messages.map(msg => ({ role: msg.role as "user" | "assistant" | "system", content: msg.content })),
       ];
-      const model = LLM_MODELS.chat;
       const response = await invokeLLM({ messages, model });
       const reply = response.choices?.[0]?.message?.content || "I couldn't generate a response. Please try again.";
       return { reply, model };
@@ -695,9 +724,64 @@ When the user provides data (e.g., "Drive Day had 12 attendees"), acknowledge it
 });
 
 export const aiWorkspaceRouter = router({
+
+  // ── File upload ──────────────────────────────────────────────────────────────
+  uploadFile: protectedProcedure
+    .input(z.object({
+      base64: z.string().max(80_000_000), // ~60MB file max
+      mimeType: z.string().max(128),
+      fileName: z.string().max(256),
+    }))
+    .mutation(async ({ input }) => {
+      const { mimeType, fileName, base64 } = input;
+      const isImage = mimeType.startsWith("image/");
+      const isText =
+        mimeType.startsWith("text/") ||
+        ["application/json", "application/csv"].includes(mimeType);
+
+      // Images → return as data URL (used as image_url in LLM messages)
+      if (isImage) {
+        return {
+          fileType: "image" as const,
+          dataUrl: `data:${mimeType};base64,${base64}`,
+          fileName,
+          mimeType,
+        };
+      }
+
+      // Plain text files → decode and return extracted text
+      if (isText) {
+        const extractedText = Buffer.from(base64, "base64").toString("utf-8");
+        return {
+          fileType: "text" as const,
+          extractedText: extractedText.slice(0, 100_000), // cap at 100k chars
+          fileName,
+          mimeType,
+        };
+      }
+
+      // PDFs and other binary files → upload to Gemini File API
+      const { ENV } = await import("../_core/env");
+      if (!ENV.geminiApiKey) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "PDF/binary uploads require GEMINI_API_KEY to be configured.",
+        });
+      }
+      const { uploadFileToGemini } = await import("../_core/geminiFile");
+      const geminiFile = await uploadFileToGemini(base64, mimeType, fileName);
+      return {
+        fileType: "gemini" as const,
+        fileUri: geminiFile.uri,
+        fileName,
+        mimeType,
+      };
+    }),
+
+  // ── Analyze ──────────────────────────────────────────────────────────────────
   analyze: protectedProcedure
     .input(z.object({
-      content: z.string().min(10).max(50000),
+      content: z.string().max(50000).default(""),
       analysisType: z.enum([
         'competitive_analysis',
         'marketing_plan',
@@ -708,6 +792,12 @@ export const aiWorkspaceRouter = router({
         'free_form',
       ]),
       customPrompt: z.string().optional(),
+      // File attachment (mutually exclusive)
+      fileUri: z.string().optional(),       // Gemini File API URI (PDFs, video, audio)
+      fileMimeType: z.string().optional(),  // required with fileUri
+      fileDataUrl: z.string().optional(),   // base64 data URL (images)
+      fileType: z.enum(["gemini", "image", "text"]).optional(),
+      fileName: z.string().optional(),
     }))
     .mutation(async ({ input }) => {
       const { invokeLLM, LLM_MODELS } = await import("../_core/llm");
@@ -722,19 +812,60 @@ export const aiWorkspaceRouter = router({
         free_form: `You are a strategic marketing AI assistant for Golf VX Arlington Heights. Context: ${GOLF_VX_CONTEXT}. Analyze the provided content and give actionable marketing insights, strategic recommendations, and specific next steps.`,
       };
       const systemPrompt = typeInstructions[input.analysisType] || typeInstructions.free_form;
+
+      const fileLabel = input.fileName ? `[Attached file: ${input.fileName}]\n\n` : "";
+      const contentSection = input.content.trim()
+        ? `CONTENT TO ANALYZE:\n${input.content}`
+        : "Please analyze the attached file.";
       const userPrompt = input.customPrompt
-        ? `${input.customPrompt}\n\n---\n\nCONTENT TO ANALYZE:\n${input.content}`
-        : `Please analyze the following content and provide a structured response with these sections:\n\n## Executive Summary\n(2-3 sentences capturing the key takeaway)\n\n## Key Insights\n(3-5 specific, data-driven observations)\n\n## Recommended Actions\n(Prioritized list of specific, actionable steps with owner and timeline)\n\n## KPIs to Track\n(Measurable success metrics with target values where possible)\n\n## Risks & Considerations\n(What to watch out for, potential downsides)\n\n---\n\nCONTENT TO ANALYZE:\n${input.content}`;
+        ? `${fileLabel}${input.customPrompt}\n\n---\n\n${contentSection}`
+        : `${fileLabel}Please analyze the following and provide a structured response with these sections:\n\n## Executive Summary\n(2-3 sentences capturing the key takeaway)\n\n## Key Insights\n(3-5 specific, data-driven observations)\n\n## Recommended Actions\n(Prioritized list of specific, actionable steps with owner and timeline)\n\n## KPIs to Track\n(Measurable success metrics with target values where possible)\n\n## Risks & Considerations\n(What to watch out for, potential downsides)\n\n---\n\n${contentSection}`;
+
       const model = LLM_MODELS.analysis;
+
+      // Path A: Gemini File API URI → native generateContent (PDF, video, audio)
+      if (input.fileType === "gemini" && input.fileUri && input.fileMimeType) {
+        const { generateContentWithFile } = await import("../_core/geminiFile");
+        const text = await generateContentWithFile({
+          model,
+          systemPrompt,
+          userPrompt,
+          fileUri: input.fileUri,
+          mimeType: input.fileMimeType,
+        });
+        return { analysis: text, analysisType: input.analysisType, model };
+      }
+
+      // Path B: Image data URL → image_url content type
+      if (input.fileType === "image" && input.fileDataUrl) {
+        const response = await invokeLLM({
+          model,
+          messages: [
+            { role: "system", content: systemPrompt },
+            {
+              role: "user",
+              content: [
+                { type: "image_url", image_url: { url: input.fileDataUrl, detail: "high" } },
+                { type: "text", text: userPrompt },
+              ],
+            },
+          ],
+        });
+        const rawContent = response?.choices?.[0]?.message?.content;
+        const result = typeof rawContent === "string" ? rawContent : (Array.isArray(rawContent) ? rawContent.map((c: any) => c.text || "").join("") : "No response generated.");
+        return { analysis: result, analysisType: input.analysisType, model };
+      }
+
+      // Path C: Text content (no file, or text file already in content)
       const response = await invokeLLM({
         model,
         messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
         ],
       });
       const rawContent = response?.choices?.[0]?.message?.content;
-      const result = typeof rawContent === 'string' ? rawContent : (Array.isArray(rawContent) ? rawContent.map((c: any) => c.text || '').join('') : 'No response generated.');
+      const result = typeof rawContent === "string" ? rawContent : (Array.isArray(rawContent) ? rawContent.map((c: any) => c.text || "").join("") : "No response generated.");
       return { analysis: result, analysisType: input.analysisType, model };
     }),
 });

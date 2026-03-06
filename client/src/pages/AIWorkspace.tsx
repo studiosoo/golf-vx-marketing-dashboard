@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { AIChatBox, type Message } from "@/components/AIChatBox";
 import { Badge } from "@/components/ui/badge";
@@ -12,9 +12,147 @@ import {
   Brain, Target, BarChart3, Building2, Megaphone, HandHeart,
   MessageSquare, Loader2, ChevronDown, ChevronUp, Clock,
   Trash2, FileText, Lightbulb, Sparkles, RefreshCw,
-  CheckCircle2, AlertTriangle,
+  CheckCircle2, AlertTriangle, Paperclip, X, Upload, Image, FileIcon,
 } from "lucide-react";
 import { Streamdown } from "streamdown";
+
+// ─── Supported file types ────────────────────────────────────────────────────
+
+const ACCEPTED_MIME_TYPES = [
+  "image/jpeg", "image/png", "image/gif", "image/webp",
+  "application/pdf",
+  "text/plain", "text/csv", "text/markdown",
+  "application/json",
+  "video/mp4", "video/quicktime",
+  "audio/mpeg", "audio/wav",
+].join(",");
+
+const MAX_FILE_BYTES = 50 * 1024 * 1024; // 50MB
+
+type AttachedFile = {
+  fileName: string;
+  mimeType: string;
+  fileType: "image" | "gemini" | "text";
+  dataUrl?: string;   // images
+  fileUri?: string;   // Gemini File API (PDF, video, audio)
+  extractedText?: string; // plain text files
+};
+
+// ─── FileUploadZone ───────────────────────────────────────────────────────────
+
+function FileUploadZone({
+  onAttached,
+  attached,
+  onRemove,
+  compact = false,
+}: {
+  onAttached: (file: AttachedFile) => void;
+  attached: AttachedFile | null;
+  onRemove: () => void;
+  compact?: boolean;
+}) {
+  const [isDragging, setIsDragging] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const uploadMutation = trpc.aiWorkspace.uploadFile.useMutation({
+    onSuccess: (result) => {
+      onAttached(result as AttachedFile);
+      toast.success(`File attached: ${result.fileName}`);
+    },
+    onError: (err) => toast.error(`Upload failed: ${err.message}`),
+  });
+
+  const processFile = useCallback(async (file: File) => {
+    if (file.size > MAX_FILE_BYTES) {
+      toast.error("File too large (max 50MB)");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+      const base64 = dataUrl.split(",")[1];
+      uploadMutation.mutate({ base64, mimeType: file.type, fileName: file.name });
+    };
+    reader.readAsDataURL(file);
+  }, [uploadMutation]);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) processFile(file);
+  }, [processFile]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) processFile(file);
+    e.target.value = "";
+  };
+
+  // Show attached chip
+  if (attached) {
+    const icon = attached.fileType === "image"
+      ? <Image size={13} className="text-[#F5C72C]" />
+      : <FileIcon size={13} className="text-[#F5C72C]" />;
+    return (
+      <div className="flex items-center gap-2 px-3 py-2 bg-[#F5C72C]/10 border border-[#F5C72C]/30 rounded-lg text-xs text-foreground">
+        {icon}
+        <span className="truncate max-w-[200px] font-medium">{attached.fileName}</span>
+        <span className="text-muted-foreground capitalize ml-1">
+          ({attached.fileType === "gemini" ? "PDF/File" : attached.fileType})
+        </span>
+        <button onClick={onRemove} className="ml-auto text-muted-foreground hover:text-foreground shrink-0">
+          <X size={13} />
+        </button>
+      </div>
+    );
+  }
+
+  if (compact) {
+    return (
+      <>
+        <input ref={inputRef} type="file" accept={ACCEPTED_MIME_TYPES} className="hidden" onChange={handleChange} />
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={uploadMutation.isPending}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-border text-xs text-muted-foreground hover:border-[#F5C72C]/50 hover:text-foreground transition-colors disabled:opacity-50"
+        >
+          {uploadMutation.isPending ? <Loader2 size={12} className="animate-spin" /> : <Paperclip size={12} />}
+          {uploadMutation.isPending ? "Uploading…" : "Attach file"}
+        </button>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <input ref={inputRef} type="file" accept={ACCEPTED_MIME_TYPES} className="hidden" onChange={handleChange} />
+      <div
+        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+        onDragLeave={() => setIsDragging(false)}
+        onDrop={handleDrop}
+        onClick={() => inputRef.current?.click()}
+        className={`flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-xl py-6 cursor-pointer transition-colors ${
+          isDragging
+            ? "border-[#F5C72C] bg-[#F5C72C]/5"
+            : "border-border hover:border-[#F5C72C]/50 hover:bg-muted/20"
+        }`}
+      >
+        {uploadMutation.isPending ? (
+          <><Loader2 size={20} className="animate-spin text-[#F5C72C]" /><p className="text-xs text-muted-foreground">Uploading file…</p></>
+        ) : (
+          <>
+            <Upload size={20} className="text-muted-foreground" />
+            <div className="text-center">
+              <p className="text-xs font-medium text-foreground">Drop file here or click to browse</p>
+              <p className="text-xs text-muted-foreground mt-0.5">PDF, images, text, video, audio — up to 50MB</p>
+            </div>
+          </>
+        )}
+      </div>
+    </>
+  );
+}
 
 // ─── Chat Tab Types ──────────────────────────────────────────────────────────
 
@@ -182,6 +320,7 @@ Our proposed donation package:
 function ChatTab() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [context, setContext] = useState<Context>("general");
+  const [attachedFile, setAttachedFile] = useState<AttachedFile | null>(null);
 
   const { data: suggestedPrompts } = trpc.workspace.getSuggestedPrompts.useQuery();
 
@@ -201,15 +340,33 @@ function ChatTab() {
   });
 
   const handleSendMessage = (content: string) => {
-    const newMessages: Message[] = [...messages, { role: "user", content }];
+    // For text files: prepend extracted text into message
+    const messageContent = attachedFile?.extractedText
+      ? `[File: ${attachedFile.fileName}]\n${attachedFile.extractedText.slice(0, 8000)}\n\n---\n\n${content}`
+      : content;
+
+    const newMessages: Message[] = [...messages, { role: "user", content: messageContent }];
     setMessages(newMessages);
-    chatMutation.mutate({ messages: newMessages, context });
+
+    const mutationInput: Parameters<typeof chatMutation.mutate>[0] = {
+      messages: newMessages,
+      context,
+    };
+
+    if (attachedFile?.fileType === "image" && attachedFile.dataUrl) {
+      mutationInput.fileDataUrl = attachedFile.dataUrl;
+      mutationInput.fileType = "image";
+      mutationInput.fileName = attachedFile.fileName;
+    }
+
+    chatMutation.mutate(mutationInput);
+    setAttachedFile(null);
   };
 
   return (
     <div className="flex flex-col h-full">
-      {/* Context selector */}
-      <div className="flex gap-2 flex-wrap mb-4">
+      {/* Context selector + File attach */}
+      <div className="flex items-center gap-2 flex-wrap mb-4">
         {CONTEXT_OPTIONS.map(opt => {
           const Icon = opt.icon;
           const isActive = context === opt.value;
@@ -228,6 +385,14 @@ function ChatTab() {
             </button>
           );
         })}
+        <div className="ml-auto">
+          <FileUploadZone
+            onAttached={setAttachedFile}
+            attached={attachedFile}
+            onRemove={() => setAttachedFile(null)}
+            compact
+          />
+        </div>
       </div>
 
       {/* Chat area */}
@@ -287,12 +452,21 @@ function StrategyWorkspaceTab() {
   const [currentResult, setCurrentResult] = useState<{ analysis: string; analysisType: string } | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [expandedHistory, setExpandedHistory] = useState<string | null>(null);
+  const [attachedFile, setAttachedFile] = useState<AttachedFile | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
+
+  const handleFileAttached = (file: AttachedFile) => {
+    setAttachedFile(file);
+    // For text files, auto-populate the textarea
+    if (file.extractedText) {
+      setContent(file.extractedText.slice(0, 50000));
+    }
+  };
 
   const analyzeMutation = trpc.aiWorkspace.analyze.useMutation({
     onSuccess: (data) => {
       setCurrentResult(data);
-      const title = content.slice(0, 60).replace(/\n/g, " ").trim() + (content.length > 60 ? "..." : "");
+      const title = (attachedFile?.fileName || content).slice(0, 60).replace(/\n/g, " ").trim() + "...";
       const historyItem: HistoryItem = {
         id: Date.now().toString(),
         title,
@@ -375,11 +549,18 @@ function StrategyWorkspaceTab() {
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
+              {/* File upload zone */}
+              <FileUploadZone
+                onAttached={handleFileAttached}
+                attached={attachedFile}
+                onRemove={() => { setAttachedFile(null); }}
+              />
+
               <Textarea
                 value={content}
                 onChange={e => setContent(e.target.value)}
-                placeholder={selectedTypeConfig.placeholder}
-                className="min-h-[180px] text-sm font-mono bg-muted/20 border-border resize-y"
+                placeholder={attachedFile ? "Add notes or context about the attached file (optional)..." : selectedTypeConfig.placeholder}
+                className="min-h-[140px] text-sm font-mono bg-muted/20 border-border resize-y"
                 maxLength={50000}
               />
               <button
@@ -399,15 +580,21 @@ function StrategyWorkspaceTab() {
               )}
               <Button
                 onClick={() => {
-                  if (!content.trim()) return;
+                  if (!content.trim() && !attachedFile) return;
                   setCurrentResult(null);
                   analyzeMutation.mutate({
                     content: content.trim(),
                     analysisType: selectedType,
                     customPrompt: customPrompt.trim() || undefined,
+                    // File attachment
+                    fileType: attachedFile?.fileType,
+                    fileUri: attachedFile?.fileUri,
+                    fileMimeType: attachedFile?.mimeType,
+                    fileDataUrl: attachedFile?.dataUrl,
+                    fileName: attachedFile?.fileName,
                   });
                 }}
-                disabled={!content.trim() || analyzeMutation.isPending}
+                disabled={(!content.trim() && !attachedFile) || analyzeMutation.isPending}
                 className="w-full bg-[#F5C72C] text-black hover:bg-yellow-300 font-semibold"
               >
                 {analyzeMutation.isPending ? (
@@ -504,11 +691,11 @@ function StrategyWorkspaceTab() {
             <CardContent>
               <ul className="space-y-2 text-xs text-muted-foreground">
                 {[
+                  "Upload PDFs, images, or text files directly",
+                  "Drop a competitor PDF or flyer for instant analysis",
                   "Paste full email threads for richer context",
                   "Include numbers and data when available",
                   "Use 'Custom instructions' to ask specific questions",
-                  "Try B2B Strategy for the Topgolf email",
-                  "Community Outreach helps evaluate donation requests",
                   "Event ROI works great for Chicago Golf Show recap",
                 ].map(tip => (
                   <li key={tip} className="flex gap-2">
