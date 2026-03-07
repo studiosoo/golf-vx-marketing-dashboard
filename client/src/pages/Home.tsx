@@ -440,11 +440,11 @@ export default function Home() {
       </div>
 
       {/* ── 2026 Key Goals ── */}
-      <div className="bg-white rounded-xl border border-[#E0E0E0] p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-white rounded-xl border border-[#E8E8E8] p-5">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Target className="h-4 w-4 text-[#F5C72C]" />
-            <h2 className="text-[14px] font-bold text-[#111111]">2026 Key Goals</h2>
+            <h2 className="text-[14px] font-semibold text-[#111111]">2026 Key Goals</h2>
           </div>
           <span className="text-[11px] text-[#AAAAAA]">Year-end targets</span>
         </div>
@@ -486,11 +486,11 @@ export default function Home() {
       </div>
 
       {/* ── Section 1: Members + Goal Progress ── */}
-      <div className="bg-white rounded-xl border border-[#E0E0E0] p-5">
+      <div className="bg-white rounded-xl border border-[#E8E8E8] p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Users className="h-4 w-4 text-[#111111]" />
-            <h2 className="text-[14px] font-bold text-[#111111]">Members</h2>
+            <h2 className="text-[14px] font-semibold text-[#111111]">Members</h2>
           </div>
           <button onClick={() => setLocation("/list/members")} className="flex items-center gap-1 text-[12px] text-[#888888] hover:text-[#111111] transition-colors">
             View all <ArrowRight className="h-3 w-3" />
@@ -541,11 +541,11 @@ export default function Home() {
       </div>
 
       {/* ── Section 2: Revenue (merged MRR + Toast + Acuity + Budget) ── */}
-      <div className="bg-white rounded-xl border border-[#E0E0E0] p-5">
+      <div className="bg-white rounded-xl border border-[#E8E8E8] p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <DollarSign className="h-4 w-4 text-[#111111]" />
-            <h2 className="text-[14px] font-bold text-[#111111]">Revenue</h2>
+            <h2 className="text-[14px] font-semibold text-[#111111]">Revenue</h2>
           </div>
           <button onClick={() => setLocation("/intelligence/reports")} className="flex items-center gap-1 text-[12px] text-[#888888] hover:text-[#111111] transition-colors">
             Full Report <ArrowRight className="h-3 w-3" />
@@ -564,7 +564,7 @@ export default function Home() {
                   </span>
                 )}
               </div>
-              <p className="text-[24px] font-bold text-[#F5C72C] leading-none tracking-tight">{snapLoading ? "—" : fmtCurrency(mrr)}</p>
+              <p className="text-[24px] font-bold text-[#111111] leading-none tracking-tight">{snapLoading ? "—" : fmtCurrency(mrr)}</p>
               <p className="text-[11px] text-[#888888] mt-1">Monthly Recurring</p>
               {memberBreakdown.length > 0 && (
                 <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1.5">
@@ -650,11 +650,11 @@ export default function Home() {
 
       {/* ── Section 3: Campaigns (merged from sidebar, no ROI) ── */}
       {(stratLoading || activeCampaigns.length > 0) && (
-        <div className="bg-white rounded-xl border border-[#E0E0E0] p-5">
+        <div className="bg-white rounded-xl border border-[#E8E8E8] p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Crosshair className="h-4 w-4 text-[#111111]" />
-              <h2 className="text-[14px] font-bold text-[#111111]">Campaigns</h2>
+              <h2 className="text-[14px] font-semibold text-[#111111]">Campaigns</h2>
             </div>
             <button onClick={() => setLocation("/campaigns/strategic")} className="flex items-center gap-1 text-[12px] text-[#888888] hover:text-[#111111] transition-colors">
               Details <ArrowRight className="h-3 w-3" />
@@ -717,11 +717,11 @@ export default function Home() {
 
       {/* ── Section 4: Active Programs with Health Scores (moved down) ── */}
       {activePrograms.length > 0 && (
-        <div className="bg-white rounded-xl border border-[#E0E0E0] p-5">
+        <div className="bg-white rounded-xl border border-[#E8E8E8] p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Flag className="h-4 w-4 text-[#111111]" />
-              <h2 className="text-[14px] font-bold text-[#111111]">Active Programs</h2>
+              <h2 className="text-[14px] font-semibold text-[#111111]">Active Programs</h2>
               <span className="text-[10px] font-bold bg-[#F5F5F5] rounded-full px-1.5 py-0.5 text-[#888888]">{activePrograms.length}</span>
             </div>
             <button onClick={() => setLocation("/programs")} className="flex items-center gap-1 text-[12px] text-[#888888] hover:text-[#111111] transition-colors">
@@ -761,11 +761,11 @@ export default function Home() {
       )}
 
       {/* ── Section 5: Data Health ── */}
-      <div className="bg-white rounded-xl border border-[#E0E0E0] p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+      <div className="bg-white rounded-xl border border-[#E8E8E8] p-5">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Activity className="h-4 w-4 text-[#111111]" />
-            <h2 className="text-[14px] font-bold text-[#111111]">Data Health</h2>
+            <h2 className="text-[14px] font-semibold text-[#111111]">Data Health</h2>
           </div>
           <span className="text-[11px] text-[#AAAAAA]">Integration status</span>
         </div>
@@ -773,22 +773,27 @@ export default function Home() {
           {DATA_SOURCES.map((src) => (
             <div key={src.label} className="py-2.5 first:pt-0 last:pb-0">
               <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div
-                    className="h-2 w-2 rounded-full shrink-0 mt-[3px]"
-                    style={{ background: STATUS_DOT[src.status] }}
-                  />
-                  <span className="text-[13px] text-[#111111]">{src.label}</span>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="text-[12px] font-medium" style={{ color: STATUS_TEXT[src.status] }}>
+                <span className="text-[13px] text-[#111111] min-w-0">{src.label}</span>
+                <div className="text-right shrink-0 flex flex-col items-end gap-0.5">
+                  <span className={cn(
+                    "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium border",
+                    src.status === "live" && "bg-[#3DB855]/10 text-[#2A9040] border-[#3DB855]/20",
+                    src.status === "warning" && "bg-[#F59E0B]/10 text-[#B45309] border-[#F59E0B]/20",
+                    src.status === "error" && "bg-[#FF3B30]/10 text-[#FF3B30] border-[#FF3B30]/20",
+                    (src.status === "offline" || src.status === "loading") && "bg-[#F2F2F7] text-[#AAAAAA] border-[#E0E0E0]"
+                  )}>
                     {STATUS_LABEL[src.status]}
-                  </p>
+                  </span>
                   <p className="text-[11px] text-[#888888]">{src.detail}</p>
                 </div>
               </div>
               {src.note && (
-                <p className="text-[11px] mt-1 pl-[18px]" style={{ color: STATUS_TEXT[src.status] }}>
+                <p className={cn(
+                  "text-[11px] mt-1",
+                  src.status === "error" && "text-[#FF3B30]/80",
+                  src.status === "warning" && "text-[#B45309]/80",
+                  (src.status === "live" || src.status === "offline" || src.status === "loading") && "text-[#888888]"
+                )}>
                   {src.note}
                 </p>
               )}

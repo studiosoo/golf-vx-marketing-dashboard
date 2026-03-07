@@ -86,11 +86,11 @@ function TokenWarningBanner() {
 
   if (!tokenStatus.valid) {
     return (
-      <div className="flex items-center gap-3 p-4 bg-[#E8453C]/10 border border-[#E8453C]/30 rounded-xl text-[#E8453C] text-sm">
+      <div className="flex items-center gap-3 p-4 bg-[#FF3B30]/8 border border-[#FF3B30]/20 rounded-xl text-[#FF3B30] text-sm">
         <AlertTriangle className="h-4 w-4 flex-shrink-0" />
         <div>
           <p className="font-semibold">Instagram Token Expired</p>
-          <p className="text-xs mt-0.5 text-[#E8453C]/80">
+          <p className="text-xs mt-0.5 text-[#FF3B30]/70">
             Your access token is invalid. Go to{" "}
             <a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noopener noreferrer" className="underline">
               Meta Graph API Explorer
@@ -104,11 +104,11 @@ function TokenWarningBanner() {
 
   if (tokenStatus.warning && tokenStatus.daysRemaining <= 14) {
     return (
-      <div className="flex items-center gap-3 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl text-[#F5C72C] text-sm">
-        <AlertTriangle className="h-4 w-4 flex-shrink-0" />
+      <div className="flex items-center gap-3 p-4 bg-[#F59E0B]/8 border border-[#F59E0B]/20 rounded-xl text-[#B45309] text-sm">
+        <AlertTriangle className="h-4 w-4 flex-shrink-0 text-[#F59E0B]" />
         <div>
           <p className="font-semibold">Token Expiring Soon — {tokenStatus.daysRemaining} days remaining</p>
-          <p className="text-xs mt-0.5 text-[#F5C72C]/80">
+          <p className="text-xs mt-0.5 text-[#B45309]/80">
             Renew your Instagram access token before it expires to avoid interruption.{" "}
             {tokenStatus.expiresAt && `Expires: ${new Date(tokenStatus.expiresAt).toLocaleDateString()}`}
           </p>
@@ -213,11 +213,11 @@ function DailyAnalysisTab() {
 
   if (error) {
     return (
-      <div className="flex items-center gap-3 p-4 bg-[#E8453C]/10 border border-[#E8453C]/30 rounded-xl text-[#E8453C] text-sm">
+      <div className="flex items-center gap-3 p-4 bg-[#FF3B30]/10 border border-[#FF3B30]/30 rounded-xl text-[#FF3B30] text-sm">
         <AlertCircle className="h-4 w-4 flex-shrink-0" />
         <div>
           <p className="font-semibold">Analysis failed</p>
-          <p className="text-xs mt-0.5 text-[#E8453C]/80">{error.message}</p>
+          <p className="text-xs mt-0.5 text-[#FF3B30]/80">{error.message}</p>
         </div>
       </div>
     );
@@ -230,7 +230,7 @@ function DailyAnalysisTab() {
   const followerPct = Math.min(100, Math.round((metrics.followers / followerGoal) * 100));
   const engagementNum = parseFloat(metrics.avgEngagement);
   const engagementLabel = engagementNum >= 3 ? "Excellent" : engagementNum >= 1 ? "Good" : "Needs Work";
-  const engagementColor = engagementNum >= 3 ? "text-[#3DB855]" : engagementNum >= 1 ? "text-[#F5C72C]" : "text-[#E8453C]";
+  const engagementColor = engagementNum >= 3 ? "text-[#3DB855]" : engagementNum >= 1 ? "text-[#F5C72C]" : "text-[#FF3B30]";
 
   return (
     <div className="space-y-5">
@@ -319,19 +319,19 @@ function DailyAnalysisTab() {
       </div>
 
       {/* Today's Post Idea */}
-      <Card className="bg-card border-[#F5C72C]/20">
+      <Card className="bg-card border-border">
         <CardHeader className="pb-3 pt-4 px-4">
           <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
             <Zap className="h-4 w-4 text-[#F5C72C]" />
             Today's Post Idea
-            <Badge className="ml-auto text-[10px] bg-[#F5C72C]/10 text-[#F5C72C] border-[#F5C72C]/30 font-normal">
+            <Badge variant="secondary" className="ml-auto text-[10px] font-normal">
               {analysis.todayPostIdea.contentType}
             </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent className="px-4 pb-4 space-y-3">
           <div className="bg-muted rounded-lg p-3 relative">
-            <p className="text-sm text-[#ddd] leading-relaxed whitespace-pre-wrap">{analysis.todayPostIdea.captionDraft}</p>
+            <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{analysis.todayPostIdea.captionDraft}</p>
             <Button
               size="sm"
               variant="ghost"
@@ -343,7 +343,7 @@ function DailyAnalysisTab() {
           </div>
           {analysis.todayPostIdea.hashtags && (
             <div className="bg-muted rounded-lg p-3 relative">
-              <p className="text-xs text-[#F5C72C]/80 leading-relaxed">{analysis.todayPostIdea.hashtags}</p>
+              <p className="text-xs text-[#888888] leading-relaxed">{analysis.todayPostIdea.hashtags}</p>
               <Button
                 size="sm"
                 variant="ghost"
@@ -372,7 +372,7 @@ function DailyAnalysisTab() {
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4">
-            <p className="text-sm text-[#ccc] leading-relaxed">{analysis.keyInsight}</p>
+            <p className="text-sm text-foreground leading-relaxed">{analysis.keyInsight}</p>
           </CardContent>
         </Card>
 
@@ -385,7 +385,7 @@ function DailyAnalysisTab() {
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4">
-            <p className="text-sm text-[#ccc] leading-relaxed">{analysis.quickWin}</p>
+            <p className="text-sm text-foreground leading-relaxed">{analysis.quickWin}</p>
           </CardContent>
         </Card>
       </div>
@@ -627,7 +627,7 @@ function ScheduledPostRow({ post, onRefresh }: { post: any; onRefresh: () => voi
           <Badge variant="outline" className="text-[10px] border-border text-[#888]">
             {post.contentType.replace("_", " ")}
           </Badge>
-          <span className={`flex items-center gap-1 text-[10px] ${isOverdue ? "text-[#E8453C]" : "text-[#888]"}`}>
+          <span className={`flex items-center gap-1 text-[10px] ${isOverdue ? "text-[#FF3B30]" : "text-[#888]"}`}>
             <Clock className="h-3 w-3" />
             {new Date(post.scheduledFor).toLocaleString("en-US", {
               month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
@@ -653,7 +653,7 @@ function ScheduledPostRow({ post, onRefresh }: { post: any; onRefresh: () => voi
           variant="ghost"
           disabled={deleteMutation.isPending}
           onClick={() => deleteMutation.mutate({ id: post.id })}
-          className="h-7 px-2 text-xs text-[#E8453C] hover:text-red-300 hover:bg-red-400/10"
+          className="h-7 px-2 text-xs text-[#FF3B30] hover:text-red-300 hover:bg-red-400/10"
         >
           <Trash2 className="h-3 w-3" />
         </Button>
@@ -730,11 +730,11 @@ export default function InstagramDashboard() {
 
       {/* Token expired — show setup card and stop rendering the rest */}
       {tokenInvalid && (
-        <div className="rounded-xl border border-[#E8453C]/30 bg-[#E8453C]/5 p-6 space-y-4">
+        <div className="rounded-xl border border-[#FF3B30]/30 bg-[#FF3B30]/5 p-6 space-y-4">
           <div className="flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 text-[#E8453C] shrink-0 mt-0.5" />
+            <AlertCircle className="h-5 w-5 text-[#FF3B30] shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-[#E8453C] text-[15px]">Instagram Access Token Expired</p>
+              <p className="font-semibold text-[#FF3B30] text-[15px]">Instagram Access Token Expired</p>
               <p className="text-[13px] text-[#888888] mt-1">
                 Your Instagram access token is no longer valid. Renew it to restore the live feed, account stats, and AI analysis.
               </p>
@@ -762,11 +762,11 @@ export default function InstagramDashboard() {
 
           {/* API Error Banner */}
           {apiError && (
-            <div className="flex items-center gap-3 p-4 bg-[#E8453C]/10 border border-[#E8453C]/30 rounded-xl text-[#E8453C] text-sm">
+            <div className="flex items-center gap-3 p-4 bg-[#FF3B30]/10 border border-[#FF3B30]/30 rounded-xl text-[#FF3B30] text-sm">
               <AlertCircle className="h-4 w-4 flex-shrink-0" />
               <div>
                 <p className="font-semibold">Instagram API Error</p>
-                <p className="text-xs mt-0.5 text-[#E8453C]/80">{(apiError as any).message}</p>
+                <p className="text-xs mt-0.5 text-[#FF3B30]/80">{(apiError as any).message}</p>
               </div>
             </div>
           )}
@@ -828,7 +828,7 @@ export default function InstagramDashboard() {
           </div>
         ) : feedError ? (
           <div className="text-center py-12 text-[#888]">
-            <AlertCircle className="h-8 w-8 mx-auto mb-3 text-[#E8453C]" />
+            <AlertCircle className="h-8 w-8 mx-auto mb-3 text-[#FF3B30]" />
             <p>Could not load feed. Check API token.</p>
           </div>
         ) : feed && feed.length > 0 ? (
