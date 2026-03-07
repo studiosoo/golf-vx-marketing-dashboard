@@ -21,6 +21,7 @@ import {
   X,
   Instagram,
   Mail,
+  Activity,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useMemo } from "react";
@@ -338,6 +339,83 @@ export default function Home() {
       display: emailSubscribers != null ? fmt(emailSubscribers) : "—",
       goalDisplay: "5,000",
       color: "#111111",
+    },
+  ];
+
+  // ── Data Health ──────────────────────────────────────────────────────────
+  type DataSourceStatus = "live" | "warning" | "error" | "offline" | "loading";
+  type DataSource = { label: string; status: DataSourceStatus; detail: string; note?: string };
+
+  const STATUS_DOT: Record<DataSourceStatus, string> = {
+    live: "#3DB855",
+    warning: "#F5C72C",
+    error: "#FF3B30",
+    offline: "#E0E0E0",
+    loading: "#E0E0E0",
+  };
+  const STATUS_LABEL: Record<DataSourceStatus, string> = {
+    live: "Live",
+    warning: "Renew soon",
+    error: "Action needed",
+    offline: "No data",
+    loading: "Loading…",
+  };
+  const STATUS_TEXT: Record<DataSourceStatus, string> = {
+    live: "#3DB855",
+    warning: "#F5C72C",
+    error: "#FF3B30",
+    offline: "#888888",
+    loading: "#888888",
+  };
+
+  const igDataSource = (): DataSource => {
+    if (!tokenStatus) return { label: "Instagram", status: "loading", detail: "Checking token…" };
+    if (!tokenValid) return {
+      label: "Instagram",
+      status: "error",
+      detail: "Follower count unavailable — token expired",
+      note: "Renew via Meta Graph API Explorer and update INSTAGRAM_ACCESS_TOKEN",
+    };
+    if (tokenStatus.warning) return {
+      label: "Instagram",
+      status: "warning",
+      detail: igFollowers != null ? `${fmt(igFollowers)} followers` : "Followers loading…",
+      note: `Token expires in ${tokenStatus.daysRemaining} day${tokenStatus.daysRemaining === 1 ? "" : "s"} — renew before it lapses`,
+    };
+    return {
+      label: "Instagram",
+      status: "live",
+      detail: igFollowers != null ? `${fmt(igFollowers)} followers` : "Followers loading…",
+    };
+  };
+
+  const DATA_SOURCES: DataSource[] = [
+    {
+      label: "Members · Boomerang",
+      status: snapLoading ? "loading" : memberTotal > 0 ? "live" : "offline",
+      detail: snapLoading ? "Syncing…" : memberTotal > 0 ? `${fmt(memberTotal)} active` : "No members synced yet",
+    },
+    {
+      label: "Revenue · Toast POS",
+      status: toastMTD > 0 ? "live" : "offline",
+      detail: toastMTD > 0
+        ? `${fmtCurrency(toastMTD)} MTD · ${toastOrders} orders`
+        : "No orders recorded this month",
+    },
+    {
+      label: "Revenue · Acuity",
+      status: acuityTotal > 0 ? "live" : "offline",
+      detail: acuityTotal > 0
+        ? `${fmtCurrency(acuityTotal)} · ${acuityBookings} sessions`
+        : "No sessions this month",
+    },
+    igDataSource(),
+    {
+      label: "Email · Encharge",
+      status: emailSubscribers != null ? "live" : "loading",
+      detail: emailSubscribers != null
+        ? `${fmt(emailSubscribers)} AHTIL contacts`
+        : "Connecting to Encharge…",
     },
   ];
 
@@ -681,6 +759,43 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* ── Section 5: Data Health ── */}
+      <div className="bg-white rounded-xl border border-[#E0E0E0] p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Activity className="h-4 w-4 text-[#111111]" />
+            <h2 className="text-[14px] font-bold text-[#111111]">Data Health</h2>
+          </div>
+          <span className="text-[11px] text-[#AAAAAA]">Integration status</span>
+        </div>
+        <div className="divide-y divide-[#F5F5F5]">
+          {DATA_SOURCES.map((src) => (
+            <div key={src.label} className="py-2.5 first:pt-0 last:pb-0">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div
+                    className="h-2 w-2 rounded-full shrink-0 mt-[3px]"
+                    style={{ background: STATUS_DOT[src.status] }}
+                  />
+                  <span className="text-[13px] text-[#111111]">{src.label}</span>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-[12px] font-medium" style={{ color: STATUS_TEXT[src.status] }}>
+                    {STATUS_LABEL[src.status]}
+                  </p>
+                  <p className="text-[11px] text-[#888888]">{src.detail}</p>
+                </div>
+              </div>
+              {src.note && (
+                <p className="text-[11px] mt-1 pl-[18px]" style={{ color: STATUS_TEXT[src.status] }}>
+                  {src.note}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
 
       <MemberListModal open={memberListOpen} onClose={() => setMemberListOpen(false)} />
     </div>
