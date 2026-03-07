@@ -358,7 +358,7 @@ Return as JSON.`;
 });
 
 export const previewRouter = router({
-  getDriveDaySessions: publicProcedure.query(async () => {
+  getDriveDaySessions: protectedProcedure.query(async () => {
     const { getSundayClinicData, extractAcquisitionSource } = await import("../acuity");
     const data = await getSundayClinicData({ minDate: "2026-01-25", maxDate: "2026-03-29" });
 
@@ -433,7 +433,7 @@ export const previewRouter = router({
     };
   }),
 
-  getSnapshot: publicProcedure.query(async () => {
+  getSnapshot: protectedProcedure.query(async () => {
     const database = await db.getDb();
     if (!database) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
 
