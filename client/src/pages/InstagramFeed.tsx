@@ -102,7 +102,7 @@ function TokenWarningBanner() {
     );
   }
 
-  if (tokenStatus.warning && tokenStatus.daysRemaining <= 7) {
+  if (tokenStatus.warning && tokenStatus.daysRemaining <= 14) {
     return (
       <div className="flex items-center gap-3 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl text-[#F5C72C] text-sm">
         <AlertTriangle className="h-4 w-4 flex-shrink-0" />

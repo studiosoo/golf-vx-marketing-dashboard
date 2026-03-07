@@ -2,7 +2,7 @@ import { protectedProcedure, router } from "../_core/trpc";
 import { z } from "zod";
 import * as db from "../db";
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import * as encharge from "../encharge";
 
 export const membersRouter = router({
@@ -11,19 +11,22 @@ export const membersRouter = router({
       search: z.string().optional(),
       status: z.enum(['active', 'inactive', 'cancelled', 'trial']).optional(),
       membershipTier: z.enum(['trial', 'monthly', 'annual', 'corporate', 'none', 'all_access_aces', 'swing_savers', 'golf_vx_pro']).optional(),
+      venueId: z.number().default(1),
     }).optional())
     .query(async ({ input }) => {
       return await db.getAllMembers(input || {});
     }),
 
-  getStats: protectedProcedure.query(async () => {
-    return await db.getMemberStats();
-  }),
+  getStats: protectedProcedure
+    .input(z.object({ venueId: z.number().default(1) }).optional())
+    .query(async ({ input }) => {
+      return await db.getMemberStats(input?.venueId ?? 1);
+    }),
 
   getById: protectedProcedure
-    .input(z.object({ id: z.number() }))
+    .input(z.object({ id: z.number(), venueId: z.number().default(1) }))
     .query(async ({ input }) => {
-      const member = await db.getMemberById(input.id);
+      const member = await db.getMemberById(input.id, input.venueId);
       if (!member) throw new TRPCError({ code: 'NOT_FOUND', message: 'Member not found' });
       return member;
     }),
@@ -78,25 +81,37 @@ export const membersRouter = router({
       }
     }),
 
-  findDuplicates: protectedProcedure.query(async () => {
-    const allMembers = await db.getAllMembers();
-    const emailGroups = new Map<string, typeof allMembers>();
-    for (const m of allMembers) {
-      const key = m.email.toLowerCase().trim();
-      if (!emailGroups.has(key)) emailGroups.set(key, []);
-      emailGroups.get(key)!.push(m);
-    }
-    return Array.from(emailGroups.values()).filter(g => g.length > 1);
-  }),
+  findDuplicates: protectedProcedure
+    .input(z.object({ venueId: z.number().default(1) }).optional())
+    .query(async ({ input }) => {
+      const allMembers = await db.getAllMembers({ venueId: input?.venueId ?? 1 });
+      const emailGroups = new Map<string, typeof allMembers>();
+      for (const m of allMembers) {
+        const key = m.email.toLowerCase().trim();
+        if (!emailGroups.has(key)) emailGroups.set(key, []);
+        emailGroups.get(key)!.push(m);
+      }
+      return Array.from(emailGroups.values()).filter(g => g.length > 1);
+    }),
 
   mergeMembers: protectedProcedure
-    .input(z.object({ primaryId: z.number(), duplicateIds: z.array(z.number()) }))
+    .input(z.object({
+      primaryId: z.number(),
+      duplicateIds: z.array(z.number()),
+      venueId: z.number().default(1),
+    }))
     .mutation(async ({ input }) => {
       const database = await db.getDb();
       if (!database) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'DB unavailable' });
       const { members: membersTable } = await import('../../drizzle/schema');
+      // Venue ownership check: verify primary member belongs to the caller's venue
+      const primary = await db.getMemberById(input.primaryId, input.venueId);
+      if (!primary) throw new TRPCError({ code: 'NOT_FOUND', message: 'Primary member not found in this venue' });
       for (const dupId of input.duplicateIds) {
-        await database.delete(membersTable).where(eq(membersTable.id, dupId));
+        // Only delete duplicates that belong to the same venue
+        await database.delete(membersTable).where(
+          and(eq(membersTable.id, dupId), eq(membersTable.venueId, input.venueId))
+        );
       }
       return { success: true, mergedCount: input.duplicateIds.length };
     }),

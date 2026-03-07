@@ -186,6 +186,7 @@ export type InsertChannelMetric = typeof channelMetrics.$inferInsert;
  */
 export const members = mysqlTable("members", {
   id: int("id").autoincrement().primaryKey(),
+  venueId: int("venue_id").notNull().default(1), // multi-tenant: 1 = Arlington Heights
   name: varchar("name", { length: 255 }).notNull(),
   email: varchar("email", { length: 320 }).notNull().unique(),
   phone: varchar("phone", { length: 20 }),
@@ -255,6 +256,9 @@ export const members = mysqlTable("members", {
   enchargeIdx: index("encharge_idx").on(table.enchargeUserId),
   toastIdx: index("toast_idx").on(table.toastCustomerId),
   acuityIdx: index("acuity_idx").on(table.acuityClientId),
+  venueIdx: index("members_venue_idx").on(table.venueId),
+  venueStatusIdx: index("members_venue_status_idx").on(table.venueId, table.status),
+  venueTierIdx: index("members_venue_tier_idx").on(table.venueId, table.membershipTier),
 }));
 
 export type Member = typeof members.$inferSelect;

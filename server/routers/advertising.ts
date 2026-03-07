@@ -660,26 +660,27 @@ export const metaAdsRouter = router({
 export const revenueRouter = router({
   getToastSummary: protectedProcedure.query(async () => {
     const database = await db.getDb();
-    if (!database) return { totalRevenue: 0, thisMonthRevenue: 0, lastMonthRevenue: 0, allTimeRevenue: 0, avgDailyRevenue: 0, thisMonthOrders: 0 };
-    const { memberTransactions } = await import('../../drizzle/schema');
-    const { eq: eqOp } = await import('drizzle-orm');
+    if (!database) return { totalRevenue: 0, thisMonthRevenue: 0, lastMonthRevenue: 0, allTimeRevenue: 0, avgDailyRevenue: 0, thisMonthOrders: 0, fbMTD: 0, fbLastMonth: 0 };
+    const { toastDailySummary } = await import('../../drizzle/schema');
     const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
-    const allTx = await database.select().from(memberTransactions).where(eqOp(memberTransactions.paymentStatus, 'paid'));
-    const thisMonthTx = allTx.filter(t => new Date(t.transactionDate) >= startOfMonth);
-    const lastMonthTx = allTx.filter(t => {
-      const d = new Date(t.transactionDate);
-      return d >= startOfLastMonth && d <= endOfLastMonth;
-    });
-    const sum = (txs: typeof allTx) => txs.reduce((s, t) => s + parseFloat(String(t.total || 0)), 0);
-    const allTimeRevenue = sum(allTx);
-    const thisMonthRevenue = sum(thisMonthTx);
-    const lastMonthRevenue = sum(lastMonthTx);
+    // Build YYYYMM prefix strings for current and last month
+    const currentMonthPrefix = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastMonthPrefix = `${lastMonthDate.getFullYear()}${String(lastMonthDate.getMonth() + 1).padStart(2, '0')}`;
+    const allRows = await database.select().from(toastDailySummary);
+    const thisMonthRows = allRows.filter(r => String(r.date).startsWith(currentMonthPrefix));
+    const lastMonthRows = allRows.filter(r => String(r.date).startsWith(lastMonthPrefix));
+    const sumRevenue = (rows: typeof allRows) => rows.reduce((s, r) => s + parseFloat(String(r.totalRevenue || 0)), 0);
+    const sumFoodBev = (rows: typeof allRows) => rows.reduce((s, r) => s + parseFloat(String(r.foodBevRevenue || 0)), 0);
+    const sumOrders = (rows: typeof allRows) => rows.reduce((s, r) => s + (r.totalOrders || 0), 0);
+    const allTimeRevenue = sumRevenue(allRows);
+    const thisMonthRevenue = sumRevenue(thisMonthRows);
+    const lastMonthRevenue = sumRevenue(lastMonthRows);
+    const fbMTD = sumFoodBev(thisMonthRows);
+    const fbLastMonth = sumFoodBev(lastMonthRows);
     const daysInMonth = now.getDate();
     const avgDailyRevenue = daysInMonth > 0 ? thisMonthRevenue / daysInMonth : 0;
-    return { totalRevenue: allTimeRevenue, thisMonthRevenue, lastMonthRevenue, allTimeRevenue, avgDailyRevenue, thisMonthOrders: thisMonthTx.length };
+    return { totalRevenue: allTimeRevenue, thisMonthRevenue, lastMonthRevenue, allTimeRevenue, avgDailyRevenue, thisMonthOrders: sumOrders(thisMonthRows), fbMTD, fbLastMonth };
   }),
 
   getSummary: protectedProcedure

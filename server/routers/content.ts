@@ -222,7 +222,8 @@ Keep the caption under 300 words. Make it engaging and authentic.`;
       }
       const expiresAt = new Date(tokenData.expires_at * 1000);
       const daysRemaining = Math.floor((expiresAt.getTime() - Date.now()) / 86400000);
-      return { valid: true, daysRemaining, expiresAt: expiresAt.toISOString(), warning: daysRemaining <= 7 };
+      // Warn at 14 days to give enough lead time for manual renewal
+      return { valid: true, daysRemaining, expiresAt: expiresAt.toISOString(), warning: daysRemaining <= 14 };
     } catch {
       // If debug_token fails, just validate by calling the API
       try {

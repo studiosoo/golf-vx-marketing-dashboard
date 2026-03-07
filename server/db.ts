@@ -1,4 +1,4 @@
-import { eq, and, or, gte, lte, desc, sql, between, like } from "drizzle-orm";
+import { eq, and, or, gte, lte, desc, sql, between, like, type SQL } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   InsertUser,
@@ -379,20 +379,21 @@ export async function getChannelPerformanceSummary(startDate: Date, endDate: Dat
 
 // ============= Member Functions =============
 
-export async function getAllMembers(filters?: { search?: string; status?: Member["status"]; membershipTier?: Member["membershipTier"]; }) {
+export async function getAllMembers(filters?: { search?: string; status?: Member["status"]; membershipTier?: Member["membershipTier"]; venueId?: number; }) {
   const db = await getDb();
   if (!db) return [];
   
   let query = db.select().from(members);
   
-  const conditions = [];
+  const conditions: SQL<unknown>[] = [];
+  // Always scope by venue — default to Arlington Heights (1) until multi-venue UI is built
+  conditions.push(eq(members.venueId, filters?.venueId ?? 1));
   if (filters?.search) {
-    conditions.push(
-      or(
-        like(members.name, `%${filters.search}%`),
-        like(members.email, `%${filters.search}%`)
-      )
+    const searchCond = or(
+      like(members.name, `%${filters.search}%`),
+      like(members.email, `%${filters.search}%`)
     );
+    if (searchCond) conditions.push(searchCond);
   }
   if (filters?.status) {
     conditions.push(eq(members.status, filters.status));
@@ -408,26 +409,25 @@ export async function getAllMembers(filters?: { search?: string; status?: Member
   return await query.orderBy(desc(members.joinDate));
 }
 
-export async function getMemberById(id: number) {
+export async function getMemberById(id: number, venueId = 1) {
   const db = await getDb();
   if (!db) return undefined;
   
-  const result = await db.select().from(members).where(eq(members.id, id)).limit(1);
+  const result = await db.select().from(members).where(and(eq(members.id, id), eq(members.venueId, venueId))).limit(1);
   return result[0];
 }
 
-export async function getMembersByStatus(status: Member["status"]) {
+export async function getMembersByStatus(status: Member["status"], venueId = 1) {
   const db = await getDb();
   if (!db) return [];
   
-  return await db.select().from(members).where(eq(members.status, status)).orderBy(desc(members.joinDate));
+  return await db.select().from(members).where(and(eq(members.status, status), eq(members.venueId, venueId))).orderBy(desc(members.joinDate));
 }
-
-export async function getMembersByTier(tier: Member["membershipTier"]) {
+export async function getMembersByTier(tier: Member["membershipTier"], venueId = 1) {
   const db = await getDb();
   if (!db) return [];
   
-  return await db.select().from(members).where(eq(members.membershipTier, tier)).orderBy(desc(members.joinDate));
+  return await db.select().from(members).where(and(eq(members.membershipTier, tier), eq(members.venueId, venueId))).orderBy(desc(members.joinDate));
 }
 
 export async function createMember(member: InsertMember) {
@@ -445,7 +445,7 @@ export async function updateMember(id: number, updates: Partial<InsertMember>) {
   await db.update(members).set(updates).where(eq(members.id, id));
 }
 
-export async function getMemberStats() {
+export async function getMemberStats(venueId = 1) {
   const db = await getDb();
   if (!db) return null;
   
@@ -465,7 +465,8 @@ export async function getMemberStats() {
       swingSaversMRR: sql<string>`SUM(CASE WHEN ${members.membershipTier} = 'swing_savers' AND ${members.status} = 'active' THEN COALESCE(${members.monthlyAmount}, 0) ELSE 0 END)`,
       golfVxProMRR: sql<string>`SUM(CASE WHEN ${members.membershipTier} = 'golf_vx_pro' AND ${members.status} = 'active' THEN COALESCE(${members.monthlyAmount}, 0) ELSE 0 END)`,
     })
-    .from(members);
+    .from(members)
+    .where(eq(members.venueId, venueId));
   
   return stats[0];
 }
