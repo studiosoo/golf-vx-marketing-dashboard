@@ -1,425 +1,652 @@
-# Golf VX Marketing Dashboard — ChatGPT Handoff Document
+# ChatGPT 5.4 Pro Handoff — Golf VX Marketing Dashboard Review
 
-> 이 문서는 새로운 AI 개발자(ChatGPT)가 이 프로젝트를 이어받아 작업할 수 있도록 작성되었습니다.
-> 작성일: 2026-03-06
+## Purpose of this document
+This handoff is meant for a ChatGPT 5.4 Pro review in chat mode. It summarizes the current Golf VX marketing dashboard repository, what the dashboard appears to do today, where the structural issues are, and what kind of solution should be proposed.
 
----
-
-## 1. 프로젝트 개요
-
-**Golf VX Marketing Dashboard** — 골프 시뮬레이터 실내 골프 시설 Golf VX Arlington Heights 매장의 내부 마케팅 운영 대쉬보드.
-
-- **운영사:** Studio Soo (마케팅 에이전시)
-- **클라이언트:** Golf VX Arlington Heights (644 E Rand Rd, Arlington Heights, IL 60004)
-- **도메인:** `dashboard.playgolfvx.com`
-- **GitHub:** `https://github.com/studiosoo/golf-vx-marketing-dashboard` (private)
-- **용도:** Studio Soo 마케터 전용 내부 툴. 멤버십 관리, 광고 성과, 수익, 캠페인, AI 인사이트 등을 한 화면에서 관리.
+The goal is to help ChatGPT 5.4 Pro analyze the product as a **Business Intelligence dashboard** and recommend the best future structure.
 
 ---
 
-## 2. 기술 스택
+## Repository identity
 
-| 레이어 | 기술 | 버전 |
-|--------|------|------|
-| Frontend | React | 19.0 |
-| 언어 | TypeScript | 5.3 |
-| 빌드 | Vite | 5.0 |
-| API | tRPC | 11.0 |
-| 스타일 | Tailwind CSS | 4.0 |
-| 컴포넌트 | shadcn/ui + Radix UI | Latest |
-| 라우팅 | Wouter | 3.0 |
-| 차트 | Chart.js + react-chartjs-2, Recharts | — |
-| 폼 | React Hook Form + Zod | — |
-| Backend | Express | 4.0 |
-| ORM | Drizzle ORM | Latest |
-| DB | MySQL (TiDB Cloud) | — |
-| 스케줄러 | node-cron | 3.0 |
-| 인증 | JWT (Azure OAuth 마이그레이션 진행 중) | — |
-| 패키지 매니저 | **pnpm** | 9.0 |
-| 테스트 | Vitest | 2.1 |
+- **Repository:** `studiosoo/golf-vx-marketing-dashboard`
+- **Primary domain:** `dashboard.playgolfvx.com`
+- **Purpose:** Internal marketing operations dashboard for Golf VX locations
+- **Primary current pilot location:** **Golf VX Arlington Heights**
+- **Primary operator:** **Studio Soo** (marketing agency)
+- **Expected users:**
+  - Studio Soo marketers: full access
+  - location staff: mostly view/read access
+  - HQ admin: future cross-location use
 
 ---
 
-## 3. 개발 환경 세팅
+## Most important business requirements
 
-### 클론 및 설치
-```bash
-git clone https://github.com/studiosoo/golf-vx-marketing-dashboard.git
-cd golf-vx-marketing-dashboard
-pnpm install
-```
+These are the two most important priorities identified during review:
 
-### 환경 변수 설정
-`.env` 파일을 루트에 생성 (Golf VX 팀에서 실제 값 제공):
-```
-DATABASE_URL=mysql://...           # TiDB Cloud MySQL 연결 문자열 (SSL 필수)
-JWT_SECRET=...
-OAUTH_SERVER_URL=...
-OWNER_OPEN_ID=...
+1. **Administrator report generation is the most critical function**
+2. **The dashboard must be optimized so the marketing agency can execute marketing for the Arlington Heights branch**
 
-# AI/LLM (선택 — 없으면 AI 기능 비활성)
-GEMINI_API_KEY=...
-ANTHROPIC_API_KEY=...
-
-# 외부 서비스
-META_ADS_ACCESS_TOKEN=...
-META_ADS_ACCOUNT_ID=...
-ACUITY_USER_ID=...
-ACUITY_API_KEY=...
-BOOMERANG_API_TOKEN=...
-ENCHARGE_API_KEY=...
-ENCHARGE_WRITE_KEY=...
-SQR_API_KEY=...
-INSTAGRAM_ACCESS_TOKEN=...
-INSTAGRAM_BUSINESS_ACCOUNT_ID=...
-```
-
-### 실행
-```bash
-pnpm dev          # 개발 서버 (frontend + backend 동시)
-pnpm check        # TypeScript 타입 체크
-pnpm test         # Vitest 테스트 실행
-pnpm build        # 프로덕션 빌드
-```
+This means the dashboard should evolve into a **Business Intelligence + Marketing Execution platform**, not just a collection of marketing tools.
 
 ---
 
-## 4. 파일 구조
+## Tech stack
 
-```
-golf-vx-marketing-dashboard/
-├── client/src/
-│   ├── pages/              # 72개 페이지 컴포넌트 (페이지당 1파일)
-│   ├── components/         # 공유 UI 컴포넌트
-│   │   ├── ui/             # shadcn/ui 기본 컴포넌트
-│   │   ├── layout/         # DashboardLayout, SidebarNav, navConfig
-│   │   └── tabs/           # 탭 컴포넌트
-│   ├── hooks/              # 커스텀 React 훅
-│   ├── lib/
-│   │   └── trpc.ts         # tRPC 클라이언트
-│   └── App.tsx             # 루트 + 라우터
-│
-├── server/
-│   ├── _core/
-│   │   ├── index.ts        # Express 앱 세팅 + 웹훅
-│   │   ├── trpc.ts         # tRPC 서버 세팅 (protectedProcedure 등)
-│   │   ├── llm.ts          # LLM 호출 레이어 (Gemini/Anthropic)
-│   │   └── env.ts          # 환경 변수
-│   ├── routers/            # tRPC 라우터 (도메인별 분리)
-│   │   ├── members.ts      # 멤버 + Encharge 라우터
-│   │   ├── campaigns.ts    # 캠페인/프로그램 + 전략 캠페인
-│   │   ├── advertising.ts  # Revenue 라우터
-│   │   ├── intelligence.ts # AI 워크스페이스 라우터
-│   │   ├── programs.ts     # 프로그램 상세
-│   │   ├── promos.ts       # In-Store 프로모션 + SQR 링크
-│   │   ├── content.ts      # Instagram 라우터
-│   │   └── auth.ts         # 인증 라우터
-│   ├── db.ts               # DB 쿼리 헬퍼 (~1,000줄)
-│   ├── routers.ts          # 모든 라우터 통합 (구 모놀리식 — 점진적 분리 중)
-│   ├── encharge.ts         # Encharge API 클라이언트
-│   ├── enchargeSync.ts     # Encharge 양방향 동기화 모듈
-│   ├── metaAds.ts          # Meta Ads API 클라이언트
-│   ├── autonomous/         # AI 마케팅 자동화 엔진
-│   ├── cache/              # API 폴백용 JSON 캐시
-│   └── tests/              # 테스트 파일 (Vitest)
-│
-├── drizzle/
-│   └── schema.ts           # DB 스키마 (39개 테이블)
-│
-├── shared/                 # 클라이언트+서버 공유 타입
-├── CLAUDE.md               # 개발 규칙 (디자인 시스템, 아키텍처 규칙 포함)
-└── .env                    # 환경 변수 (git 제외)
-```
+Based on repo documentation and code:
+
+- Frontend: React 19 + TypeScript + Vite
+- Routing: Wouter
+- Styling: Tailwind CSS + shadcn/ui + Radix
+- API: tRPC
+- Backend: Express
+- ORM: Drizzle ORM
+- DB: MySQL / TiDB
+- Charts: Chart.js + Recharts
+- Forms: React Hook Form + Zod
+- Scheduler: node-cron
+- Auth: JWT / Azure OAuth migration
+- Testing: Vitest
 
 ---
 
-## 5. 핵심 아키텍처 규칙 (반드시 준수)
+## High-level codebase structure
 
-### 멀티테넌트 구조
-- 모든 DB 테이블에 `venueId` 컬럼 필수
-- 모든 쿼리는 `venueId`로 필터링
-- 하드코딩 금지: 주소, 전화번호, 가격 등은 항상 `venues` 테이블에서 읽기
+### Frontend
+- `client/src/App.tsx` defines routes
+- `client/src/components/layout/navConfig.ts` defines sidebar nav structure
+- `client/src/pages/` contains many page files
 
-### 권한 (RBAC)
-| 역할 | 접근 범위 |
-|------|-----------|
-| `studio_soo` | 전체 기능 |
-| `location_staff` | 읽기 전용 |
-| `hq_admin` | 멀티 매장 비교 (미래) |
+### Backend
+- `server/routers.ts` composes app routers from domain-specific router modules
+- server appears more domain-organized than frontend navigation
 
-tRPC 절차: `publicProcedure` / `protectedProcedure` / `adminProcedure`
-
----
-
-## 6. 디자인 시스템 요약
-
-### 브랜드 컬러 (엄격히 준수)
-```css
---brand-yellow:   #F5C72C   /* CTA, 활성 탭, 차트 — 장식적 사용 금지 */
---text-primary:   #111111
---text-secondary: #888888
---border:         #E0E0E0
---bg-card:        #FFFFFF
---bg-secondary:   #F5F5F5
---brand-green:    #3DB855   /* 성공, 긍정 지표 */
---link-blue:      #007AFF
---error-red:      #E8453C
-```
-
-### 레이아웃 규칙
-- 페이지 outer div: `className="space-y-N"` — **`p-6` 추가 금지** (DashboardLayout이 `p-4 md:p-6` 적용 중, 중복 시 모바일 오버플로우 발생)
-- 폰트: Inter (primary), Pretendard (한국어 포함 시)
-- 카드: `bg-white rounded-xl border border-[#E0E0E0] p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]`
-- 테이블: 항상 `<div className="overflow-x-auto">` 래퍼 필수 (모바일 대응)
-- Tab bar: 탭이 3개 이상이면 `overflow-x-auto` 래퍼 필수
+### Important architectural notes from repo docs
+- Multi-tenant support is mandatory
+- Every major query should be venue-scoped
+- Arlington Heights is the current pilot, but long-term structure should support multiple venues
+- Studio Soo is the main admin/operator profile today
 
 ---
 
-## 7. 현재 구현된 주요 기능
+## Current frontend page inventory
 
-### 대쉬보드 홈 (`/`)
-- **2026 핵심 목표 4가지** (상단 고정): 연 매출 $2M, 멤버십 300명, 인스타 팔로워 2,000, 이메일 구독자 5,000
-- 실시간 MRR, 멤버 수, 수익 요약
-- 캠페인 카드 (Membership Acquisition → 실제 멤버 수 / 300 진행률 표시)
-- 활성 프로그램 health score
+The frontend currently contains roughly **70 page files**, including many overlapping or legacy pages.
 
-### 멤버 & CRM
-- **Boomerang POS 멤버 동기화**: 자동 DB 동기화, 플랜별 분류
-- 활성 멤버 = all_access_aces + swing_savers + golf_vx_pro + family + monthly + annual + corporate (Pro 포함)
-- **멤버 목표: 300명** (2026 연간)
+Notable pages include:
 
-### 수익 (`/intelligence/revenue`)
-- MRR, Toast POS MTD, Bay / Golf / F&B 카테고리별 분리
-- 결제 방법 (현금/카드 비율), 팁, 할인, 게스트 수
-- 일별 테이블 (8컬럼: Date, Total, Bay, Golf, F&B, Tips, Guests, Orders)
+### Core / overview / reporting
+- `Home`
+- `Overview`
+- `Performance`
+- `Revenue`
+- `ROI`
+- `Reports`
+- `StrategicCampaigns`
 
-### 광고 (`/advertising` → Meta Ads)
-- Meta Ads API 연동 (캐시 폴백)
-- 캠페인 프로그램별 그룹핑 (`parseProgramGroup()`)
-- CTR / CPC / CPM 지표 표시
-- Active 우선 정렬, Paused 후순위
+### Campaigns / marketing execution
+- `Campaigns`
+- `CampaignDetail`
+- `CampaignTimeline`
+- `CampaignVisuals`
+- `Advertising`
+- `MetaAds`
+- `MetaAdsCampaignDetail`
+- `BudgetManager`
+- `CalendarViewer`
 
-### 인스타그램 (`/website/instagram`)
-- 토큰 만료 시 graceful degradation — 갱신 안내 카드 표시
-- 팔로워 목표: **2,000명** (2026 연간)
-- 포스트 스케줄러 (토큰 없어도 작동)
+### Programs / branch activations
+- `Programs`
+- `DriveDay`
+- `Leagues`
+- `PrivateEvents`
+- `JuniorSummerCamp`
+- `JuniorCampDashboard`
+- `SummerCamp`
+- `TrialSession`
+- `TrialSessionDetail`
+- `AnnualGiveaway`
+- `AnniversaryGiveaway`
+- `PromotionsHub`
+- `PromoLanding`
+- `GiveawayApplications`
 
-### AI 워크스페이스 (`/intelligence/assistant`)
-- Gemini API 직접 연결 (`GEMINI_API_KEY`) 또는 폴백 프록시
-- 채팅용 경량 모델, 분석용 고성능 모델 분리
+### CRM / audience
+- `Members`
+- `MemberProfile`
+- `Leads`
+- `Guests`
+- `ProMembers`
+- `Duplicates`
 
-### In-Store 프로모션 (`/promotions/hub`)
-- SQR.co 링크 연동 (Golf VX 프로모션만 필터링)
-- Encharge 이메일 구독 연동
+### Communications / content
+- `CommunicationsHub`
+- `EmailMarketing`
+- `Announcements`
+- `Automations`
+- `DripCampaigns`
+- `InstagramFeed`
+- `InstagramAnalytics`
+- `InstagramSync`
+- `WebsiteViewer`
+- `SiteControl`
+- `NewsManager`
 
-### Encharge 이메일
-- AHTIL 태그 구독자 카운트 (`encharge.getAHTILCount`)
-- **이메일 구독자 목표: 5,000명** (AHTIL 태그 기준)
+### AI / intelligence / planning
+- `Assistant`
+- `Autopilot`
+- `AIWorkspace`
+- `MarketingIntelligence`
+- `Strategy`
+- `ActionPlan`
+- `AIActions`
+- `MarketResearch`
 
-### ROI & KPI (`/roi`)
-- 프로그램별 Meta Ads 성과
-- KPI Goals 탭: Instagram Follower Growth 목표 **2,000** (DB kpiTarget 업데이트 완료)
+### Settings / support
+- `Integrations`
+- `AccountSettings`
 
----
-
-## 8. 외부 서비스 연동 현황
-
-| 서비스 | 상태 | 용도 |
-|--------|------|------|
-| Boomerang POS | ✅ 연동 | 멤버십 데이터, 웹훅 |
-| Toast POS | ✅ 연동 | 매장 매출 (Bay/F&B) |
-| Meta Ads | ✅ 연동 | 광고 성과 (캐시 폴백) |
-| Acuity Scheduling | ✅ 연동 | 프로그램 예약/수익 |
-| Encharge | ✅ 연동 | 이메일 자동화, AHTIL 구독자 |
-| Instagram | ⚠️ 토큰 만료 | 60일 토큰 → 만료 시 Graph API에서 재발급 필요 |
-| SQR.co | ✅ 연동 | QR 링크 |
-| Gemini AI | ✅ 연동 | LLM 인사이트 |
-| Twilio | 🔧 준비됨 | SMS (계정 셋업 대기) |
-| Stripe | 🔧 준비됨 | 결제 (미사용) |
-
----
-
-## 9. 2026 핵심 목표 (기능 개발 기준점)
-
-| 목표 | 수치 | 데이터 소스 |
-|------|------|------------|
-| 연 매출 | $2,000,000 | MRR × 12 + Toast + Acuity run rate |
-| 멤버십 | 300명 | Boomerang 활성 멤버 (Pro 포함) |
-| 인스타 팔로워 | 2,000명 | Instagram Graph API |
-| 이메일 구독자 | 5,000명 | Encharge AHTIL 태그 |
-
----
-
-## 10. DB 스키마 주요 테이블
-
-| 테이블 | 용도 |
-|--------|------|
-| `members` | Boomerang 멤버 (venueId 필수) |
-| `campaigns` | 프로그램/캠페인 (kpiTarget, kpiActual 포함) |
-| `toastDailySummary` | Toast POS 일별 매출 |
-| `promos` | In-Store 프로모션 |
-| `news_items` | 블로그/뉴스 게시물 |
-| `venues` | 매장 정보 (멀티테넌트 기준) |
-| `acuityAppointments` | Acuity 예약 데이터 |
-
-전체 스키마: `drizzle/schema.ts` (39개 테이블)
+There are also legacy redirect routes and some public-facing pages mixed into the app routing structure.
 
 ---
 
-## 11. 알려진 기술 부채 / 주의사항
+## Current sidebar navigation structure
 
-1. **`server/routers.ts`** — 아직 3,700줄 모놀리식 파일. 신규 엔드포인트는 `server/routers/` 하위 별도 파일로 작성할 것
-2. **Instagram 토큰** — 60일 만료. 만료 시 [Meta Graph API Explorer](https://developers.facebook.com/tools/explorer/)에서 재발급 후 `INSTAGRAM_ACCESS_TOKEN` 환경변수 업데이트
-3. **페이지 `p-6` 금지** — 각 페이지 최상위 div에 `p-6` 추가하면 DashboardLayout의 패딩과 중첩되어 모바일 오버플로우 발생. outer div는 `space-y-N`만 사용
-4. **테이블은 반드시 `overflow-x-auto` 래퍼** — 모바일에서 수평 스크롤 필요
-5. **`any` 타입** — 레거시 코드에 다수 존재. 신규 코드는 타입 명시 필수
-6. **Manus 의존성 제거 중** — `BUILT_IN_FORGE_API_KEY` 등 Manus 관련 env var는 단계적 제거 예정
+The current sidebar nav is roughly organized like this:
 
----
-
-## 12. 네비게이션 구조
-
-```
-Dashboard (/)
-├── Intelligence
-│   ├── Autopilot (/intelligence/autopilot)
-│   ├── Analytics
-│   │   ├── Performance (/intelligence/performance)
-│   │   ├── Revenue (/intelligence/revenue)
-│   │   ├── Reports (/intelligence/reports)
-│   │   ├── ROI & KPI (/roi)
-│   │   └── Market Research (/intelligence/market-research)
-│   ├── Strategy (/intelligence/strategy)
-│   └── Assistant (/intelligence/assistant)
-├── Marketing
-│   ├── Programs & Events (/programs)
-│   ├── In-Store Promos (/promotions/hub)
-│   ├── Advertising (/advertising)
-│   ├── Social & Content
-│   │   ├── Instagram (/website/instagram)
-│   │   └── Instagram Analytics (/website/instagram/analytics)
-│   └── Communications
-│       ├── News / Blog (/website/news)
-│       ├── Email - Encharge (/communication/email-marketing)
-│       ├── Drip Campaigns (/communication/drip)
-│       ├── SMS & Announcements (/communication/announcements)
-│       └── Automations (/communication/automations)
-├── Contacts & CRM
-│   ├── Members (/list/members)
-│   ├── Pro Members (/pro-members)
-│   └── Guests & Leads (/list/guests)
-└── Settings
-    ├── Integrations (/settings/integrations)
-    └── Account (/settings/account)
-```
+1. Dashboard
+2. Intelligence
+   - Autopilot
+   - Analytics
+     - Performance
+     - Revenue
+     - Reports
+     - ROI & KPI
+     - Market Research
+   - Strategy
+   - Assistant
+3. Marketing
+   - Programs & Events
+   - In-Store Promos
+   - Advertising
+   - Social & Content
+   - Communications
+4. Contacts & CRM
+   - Members
+   - Pro Members
+   - Guests & Leads
+5. Settings
+   - Integrations
+   - Account
 
 ---
 
-## 13. 코딩 컨벤션
+## Current dashboard strengths
 
-- **불변성 필수**: 객체 직접 수정 금지, spread operator 사용
-- **컴포넌트**: 함수형만. `React.FC` 최소화
-- **커스텀 훅**: `client/src/hooks/`
-- **입력 검증**: tRPC input은 반드시 Zod 스키마
-- **색상**: 위 팔레트 외 색상 추가 금지
-- **커밋 형식**: `feat:`, `fix:`, `refactor:`, `chore:` 등 conventional commits
+### 1. Strong functional breadth already exists
+The codebase already includes a lot of valuable business functions:
+
+- campaign performance tracking
+- revenue reporting
+- Meta Ads reporting
+- member and lead data
+- communications tooling
+- promotions and landing pages
+- local programs/events management
+- AI recommendations and analysis
+- report-related interfaces
+
+So the product is not missing capabilities. The main problem is structure and prioritization.
+
+### 2. Backend domain organization is relatively solid
+The backend router composition is cleaner than the frontend nav:
+
+- campaigns
+- reports
+- intelligence
+- members
+- advertising
+- promos
+- revenue
+- automation
+- content
+
+This suggests the frontend can likely be reorganized without needing a total backend rewrite.
+
+### 3. The business intent is already correct
+The repo documentation clearly frames the app as:
+
+- a marketing operations dashboard
+- built for Golf VX
+- piloted at Arlington Heights
+- primarily operated by Studio Soo
+- eventually multi-location
+
+That business framing is sound.
 
 ---
 
-*이 문서는 2026년 3월 6일 기준으로 작성되었습니다. 최신 코드는 GitHub 저장소를 참고하세요.*
+## Major structural problems identified
+
+### 1. Too many pages for the core workflow
+There are too many destinations for what should be a focused workflow.
+
+For a BI dashboard centered on reporting and branch execution, a user should be able to quickly answer:
+- What happened?
+- Why did it happen?
+- What do we do next?
+- What do we report?
+
+The current page count creates too much cognitive load.
+
+### 2. Reporting is not prominent enough
+The most important requirement is admin reporting, but reporting is currently nested under:
+
+- `Intelligence > Analytics > Reports`
+
+That is not ideal. Reports should be a primary top-level destination.
+
+### 3. Analytics pages overlap too much
+There appears to be significant overlap among:
+
+- `Home`
+- `Performance`
+- `Revenue`
+- `ROI`
+- `Reports`
+- `StrategicCampaigns`
+
+These pages all cover some combination of KPIs, revenue, campaign performance, goals, or reporting. This creates duplication and unclear page ownership.
+
+### 4. The “Intelligence” section is overloaded
+The current “Intelligence” bucket mixes:
+
+- BI analytics
+- AI automation
+- strategic planning
+- assistant/chat
+- market research
+
+These are not the same job. A BI dashboard should make analysis and reporting extremely clear. AI should support that structure, not blur it.
+
+### 5. Arlington Heights execution is too fragmented
+The branch marketing workflow is spread across too many surfaces:
+
+- Programs
+- Promotions
+- Advertising
+- Communications
+- Instagram
+- Website
+- Strategy
+- Assistant
+- Autopilot
+- Market Research
+
+This makes daily execution harder than it needs to be.
+
+### 6. Legacy and experimental pages add noise
+There are multiple pages that feel redundant, overlapping, or experimental, especially in the AI/intelligence layer.
+
+Examples:
+- `MarketingIntelligence`
+- `AIActions`
+- `AIWorkspace`
+- `Assistant`
+- `Autopilot`
+- `ActionPlan`
+- `Strategy`
+- `Overview`
+- legacy redirects
+
+### 7. Navigation is tool-centric rather than decision-centric
+The nav currently reflects systems/tools more than business decisions.
+
+A better BI structure should align with questions users are trying to answer:
+- How is Arlington Heights performing?
+- What must be reported this week/month?
+- Which campaigns are working?
+- Which local programs/promotions need attention?
+- What should the agency execute next?
 
 ---
 
-## 14. ChatGPT 시작 프롬프트 (복사해서 사용)
+## Detailed observations by area
 
-아래 프롬프트를 ChatGPT에 붙여넣어 프로젝트를 시작하세요.
+### Home page
+The `Home` page acts like a mega-dashboard. It includes many different data types and summary widgets.
+
+**Issue:** It tries to do too much and lacks a sharp BI role.
+
+**Suggested future role:** A tighter **Executive Dashboard** with only:
+- key KPIs
+- branch health
+- top alerts
+- top priorities
+- shortcuts to reports and execution workflows
+
+### Reports page
+The existing `Reports` page is one of the most important surfaces conceptually, but it does not appear to function as a true report generation center.
+
+**Issue:** Reporting is treated as just another analytics surface.
+
+**Suggested future role:** A dedicated **Reports Center** with:
+- weekly executive reports
+- monthly Arlington Heights reports
+- channel reports
+- campaign reports
+- program/event reports
+- scheduled exports and email distribution
+
+### Performance / Revenue / ROI
+These three areas overlap heavily.
+
+**Issue:** They likely should not exist as fully separate primary destinations.
+
+**Suggested future role:** Merge into one **Performance** area with tabs such as:
+- Overview
+- Revenue
+- Channel ROI
+- Program ROI
+- Funnel
+
+### Strategic Campaigns and Programs
+These are both useful, but their relationship is not clear enough.
+
+**Issue:** Strategic campaigns and tactical programs feel adjacent rather than structured hierarchically.
+
+**Suggested future model:**
+- Campaigns = strategic initiatives
+- Programs = tactical executions beneath those initiatives
+
+### Communications Hub
+Useful functionally, but currently more like a generic send tool.
+
+**Issue:** It is not tightly tied to reporting, segmentation performance, or campaign workflows.
+
+**Suggested future role:** A campaign-linked communications execution center.
+
+### Advertising / Meta Ads
+Good underlying value, especially for active paid media work.
+
+**Issue:** It is mixed with several lower-frequency channels in one area, while Meta is probably the highest-value daily advertising module.
+
+**Suggested future structure:**
+- Paid Media
+- Local Outreach / Partnerships
+
+### AI / strategy / assistant pages
+There are too many separate AI-related surfaces.
+
+**Issue:** Too much fragmentation.
+
+**Suggested future role:** One unified **Insights & Recommendations** area with tabs like:
+- Alerts
+- Recommendations
+- Ask AI
+- Research
 
 ---
 
-```
-You are taking over development of the Golf VX Marketing Dashboard — an internal marketing operations tool for Golf VX Arlington Heights, built and operated by Studio Soo (marketing agency).
+## What the dashboard should become
 
-## Step 1: Get the code
+The dashboard should become a **Business Intelligence dashboard for Golf VX branch marketing**, with Arlington Heights as the operating default.
 
-Clone the private GitHub repository:
+It should support two main user modes:
 
-git clone https://github.com/studiosoo/golf-vx-marketing-dashboard.git
-cd golf-vx-marketing-dashboard
-pnpm install
+### 1. Executive / admin mode
+Questions this user needs answered:
+- What happened this week/month?
+- Are we on target?
+- What drove results?
+- What needs to be reported?
+- Can I export/share the report quickly?
 
-## Step 2: Read these files first (MANDATORY before touching any code)
+### 2. Agency operator mode
+Questions this user needs answered:
+- What should we execute for Arlington Heights this week?
+- Which campaigns and programs need attention?
+- Which channels are underperforming?
+- Which communications need to go out?
+- What are the next best actions?
 
-1. CLAUDE.md — Architecture rules, design system, coding conventions, multi-tenant requirements
-2. CHATGPT_HANDOFF.md — Project overview, current state, known issues, 2026 goals
+---
 
-## Step 3: Set up environment
+## Recommended target information architecture
 
-Create a .env file at the project root with these variables (get values from the team):
+A proposed better top-level structure is:
 
-DATABASE_URL=
-META_ADS_ACCESS_TOKEN=
-META_ADS_ACCOUNT_ID=
-BOOMERANG_API_TOKEN=
-BOOMERANG_WEBHOOK_SECRET=
-ACUITY_API_KEY=
-ACUITY_USER_ID=
-ENCHARGE_API_KEY=
-ENCHARGE_WRITE_KEY=
-TWILIO_ACCOUNT_SID=
-TWILIO_AUTH_TOKEN=
-TWILIO_FROM_NUMBER=
-GEMINI_API_KEY=
-INSTAGRAM_ACCESS_TOKEN=
-INSTAGRAM_BUSINESS_ACCOUNT_ID=
-JWT_SECRET=
+1. **Executive Dashboard**
+2. **Reports Center**
+3. **Performance**
+4. **Campaigns**
+5. **Programs & Promotions**
+6. **Audience & CRM**
+7. **Communications**
+8. **Content & Social**
+9. **Insights & Recommendations**
+10. **Admin**
 
-## Step 4: Start development server
+---
 
-pnpm dev
+## What each top-level section should do
 
-The app runs at http://localhost:5000 (frontend + backend on same port via Express).
+### 1. Executive Dashboard
+Purpose:
+- main landing page
+- branch health snapshot
+- top KPIs
+- alerts and priorities
+- fast link to generate report
 
-## Tech Stack Summary
+### 2. Reports Center
+Purpose:
+- primary reporting workspace
+- export, schedule, email, and archive reports
 
-- React 19 + TypeScript 5.3 + Vite 5
-- tRPC 11 (type-safe API — NO REST endpoints in client code)
-- Tailwind CSS 4 + shadcn/ui components
-- Drizzle ORM + MySQL (TiDB)
-- Express 4 backend
-- pnpm (NOT npm or yarn)
+This should be the highest-priority admin area.
 
-## Critical Rules (from CLAUDE.md)
+### 3. Performance
+Purpose:
+- consolidated analytics
+- replace fragmented Performance / Revenue / ROI setup
 
-1. MULTI-TENANT: Every DB query must filter by venueId. Never hardcode location data.
-2. NO p-6 on page outer divs — DashboardLayout already provides padding. Pages use space-y-N only.
-3. All tables need overflow-x-auto wrapper for mobile.
-4. Colors: only use the defined palette (#F5C72C yellow, #3DB855 green, #111111, #888888, #E0E0E0, #FFFFFF). No new colors.
-5. Yellow (#F5C72C) is RESERVED for CTAs, active states, data highlights only — never decorative.
-6. tRPC only — client never calls fetch() directly to the backend.
-7. New tRPC endpoints go in server/routers/ subdirectory files (NOT the monolithic server/routers.ts).
-8. Zod validation on all tRPC inputs.
+### 4. Campaigns
+Purpose:
+- manage active and planned strategic initiatives
+- show status, spend, results, next action, and ownership
 
-## 2026 Key Goals (track these in the dashboard)
+### 5. Programs & Promotions
+Purpose:
+- manage Arlington Heights branch activations
+- local programs, giveaways, promos, landing pages, QR performance
 
-1. Annual Revenue: $2,000,000
-2. Active Members: 300 (Boomerang members, all tiers including Pro)
-3. Instagram Followers: 2,000
-4. Email Subscribers (Encharge AHTIL tag): 5,000
+### 6. Audience & CRM
+Purpose:
+- understand and manage leads, members, guests, segments, and lifecycle
 
-## Current Status (as of 2026-03-06)
+### 7. Communications
+Purpose:
+- execute campaign-linked email/SMS/automation flows
+- tie sends to audience segments and measurable outcomes
 
-- Dashboard is live at dashboard.playgolfvx.com
-- Authentication: JWT-based (migrating from Manus OAuth to Azure OAuth)
-- All major pages implemented (see CHATGPT_HANDOFF.md section 5 for full feature list)
-- Known issues: Instagram Access Token expires every 60 days (manual refresh needed)
-- server/routers.ts is a ~3,700-line monolith — new endpoints go in server/routers/ subdirectory
+### 8. Content & Social
+Purpose:
+- manage Instagram, social performance, website/news, and content planning
 
-## Before writing any code
+### 9. Insights & Recommendations
+Purpose:
+- AI-assisted alerts, recommendations, research, and conversational help
+- not as a cluttered cluster of separate AI products
 
-1. Confirm you've read CLAUDE.md and CHATGPT_HANDOFF.md
-2. Run: npx tsc --noEmit (should return 0 errors before you start)
-3. State which file(s) you plan to modify and why
-4. Follow the design system in CLAUDE.md exactly — do not introduce new visual patterns
+### 10. Admin
+Purpose:
+- integrations
+- users/roles
+- report schedules
+- branch settings
+- KPI definitions
+- sync health
 
-I'm ready to work on this project. What would you like me to do?
-```
+---
+
+## Suggested consolidation / merge plan
+
+### Merge into Performance
+- `Performance`
+- `Revenue`
+- `ROI`
+- some KPI/summary portions of `Home`
+
+### Merge into Insights & Recommendations
+- `Assistant`
+- `Autopilot`
+- `AIWorkspace`
+- `MarketingIntelligence`
+- `Strategy`
+- `ActionPlan`
+- `MarketResearch`
+- `AIActions`
+
+### Merge into Campaigns
+- `StrategicCampaigns`
+- `CampaignTimeline`
+- `CalendarViewer`
+- campaign detail surfaces
+- parts of advertising planning
+
+### Merge into Programs & Promotions
+- `Programs`
+- `PromotionsHub`
+- giveaway/promo operational pages
+- promo landing management
+
+### Merge into Content & Social
+- Instagram pages
+- website viewer/control
+- news/blog pages
+
+### Demote or hide from primary nav
+- component showcase / internal UI pages
+- redirect-only pages
+- public landing experience pages
+- legacy route compatibility pages
+
+---
+
+## BI KPI framework recommendation
+
+To be a real BI dashboard, the product should use a clear KPI hierarchy.
+
+### Executive outcomes
+- revenue
+- membership growth
+- trial-to-membership conversion
+- retention/churn
+- qualified leads
+- event/program bookings
+
+### Marketing efficiency
+- CAC
+- CPL
+- ROAS
+- CTR
+- conversion rate
+- booking rate
+- email/SMS engagement
+
+### Arlington Heights local execution metrics
+- local program attendance
+- promo claim rate
+- QR scan volume
+- giveaway conversion
+- private event pipeline
+- partnership/local outreach impact
+- branch social/content performance
+
+Every page should clearly map back to one or more of these KPI groups.
+
+---
+
+## Arlington Heights-specific operational recommendations
+
+Because Arlington Heights is the current pilot and main operating branch, the dashboard should explicitly support local execution.
+
+### Key structural recommendations
+- Make Arlington Heights the default branch context
+- Add branch-specific executive report templates
+- Add “This Week at Arlington Heights” operational view
+- Show local program performance separately from broader marketing categories
+- Tie local promos, paid media, events, communications, and outcomes together more tightly
+
+### Strong recommendation
+Create a standard **Arlington Heights Branch Performance Report** template with:
+- summary
+- wins
+- issues
+- paid media performance
+- local programs/promotions
+- CRM/communications performance
+- revenue and membership impact
+- recommended next actions
+
+---
+
+## Suggested phased implementation path
+
+### Phase 1 — Information architecture cleanup
+- simplify sidebar
+- promote Reports to top-level
+- merge overlapping analytics pages
+- consolidate AI pages
+- reduce legacy clutter
+
+### Phase 2 — Reporting-first redesign
+- build Reports Center
+- create report templates
+- add scheduling/export/sharing
+- make Arlington Heights reporting first-class
+
+### Phase 3 — Branch execution optimization
+- create a true Arlington Heights operations view
+- unify local campaigns, programs, communications, and tasks
+
+### Phase 4 — AI rationalization
+- unify AI surfaces into one coherent decision-support section
+
+---
+
+## Main conclusion
+
+The current dashboard is **capable but structurally inefficient**.
+
+It has many useful features, but the product architecture currently feels like a collection of tools rather than a focused BI and execution system.
+
+The biggest improvements should be:
+- make **Reports** a top-level, primary workflow
+- consolidate overlapping analytics pages
+- centralize Arlington Heights execution workflows
+- simplify or unify AI/intelligence pages
+- restructure navigation around business decisions, not just features
+
+---
+
+## Direct prompt suggestion for ChatGPT 5.4 Pro
+
+You can paste the following prompt together with this document:
+
+> Please review this dashboard handoff and propose the ideal future product structure for Golf VX’s marketing dashboard. Prioritize two business requirements above all else: (1) administrator report generation and (2) marketing agency execution for the Arlington Heights branch. I want you to think like a product strategist, BI dashboard architect, and UX information architect. Please recommend the best navigation model, page hierarchy, merge/remove/keep strategy, reporting workflow, and branch-specific operating model. Also identify what should be top-level vs secondary vs hidden, and how to reorganize the dashboard into a true Business Intelligence system.
+
+---
+
+## Notes on confidence
+
+This handoff is based on repository inspection of:
+- top-level documentation
+- route structure
+- sidebar configuration
+- representative page components
+- backend router composition
+
+It is a structural/product review, not a line-by-line functional audit of every page.
