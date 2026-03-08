@@ -1,6 +1,8 @@
 import {
   AlertTriangle,
   BarChart3,
+  Building2,
+  Calendar,
   ClipboardList,
   FileBarChart,
   FileClock,
@@ -8,19 +10,21 @@ import {
   FileText,
   Flag,
   Gauge,
+  Instagram,
+  KeyRound,
   LayoutDashboard,
   Lightbulb,
   MessageSquare,
   Search,
-  Settings,
   Shield,
+  Sparkles,
   Target,
   Users,
   UserCircle2,
   Workflow,
   Wrench,
 } from "lucide-react";
-import { appRoutes, DEFAULT_VENUE_SLUG, getVenueBasePath, withDefaultVenueSlug } from "@/lib/routes";
+import { appRoutes, DEFAULT_VENUE_SLUG, getVenueBasePath, isRouteActive, withDefaultVenueSlug } from "@/lib/routes";
 
 export type NavItem = {
   label: string;
@@ -62,6 +66,7 @@ function buildNav(venueSlug: string) {
         venue.reports.schedules,
         venue.reports.archive,
         venue.reports.briefs,
+        `${venue.reports.home}/`,
       ],
       children: [
         { label: "Overview", path: venue.reports.home, icon: FileText },
@@ -94,16 +99,21 @@ function buildNav(venueSlug: string) {
         venue.operations.promotions,
         venue.operations.communications,
         venue.operations.content,
+        `${venue.operations.campaigns}/`,
+        `${venue.operations.paidMedia}/`,
+        `${venue.operations.programs}/`,
+        `${venue.operations.promotions}/`,
+        `${venue.operations.communications}/`,
       ],
       children: [
-        { label: "This Week", path: venue.operations.thisWeek, icon: ClipboardList },
+        { label: "This Week", path: venue.operations.thisWeek, icon: Sparkles },
         { label: "Inbox", path: venue.operations.inbox, icon: MessageSquare },
         { label: "Campaigns", path: venue.operations.campaigns, icon: Flag },
         { label: "Paid Media", path: venue.operations.paidMedia, icon: BarChart3 },
         { label: "Programs", path: venue.operations.programs, icon: Target },
         { label: "Promotions", path: venue.operations.promotions, icon: Lightbulb },
         { label: "Communications", path: venue.operations.communications, icon: MessageSquare },
-        { label: "Content", path: venue.operations.content, icon: FileText },
+        { label: "Content & Social", path: venue.operations.content, icon: Instagram },
         { label: "Issues", path: venue.operations.issues, icon: AlertTriangle },
         { label: "Tasks", path: venue.operations.tasks, icon: ClipboardList },
       ],
@@ -117,6 +127,7 @@ function buildNav(venueSlug: string) {
         venue.audience.people,
         venue.audience.segments,
         venue.audience.duplicates,
+        `${venue.audience.home}/`,
       ],
       children: [
         { label: "People", path: venue.audience.people, icon: Users },
@@ -161,7 +172,9 @@ function buildNav(venueSlug: string) {
       children: [
         { label: "Overview", path: appRoutes.admin.overview, icon: Shield },
         { label: "Integrations", path: appRoutes.admin.integrations, icon: Wrench },
-        { label: "Venues", path: appRoutes.admin.venues, icon: Users },
+        { label: "Venues", path: appRoutes.admin.venues, icon: Building2 },
+        { label: "Users", path: appRoutes.admin.users, icon: Users },
+        { label: "Roles", path: appRoutes.admin.roles, icon: KeyRound },
         { label: "KPI Definitions", path: appRoutes.admin.kpiDefinitions, icon: Target },
         { label: "Sync Health", path: appRoutes.admin.syncHealth, icon: AlertTriangle },
         { label: "Report Settings", path: appRoutes.admin.reportSettings, icon: FileClock },
@@ -181,7 +194,7 @@ export function getNavStructure(location?: string): Array<NavCollapsible | NavGr
 export const NAV_STRUCTURE: Array<NavCollapsible | NavGroup> = getNavStructure();
 
 function matchesPath(location: string, candidate: string): boolean {
-  return location === candidate || location.startsWith(candidate + "/");
+  return isRouteActive(location, candidate);
 }
 
 export function getActiveLabel(location: string): string {

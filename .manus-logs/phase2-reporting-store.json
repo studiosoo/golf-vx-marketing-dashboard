@@ -1,0 +1,281 @@
+{
+  "nextIds": {
+    "reportDraft": 3,
+    "brief": 2,
+    "operationalUpdate": 4,
+    "issue": 5,
+    "task": 6
+  },
+  "reportDrafts": [
+    {
+      "id": 1,
+      "venueSlug": "arlington-heights",
+      "reportType": "weekly_executive",
+      "title": "Arlington Heights Weekly Executive Report",
+      "dateRangeLabel": "This Week",
+      "status": "draft",
+      "content": {
+        "summary": "Weekly leadership snapshot covering revenue, member activity, and immediate campaign watchpoints.",
+        "sections": [
+          {
+            "heading": "Executive Summary",
+            "body": "Draft summary prepared for venue leadership review."
+          }
+        ],
+        "highlights": [
+          "Review paid media pacing",
+          "Confirm weekly branch update inputs"
+        ]
+      },
+      "createdBy": "system",
+      "createdAt": "2026-03-08T06:52:05.926Z",
+      "updatedAt": "2026-03-08T06:52:05.926Z"
+    },
+    {
+      "id": 2,
+      "venueSlug": "arlington-heights",
+      "reportType": "paid_media",
+      "title": "Paid Media Report",
+      "dateRangeLabel": "Last 30 Days",
+      "status": "ready",
+      "content": {
+        "summary": "Paid media performance recap with spend, reach, and campaign notes.",
+        "sections": [
+          {
+            "heading": "Channel Summary",
+            "body": "Initial draft created from current reporting workspace."
+          }
+        ],
+        "highlights": [
+          "Meta ads spend stabilized",
+          "Need fresh creative for top campaign"
+        ]
+      },
+      "createdBy": "system",
+      "createdAt": "2026-03-08T06:52:05.926Z",
+      "updatedAt": "2026-03-08T06:52:05.926Z"
+    }
+  ],
+  "briefs": [
+    {
+      "id": 1,
+      "venueSlug": "arlington-heights",
+      "briefType": "weekly_ops",
+      "title": "Weekly Ops Brief",
+      "status": "draft",
+      "content": {
+        "effectiveDate": "2026-03-08",
+        "summary": "Current week operations summary is in progress.",
+        "topHighlights": [
+          "Inbox now accepts manual updates and screenshots"
+        ],
+        "blockers": [
+          "Need a final call on unresolved promotion copy"
+        ],
+        "nextActions": [
+          "Review new inbox items by source type"
+        ]
+      },
+      "createdBy": "system",
+      "createdAt": "2026-03-08T06:52:05.926Z",
+      "updatedAt": "2026-03-08T06:52:05.926Z"
+    }
+  ],
+  "operationalUpdates": [
+    {
+      "id": 3,
+      "venueSlug": "arlington-heights",
+      "sourceType": "manual",
+      "rawText": "Flow A verification update from inbox.",
+      "status": "processed",
+      "screenshot": null,
+      "metadata": {
+        "note": "Manual verification",
+        "normalizedSummary": "Flow A summary",
+        "linkedEntity": "verification",
+        "linkedIssueId": 3,
+        "ownershipState": "awaiting_hq",
+        "linkedTaskId": 4
+      },
+      "submittedBy": "verifier",
+      "submittedAt": "2026-03-08T06:54:12.074Z",
+      "updatedAt": "2026-03-08T06:54:12.078Z"
+    },
+    {
+      "id": 1,
+      "venueSlug": "arlington-heights",
+      "sourceType": "venue_update",
+      "rawText": "Front desk flagged two promo questions for the current giveaway signage.",
+      "status": "new",
+      "metadata": {
+        "note": "Needs HQ review",
+        "linkedEntity": "promotion",
+        "ownershipState": "awaiting_hq"
+      },
+      "submittedBy": "system",
+      "submittedAt": "2026-03-08T06:52:05.926Z",
+      "updatedAt": "2026-03-08T06:52:05.926Z"
+    },
+    {
+      "id": 2,
+      "venueSlug": "arlington-heights",
+      "sourceType": "hq_summary",
+      "rawText": "HQ requested a lightweight weekly branch summary for Monday leadership review.",
+      "status": "in_review",
+      "metadata": {
+        "normalizedSummary": "Prepare a branch update summary brief",
+        "ownershipState": "awaiting_studio_soo"
+      },
+      "submittedBy": "system",
+      "submittedAt": "2026-03-08T06:52:05.926Z",
+      "updatedAt": "2026-03-08T06:52:05.926Z"
+    }
+  ],
+  "issues": [
+    {
+      "id": 4,
+      "venueSlug": "arlington-heights",
+      "title": "Flow B direct issue",
+      "description": "Direct issue verification",
+      "status": "blocked",
+      "priority": "low",
+      "ownershipState": "needs_approval",
+      "assignedTo": "Studio Soo",
+      "linkedUpdateId": null,
+      "createdBy": "verifier",
+      "dueAt": "2026-03-08T06:54:12.078Z",
+      "createdAt": "2026-03-08T06:54:12.079Z",
+      "updatedAt": "2026-03-08T06:54:12.079Z"
+    },
+    {
+      "id": 3,
+      "venueSlug": "arlington-heights",
+      "title": "Flow A linked issue",
+      "description": "Issue created from verification update",
+      "status": "open",
+      "priority": "critical",
+      "ownershipState": "awaiting_hq",
+      "assignedTo": "HQ support",
+      "linkedUpdateId": 3,
+      "createdBy": "verifier",
+      "dueAt": "2026-03-08T06:54:12.076Z",
+      "createdAt": "2026-03-08T06:54:12.076Z",
+      "updatedAt": "2026-03-08T06:54:12.076Z"
+    },
+    {
+      "id": 1,
+      "venueSlug": "arlington-heights",
+      "title": "Promo signage questions unresolved",
+      "description": "Front desk needs confirmation on giveaway signage language before local execution.",
+      "status": "open",
+      "priority": "high",
+      "ownershipState": "awaiting_hq",
+      "assignedTo": "HQ support",
+      "linkedUpdateId": 1,
+      "createdBy": "system",
+      "createdAt": "2026-03-08T06:52:05.926Z",
+      "updatedAt": "2026-03-08T06:52:05.926Z",
+      "dueAt": "2026-03-09T06:52:05.926Z"
+    },
+    {
+      "id": 2,
+      "venueSlug": "arlington-heights",
+      "title": "Weekly branch summary still pending",
+      "description": "Leadership review needs the branch summary brief finalized before Monday morning.",
+      "status": "in_progress",
+      "priority": "medium",
+      "ownershipState": "awaiting_studio_soo",
+      "assignedTo": "Studio Soo",
+      "linkedUpdateId": 2,
+      "createdBy": "system",
+      "createdAt": "2026-03-08T06:52:05.926Z",
+      "updatedAt": "2026-03-08T06:52:05.926Z",
+      "dueAt": "2026-03-10T06:52:05.926Z"
+    }
+  ],
+  "tasks": [
+    {
+      "id": 5,
+      "venueSlug": "arlington-heights",
+      "title": "Flow B direct task",
+      "description": "Direct task verification",
+      "status": "in_progress",
+      "ownershipState": "needs_local_execution",
+      "assignedTo": "Venue Admin",
+      "linkedIssueId": null,
+      "linkedUpdateId": null,
+      "externalTaskRef": {
+        "provider": "asana",
+        "taskGid": "local-5",
+        "status": "not_configured",
+        "message": "ASANA_PAT environment variable is not set"
+      },
+      "createdBy": "verifier",
+      "dueAt": "2026-03-08T06:54:12.079Z",
+      "createdAt": "2026-03-08T06:54:12.079Z",
+      "updatedAt": "2026-03-08T06:54:12.080Z"
+    },
+    {
+      "id": 4,
+      "venueSlug": "arlington-heights",
+      "title": "Flow A linked task",
+      "description": "Task created from verification update",
+      "status": "open",
+      "ownershipState": "awaiting_venue",
+      "assignedTo": "Venue Admin",
+      "linkedIssueId": 3,
+      "linkedUpdateId": 3,
+      "externalTaskRef": null,
+      "createdBy": "verifier",
+      "dueAt": "2026-03-08T06:54:12.077Z",
+      "createdAt": "2026-03-08T06:54:12.077Z",
+      "updatedAt": "2026-03-08T06:54:12.077Z"
+    },
+    {
+      "id": 1,
+      "venueSlug": "arlington-heights",
+      "title": "Follow up with HQ on signage copy",
+      "description": "Confirm whether current giveaway signage is approved for local display.",
+      "status": "open",
+      "ownershipState": "awaiting_hq",
+      "assignedTo": "HQ support",
+      "linkedIssueId": 1,
+      "linkedUpdateId": 1,
+      "createdBy": "system",
+      "createdAt": "2026-03-08T06:52:05.926Z",
+      "updatedAt": "2026-03-08T06:52:05.926Z",
+      "dueAt": "2026-03-09T06:52:05.926Z",
+      "externalTaskRef": null
+    },
+    {
+      "id": 2,
+      "venueSlug": "arlington-heights",
+      "title": "Prepare weekly branch update brief",
+      "description": "Pull inbox/context into a branch update summary for Monday leadership review.",
+      "status": "in_progress",
+      "ownershipState": "awaiting_studio_soo",
+      "assignedTo": "Studio Soo",
+      "linkedIssueId": 2,
+      "linkedUpdateId": 2,
+      "createdBy": "system",
+      "createdAt": "2026-03-08T06:52:05.926Z",
+      "updatedAt": "2026-03-08T06:52:05.926Z",
+      "dueAt": "2026-03-10T06:52:05.926Z",
+      "externalTaskRef": null
+    },
+    {
+      "id": 3,
+      "venueSlug": "arlington-heights",
+      "title": "Confirm local execution owner for upcoming promo",
+      "description": "Venue admin needs to confirm who will handle on-site execution this week.",
+      "status": "blocked",
+      "ownershipState": "awaiting_venue",
+      "assignedTo": "Venue Admin",
+      "createdBy": "system",
+      "createdAt": "2026-03-08T06:52:05.926Z",
+      "updatedAt": "2026-03-08T06:52:05.926Z",
+      "dueAt": "2026-03-11T06:52:05.926Z",
+      "externalTaskRef": null
+    }
+  ]
+}
