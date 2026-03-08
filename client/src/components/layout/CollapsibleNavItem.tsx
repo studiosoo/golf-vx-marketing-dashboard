@@ -17,11 +17,15 @@ export function CollapsibleNavItem({
   isCollapsed,
 }: CollapsibleNavItemProps) {
   const hasChildren = !!item.children?.length;
+  const matchesPath = (candidate: string) =>
+    location === candidate || (candidate !== "/" && location.startsWith(candidate + "/"));
+
   const isSelfActive =
-    location === item.path ||
-    (item.path !== "/" && location.startsWith(item.path + "/"));
+    matchesPath(item.path) ||
+    item.matchPaths?.some((path) => matchesPath(path)) ||
+    false;
   const isChildActive = hasChildren
-    ? item.children!.some((c) => location === c.path)
+    ? item.children!.some((c) => matchesPath(c.path) || c.matchPaths?.some((path) => matchesPath(path)))
     : false;
   const isActive = isSelfActive || isChildActive;
   const [open, setOpen] = useState(isActive || isChildActive);
@@ -97,7 +101,7 @@ export function CollapsibleNavItem({
       {!isCollapsed && open && (
         <div className="ml-5 mt-0.5 border-l border-[#E8E8E8] pl-3 space-y-0.5">
           {item.children!.map((child) => {
-            const childActive = location === child.path;
+            const childActive = matchesPath(child.path) || child.matchPaths?.some((path) => matchesPath(path));
             return (
               <button
                 key={child.path}

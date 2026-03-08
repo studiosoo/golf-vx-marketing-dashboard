@@ -3,11 +3,21 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle, Home } from "lucide-react";
 import { useLocation } from "wouter";
 
-export default function NotFound() {
+export type NotFoundProps = {
+  title?: string;
+  description?: string;
+  homePath?: string;
+};
+
+export default function NotFound({
+  title = "Page Not Found",
+  description = "Sorry, the page you are looking for doesn't exist. It may have been moved or deleted.",
+  homePath = "/",
+}: NotFoundProps) {
   const [, setLocation] = useLocation();
 
   const handleGoHome = () => {
-    setLocation("/");
+    setLocation(homePath);
   };
 
   return (
@@ -24,13 +34,11 @@ export default function NotFound() {
           <h1 className="text-4xl font-bold text-slate-900 mb-2">404</h1>
 
           <h2 className="text-xl font-semibold text-slate-700 mb-4">
-            Page Not Found
+            {title}
           </h2>
 
           <p className="text-slate-600 mb-8 leading-relaxed">
-            Sorry, the page you are looking for doesn't exist.
-            <br />
-            It may have been moved or deleted.
+            {description}
           </p>
 
           <div

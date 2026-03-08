@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { CollapsibleNavItem } from "./CollapsibleNavItem";
-import { NAV_STRUCTURE } from "./navConfig";
+import { getNavStructure } from "./navConfig";
 
 interface SidebarNavProps {
   isCollapsed: boolean;
@@ -10,9 +10,11 @@ interface SidebarNavProps {
 }
 
 export function SidebarNav({ isCollapsed, location, setLocation, onNavigate }: SidebarNavProps) {
+  const navStructure = getNavStructure(location);
+
   return (
     <div className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
-      {NAV_STRUCTURE.map((item, idx) => {
+      {navStructure.map((item, idx) => {
         if ("heading" in item) {
           return (
             <div key={item.heading} className={cn(idx > 0 && "mt-4")}>

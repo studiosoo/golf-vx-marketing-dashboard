@@ -16,6 +16,7 @@ import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import { SidebarNav } from "./layout/SidebarNav";
 import { getActiveLabel } from "./layout/navConfig";
+import { appRoutes, DEFAULT_VENUE_SLUG, getVenueSlugFromPath } from "@/lib/routes";
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width-v2";
 const DEFAULT_WIDTH = 240;
@@ -36,6 +37,7 @@ export default function DashboardLayout({
   const [location, setLocation] = useLocation();
   const isMobile = useIsMobile();
   const activeLabel = getActiveLabel(location);
+  const currentVenueSlug = getVenueSlugFromPath(location) ?? DEFAULT_VENUE_SLUG;
 
   const [sidebarWidth, setSidebarWidth] = useState<number>(() => {
     const stored = localStorage.getItem(SIDEBAR_WIDTH_KEY);
@@ -122,11 +124,16 @@ export default function DashboardLayout({
               <PanelLeft className="h-4 w-4 text-[#888888]" />
             </button>
             {!isCollapsed && (
-              <img
-                src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663329642625/LwjZZbOogTHBMDfo.png"
-                alt="Golf VX"
-                className="h-7 w-auto object-contain"
-              />
+              <div className="min-w-0">
+                <img
+                  src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663329642625/LwjZZbOogTHBMDfo.png"
+                  alt="Golf VX"
+                  className="h-7 w-auto object-contain"
+                />
+                <p className="text-[10px] uppercase tracking-[0.18em] text-[#AAAAAA] mt-0.5 truncate">
+                  {currentVenueSlug.replace(/-/g, " ")}
+                </p>
+              </div>
             )}
           </div>
 
@@ -138,10 +145,10 @@ export default function DashboardLayout({
 
           <div className="border-t border-[#E0E0E0] p-2 space-y-0.5 shrink-0">
             <button
-              onClick={() => setLocation("/settings/account")}
+              onClick={() => setLocation(appRoutes.accountProfile)}
               className={cn(
                 "flex items-center gap-2.5 w-full rounded-lg px-2.5 py-2 text-[13px] transition-colors duration-150 text-left",
-                location.startsWith("/settings")
+                location.startsWith("/app/account") || location.startsWith("/app/admin")
                   ? "bg-[#F5C72C]/15 text-[#111111] font-semibold"
                   : "text-[#888888] hover:bg-[#F5F5F5] hover:text-[#111111]"
               )}
