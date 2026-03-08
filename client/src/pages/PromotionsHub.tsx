@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
+import { DEFAULT_VENUE_SLUG, appRoutes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import {
   Tag, Plus, QrCode, Users, BarChart2, ExternalLink,
@@ -255,8 +257,10 @@ function PromoCard({
             {expiry && <span className="text-[10px] text-[#AAAAAA] ml-auto">Expires {expiry}</span>}
           </div>
 
-          <p className="text-[14px] font-semibold text-[#111111] leading-snug">{promo.title}</p>
-          <p className="text-[11px] text-[#AAAAAA] mt-0.5">/p/{promo.slug}</p>
+          <button onClick={onSelect} className="text-left">
+            <p className="text-[14px] font-semibold text-[#111111] leading-snug hover:underline">{promo.title}</p>
+            <p className="text-[11px] text-[#AAAAAA] mt-0.5">/p/{promo.slug}</p>
+          </button>
 
           {/* Stats row */}
           <div className="flex items-center gap-3 mt-3">
@@ -462,6 +466,8 @@ function SqrLinksPanel() {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function PromotionsHub() {
+  const venueSlug = DEFAULT_VENUE_SLUG;
+  const [, setLocation] = useLocation();
   const [tab, setTab] = useState<"promos" | "sqr">("promos");
   const [showCreate, setShowCreate] = useState(false);
   const [qrPromo, setQrPromo] = useState<{ url: string; title: string } | null>(null);
@@ -561,7 +567,7 @@ export default function PromotionsHub() {
               <PromoCard
                 key={promo.id}
                 promo={promo}
-                onSelect={() => setLeadsPromo({ id: promo.id, title: promo.title })}
+                onSelect={() => setLocation(appRoutes.venue(venueSlug).operations.promotionDetail(promo.id))}
                 onToggleStatus={() =>
                   toggleStatusMutation.mutate({
                     id: promo.id,

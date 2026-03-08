@@ -81,6 +81,12 @@ const operationalUpdatePayloadSchema = z.object({
   linkedTaskId: z.number().optional(),
 });
 
+const linkedInitiativeFieldsSchema = {
+  linkedCampaignId: z.string().nullable().optional(),
+  linkedProgramId: z.string().nullable().optional(),
+  linkedPromotionId: z.string().nullable().optional(),
+} as const;
+
 const issueInputSchema = z.object({
   venueSlug: z.string(),
   title: z.string().min(3),
@@ -90,6 +96,7 @@ const issueInputSchema = z.object({
   ownershipState: ownershipStateEnum,
   assignedTo: z.string().min(1),
   linkedUpdateId: z.number().nullable().optional(),
+  ...linkedInitiativeFieldsSchema,
   dueAt: z.string().nullable().optional(),
 });
 
@@ -102,6 +109,7 @@ const issueUpdateSchema = z.object({
   ownershipState: ownershipStateEnum,
   assignedTo: z.string().min(1),
   linkedUpdateId: z.number().nullable().optional(),
+  ...linkedInitiativeFieldsSchema,
   dueAt: z.string().nullable().optional(),
 });
 
@@ -114,6 +122,7 @@ const taskInputSchema = z.object({
   assignedTo: z.string().min(1),
   linkedIssueId: z.number().nullable().optional(),
   linkedUpdateId: z.number().nullable().optional(),
+  ...linkedInitiativeFieldsSchema,
   dueAt: z.string().nullable().optional(),
 });
 
@@ -126,6 +135,7 @@ const taskUpdateSchema = z.object({
   assignedTo: z.string().min(1),
   linkedIssueId: z.number().nullable().optional(),
   linkedUpdateId: z.number().nullable().optional(),
+  ...linkedInitiativeFieldsSchema,
   dueAt: z.string().nullable().optional(),
   externalTaskRef: z.object({
     provider: z.literal("asana"),
@@ -184,6 +194,7 @@ export const reportingRouter = router({
       briefType: briefTypeEnum,
       title: z.string().min(3),
       status: briefStatusEnum.default("draft"),
+      ...linkedInitiativeFieldsSchema,
       content: briefPayloadSchema,
     }))
     .mutation(async ({ ctx, input }) => {
@@ -192,6 +203,9 @@ export const reportingRouter = router({
         briefType: input.briefType,
         title: input.title,
         status: input.status,
+        linkedCampaignId: input.linkedCampaignId ?? null,
+        linkedProgramId: input.linkedProgramId ?? null,
+        linkedPromotionId: input.linkedPromotionId ?? null,
         content: input.content,
         createdBy: ctx.user.email || ctx.user.name || "unknown",
       });
@@ -202,6 +216,7 @@ export const reportingRouter = router({
       id: z.number(),
       title: z.string().min(3),
       status: briefStatusEnum,
+      ...linkedInitiativeFieldsSchema,
       content: briefPayloadSchema,
     }))
     .mutation(async ({ input }) => db.updateBrief(input.id, input)),
@@ -217,6 +232,7 @@ export const reportingRouter = router({
       rawText: z.string().min(1),
       status: operationalUpdateStatusEnum.default("new"),
       screenshot: screenshotSchema.optional(),
+      ...linkedInitiativeFieldsSchema,
       metadata: operationalUpdatePayloadSchema.default({}),
     }))
     .mutation(async ({ ctx, input }) => {
@@ -226,6 +242,9 @@ export const reportingRouter = router({
         rawText: input.rawText,
         status: input.status,
         screenshot: input.screenshot,
+        linkedCampaignId: input.linkedCampaignId ?? null,
+        linkedProgramId: input.linkedProgramId ?? null,
+        linkedPromotionId: input.linkedPromotionId ?? null,
         metadata: input.metadata,
         submittedBy: ctx.user.email || ctx.user.name || "unknown",
       });
@@ -249,6 +268,9 @@ export const reportingRouter = router({
       return db.createIssue({
         ...input,
         linkedUpdateId: input.linkedUpdateId ?? null,
+        linkedCampaignId: input.linkedCampaignId ?? null,
+        linkedProgramId: input.linkedProgramId ?? null,
+        linkedPromotionId: input.linkedPromotionId ?? null,
         dueAt: input.dueAt ?? null,
         createdBy: ctx.user.email || ctx.user.name || "unknown",
       });
@@ -269,6 +291,9 @@ export const reportingRouter = router({
         ...input,
         linkedIssueId: input.linkedIssueId ?? null,
         linkedUpdateId: input.linkedUpdateId ?? null,
+        linkedCampaignId: input.linkedCampaignId ?? null,
+        linkedProgramId: input.linkedProgramId ?? null,
+        linkedPromotionId: input.linkedPromotionId ?? null,
         dueAt: input.dueAt ?? null,
         externalTaskRef: null,
         createdBy: ctx.user.email || ctx.user.name || "unknown",
@@ -337,6 +362,9 @@ export const reportingRouter = router({
         dueAt: task.dueAt ?? null,
         linkedIssueId: task.linkedIssueId ?? null,
         linkedUpdateId: task.linkedUpdateId ?? null,
+        linkedCampaignId: task.linkedCampaignId ?? null,
+        linkedProgramId: task.linkedProgramId ?? null,
+        linkedPromotionId: task.linkedPromotionId ?? null,
         externalTaskRef,
       });
 

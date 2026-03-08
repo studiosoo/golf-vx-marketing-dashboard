@@ -10,7 +10,6 @@ import TrialSession from "./pages/TrialSession";
 import AnniversaryGiveaway from "./pages/AnniversaryGiveaway";
 import AnniversaryGiveawayApplication from "./pages/AnniversaryGiveawayApplication";
 import AnniversaryGiveawayThankYou from "./pages/AnniversaryGiveawayThankYou";
-import CampaignDetail from "./pages/CampaignDetail";
 import MetaAdsCampaignDetail from "./pages/MetaAdsCampaignDetail";
 import MemberProfile from "./pages/MemberProfile";
 import NotFoundPage from "./pages/NotFound";
@@ -40,6 +39,9 @@ import BriefsPage from "./pages/app/reports/BriefsPage";
 import ThisWeekPage from "./pages/app/operations/ThisWeekPage";
 import InboxPage from "./pages/app/operations/InboxPage";
 import IssuesPage from "./pages/app/operations/IssuesPage";
+import CampaignWorkspacePage from "./pages/app/operations/CampaignWorkspacePage";
+import ProgramWorkspacePage from "./pages/app/operations/ProgramWorkspacePage";
+import PromotionWorkspacePage from "./pages/app/operations/PromotionWorkspacePage";
 import AdminOverviewPage from "./pages/app/admin/AdminOverviewPage";
 import UsersPage from "./pages/app/admin/UsersPage";
 import RolesPage from "./pages/app/admin/RolesPage";
@@ -110,11 +112,11 @@ function ReportDetailRoute({ params }: { params: { venueSlug: string; reportId: 
 }
 
 function ProgramDetailRoute({ params }: { params: { venueSlug: string; programId: string } }) {
-  return <Redirect to={appRoutes.venue(params.venueSlug).operations.programs} />;
+  return <ProgramWorkspacePage venueSlug={params.venueSlug} programId={params.programId} />;
 }
 
 function PromotionDetailRoute({ params }: { params: { venueSlug: string; promotionId: string } }) {
-  return <Redirect to={appRoutes.venue(params.venueSlug).operations.promotions} />;
+  return <PromotionWorkspacePage venueSlug={params.venueSlug} promotionId={params.promotionId} />;
 }
 
 function CommunicationDetailRoute({ params }: { params: { venueSlug: string; communicationId: string } }) {
@@ -160,7 +162,7 @@ function DashboardAppRoutes() {
         <Route path="/app/:venueSlug/operations/tasks" component={OperationsTasksWrapper} />
         <Route path="/app/:venueSlug/operations/calendar" component={OperationsCalendarWrapper} />
         <Route path="/app/:venueSlug/operations/campaigns" component={OperationsCampaignsWrapper} />
-        <Route path="/app/:venueSlug/operations/campaigns/:id" component={CampaignDetail} />
+        <Route path="/app/:venueSlug/operations/campaigns/:campaignId">{({ venueSlug, campaignId }) => <CampaignWorkspacePage venueSlug={venueSlug} campaignId={campaignId} />}</Route>
         <Route path="/app/:venueSlug/operations/paid-media" component={OperationsPaidMediaWrapper} />
         <Route path="/app/:venueSlug/operations/paid-media/:id" component={MetaAdsCampaignDetail} />
         <Route path="/app/:venueSlug/operations/programs" component={OperationsProgramsWrapper} />

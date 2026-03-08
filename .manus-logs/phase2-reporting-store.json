@@ -1,10 +1,10 @@
 {
   "nextIds": {
     "reportDraft": 3,
-    "brief": 2,
+    "brief": 3,
     "operationalUpdate": 4,
-    "issue": 5,
-    "task": 6
+    "issue": 6,
+    "task": 7
   },
   "reportDrafts": [
     {
@@ -58,6 +58,33 @@
   ],
   "briefs": [
     {
+      "id": 2,
+      "venueSlug": "arlington-heights",
+      "briefType": "promotion_status",
+      "title": "Promotion 303 Brief",
+      "status": "draft",
+      "linkedCampaignId": null,
+      "linkedProgramId": null,
+      "linkedPromotionId": "303",
+      "content": {
+        "effectiveDate": "2026-03-08",
+        "dateRangeLabel": "This Week",
+        "summary": "Created from promotion detail workspace",
+        "topHighlights": [
+          "Promotion linked"
+        ],
+        "blockers": [
+          "Awaiting final approval"
+        ],
+        "nextActions": [
+          "Confirm venue rollout"
+        ]
+      },
+      "createdBy": "manual-script",
+      "createdAt": "2026-03-08T07:16:09.843Z",
+      "updatedAt": "2026-03-08T07:16:09.843Z"
+    },
+    {
       "id": 1,
       "venueSlug": "arlington-heights",
       "briefType": "weekly_ops",
@@ -78,7 +105,10 @@
       },
       "createdBy": "system",
       "createdAt": "2026-03-08T06:52:05.926Z",
-      "updatedAt": "2026-03-08T06:52:05.926Z"
+      "updatedAt": "2026-03-08T06:52:05.926Z",
+      "linkedCampaignId": null,
+      "linkedProgramId": null,
+      "linkedPromotionId": null
     }
   ],
   "operationalUpdates": [
@@ -99,7 +129,10 @@
       },
       "submittedBy": "verifier",
       "submittedAt": "2026-03-08T06:54:12.074Z",
-      "updatedAt": "2026-03-08T06:54:12.078Z"
+      "updatedAt": "2026-03-08T06:54:12.078Z",
+      "linkedCampaignId": null,
+      "linkedProgramId": null,
+      "linkedPromotionId": null
     },
     {
       "id": 1,
@@ -114,7 +147,10 @@
       },
       "submittedBy": "system",
       "submittedAt": "2026-03-08T06:52:05.926Z",
-      "updatedAt": "2026-03-08T06:52:05.926Z"
+      "updatedAt": "2026-03-08T06:52:05.926Z",
+      "linkedCampaignId": null,
+      "linkedProgramId": null,
+      "linkedPromotionId": null
     },
     {
       "id": 2,
@@ -128,10 +164,31 @@
       },
       "submittedBy": "system",
       "submittedAt": "2026-03-08T06:52:05.926Z",
-      "updatedAt": "2026-03-08T06:52:05.926Z"
+      "updatedAt": "2026-03-08T06:52:05.926Z",
+      "linkedCampaignId": null,
+      "linkedProgramId": null,
+      "linkedPromotionId": null
     }
   ],
   "issues": [
+    {
+      "id": 5,
+      "venueSlug": "arlington-heights",
+      "title": "Campaign 101 blocker",
+      "description": "Created from campaign detail workspace",
+      "status": "open",
+      "priority": "high",
+      "ownershipState": "awaiting_hq",
+      "assignedTo": "Studio Soo",
+      "linkedUpdateId": null,
+      "linkedCampaignId": "101",
+      "linkedProgramId": null,
+      "linkedPromotionId": null,
+      "createdBy": "manual-script",
+      "createdAt": "2026-03-08T07:16:09.843Z",
+      "updatedAt": "2026-03-08T07:16:09.843Z",
+      "dueAt": "2026-03-08T07:16:09.843Z"
+    },
     {
       "id": 4,
       "venueSlug": "arlington-heights",
@@ -145,7 +202,10 @@
       "createdBy": "verifier",
       "dueAt": "2026-03-08T06:54:12.078Z",
       "createdAt": "2026-03-08T06:54:12.079Z",
-      "updatedAt": "2026-03-08T06:54:12.079Z"
+      "updatedAt": "2026-03-08T06:54:12.079Z",
+      "linkedCampaignId": null,
+      "linkedProgramId": null,
+      "linkedPromotionId": null
     },
     {
       "id": 3,
@@ -160,7 +220,10 @@
       "createdBy": "verifier",
       "dueAt": "2026-03-08T06:54:12.076Z",
       "createdAt": "2026-03-08T06:54:12.076Z",
-      "updatedAt": "2026-03-08T06:54:12.076Z"
+      "updatedAt": "2026-03-08T06:54:12.076Z",
+      "linkedCampaignId": null,
+      "linkedProgramId": null,
+      "linkedPromotionId": null
     },
     {
       "id": 1,
@@ -175,7 +238,10 @@
       "createdBy": "system",
       "createdAt": "2026-03-08T06:52:05.926Z",
       "updatedAt": "2026-03-08T06:52:05.926Z",
-      "dueAt": "2026-03-09T06:52:05.926Z"
+      "dueAt": "2026-03-09T06:52:05.926Z",
+      "linkedCampaignId": null,
+      "linkedProgramId": null,
+      "linkedPromotionId": null
     },
     {
       "id": 2,
@@ -190,10 +256,32 @@
       "createdBy": "system",
       "createdAt": "2026-03-08T06:52:05.926Z",
       "updatedAt": "2026-03-08T06:52:05.926Z",
-      "dueAt": "2026-03-10T06:52:05.926Z"
+      "dueAt": "2026-03-10T06:52:05.926Z",
+      "linkedCampaignId": null,
+      "linkedProgramId": null,
+      "linkedPromotionId": null
     }
   ],
   "tasks": [
+    {
+      "id": 6,
+      "venueSlug": "arlington-heights",
+      "title": "Program 202 task",
+      "description": "Created from program detail workspace",
+      "status": "open",
+      "ownershipState": "awaiting_venue",
+      "assignedTo": "Venue Admin",
+      "linkedIssueId": null,
+      "linkedUpdateId": null,
+      "linkedCampaignId": null,
+      "linkedProgramId": "202",
+      "linkedPromotionId": null,
+      "externalTaskRef": null,
+      "createdBy": "manual-script",
+      "createdAt": "2026-03-08T07:16:09.843Z",
+      "updatedAt": "2026-03-08T07:16:09.843Z",
+      "dueAt": "2026-03-08T07:16:09.843Z"
+    },
     {
       "id": 5,
       "venueSlug": "arlington-heights",
@@ -213,7 +301,10 @@
       "createdBy": "verifier",
       "dueAt": "2026-03-08T06:54:12.079Z",
       "createdAt": "2026-03-08T06:54:12.079Z",
-      "updatedAt": "2026-03-08T06:54:12.080Z"
+      "updatedAt": "2026-03-08T06:54:12.080Z",
+      "linkedCampaignId": null,
+      "linkedProgramId": null,
+      "linkedPromotionId": null
     },
     {
       "id": 4,
@@ -229,7 +320,10 @@
       "createdBy": "verifier",
       "dueAt": "2026-03-08T06:54:12.077Z",
       "createdAt": "2026-03-08T06:54:12.077Z",
-      "updatedAt": "2026-03-08T06:54:12.077Z"
+      "updatedAt": "2026-03-08T06:54:12.077Z",
+      "linkedCampaignId": null,
+      "linkedProgramId": null,
+      "linkedPromotionId": null
     },
     {
       "id": 1,
@@ -245,7 +339,10 @@
       "createdAt": "2026-03-08T06:52:05.926Z",
       "updatedAt": "2026-03-08T06:52:05.926Z",
       "dueAt": "2026-03-09T06:52:05.926Z",
-      "externalTaskRef": null
+      "externalTaskRef": null,
+      "linkedCampaignId": null,
+      "linkedProgramId": null,
+      "linkedPromotionId": null
     },
     {
       "id": 2,
@@ -261,7 +358,10 @@
       "createdAt": "2026-03-08T06:52:05.926Z",
       "updatedAt": "2026-03-08T06:52:05.926Z",
       "dueAt": "2026-03-10T06:52:05.926Z",
-      "externalTaskRef": null
+      "externalTaskRef": null,
+      "linkedCampaignId": null,
+      "linkedProgramId": null,
+      "linkedPromotionId": null
     },
     {
       "id": 3,
@@ -275,7 +375,10 @@
       "createdAt": "2026-03-08T06:52:05.926Z",
       "updatedAt": "2026-03-08T06:52:05.926Z",
       "dueAt": "2026-03-11T06:52:05.926Z",
-      "externalTaskRef": null
+      "externalTaskRef": null,
+      "linkedCampaignId": null,
+      "linkedProgramId": null,
+      "linkedPromotionId": null
     }
   ]
 }

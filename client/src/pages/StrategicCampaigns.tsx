@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { DEFAULT_VENUE_SLUG, appRoutes } from "@/lib/routes";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,6 +24,7 @@ const CAMPAIGN_BG_COLORS: Record<string, string> = {
 };
 
 export default function StrategicCampaigns() {
+  const venueSlug = DEFAULT_VENUE_SLUG;
   const [, setLocation] = useLocation();
   const { data: campaigns, isLoading } = trpc.strategicCampaigns.getOverview.useQuery();
   const { data: kpiData } = trpc.intelligence.getStrategicKPIs.useQuery();
@@ -141,7 +143,7 @@ export default function StrategicCampaigns() {
           const colorClass = CAMPAIGN_BG_COLORS[campaign.color] || CAMPAIGN_BG_COLORS.blue;
           
           return (
-            <Card key={campaign.id} className="hover:shadow-lg transition-shadow">
+            <Card key={campaign.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation(appRoutes.venue(venueSlug).operations.campaignDetail(campaign.id))}>
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="space-y-1 flex-1">
@@ -290,7 +292,10 @@ export default function StrategicCampaigns() {
                       return (
                         <button
                           key={program.id}
-                          onClick={() => setLocation("/programs")}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setLocation(appRoutes.venue(venueSlug).operations.programDetail(program.id));
+                          }}
                           className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-accent transition-colors text-left group"
                         >
                           <div className="flex-1 min-w-0">

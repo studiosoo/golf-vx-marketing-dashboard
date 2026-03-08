@@ -1,5 +1,6 @@
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
+import { DEFAULT_VENUE_SLUG, appRoutes } from "@/lib/routes";
 import { useState, useMemo } from "react";
 import {
   Plus,
@@ -90,27 +91,8 @@ const STRATEGIC_META: Record<StrategicCampaign, { label: string; color: string }
 };
 
 // Map program names to detail routes
-const PROGRAM_ROUTES: Record<string, string> = {
-  "Drive Day": "/programs/drive-day",
-  "Sunday Clinic": "/programs/drive-day",
-  "Winter Clinic": "/programs/winter-clinics",
-  "Junior Summer Camp": "/programs/summer-camp",
-  "Junior Golf Summer Camp 2026": "/programs/summer-camp",
-  "Leagues": "/programs/leagues",
-  "Annual Giveaway": "/programs/annual-giveaway",
-  "Golf VX Annual Giveaway": "/programs/annual-giveaway",
-};
-
-function getProgramRoute(program: Program): string {
-  // Check by name keywords
-  const name = program.name.toLowerCase();
-  if (name.includes("drive day") || name.includes("sunday clinic")) return "/programs/drive-day";
-  if (name.includes("winter clinic")) return "/programs/winter-clinics";
-  if (name.includes("junior") || name.includes("summer camp")) return "/programs/summer-camp";
-  if (name.includes("league") || name.includes("tournament")) return "/programs/leagues";
-  if (name.includes("giveaway")) return "/programs/annual-giveaway";
-  if (name.includes("trial") || name.includes("1-hour")) return "/programs/trial-session";
-  return `/programs/${program.id}`;
+function getProgramRoute(program: Program, venueSlug = DEFAULT_VENUE_SLUG): string {
+  return appRoutes.venue(venueSlug).operations.programDetail(program.id);
 }
 
 // ─────────────────────────────────────────────
@@ -438,6 +420,7 @@ function AddProgramDialog({ onSuccess }: { onSuccess: () => void }) {
 // Main Page
 // ─────────────────────────────────────────────
 export default function Programs() {
+  const venueSlug = DEFAULT_VENUE_SLUG;
   const [, setLocation] = useLocation();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "running" | CampaignStatus>("all");
@@ -575,7 +558,7 @@ export default function Programs() {
             <ProgramCard
               key={program.id}
               program={program}
-              onClick={() => setLocation(getProgramRoute(program))}
+              onClick={() => setLocation(getProgramRoute(program, venueSlug))}
             />
           ))}
           {/* Add new card */}

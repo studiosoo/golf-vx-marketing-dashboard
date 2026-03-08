@@ -95,6 +95,9 @@ type BriefRecord = {
   briefType: BriefTemplateType;
   title: string;
   status: BriefStatus;
+  linkedCampaignId?: string | null;
+  linkedProgramId?: string | null;
+  linkedPromotionId?: string | null;
   content: {
     effectiveDate?: string;
     dateRangeLabel?: string;
@@ -113,6 +116,9 @@ type OperationalUpdateRecord = {
   venueSlug: string;
   sourceType: OperationalSourceType;
   rawText: string;
+  linkedCampaignId?: string | null;
+  linkedProgramId?: string | null;
+  linkedPromotionId?: string | null;
   screenshot?: {
     name: string;
     mimeType: "image/png" | "image/jpeg" | "image/webp";
@@ -143,6 +149,9 @@ type IssueRecord = {
   ownershipState: OwnershipState;
   assignedTo: string;
   linkedUpdateId?: number | null;
+  linkedCampaignId?: string | null;
+  linkedProgramId?: string | null;
+  linkedPromotionId?: string | null;
   createdBy: string;
   createdAt: string;
   updatedAt: string;
@@ -159,6 +168,9 @@ type TaskRecord = {
   assignedTo: string;
   linkedIssueId?: number | null;
   linkedUpdateId?: number | null;
+  linkedCampaignId?: string | null;
+  linkedProgramId?: string | null;
+  linkedPromotionId?: string | null;
   externalTaskRef?: {
     provider: "asana";
     taskGid: string;
@@ -474,13 +486,16 @@ export async function createBrief(input: Omit<BriefRecord, "id" | "createdAt" | 
 
 export async function updateBrief(
   id: number,
-  updates: Pick<BriefRecord, "title" | "status" | "content">
+  updates: Pick<BriefRecord, "title" | "status" | "content" | "linkedCampaignId" | "linkedProgramId" | "linkedPromotionId">
 ) {
   const store = await readReportingStore();
   const record = store.briefs.find((item) => item.id === id);
   if (!record) throw new Error("Brief not found");
   record.title = updates.title;
   record.status = updates.status;
+  record.linkedCampaignId = updates.linkedCampaignId ?? null;
+  record.linkedProgramId = updates.linkedProgramId ?? null;
+  record.linkedPromotionId = updates.linkedPromotionId ?? null;
   record.content = updates.content;
   record.updatedAt = new Date().toISOString();
   await writeReportingStore(store);
@@ -512,7 +527,12 @@ export async function createOperationalUpdate(
 
 export async function updateOperationalUpdate(
   id: number,
-  updates: Pick<OperationalUpdateRecord, "status"> & { metadata?: OperationalUpdateRecord["metadata"] }
+  updates: Pick<OperationalUpdateRecord, "status"> & {
+    metadata?: OperationalUpdateRecord["metadata"];
+    linkedCampaignId?: string | null;
+    linkedProgramId?: string | null;
+    linkedPromotionId?: string | null;
+  }
 ) {
   const store = await readReportingStore();
   const record = store.operationalUpdates.find((item) => item.id === id);
@@ -524,6 +544,9 @@ export async function updateOperationalUpdate(
       ...updates.metadata,
     };
   }
+  if ("linkedCampaignId" in updates) record.linkedCampaignId = updates.linkedCampaignId ?? null;
+  if ("linkedProgramId" in updates) record.linkedProgramId = updates.linkedProgramId ?? null;
+  if ("linkedPromotionId" in updates) record.linkedPromotionId = updates.linkedPromotionId ?? null;
   record.updatedAt = new Date().toISOString();
   await writeReportingStore(store);
   return record;
@@ -560,7 +583,12 @@ export async function createIssue(input: Omit<IssueRecord, "id" | "createdAt" | 
 
 export async function updateIssue(
   id: number,
-  updates: Pick<IssueRecord, "title" | "description" | "status" | "priority" | "ownershipState" | "assignedTo" | "dueAt"> & { linkedUpdateId?: number | null }
+  updates: Pick<IssueRecord, "title" | "description" | "status" | "priority" | "ownershipState" | "assignedTo" | "dueAt"> & {
+    linkedUpdateId?: number | null;
+    linkedCampaignId?: string | null;
+    linkedProgramId?: string | null;
+    linkedPromotionId?: string | null;
+  }
 ) {
   const store = await readReportingStore();
   const record = store.issues.find((item) => item.id === id);
@@ -573,6 +601,9 @@ export async function updateIssue(
   record.assignedTo = updates.assignedTo;
   record.dueAt = updates.dueAt;
   record.linkedUpdateId = updates.linkedUpdateId ?? null;
+  record.linkedCampaignId = updates.linkedCampaignId ?? null;
+  record.linkedProgramId = updates.linkedProgramId ?? null;
+  record.linkedPromotionId = updates.linkedPromotionId ?? null;
   record.updatedAt = new Date().toISOString();
   if (record.linkedUpdateId) {
     const update = store.operationalUpdates.find((item) => item.id === record.linkedUpdateId);
@@ -620,7 +651,13 @@ export async function getTaskById(id: number) {
 
 export async function updateTask(
   id: number,
-  updates: Pick<TaskRecord, "title" | "description" | "status" | "ownershipState" | "assignedTo" | "dueAt" | "externalTaskRef"> & { linkedIssueId?: number | null; linkedUpdateId?: number | null }
+  updates: Pick<TaskRecord, "title" | "description" | "status" | "ownershipState" | "assignedTo" | "dueAt" | "externalTaskRef"> & {
+    linkedIssueId?: number | null;
+    linkedUpdateId?: number | null;
+    linkedCampaignId?: string | null;
+    linkedProgramId?: string | null;
+    linkedPromotionId?: string | null;
+  }
 ) {
   const store = await readReportingStore();
   const record = store.tasks.find((item) => item.id === id);
@@ -633,6 +670,9 @@ export async function updateTask(
   record.dueAt = updates.dueAt;
   record.linkedIssueId = updates.linkedIssueId ?? null;
   record.linkedUpdateId = updates.linkedUpdateId ?? null;
+  record.linkedCampaignId = updates.linkedCampaignId ?? null;
+  record.linkedProgramId = updates.linkedProgramId ?? null;
+  record.linkedPromotionId = updates.linkedPromotionId ?? null;
   record.externalTaskRef = updates.externalTaskRef ?? null;
   record.updatedAt = new Date().toISOString();
   if (record.linkedUpdateId) {

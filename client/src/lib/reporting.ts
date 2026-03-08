@@ -81,6 +81,9 @@ export type OperationalUpdateRecord = {
   sourceType: InboxSourceType;
   rawText: string;
   status: OperationalUpdateStatus;
+  linkedCampaignId?: string | null;
+  linkedProgramId?: string | null;
+  linkedPromotionId?: string | null;
   metadata: {
     note?: string;
     linkedEntity?: string;
@@ -110,6 +113,9 @@ export type IssueRecord = {
   ownershipState: OwnershipState;
   assignedTo: string;
   linkedUpdateId?: number | null;
+  linkedCampaignId?: string | null;
+  linkedProgramId?: string | null;
+  linkedPromotionId?: string | null;
   createdBy: string;
   createdAt: string;
   updatedAt: string;
@@ -126,6 +132,9 @@ export type TaskRecord = {
   assignedTo: string;
   linkedIssueId?: number | null;
   linkedUpdateId?: number | null;
+  linkedCampaignId?: string | null;
+  linkedProgramId?: string | null;
+  linkedPromotionId?: string | null;
   externalTaskRef?: ExternalTaskRef | null;
   createdBy: string;
   createdAt: string;
