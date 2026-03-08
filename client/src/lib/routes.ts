@@ -8,6 +8,10 @@ export type VenueScopedSection =
   | "audience"
   | "insights";
 
+export type NavMatchOptions = {
+  exact?: boolean;
+};
+
 export function withDefaultVenueSlug(venueSlug?: string | null): string {
   return venueSlug?.trim() || DEFAULT_VENUE_SLUG;
 }
@@ -121,4 +125,9 @@ export function getDefaultVenueRoute(section: VenueScopedSection = "dashboard"):
     default:
       return venue.dashboard;
   }
+}
+
+export function isRouteActive(currentPath: string, targetPath: string, options: NavMatchOptions = {}): boolean {
+  if (options.exact) return currentPath === targetPath;
+  return currentPath === targetPath || currentPath.startsWith(`${targetPath}/`);
 }

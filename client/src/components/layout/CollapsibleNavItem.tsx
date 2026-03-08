@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import { isRouteActive } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import type { NavCollapsible } from "./navConfig";
 
@@ -17,8 +18,7 @@ export function CollapsibleNavItem({
   isCollapsed,
 }: CollapsibleNavItemProps) {
   const hasChildren = !!item.children?.length;
-  const matchesPath = (candidate: string) =>
-    location === candidate || (candidate !== "/" && location.startsWith(candidate + "/"));
+  const matchesPath = (candidate: string) => isRouteActive(location, candidate);
 
   const isSelfActive =
     matchesPath(item.path) ||

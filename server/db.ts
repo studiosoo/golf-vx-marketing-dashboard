@@ -43,9 +43,659 @@ import {
   cfFunnels,
   cfFormSubmissions,
 } from "../drizzle/schema";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import path from "node:path";
 import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
+
+const reportingStorePath = path.join(process.cwd(), ".manus-logs", "phase2-reporting-store.json");
+
+type ReportTemplateType = "weekly_executive" | "monthly_marketing" | "paid_media";
+type BriefTemplateType = "weekly_ops" | "paid_media_one_pager" | "promotion_status" | "issue_blocker" | "branch_update";
+type ReportDraftStatus = "draft" | "ready" | "archived";
+type BriefStatus = "draft" | "ready" | "shared";
+type OperationalUpdateStatus = "new" | "in_review" | "processed";
+type OperationalSourceType = "manual" | "email" | "teams" | "screenshot" | "hq_summary" | "venue_update" | "imported";
+type OwnershipState =
+  | "awaiting_studio_soo"
+  | "awaiting_venue"
+  | "awaiting_hq"
+  | "awaiting_follow_up"
+  | "blocked_by_staffing"
+  | "blocked_by_missing_data"
+  | "needs_approval"
+  | "needs_local_execution"
+  | "needs_creative"
+  | "needs_booking_follow_up";
+type IssueStatus = "open" | "in_progress" | "blocked" | "resolved";
+type IssuePriority = "low" | "medium" | "high" | "critical";
+type TaskStatus = "open" | "in_progress" | "done" | "blocked";
+
+type ReportDraftRecord = {
+  id: number;
+  venueSlug: string;
+  reportType: ReportTemplateType;
+  title: string;
+  dateRangeLabel?: string | null;
+  status: ReportDraftStatus;
+  content: {
+    summary?: string;
+    sections: Array<{ heading: string; body: string }>;
+    highlights: string[];
+  };
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type BriefRecord = {
+  id: number;
+  venueSlug: string;
+  briefType: BriefTemplateType;
+  title: string;
+  status: BriefStatus;
+  content: {
+    effectiveDate?: string;
+    dateRangeLabel?: string;
+    summary: string;
+    topHighlights: string[];
+    blockers: string[];
+    nextActions: string[];
+  };
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type OperationalUpdateRecord = {
+  id: number;
+  venueSlug: string;
+  sourceType: OperationalSourceType;
+  rawText: string;
+  screenshot?: {
+    name: string;
+    mimeType: "image/png" | "image/jpeg" | "image/webp";
+    size: number;
+    dataUrl: string;
+  } | null;
+  status: OperationalUpdateStatus;
+  metadata: {
+    note?: string;
+    linkedEntity?: string;
+    normalizedSummary?: string;
+    ownershipState?: OwnershipState;
+    linkedIssueId?: number;
+    linkedTaskId?: number;
+  };
+  submittedBy: string;
+  submittedAt: string;
+  updatedAt: string;
+};
+
+type IssueRecord = {
+  id: number;
+  venueSlug: string;
+  title: string;
+  description: string;
+  status: IssueStatus;
+  priority: IssuePriority;
+  ownershipState: OwnershipState;
+  assignedTo: string;
+  linkedUpdateId?: number | null;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  dueAt?: string | null;
+};
+
+type TaskRecord = {
+  id: number;
+  venueSlug: string;
+  title: string;
+  description: string;
+  status: TaskStatus;
+  ownershipState: OwnershipState;
+  assignedTo: string;
+  linkedIssueId?: number | null;
+  linkedUpdateId?: number | null;
+  externalTaskRef?: {
+    provider: "asana";
+    taskGid: string;
+    permalinkUrl?: string;
+    status: "created" | "not_configured" | "failed";
+    message?: string;
+  } | null;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  dueAt?: string | null;
+};
+
+type ReportingStore = {
+  nextIds: {
+    reportDraft: number;
+    brief: number;
+    operationalUpdate: number;
+    issue: number;
+    task: number;
+  };
+  reportDrafts: ReportDraftRecord[];
+  briefs: BriefRecord[];
+  operationalUpdates: OperationalUpdateRecord[];
+  issues: IssueRecord[];
+  tasks: TaskRecord[];
+};
+
+const defaultReportingStore = (): ReportingStore => ({
+  nextIds: {
+    reportDraft: 3,
+    brief: 2,
+    operationalUpdate: 3,
+    issue: 3,
+    task: 4,
+  },
+  reportDrafts: [
+    {
+      id: 1,
+      venueSlug: "arlington-heights",
+      reportType: "weekly_executive",
+      title: "Arlington Heights Weekly Executive Report",
+      dateRangeLabel: "This Week",
+      status: "draft",
+      content: {
+        summary: "Weekly leadership snapshot covering revenue, member activity, and immediate campaign watchpoints.",
+        sections: [
+          { heading: "Executive Summary", body: "Draft summary prepared for venue leadership review." },
+        ],
+        highlights: ["Review paid media pacing", "Confirm weekly branch update inputs"],
+      },
+      createdBy: "system",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: 2,
+      venueSlug: "arlington-heights",
+      reportType: "paid_media",
+      title: "Paid Media Report",
+      dateRangeLabel: "Last 30 Days",
+      status: "ready",
+      content: {
+        summary: "Paid media performance recap with spend, reach, and campaign notes.",
+        sections: [
+          { heading: "Channel Summary", body: "Initial draft created from current reporting workspace." },
+        ],
+        highlights: ["Meta ads spend stabilized", "Need fresh creative for top campaign"],
+      },
+      createdBy: "system",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+  ],
+  briefs: [
+    {
+      id: 1,
+      venueSlug: "arlington-heights",
+      briefType: "weekly_ops",
+      title: "Weekly Ops Brief",
+      status: "draft",
+      content: {
+        effectiveDate: new Date().toISOString().slice(0, 10),
+        summary: "Current week operations summary is in progress.",
+        topHighlights: ["Inbox now accepts manual updates and screenshots"],
+        blockers: ["Need a final call on unresolved promotion copy"],
+        nextActions: ["Review new inbox items by source type"],
+      },
+      createdBy: "system",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+  ],
+  operationalUpdates: [
+    {
+      id: 1,
+      venueSlug: "arlington-heights",
+      sourceType: "venue_update",
+      rawText: "Front desk flagged two promo questions for the current giveaway signage.",
+      status: "new",
+      metadata: {
+        note: "Needs HQ review",
+        linkedEntity: "promotion",
+        ownershipState: "awaiting_hq",
+      },
+      submittedBy: "system",
+      submittedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: 2,
+      venueSlug: "arlington-heights",
+      sourceType: "hq_summary",
+      rawText: "HQ requested a lightweight weekly branch summary for Monday leadership review.",
+      status: "in_review",
+      metadata: {
+        normalizedSummary: "Prepare a branch update summary brief",
+        ownershipState: "awaiting_studio_soo",
+      },
+      submittedBy: "system",
+      submittedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+  ],
+  issues: [
+    {
+      id: 1,
+      venueSlug: "arlington-heights",
+      title: "Promo signage questions unresolved",
+      description: "Front desk needs confirmation on giveaway signage language before local execution.",
+      status: "open",
+      priority: "high",
+      ownershipState: "awaiting_hq",
+      assignedTo: "HQ support",
+      linkedUpdateId: 1,
+      createdBy: "system",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      dueAt: new Date(Date.now() + 86400000).toISOString(),
+    },
+    {
+      id: 2,
+      venueSlug: "arlington-heights",
+      title: "Weekly branch summary still pending",
+      description: "Leadership review needs the branch summary brief finalized before Monday morning.",
+      status: "in_progress",
+      priority: "medium",
+      ownershipState: "awaiting_studio_soo",
+      assignedTo: "Studio Soo",
+      linkedUpdateId: 2,
+      createdBy: "system",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      dueAt: new Date(Date.now() + 2 * 86400000).toISOString(),
+    },
+  ],
+  tasks: [
+    {
+      id: 1,
+      venueSlug: "arlington-heights",
+      title: "Follow up with HQ on signage copy",
+      description: "Confirm whether current giveaway signage is approved for local display.",
+      status: "open",
+      ownershipState: "awaiting_hq",
+      assignedTo: "HQ support",
+      linkedIssueId: 1,
+      linkedUpdateId: 1,
+      createdBy: "system",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      dueAt: new Date(Date.now() + 86400000).toISOString(),
+      externalTaskRef: null,
+    },
+    {
+      id: 2,
+      venueSlug: "arlington-heights",
+      title: "Prepare weekly branch update brief",
+      description: "Pull inbox/context into a branch update summary for Monday leadership review.",
+      status: "in_progress",
+      ownershipState: "awaiting_studio_soo",
+      assignedTo: "Studio Soo",
+      linkedIssueId: 2,
+      linkedUpdateId: 2,
+      createdBy: "system",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      dueAt: new Date(Date.now() + 2 * 86400000).toISOString(),
+      externalTaskRef: null,
+    },
+    {
+      id: 3,
+      venueSlug: "arlington-heights",
+      title: "Confirm local execution owner for upcoming promo",
+      description: "Venue admin needs to confirm who will handle on-site execution this week.",
+      status: "blocked",
+      ownershipState: "awaiting_venue",
+      assignedTo: "Venue Admin",
+      createdBy: "system",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      dueAt: new Date(Date.now() + 3 * 86400000).toISOString(),
+      externalTaskRef: null,
+    },
+  ],
+});
+
+async function readReportingStore(): Promise<ReportingStore> {
+  try {
+    const raw = await readFile(reportingStorePath, "utf8");
+    return JSON.parse(raw) as ReportingStore;
+  } catch {
+    const initial = defaultReportingStore();
+    await writeReportingStore(initial);
+    return initial;
+  }
+}
+
+async function writeReportingStore(store: ReportingStore): Promise<void> {
+  await mkdir(path.dirname(reportingStorePath), { recursive: true });
+  await writeFile(reportingStorePath, JSON.stringify(store, null, 2), "utf8");
+}
+
+export function getReportingTemplates() {
+  return {
+    reports: [
+      {
+        type: "weekly_executive" as const,
+        title: "Arlington Heights Weekly Executive Report",
+        description: "A recurring leadership report for weekly venue performance, issues, and key actions.",
+        cadence: "Weekly",
+      },
+      {
+        type: "monthly_marketing" as const,
+        title: "Arlington Heights Monthly Marketing Report",
+        description: "Monthly view of campaigns, channel activity, and venue marketing outcomes.",
+        cadence: "Monthly",
+      },
+      {
+        type: "paid_media" as const,
+        title: "Paid Media Report",
+        description: "Channel-specific report focused on spend, efficiency, and current paid campaign learnings.",
+        cadence: "As Needed",
+      },
+    ],
+    briefs: [
+      { type: "weekly_ops" as const, title: "Weekly Ops Brief" },
+      { type: "paid_media_one_pager" as const, title: "Paid Media One-Pager" },
+      { type: "promotion_status" as const, title: "Promotion Status Brief" },
+      { type: "issue_blocker" as const, title: "Issue / Blocker Brief" },
+      { type: "branch_update" as const, title: "Branch Update Summary" },
+    ],
+    sourceTypes: ["manual", "email", "teams", "screenshot", "hq_summary", "venue_update", "imported"] as const,
+  };
+}
+
+export async function listReportDrafts(venueSlug: string) {
+  const store = await readReportingStore();
+  return store.reportDrafts
+    .filter((record) => record.venueSlug === venueSlug)
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+}
+
+export async function createReportDraft(input: Omit<ReportDraftRecord, "id" | "createdAt" | "updatedAt">) {
+  const store = await readReportingStore();
+  const timestamp = new Date().toISOString();
+  const record: ReportDraftRecord = {
+    id: store.nextIds.reportDraft++,
+    ...input,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  };
+  store.reportDrafts.unshift(record);
+  await writeReportingStore(store);
+  return record;
+}
+
+export async function updateReportDraft(
+  id: number,
+  updates: Pick<ReportDraftRecord, "title" | "dateRangeLabel" | "status" | "content">
+) {
+  const store = await readReportingStore();
+  const record = store.reportDrafts.find((item) => item.id === id);
+  if (!record) throw new Error("Report draft not found");
+  record.title = updates.title;
+  record.dateRangeLabel = updates.dateRangeLabel;
+  record.status = updates.status;
+  record.content = updates.content;
+  record.updatedAt = new Date().toISOString();
+  await writeReportingStore(store);
+  return record;
+}
+
+export async function listBriefs(venueSlug: string) {
+  const store = await readReportingStore();
+  return store.briefs
+    .filter((record) => record.venueSlug === venueSlug)
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+}
+
+export async function createBrief(input: Omit<BriefRecord, "id" | "createdAt" | "updatedAt">) {
+  const store = await readReportingStore();
+  const timestamp = new Date().toISOString();
+  const record: BriefRecord = {
+    id: store.nextIds.brief++,
+    ...input,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  };
+  store.briefs.unshift(record);
+  await writeReportingStore(store);
+  return record;
+}
+
+export async function updateBrief(
+  id: number,
+  updates: Pick<BriefRecord, "title" | "status" | "content">
+) {
+  const store = await readReportingStore();
+  const record = store.briefs.find((item) => item.id === id);
+  if (!record) throw new Error("Brief not found");
+  record.title = updates.title;
+  record.status = updates.status;
+  record.content = updates.content;
+  record.updatedAt = new Date().toISOString();
+  await writeReportingStore(store);
+  return record;
+}
+
+export async function listOperationalUpdates(venueSlug: string) {
+  const store = await readReportingStore();
+  return store.operationalUpdates
+    .filter((record) => record.venueSlug === venueSlug)
+    .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt));
+}
+
+export async function createOperationalUpdate(
+  input: Omit<OperationalUpdateRecord, "id" | "submittedAt" | "updatedAt">
+) {
+  const store = await readReportingStore();
+  const timestamp = new Date().toISOString();
+  const record: OperationalUpdateRecord = {
+    id: store.nextIds.operationalUpdate++,
+    ...input,
+    submittedAt: timestamp,
+    updatedAt: timestamp,
+  };
+  store.operationalUpdates.unshift(record);
+  await writeReportingStore(store);
+  return record;
+}
+
+export async function updateOperationalUpdate(
+  id: number,
+  updates: Pick<OperationalUpdateRecord, "status"> & { metadata?: OperationalUpdateRecord["metadata"] }
+) {
+  const store = await readReportingStore();
+  const record = store.operationalUpdates.find((item) => item.id === id);
+  if (!record) throw new Error("Operational update not found");
+  record.status = updates.status;
+  if (updates.metadata) {
+    record.metadata = {
+      ...record.metadata,
+      ...updates.metadata,
+    };
+  }
+  record.updatedAt = new Date().toISOString();
+  await writeReportingStore(store);
+  return record;
+}
+
+
+export async function listIssues(venueSlug: string) {
+  const store = await readReportingStore();
+  return store.issues
+    .filter((record) => record.venueSlug === venueSlug)
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+}
+
+export async function createIssue(input: Omit<IssueRecord, "id" | "createdAt" | "updatedAt">) {
+  const store = await readReportingStore();
+  const timestamp = new Date().toISOString();
+  const record: IssueRecord = {
+    id: store.nextIds.issue++,
+    ...input,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  };
+  store.issues.unshift(record);
+  if (record.linkedUpdateId) {
+    const update = store.operationalUpdates.find((item) => item.id === record.linkedUpdateId);
+    if (update) {
+      update.metadata = { ...update.metadata, linkedIssueId: record.id, ownershipState: record.ownershipState };
+      update.updatedAt = timestamp;
+    }
+  }
+  await writeReportingStore(store);
+  return record;
+}
+
+export async function updateIssue(
+  id: number,
+  updates: Pick<IssueRecord, "title" | "description" | "status" | "priority" | "ownershipState" | "assignedTo" | "dueAt"> & { linkedUpdateId?: number | null }
+) {
+  const store = await readReportingStore();
+  const record = store.issues.find((item) => item.id === id);
+  if (!record) throw new Error("Issue not found");
+  record.title = updates.title;
+  record.description = updates.description;
+  record.status = updates.status;
+  record.priority = updates.priority;
+  record.ownershipState = updates.ownershipState;
+  record.assignedTo = updates.assignedTo;
+  record.dueAt = updates.dueAt;
+  record.linkedUpdateId = updates.linkedUpdateId ?? null;
+  record.updatedAt = new Date().toISOString();
+  if (record.linkedUpdateId) {
+    const update = store.operationalUpdates.find((item) => item.id === record.linkedUpdateId);
+    if (update) {
+      update.metadata = { ...update.metadata, linkedIssueId: record.id, ownershipState: record.ownershipState };
+      update.updatedAt = record.updatedAt;
+    }
+  }
+  await writeReportingStore(store);
+  return record;
+}
+
+export async function listTasks(venueSlug: string) {
+  const store = await readReportingStore();
+  return store.tasks
+    .filter((record) => record.venueSlug === venueSlug)
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+}
+
+export async function createTask(input: Omit<TaskRecord, "id" | "createdAt" | "updatedAt">) {
+  const store = await readReportingStore();
+  const timestamp = new Date().toISOString();
+  const record: TaskRecord = {
+    id: store.nextIds.task++,
+    ...input,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  };
+  store.tasks.unshift(record);
+  if (record.linkedUpdateId) {
+    const update = store.operationalUpdates.find((item) => item.id === record.linkedUpdateId);
+    if (update) {
+      update.metadata = { ...update.metadata, linkedTaskId: record.id, ownershipState: record.ownershipState };
+      update.updatedAt = timestamp;
+    }
+  }
+  await writeReportingStore(store);
+  return record;
+}
+
+export async function getTaskById(id: number) {
+  const store = await readReportingStore();
+  return store.tasks.find((item) => item.id === id) ?? null;
+}
+
+export async function updateTask(
+  id: number,
+  updates: Pick<TaskRecord, "title" | "description" | "status" | "ownershipState" | "assignedTo" | "dueAt" | "externalTaskRef"> & { linkedIssueId?: number | null; linkedUpdateId?: number | null }
+) {
+  const store = await readReportingStore();
+  const record = store.tasks.find((item) => item.id === id);
+  if (!record) throw new Error("Task not found");
+  record.title = updates.title;
+  record.description = updates.description;
+  record.status = updates.status;
+  record.ownershipState = updates.ownershipState;
+  record.assignedTo = updates.assignedTo;
+  record.dueAt = updates.dueAt;
+  record.linkedIssueId = updates.linkedIssueId ?? null;
+  record.linkedUpdateId = updates.linkedUpdateId ?? null;
+  record.externalTaskRef = updates.externalTaskRef ?? null;
+  record.updatedAt = new Date().toISOString();
+  if (record.linkedUpdateId) {
+    const update = store.operationalUpdates.find((item) => item.id === record.linkedUpdateId);
+    if (update) {
+      update.metadata = { ...update.metadata, linkedTaskId: record.id, ownershipState: record.ownershipState };
+      update.updatedAt = record.updatedAt;
+    }
+  }
+  await writeReportingStore(store);
+  return record;
+}
+
+export async function getThisWeekSummary(venueSlug: string) {
+  const store = await readReportingStore();
+  const updates = store.operationalUpdates.filter((record) => record.venueSlug === venueSlug);
+  const issues = store.issues.filter((record) => record.venueSlug === venueSlug);
+  const tasks = store.tasks.filter((record) => record.venueSlug === venueSlug);
+
+  const blockedItems = [
+    ...issues.filter((issue) => issue.status === "blocked"),
+    ...tasks.filter((task) => task.status === "blocked"),
+  ];
+
+  const ownershipBuckets = {
+    awaiting_studio_soo: [] as Array<{ kind: "issue" | "task"; id: number; title: string; status: string }>,
+    awaiting_venue: [] as Array<{ kind: "issue" | "task"; id: number; title: string; status: string }>,
+    awaiting_hq: [] as Array<{ kind: "issue" | "task"; id: number; title: string; status: string }>,
+  };
+
+  for (const issue of issues) {
+    if (issue.ownershipState in ownershipBuckets) {
+      ownershipBuckets[issue.ownershipState as keyof typeof ownershipBuckets].push({ kind: "issue", id: issue.id, title: issue.title, status: issue.status });
+    }
+  }
+  for (const task of tasks) {
+    if (task.ownershipState in ownershipBuckets) {
+      ownershipBuckets[task.ownershipState as keyof typeof ownershipBuckets].push({ kind: "task", id: task.id, title: task.title, status: task.status });
+    }
+  }
+
+  const dueTasks = tasks.filter((task) => task.status !== "done" && task.dueAt);
+  const topPriorities = [
+    ...issues.filter((issue) => issue.status !== "resolved").sort((a, b) => a.priority.localeCompare(b.priority)).slice(0, 3).map((issue) => ({ kind: "issue" as const, id: issue.id, title: issue.title, status: issue.status, ownershipState: issue.ownershipState })),
+    ...tasks.filter((task) => task.status !== "done").slice(0, 3).map((task) => ({ kind: "task" as const, id: task.id, title: task.title, status: task.status, ownershipState: task.ownershipState })),
+  ].slice(0, 6);
+
+  return {
+    counts: {
+      newInboxItems: updates.filter((update) => update.status === "new").length,
+      openIssues: issues.filter((issue) => issue.status !== "resolved").length,
+      dueTasks: dueTasks.length,
+      blockedItems: blockedItems.length,
+    },
+    topPriorities,
+    ownershipBuckets,
+    upcoming: {
+      inbox: updates.slice(0, 5),
+      issues: issues.filter((issue) => issue.status !== "resolved").slice(0, 5),
+      tasks: tasks.filter((task) => task.status !== "done").slice(0, 5),
+    },
+  };
+}
 
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
