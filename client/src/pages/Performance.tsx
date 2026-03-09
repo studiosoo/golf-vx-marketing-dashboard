@@ -8,7 +8,7 @@ import { DollarSign, BarChart3, ArrowRight, TrendingUp, Activity } from "lucide-
 export default function Performance() {
   const [, navigate] = useLocation();
 
-  const { data: campaigns, isLoading: campaignsLoading } = trpc.campaigns.getByStatus.useQuery({ status: "active" });
+  const { data: campaigns, isLoading: campaignsLoading } = trpc.campaigns.list.useQuery();
   const { data: channelSummary } = trpc.campaigns.getCategorySummary.useQuery();
   const { data: revSummary } = trpc.revenue.getSummary.useQuery(undefined);
 
@@ -130,7 +130,7 @@ export default function Performance() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-12 text-muted-foreground">No active campaigns</div>
+            <div className="text-center py-12 text-muted-foreground">No campaigns found</div>
           )}
         </TabsContent>
 

@@ -309,7 +309,10 @@ export default function Reports() {
   const { data: campaigns } = trpc.campaigns.list.useQuery();
   const { data: memberStats } = trpc.members.getStats.useQuery();
   const { data: revSummary } = trpc.revenue.getSummary.useQuery({ startDate, endDate });
-  // Drive Day metrics sourced from programs array below
+  const { data: winterMetrics } = trpc.campaigns.getWinterClinicMetrics.useQuery(
+    { minDate: "2026-01-01", maxDate: "2026-03-31" },
+    { staleTime: 5 * 60 * 1000 }
+  );
 
   // Program health scores based on real data
   const programs = useMemo(() => [
@@ -319,12 +322,12 @@ export default function Reports() {
       status: "active",
       goalCompletionPct: 87,   // 52/60 attendance
       attendancePct: 87,
-      revenuePct: 70,          // $20/person, 52 paid some
+      revenuePct: 70,          // $20/person, 52 paid
       leadCapturePct: 60,
       socialPct: 50,
       kpi: "52 / 60 attendees",
       kpiLabel: "Attendance",
-      revenue: 1040,
+      revenue: 1040,           // Acuity booking revenue — manually tracked
       revenueTarget: 1200,
       notes: "2 dates remaining (Mar 22 + Mar 29)",
     },
@@ -332,14 +335,16 @@ export default function Reports() {
       name: "Winter Clinic",
       type: "Instruction Program",
       status: "active",
-      goalCompletionPct: 55,   // Bogey Jrs + Par Shooters on target, others low
+      goalCompletionPct: 55,
       attendancePct: 55,
-      revenuePct: 55,
+      revenuePct: winterMetrics ? Math.min(100, Math.round((winterMetrics.totalRevenue / 2400) * 100)) : 55,
       leadCapturePct: 40,
       socialPct: 30,
-      kpi: "4 / 8 class types on target",
+      kpi: winterMetrics
+        ? `${winterMetrics.totalRegistrations} registrations · $${Math.round(winterMetrics.totalRevenue).toLocaleString()} revenue`
+        : "4 / 8 class types on target",
       kpiLabel: "Class Fill Rate",
-      revenue: 0,
+      revenue: winterMetrics ? Math.round(winterMetrics.totalRevenue) : 0,
       revenueTarget: 2400,
       notes: "Bogey Jrs & Par Shooters performing well; other levels need promotion",
     },
@@ -388,7 +393,7 @@ export default function Reports() {
       revenueTarget: 300,
       notes: "1 bay booking ($300). 4,167 ad impressions. Low attendance but positive ROI on ad spend.",
     },
-  ], []);
+  ], [winterMetrics]);
 
   const programsWithScore = useMemo(() =>
     programs.map(p => ({ ...p, healthScore: calcHealthScore(p) }))
@@ -417,7 +422,7 @@ export default function Reports() {
 
   const metaSpend = [
     { name: "Annual Giveaway A1", spend: 803, impressions: 80947, ctr: 0.90 },
-    { name: "Junior Summer Camp", spend: 293.16, impressions: 82307, ctr: 1.82 },
+    { name: "Junior Summer Camp *", spend: 293.16, impressions: 82307, ctr: 1.82 },
     { name: "Annual Giveaway A2", spend: 379, impressions: 26434, ctr: 2.80 },
     { name: "Superbowl Watch Party", spend: 75, impressions: 4167, ctr: 1.37 },
     { name: "Drive Day Boost", spend: 55, impressions: 4633, ctr: 4.21 },
