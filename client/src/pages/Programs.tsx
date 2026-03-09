@@ -1,5 +1,6 @@
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
+import { appRoutes, DEFAULT_VENUE_SLUG } from "@/lib/routes";
 import { useState, useMemo } from "react";
 import {
   Plus,
@@ -89,28 +90,16 @@ const STRATEGIC_META: Record<StrategicCampaign, { label: string; color: string }
   corporate_events: { label: "B2B Sales", color: "#111111" },
 };
 
-// Map program names to detail routes
-const PROGRAM_ROUTES: Record<string, string> = {
-  "Drive Day": "/programs/drive-day",
-  "Sunday Clinic": "/programs/drive-day",
-  "Winter Clinic": "/programs/winter-clinics",
-  "Junior Summer Camp": "/programs/summer-camp",
-  "Junior Golf Summer Camp 2026": "/programs/summer-camp",
-  "Leagues": "/programs/leagues",
-  "Annual Giveaway": "/programs/annual-giveaway",
-  "Golf VX Annual Giveaway": "/programs/annual-giveaway",
-};
-
 function getProgramRoute(program: Program): string {
-  // Check by name keywords
   const name = program.name.toLowerCase();
-  if (name.includes("drive day") || name.includes("sunday clinic")) return "/programs/drive-day";
-  if (name.includes("winter clinic")) return "/programs/winter-clinics";
-  if (name.includes("junior") || name.includes("summer camp")) return "/programs/summer-camp";
-  if (name.includes("league") || name.includes("tournament")) return "/programs/leagues";
-  if (name.includes("giveaway")) return "/programs/annual-giveaway";
-  if (name.includes("trial") || name.includes("1-hour")) return "/programs/trial-session";
-  return `/programs/${program.id}`;
+  const pd = appRoutes.venue(DEFAULT_VENUE_SLUG).operations.programDetail;
+  if (name.includes("drive day") || name.includes("sunday clinic")) return pd("drive-day");
+  if (name.includes("winter clinic")) return pd("winter-clinics");
+  if (name.includes("junior") || name.includes("summer camp")) return pd("summer-camp");
+  if (name.includes("league") || name.includes("tournament")) return pd("leagues");
+  if (name.includes("giveaway")) return pd("annual-giveaway");
+  if (name.includes("trial") || name.includes("1-hour")) return pd("trial-session");
+  return pd(program.id);
 }
 
 // ─────────────────────────────────────────────

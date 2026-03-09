@@ -284,6 +284,10 @@ function RevenueTabContent() {
   );
 }
 
+function toISODate(d: Date) {
+  return d.toISOString().split("T")[0];
+}
+
 export default function Reports() {
   const [activeTab, setActiveTab] = useState(() => {
     if (typeof window !== "undefined") {
@@ -294,14 +298,17 @@ export default function Reports() {
   });
 
   const now = useMemo(() => new Date(), []);
-  const startOfMonth = useMemo(() => new Date(now.getFullYear(), now.getMonth(), 1), [now]);
-  const endOfMonth = useMemo(() => new Date(now.getFullYear(), now.getMonth() + 1, 0), [now]);
-  const startOfYear = useMemo(() => new Date(now.getFullYear(), 0, 1), [now]);
+  // Default: Jan 1 → today (full year-to-date)
+  const [startDateStr, setStartDateStr] = useState(() => `${now.getFullYear()}-01-01`);
+  const [endDateStr, setEndDateStr] = useState(() => toISODate(now));
+
+  const startDate = useMemo(() => new Date(startDateStr + "T00:00:00"), [startDateStr]);
+  const endDate = useMemo(() => new Date(endDateStr + "T23:59:59"), [endDateStr]);
 
   const { data: snapshot } = trpc.preview.getSnapshot.useQuery();
   const { data: campaigns } = trpc.campaigns.list.useQuery();
   const { data: memberStats } = trpc.members.getStats.useQuery();
-  const { data: revSummary } = trpc.revenue.getSummary.useQuery({ startDate: startOfYear, endDate: endOfMonth });
+  const { data: revSummary } = trpc.revenue.getSummary.useQuery({ startDate, endDate });
   // Drive Day metrics sourced from programs array below
 
   // Program health scores based on real data
@@ -423,17 +430,31 @@ export default function Reports() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Reports</h1>
           <p className="text-muted-foreground text-sm mt-1">Performance across all programs, campaigns, and revenue streams</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+          {/* Date range selector */}
+          <div className="flex items-center gap-2 bg-muted/30 border border-border rounded-lg px-3 py-1.5">
+            <span className="text-xs text-muted-foreground whitespace-nowrap">From</span>
+            <input
+              type="date"
+              value={startDateStr}
+              onChange={e => setStartDateStr(e.target.value)}
+              className="text-xs bg-transparent border-none outline-none text-foreground"
+            />
+            <span className="text-xs text-muted-foreground">–</span>
+            <input
+              type="date"
+              value={endDateStr}
+              onChange={e => setEndDateStr(e.target.value)}
+              className="text-xs bg-transparent border-none outline-none text-foreground"
+            />
+          </div>
           <Button variant="outline" size="sm" className="gap-2">
             <Download size={14} /> Export PDF
-          </Button>
-          <Button variant="outline" size="sm" className="gap-2">
-            <RefreshCw size={14} /> Refresh
           </Button>
         </div>
       </div>
@@ -442,8 +463,8 @@ export default function Reports() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard
           icon={DollarSign}
-          label="MRR (Mar 2026)"
-          value={fmtCurrency(snapshot?.members?.mrr ?? 59910)}
+          label={`MRR (${now.toLocaleDateString("en-US", { month: "short", year: "numeric" })})`}
+          value={snapshot?.members?.mrr != null ? fmtCurrency(snapshot.members.mrr) : "—"}
           sub={snapshot?.revenue?.mom != null ? `${fmtPct(snapshot.revenue.mom)} vs last month` : undefined}
           trend={snapshot?.revenue?.mom}
         />
@@ -488,6 +509,7 @@ export default function Reports() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
                   <Award size={14} style={{ color: YELLOW }} /> Program Health Scores
+                  <span className="text-[10px] font-normal text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded">Manually tracked</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -563,6 +585,10 @@ export default function Reports() {
 
         {/* Program Health Tab */}
         <TabsContent value="programs" className="space-y-4 mt-4">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/30 border border-border text-xs text-muted-foreground">
+            <span>⚠</span>
+            <span>Health scores are <strong>manually tracked estimates</strong> based on notes and partial data — not pulled from a live source. Update the values in <code>Reports.tsx</code> as new data becomes available.</span>
+          </div>
           {programsWithScore.map(p => (
             <Card key={p.name} className="bg-card border-border">
               <CardContent className="p-5">

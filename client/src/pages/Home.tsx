@@ -303,13 +303,15 @@ export default function Home() {
     statusColor?: string;
   }> = [
     {
-      label: "Annual Revenue",
+      label: "Annual Revenue (Est.)",
       icon: DollarSign,
-      current: annualRunRate,
+      current: hasAnyRevenue ? annualRunRate : null,
       goal: ANNUAL_REVENUE_GOAL,
-      display: fmtCurrency(annualRunRate),
+      display: hasAnyRevenue ? fmtCurrency(annualRunRate) : "—",
       goalDisplay: "$2M",
       color: "#F5C72C",
+      statusNote: hasAnyRevenue ? "Projected run rate · not actual YTD" : null,
+      statusColor: "#888888",
     },
     {
       label: "Members",
@@ -524,18 +526,11 @@ export default function Home() {
               </div>
             )}
           </div>
-          <div className="flex flex-col justify-center">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[13px] font-semibold text-[#111111]">Member Goal Progress</span>
-              <span className="text-[18px] font-bold text-[#F5C72C]">{memberGoalPct.toFixed(0)}%</span>
-            </div>
-            <div className="h-2.5 bg-[#F2F2F7] rounded-full overflow-hidden">
-              <div className="h-full rounded-full bg-[#F5C72C] transition-all" style={{ width: `${memberGoalPct}%` }} />
-            </div>
-            <div className="flex justify-between mt-1.5">
-              <span className="text-[11px] text-[#AAAAAA]">{fmt(memberTotal)} of {fmt(memberGoal)} members</span>
-              <span className="text-[11px] text-[#AAAAAA]">{fmt(memberGoal - memberTotal)} remaining</span>
-            </div>
+          <div className="flex flex-col justify-center space-y-2">
+            <p className="text-[12px] text-[#888888]">Goal progress is tracked in the <strong className="text-[#111111]">2026 Key Goals</strong> section above.</p>
+            {members?.newThisMonth === undefined && (
+              <p className="text-[11px] text-[#AAAAAA]">New member count will appear once synced.</p>
+            )}
           </div>
         </div>
       </div>
@@ -579,33 +574,32 @@ export default function Home() {
             <div className="p-3 rounded-lg bg-[#FAFAFA] border border-[#F0F0F0]">
               <div className="flex items-center gap-1.5 mb-1">
                 <ShoppingBag className="h-3 w-3 text-[#AAAAAA]" />
-                <span className="text-[10px] text-[#AAAAAA]">Toast POS</span>
+                <span className="text-[10px] text-[#AAAAAA]">Toast POS · MTD</span>
               </div>
               <p className="text-[24px] font-bold text-[#111111] leading-none tracking-tight">{fmtCurrency(toastMTD)}</p>
-              <p className="text-[11px] text-[#888888] mt-1">This month</p>
-              {toastOrders > 0 && <p className="text-[10px] text-[#AAAAAA] mt-0.5">{toastOrders} orders</p>}
-              {toastLastMonth > 0 && <p className="text-[10px] text-[#AAAAAA]">Last month: {fmtCurrency(toastLastMonth)}</p>}
+              <p className="text-[11px] text-[#888888] mt-1">{now.toLocaleDateString("en-US", { month: "long" })} · {toastOrders > 0 ? `${toastOrders} orders` : "No orders yet"}</p>
+              {toastLastMonth > 0 && <p className="text-[10px] text-[#AAAAAA] mt-0.5">Last month: {fmtCurrency(toastLastMonth)}</p>}
             </div>
           )}
           {acuityTotal > 0 && (
             <div className="p-3 rounded-lg bg-[#FAFAFA] border border-[#F0F0F0]">
               <div className="flex items-center gap-1.5 mb-1">
                 <CreditCard className="h-3 w-3 text-[#AAAAAA]" />
-                <span className="text-[10px] text-[#AAAAAA]">Programs</span>
+                <span className="text-[10px] text-[#AAAAAA]">Programs · Acuity</span>
               </div>
               <p className="text-[24px] font-bold text-[#111111] leading-none tracking-tight">{fmtCurrency(acuityTotal)}</p>
-              <p className="text-[11px] text-[#888888] mt-1">Acuity bookings</p>
-              {acuityBookings > 0 && <p className="text-[10px] text-[#AAAAAA] mt-0.5">{acuityBookings} sessions</p>}
+              <p className="text-[11px] text-[#888888] mt-1">All sessions · {acuityBookings > 0 ? `${acuityBookings} bookings` : "No bookings"}</p>
             </div>
           )}
           {hasAnyRevenue && (
             <div className="p-3 rounded-lg bg-[#F5C72C]/5 border border-[#F5C72C]/20">
               <div className="flex items-center gap-1.5 mb-1">
                 <Award className="h-3 w-3 text-[#111111]" />
-                <span className="text-[10px] text-[#888888]">Total MTD</span>
+                <span className="text-[10px] text-[#888888]">Combined MTD + MRR</span>
               </div>
-              <p className="text-[24px] font-bold text-[#111111] leading-none tracking-tight">{fmtCurrency(mrr + toastMTD + acuityTotal)}</p>
-              <p className="text-[11px] text-[#888888] mt-1">All channels</p>
+              <p className="text-[24px] font-bold text-[#111111] leading-none tracking-tight">{fmtCurrency(mrr + toastMTD)}</p>
+              <p className="text-[11px] text-[#888888] mt-1">MRR + Toast this month</p>
+              <p className="text-[10px] text-[#AAAAAA] mt-0.5">Acuity reported separately above</p>
             </div>
           )}
         </div>

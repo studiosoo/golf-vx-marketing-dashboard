@@ -12,6 +12,7 @@ import AnniversaryGiveawayApplication from "./pages/AnniversaryGiveawayApplicati
 import AnniversaryGiveawayThankYou from "./pages/AnniversaryGiveawayThankYou";
 import CampaignDetail from "./pages/CampaignDetail";
 import MetaAdsCampaignDetail from "./pages/MetaAdsCampaignDetail";
+import ProgramDetailRouter from "./pages/ProgramDetailRouter";
 import MemberProfile from "./pages/MemberProfile";
 import {
   AccountProfilePlaceholder,
@@ -103,6 +104,7 @@ function DashboardAppRoutes() {
         <Route path="/app/:venueSlug/operations/paid-media" component={OperationsPaidMediaWrapper} />
         <Route path="/app/:venueSlug/operations/paid-media/:id" component={MetaAdsCampaignDetail} />
         <Route path="/app/:venueSlug/operations/programs" component={OperationsProgramsWrapper} />
+        <Route path="/app/:venueSlug/operations/programs/:slug" component={ProgramDetailRouter} />
         <Route path="/app/:venueSlug/operations/promotions" component={OperationsPromotionsWrapper} />
         <Route path="/app/:venueSlug/operations/communications" component={OperationsCommunicationsWrapper} />
         <Route path="/app/:venueSlug/operations/content" component={OperationsContentWrapper} />
@@ -168,6 +170,14 @@ function LegacyRoutes() {
       <Route path="/meta-ads/campaign/:id">{params => <Redirect to={venue.operations.paidMediaDetail(params.id)} />}</Route>
 
       <Route path="/programs">{() => <Redirect to={venue.operations.programs} />}</Route>
+      <Route path="/programs/winter-clinics">{() => <Redirect to={venue.operations.programDetail("winter-clinics")} />}</Route>
+      <Route path="/programs/drive-day">{() => <Redirect to={venue.operations.programDetail("drive-day")} />}</Route>
+      <Route path="/programs/sunday-clinic">{() => <Redirect to={venue.operations.programDetail("sunday-clinic")} />}</Route>
+      <Route path="/programs/summer-camp">{() => <Redirect to={venue.operations.programDetail("summer-camp")} />}</Route>
+      <Route path="/programs/leagues">{() => <Redirect to={venue.operations.programDetail("leagues")} />}</Route>
+      <Route path="/programs/annual-giveaway">{() => <Redirect to={venue.operations.programDetail("annual-giveaway")} />}</Route>
+      <Route path="/programs/trial-session">{() => <Redirect to={venue.operations.programDetail("trial-session")} />}</Route>
+      <Route path="/programs/:id">{params => <Redirect to={venue.operations.programDetail(params.id!)} />}</Route>
       <Route path="/promotions/hub">{() => <Redirect to={venue.operations.promotions} />}</Route>
       <Route path="/communication">{() => <Redirect to={venue.operations.communications} />}</Route>
       <Route path="/communication/hub">{() => <Redirect to={venue.operations.communications} />}</Route>
