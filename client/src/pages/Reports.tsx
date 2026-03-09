@@ -11,7 +11,7 @@ import {
 } from "recharts";
 import {
   TrendingUp, TrendingDown, Users, DollarSign, Target, Calendar,
-  FileText, Download, RefreshCw, Star, Activity, Award,
+  FileText, RefreshCw, Star, Activity, Award,
   ShoppingBag, CreditCard
 } from "lucide-react";
 
@@ -453,9 +453,6 @@ export default function Reports() {
               className="text-xs bg-transparent border-none outline-none text-foreground"
             />
           </div>
-          <Button variant="outline" size="sm" className="gap-2">
-            <Download size={14} /> Export PDF
-          </Button>
         </div>
       </div>
 

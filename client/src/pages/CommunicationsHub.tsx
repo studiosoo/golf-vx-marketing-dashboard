@@ -111,13 +111,14 @@ export default function CommunicationsHub() {
           audienceDescription: `${selectedMembers.length} Golf VX members`,
         }}),
       });
-      if (resp.ok) {
-        const data = await resp.json();
-        const emails = data?.result?.data?.json?.emails;
-        if (emails && emails.length > 0) {
-          setSubject(emails[0].subject || '');
-          setBody(emails[0].body || '');
-        }
+      if (!resp.ok) throw new Error(`Request failed (${resp.status})`);
+      const data = await resp.json();
+      const emails = data?.result?.data?.json?.emails;
+      if (emails && emails.length > 0) {
+        setSubject(emails[0].subject || '');
+        setBody(emails[0].body || '');
+      } else {
+        throw new Error("No draft returned");
       }
     } catch {
       toast({ title: 'AI draft failed', description: 'Could not generate draft. Please write manually.', variant: 'destructive' });

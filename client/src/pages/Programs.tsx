@@ -369,7 +369,7 @@ function AddProgramDialog({ onSuccess }: { onSuccess: () => void }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-[#F5C72C] text-[#111111] font-semibold hover:brightness-95 active:scale-95 transition-all h-9 px-4 text-[13px]">
+        <Button data-add-program className="bg-[#F5C72C] text-[#111111] font-semibold hover:brightness-95 active:scale-95 transition-all h-9 px-4 text-[13px]">
           <Plus className="h-4 w-4 mr-1.5" />
           New Program
         </Button>
