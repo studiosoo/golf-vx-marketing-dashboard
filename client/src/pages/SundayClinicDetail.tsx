@@ -283,15 +283,35 @@ export default function SundayClinicDetail() {
   const [sourceModal, setSourceModal] = useState<SourceModal>(null);
   const [eventModal, setEventModal] = useState<EventModal>(null);
 
-  const { data: metrics, isLoading } = trpc.campaigns.getSundayClinicMetrics.useQuery({
+  const { data: metrics, isLoading, error } = trpc.campaigns.getSundayClinicMetrics.useQuery({
     minDate: "2026-01-01",
     maxDate: "2026-03-31",
   }, { staleTime: 0 });
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Sunday Clinic — Drive Day Series</h1>
+          <p className="text-muted-foreground">Loading clinic data from Acuity…</p>
+        </div>
+        <div className="flex items-center justify-center h-48">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Sunday Clinic — Drive Day Series</h1>
+        </div>
+        <div className="rounded-lg border border-border bg-muted/20 p-6 text-center space-y-1">
+          <p className="text-sm font-semibold text-foreground">Unable to load clinic data</p>
+          <p className="text-xs text-muted-foreground">Acuity scheduling data is temporarily unavailable. Try refreshing the page.</p>
+        </div>
       </div>
     );
   }

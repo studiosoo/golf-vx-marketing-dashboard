@@ -248,7 +248,7 @@ export const campaignsRouter = router({
       clinicShortName: z.string().optional(),
     }))
     .query(async ({ input }) => {
-      const { getAppointments } = await import("../acuity");
+      const { getAppointments, categorizeClinicType } = await import("../acuity");
       const appointments = await getAppointments({
         minDate: input.minDate || '2026-01-01',
         maxDate: input.maxDate || '2026-03-31',
@@ -270,7 +270,7 @@ export const campaignsRouter = router({
         );
         if (!isClinic) return false;
         if (input.clinicShortName) {
-          return apt.type.toLowerCase().includes(input.clinicShortName.toLowerCase());
+          return categorizeClinicType(apt.type).shortName === input.clinicShortName;
         }
         return true;
       });

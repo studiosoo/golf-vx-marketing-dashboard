@@ -45,6 +45,31 @@ function GenericProgramDetail({ slug }: { slug: string }) {
     { enabled: numericId !== undefined }
   );
 
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-4 max-w-3xl">
+        <BackToProgramsButton />
+        <div className="space-y-3">
+          <div className="h-6 bg-muted animate-pulse rounded w-48" />
+          <div className="h-4 bg-muted animate-pulse rounded w-32" />
+        </div>
+      </div>
+    );
+  }
+
+  // Numeric ID that doesn't exist in the DB
+  if (numericId !== undefined && !program) {
+    return (
+      <div className="p-6 space-y-4 max-w-3xl">
+        <BackToProgramsButton />
+        <div className="rounded-lg border border-border bg-muted/20 p-6 text-center space-y-1">
+          <p className="text-sm font-semibold text-foreground">Program not found</p>
+          <p className="text-xs text-muted-foreground">No program with ID {numericId} exists. It may have been deleted or the link is incorrect.</p>
+        </div>
+      </div>
+    );
+  }
+
   const programName = program
     ? (program as any).name
     : slug.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
@@ -53,9 +78,7 @@ function GenericProgramDetail({ slug }: { slug: string }) {
     <div className="p-6 space-y-4 max-w-3xl">
       <BackToProgramsButton />
       <div className="space-y-1">
-        <h1 className="text-xl font-semibold text-foreground">
-          {isLoading ? "Loading…" : programName}
-        </h1>
+        <h1 className="text-xl font-semibold text-foreground">{programName}</h1>
         {program && (
           <p className="text-sm text-muted-foreground">
             {(program as any).description || (program as any).category || "Program"}
@@ -63,7 +86,7 @@ function GenericProgramDetail({ slug }: { slug: string }) {
         )}
       </div>
 
-      {!isLoading && program && (
+      {program && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {[
             { label: "Status", value: (program as any).status },
