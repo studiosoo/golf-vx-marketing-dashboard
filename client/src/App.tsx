@@ -132,6 +132,16 @@ function LegacyRoutes() {
       <Route path="/revenue">{() => <Redirect to={venue.performance} />}</Route>
       <Route path="/roi">{() => <Redirect to={venue.performance} />}</Route>
 
+      <Route path="/operations">{() => <Redirect to={venue.operations.campaigns} />}</Route>
+      <Route path="/operations/campaigns">{() => <Redirect to={venue.operations.campaigns} />}</Route>
+      <Route path="/operations/programs">{() => <Redirect to={venue.operations.programs} />}</Route>
+      <Route path="/operations/programs/:id">{params => <Redirect to={venue.operations.programDetail(params.id!)} />}</Route>
+      <Route path="/operations/promotions">{() => <Redirect to={venue.operations.promotions} />}</Route>
+      <Route path="/operations/local-marketing">{() => <Redirect to={venue.operations.localMarketing} />}</Route>
+      <Route path="/operations/content">{() => <Redirect to={venue.operations.content} />}</Route>
+      <Route path="/operations/calendar">{() => <Redirect to={venue.operations.calendar} />}</Route>
+      <Route path="/operations/paid-media">{() => <Redirect to={venue.operations.campaigns} />}</Route>
+
       <Route path="/campaigns">{() => <Redirect to={venue.operations.campaigns} />}</Route>
       <Route path="/campaigns/strategic">{() => <Redirect to={venue.operations.campaigns} />}</Route>
       <Route path="/campaigns/meta-ads">{() => <Redirect to={venue.operations.paidMedia} />}</Route>
