@@ -417,7 +417,7 @@ export default function Reports() {
 
   const metaSpend = [
     { name: "Annual Giveaway A1", spend: 803, impressions: 80947, ctr: 0.90 },
-    { name: "Junior Summer Camp", spend: 430, impressions: 82307, ctr: 1.82 },
+    { name: "Junior Summer Camp", spend: 293.16, impressions: 82307, ctr: 1.82 },
     { name: "Annual Giveaway A2", spend: 379, impressions: 26434, ctr: 2.80 },
     { name: "Superbowl Watch Party", spend: 75, impressions: 4167, ctr: 1.37 },
     { name: "Drive Day Boost", spend: 55, impressions: 4633, ctr: 4.21 },
@@ -644,7 +644,10 @@ export default function Reports() {
           </div>
           <Card className="bg-card border-border">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-semibold">Campaign Performance</CardTitle>
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                Campaign Performance
+                <span className="text-[10px] font-normal text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded">Manually tracked · Feb 2 – Mar 3</span>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="rounded-lg border border-border overflow-x-auto">

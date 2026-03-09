@@ -13,15 +13,18 @@ import { ArrowLeft } from "lucide-react";
 import WinterClinicDetail from "./WinterClinicDetail";
 import SundayClinicDetail from "./SundayClinicDetail";
 import Leagues from "./Leagues";
+import AnnualGiveaway from "./AnnualGiveaway";
 import { appRoutes, DEFAULT_VENUE_SLUG } from "@/lib/routes";
 
 // Slug aliases for known detail pages
-const SLUG_MAP: Record<string, "winter" | "sunday" | "leagues"> = {
-  "winter-clinics":   "winter",
-  "winter-clinic":    "winter",
-  "drive-day":        "sunday",   // Drive Day sessions run via Sunday Clinic Acuity calendar
-  "sunday-clinic":    "sunday",
-  "sunday-clinics":   "sunday",
+const SLUG_MAP: Record<string, "winter" | "sunday" | "leagues" | "giveaway"> = {
+  "winter-clinics":               "winter",
+  "winter-clinic":                "winter",
+  "drive-day":                    "sunday",   // Drive Day sessions run via Sunday Clinic Acuity calendar
+  "sunday-clinic":                "sunday",
+  "sunday-clinics":               "sunday",
+  "annual-giveaway":              "giveaway", // Annual Membership Giveaway — Google Sheets-backed
+  "annual-membership-giveaway":   "giveaway",
 };
 
 function BackToProgramsButton() {
@@ -34,6 +37,15 @@ function BackToProgramsButton() {
       <ArrowLeft size={14} />
       Back to Programs
     </button>
+  );
+}
+
+function GiveawayProgramDetail() {
+  return (
+    <div>
+      <BackToProgramsButton />
+      <AnnualGiveaway />
+    </div>
   );
 }
 
@@ -120,6 +132,7 @@ export default function ProgramDetailRouter() {
 
   if (knownType === "winter") return <WinterClinicDetail />;
   if (knownType === "sunday") return <SundayClinicDetail />;
+  if (knownType === "giveaway") return <GiveawayProgramDetail />;
   if (slug === "leagues") return <Leagues />;
 
   return <GenericProgramDetail slug={slug} />;
