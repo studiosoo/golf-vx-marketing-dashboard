@@ -42,8 +42,8 @@ interface CachedInsight {
   account_id?: string;
 }
 
-// Use /tmp to avoid the corrupted .meta-ads-cache sandbox directory (errno -117)
-const CACHE_FILE_PATH = '/tmp/golf-vx-meta-ads-insights.json';
+// Cache path is env-configurable; defaults to /tmp to avoid chokidar lstat errors on .meta-ads-cache
+const CACHE_FILE_PATH = process.env.META_ADS_CACHE_PATH || '/tmp/golf-vx-meta-ads-insights.json';
 
 /**
  * Read Meta Ads insights from cache file

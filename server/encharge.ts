@@ -139,41 +139,29 @@ export async function updateEnchargePersonByEmail(
 }
 
 /**
- * Count contacts in Encharge that have the AHTIL tag.
+ * Count contacts in Encharge that belong to the AHTIL segment.
+ * Uses the /segments/{id}/people endpoint. The segment ID is configurable
+ * via ENCHARGE_AHTIL_SEGMENT_ID env var.
+ * Defaults to segment 1111630 ("AHTIL Members") which tracks active paying members.
+ * Set ENCHARGE_AHTIL_SEGMENT_ID=1111629 to count the full AHTIL email list instead.
+ *
+ * Uses a single request with limit=500 — sufficient for the AHTIL Members segment
+ * which is expected to be under 500 contacts. For larger segments, paginate.
  */
 export async function getAHTILTagCount(): Promise<number> {
   if (!ENCHARGE_API_KEY) return 0;
+  const segmentId = process.env.ENCHARGE_AHTIL_SEGMENT_ID || "1111630";
   try {
-    const url = new URL(`${ENCHARGE_API_BASE}/people`);
-    url.searchParams.set("tag", "AHTIL");
-    url.searchParams.set("limit", "100");
-    url.searchParams.set("page", "1");
-    const res = await fetch(url.toString(), {
+    // Single-page fetch: AHTIL Members segment is ~196 contacts, well under 500
+    const url = `${ENCHARGE_API_BASE}/segments/${segmentId}/people?limit=500&page=1`;
+    const res = await fetch(url, {
       headers: { "X-Encharge-Token": ENCHARGE_API_KEY, "Content-Type": "application/json" },
+      signal: AbortSignal.timeout(15_000), // 15s timeout
     });
     if (!res.ok) return 0;
     const data = await res.json();
-    // Encharge may return total in meta
-    const metaTotal = data?.meta?.total ?? data?.totalCount ?? data?.total;
-    if (typeof metaTotal === "number") return metaTotal;
-    // Otherwise sum up paginated results
-    const firstBatch: any[] = data?.data ?? data?.people ?? [];
-    let count = firstBatch.filter((p: any) => Array.isArray(p.tags) && p.tags.includes("AHTIL")).length;
-    if (firstBatch.length < 100) return count;
-    let page = 2;
-    while (page <= 50) {
-      url.searchParams.set("page", String(page));
-      const r2 = await fetch(url.toString(), {
-        headers: { "X-Encharge-Token": ENCHARGE_API_KEY, "Content-Type": "application/json" },
-      });
-      if (!r2.ok) break;
-      const d2 = await r2.json();
-      const batch: any[] = d2?.data ?? d2?.people ?? [];
-      count += batch.filter((p: any) => Array.isArray(p.tags) && p.tags.includes("AHTIL")).length;
-      if (batch.length < 100) break;
-      page++;
-    }
-    return count;
+    const people: any[] = data?.people ?? [];
+    return people.length;
   } catch {
     return 0;
   }

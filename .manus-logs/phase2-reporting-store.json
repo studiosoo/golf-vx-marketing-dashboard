@@ -1,12 +1,75 @@
 {
   "nextIds": {
-    "reportDraft": 3,
+    "reportDraft": 6,
     "brief": 3,
     "operationalUpdate": 4,
     "issue": 6,
     "task": 7
   },
   "reportDrafts": [
+    {
+      "id": 5,
+      "venueSlug": "arlington-heights",
+      "reportType": "weekly_executive",
+      "title": "Arlington Heights Weekly Executive Report",
+      "dateRangeLabel": "This Week",
+      "status": "draft",
+      "content": {
+        "summary": "Weekly venue summary draft for leadership review.",
+        "sections": [
+          {
+            "heading": "Summary",
+            "body": "Weekly venue summary draft for leadership review."
+          }
+        ],
+        "highlights": []
+      },
+      "createdBy": "dev@local",
+      "createdAt": "2026-03-09T03:48:45.047Z",
+      "updatedAt": "2026-03-09T03:48:45.047Z"
+    },
+    {
+      "id": 4,
+      "venueSlug": "arlington-heights",
+      "reportType": "weekly_executive",
+      "title": "Arlington Heights Weekly Executive Report",
+      "dateRangeLabel": "This Week",
+      "status": "draft",
+      "content": {
+        "summary": "Weekly venue summary draft for leadership review.",
+        "sections": [
+          {
+            "heading": "Summary",
+            "body": "Weekly venue summary draft for leadership review."
+          }
+        ],
+        "highlights": []
+      },
+      "createdBy": "dev@local",
+      "createdAt": "2026-03-09T03:48:42.980Z",
+      "updatedAt": "2026-03-09T03:48:42.980Z"
+    },
+    {
+      "id": 3,
+      "venueSlug": "arlington-heights",
+      "reportType": "monthly_marketing",
+      "title": "Arlington Heights Monthly Marketing Report",
+      "dateRangeLabel": "This Week",
+      "status": "draft",
+      "content": {
+        "summary": "Monthly marketing recap covering campaigns, channels, and branch momentum.",
+        "sections": [
+          {
+            "heading": "Summary",
+            "body": "Monthly marketing recap covering campaigns, channels, and branch momentum."
+          }
+        ],
+        "highlights": []
+      },
+      "createdBy": "dev@local",
+      "createdAt": "2026-03-09T03:25:55.680Z",
+      "updatedAt": "2026-03-09T03:25:55.680Z"
+    },
     {
       "id": 1,
       "venueSlug": "arlington-heights",
