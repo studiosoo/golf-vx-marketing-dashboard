@@ -14,27 +14,7 @@ import CampaignDetail from "./pages/CampaignDetail";
 import MetaAdsCampaignDetail from "./pages/MetaAdsCampaignDetail";
 import ProgramDetailRouter from "./pages/ProgramDetailRouter";
 import MemberProfile from "./pages/MemberProfile";
-import {
-  AccountProfilePlaceholder,
-  AdminAuditLogPlaceholder,
-  AdminKpiDefinitionsPlaceholder,
-  AdminOverviewPlaceholder,
-  AdminReportSettingsPlaceholder,
-  AdminRolesPlaceholder,
-  AdminSyncHealthPlaceholder,
-  AdminUsersPlaceholder,
-  AdminVenuesPlaceholder,
-  AudienceSegmentsPlaceholder,
-  InsightsAlertsPlaceholder,
-  OperationsInboxPlaceholder,
-  OperationsIssuesPlaceholder,
-  OperationsThisWeekPlaceholder,
-  ReportsArchivePlaceholder,
-  ReportsBriefsPlaceholder,
-  ReportsSchedulesPlaceholder,
-  ReportsTemplatesPlaceholder,
-  SharedReportPlaceholder,
-} from "./pages/ControlTowerPlaceholders";
+import { SharedReportPlaceholder } from "./pages/ControlTowerPlaceholders";
 import {
   AdminIntegrationsWrapper,
   AudienceDuplicatesWrapper,
@@ -70,33 +50,33 @@ function DashboardAppRoutes() {
   return (
     <DashboardLayout>
       <Switch>
-        <Route path="/app/account/profile" component={AccountProfilePlaceholder} />
+        <Route path="/app/account/profile">{() => <Redirect to={appRoutes.admin.integrations} />}</Route>
 
-        <Route path="/app/admin/overview" component={AdminOverviewPlaceholder} />
-        <Route path="/app/admin/users" component={AdminUsersPlaceholder} />
-        <Route path="/app/admin/roles" component={AdminRolesPlaceholder} />
         <Route path="/app/admin/integrations" component={AdminIntegrationsWrapper} />
-        <Route path="/app/admin/venues" component={AdminVenuesPlaceholder} />
-        <Route path="/app/admin/kpi-definitions" component={AdminKpiDefinitionsPlaceholder} />
-        <Route path="/app/admin/sync-health" component={AdminSyncHealthPlaceholder} />
-        <Route path="/app/admin/report-settings" component={AdminReportSettingsPlaceholder} />
-        <Route path="/app/admin/audit-log" component={AdminAuditLogPlaceholder} />
-        <Route path="/app/admin">{() => <Redirect to={appRoutes.admin.overview} />}</Route>
+        <Route path="/app/admin/overview">{() => <Redirect to={appRoutes.admin.integrations} />}</Route>
+        <Route path="/app/admin/users">{() => <Redirect to={appRoutes.admin.integrations} />}</Route>
+        <Route path="/app/admin/roles">{() => <Redirect to={appRoutes.admin.integrations} />}</Route>
+        <Route path="/app/admin/venues">{() => <Redirect to={appRoutes.admin.integrations} />}</Route>
+        <Route path="/app/admin/kpi-definitions">{() => <Redirect to={appRoutes.admin.integrations} />}</Route>
+        <Route path="/app/admin/sync-health">{() => <Redirect to={appRoutes.admin.integrations} />}</Route>
+        <Route path="/app/admin/report-settings">{() => <Redirect to={appRoutes.admin.integrations} />}</Route>
+        <Route path="/app/admin/audit-log">{() => <Redirect to={appRoutes.admin.integrations} />}</Route>
+        <Route path="/app/admin">{() => <Redirect to={appRoutes.admin.integrations} />}</Route>
 
         <Route path="/app/:venueSlug/dashboard" component={DashboardPageWrapper} />
 
         <Route path="/app/:venueSlug/reports" component={ReportsPageWrapper} />
-        <Route path="/app/:venueSlug/reports/templates" component={ReportsTemplatesPlaceholder} />
-        <Route path="/app/:venueSlug/reports/schedules" component={ReportsSchedulesPlaceholder} />
-        <Route path="/app/:venueSlug/reports/archive" component={ReportsArchivePlaceholder} />
-        <Route path="/app/:venueSlug/reports/briefs" component={ReportsBriefsPlaceholder} />
+        <Route path="/app/:venueSlug/reports/templates">{params => <Redirect to={appRoutes.venue(params.venueSlug).reports.home} />}</Route>
+        <Route path="/app/:venueSlug/reports/schedules">{params => <Redirect to={appRoutes.venue(params.venueSlug).reports.home} />}</Route>
+        <Route path="/app/:venueSlug/reports/archive">{params => <Redirect to={appRoutes.venue(params.venueSlug).reports.home} />}</Route>
+        <Route path="/app/:venueSlug/reports/briefs">{params => <Redirect to={appRoutes.venue(params.venueSlug).reports.home} />}</Route>
 
         <Route path="/app/:venueSlug/performance" component={PerformancePageWrapper} />
 
-        <Route path="/app/:venueSlug/operations">{params => <Redirect to={appRoutes.venue(params.venueSlug).operations.thisWeek} />}</Route>
-        <Route path="/app/:venueSlug/operations/this-week" component={OperationsThisWeekPlaceholder} />
-        <Route path="/app/:venueSlug/operations/inbox" component={OperationsInboxPlaceholder} />
-        <Route path="/app/:venueSlug/operations/issues" component={OperationsIssuesPlaceholder} />
+        <Route path="/app/:venueSlug/operations">{params => <Redirect to={appRoutes.venue(params.venueSlug).operations.campaigns} />}</Route>
+        <Route path="/app/:venueSlug/operations/this-week">{params => <Redirect to={appRoutes.venue(params.venueSlug).operations.campaigns} />}</Route>
+        <Route path="/app/:venueSlug/operations/inbox">{params => <Redirect to={appRoutes.venue(params.venueSlug).operations.campaigns} />}</Route>
+        <Route path="/app/:venueSlug/operations/issues">{params => <Redirect to={appRoutes.venue(params.venueSlug).operations.campaigns} />}</Route>
         <Route path="/app/:venueSlug/operations/tasks" component={OperationsTasksWrapper} />
         <Route path="/app/:venueSlug/operations/calendar" component={OperationsCalendarWrapper} />
         <Route path="/app/:venueSlug/operations/campaigns" component={OperationsCampaignsWrapper} />
@@ -111,12 +91,12 @@ function DashboardAppRoutes() {
 
         <Route path="/app/:venueSlug/audience">{params => <Redirect to={appRoutes.venue(params.venueSlug).audience.people} />}</Route>
         <Route path="/app/:venueSlug/audience/people" component={AudiencePeopleWrapper} />
-        <Route path="/app/:venueSlug/audience/segments" component={AudienceSegmentsPlaceholder} />
+        <Route path="/app/:venueSlug/audience/segments">{params => <Redirect to={appRoutes.venue(params.venueSlug).audience.people} />}</Route>
         <Route path="/app/:venueSlug/audience/duplicates" component={AudienceDuplicatesWrapper} />
         <Route path="/app/:venueSlug/audience/:id" component={MemberProfile} />
 
-        <Route path="/app/:venueSlug/insights">{params => <Redirect to={appRoutes.venue(params.venueSlug).insights.alerts} />}</Route>
-        <Route path="/app/:venueSlug/insights/alerts" component={InsightsAlertsPlaceholder} />
+        <Route path="/app/:venueSlug/insights">{params => <Redirect to={appRoutes.venue(params.venueSlug).insights.recommendations} />}</Route>
+        <Route path="/app/:venueSlug/insights/alerts">{params => <Redirect to={appRoutes.venue(params.venueSlug).insights.recommendations} />}</Route>
         <Route path="/app/:venueSlug/insights/recommendations" component={InsightsRecommendationsWrapper} />
         <Route path="/app/:venueSlug/insights/ask" component={InsightsAskWrapper} />
         <Route path="/app/:venueSlug/insights/research" component={InsightsResearchWrapper} />
