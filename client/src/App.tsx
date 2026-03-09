@@ -17,7 +17,6 @@ import MemberProfile from "./pages/MemberProfile";
 import { SharedReportPlaceholder } from "./pages/ControlTowerPlaceholders";
 import {
   AdminIntegrationsWrapper,
-  AudienceDuplicatesWrapper,
   AudiencePeopleWrapper,
   DashboardPageWrapper,
   InsightsAskWrapper,
@@ -25,12 +24,10 @@ import {
   InsightsResearchWrapper,
   OperationsCalendarWrapper,
   OperationsCampaignsWrapper,
-  OperationsCommunicationsWrapper,
   OperationsContentWrapper,
   OperationsPaidMediaWrapper,
   OperationsProgramsWrapper,
   OperationsPromotionsWrapper,
-  OperationsTasksWrapper,
   PerformancePageWrapper,
   ReportsPageWrapper,
 } from "./pages/ControlTowerWrappers";
@@ -77,7 +74,7 @@ function DashboardAppRoutes() {
         <Route path="/app/:venueSlug/operations/this-week">{params => <Redirect to={appRoutes.venue(params.venueSlug).operations.campaigns} />}</Route>
         <Route path="/app/:venueSlug/operations/inbox">{params => <Redirect to={appRoutes.venue(params.venueSlug).operations.campaigns} />}</Route>
         <Route path="/app/:venueSlug/operations/issues">{params => <Redirect to={appRoutes.venue(params.venueSlug).operations.campaigns} />}</Route>
-        <Route path="/app/:venueSlug/operations/tasks" component={OperationsTasksWrapper} />
+        <Route path="/app/:venueSlug/operations/tasks">{params => <Redirect to={appRoutes.venue(params.venueSlug).operations.campaigns} />}</Route>
         <Route path="/app/:venueSlug/operations/calendar" component={OperationsCalendarWrapper} />
         <Route path="/app/:venueSlug/operations/campaigns" component={OperationsCampaignsWrapper} />
         <Route path="/app/:venueSlug/operations/campaigns/:id" component={CampaignDetail} />
@@ -86,13 +83,13 @@ function DashboardAppRoutes() {
         <Route path="/app/:venueSlug/operations/programs" component={OperationsProgramsWrapper} />
         <Route path="/app/:venueSlug/operations/programs/:slug" component={ProgramDetailRouter} />
         <Route path="/app/:venueSlug/operations/promotions" component={OperationsPromotionsWrapper} />
-        <Route path="/app/:venueSlug/operations/communications" component={OperationsCommunicationsWrapper} />
+        <Route path="/app/:venueSlug/operations/communications">{params => <Redirect to={appRoutes.venue(params.venueSlug).operations.campaigns} />}</Route>
         <Route path="/app/:venueSlug/operations/content" component={OperationsContentWrapper} />
 
         <Route path="/app/:venueSlug/audience">{params => <Redirect to={appRoutes.venue(params.venueSlug).audience.people} />}</Route>
         <Route path="/app/:venueSlug/audience/people" component={AudiencePeopleWrapper} />
         <Route path="/app/:venueSlug/audience/segments">{params => <Redirect to={appRoutes.venue(params.venueSlug).audience.people} />}</Route>
-        <Route path="/app/:venueSlug/audience/duplicates" component={AudienceDuplicatesWrapper} />
+        <Route path="/app/:venueSlug/audience/duplicates">{params => <Redirect to={appRoutes.venue(params.venueSlug).audience.people} />}</Route>
         <Route path="/app/:venueSlug/audience/:id" component={MemberProfile} />
 
         <Route path="/app/:venueSlug/insights">{params => <Redirect to={appRoutes.venue(params.venueSlug).insights.recommendations} />}</Route>

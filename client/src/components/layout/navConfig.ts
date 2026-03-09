@@ -1,7 +1,5 @@
 import {
-  AlertTriangle,
   BarChart3,
-  ClipboardList,
   FileText,
   Flag,
   Gauge,
@@ -64,13 +62,10 @@ function buildNav(venueSlug: string) {
       icon: Workflow,
       matchPaths: [
         venue.operations.home,
-        venue.operations.tasks,
-        venue.operations.calendar,
         venue.operations.campaigns,
         venue.operations.paidMedia,
         venue.operations.programs,
         venue.operations.promotions,
-        venue.operations.communications,
         venue.operations.content,
       ],
       children: [
@@ -78,9 +73,7 @@ function buildNav(venueSlug: string) {
         { label: "Paid Media", path: venue.operations.paidMedia, icon: BarChart3 },
         { label: "Programs", path: venue.operations.programs, icon: Target },
         { label: "Promotions", path: venue.operations.promotions, icon: Lightbulb },
-        { label: "Communications", path: venue.operations.communications, icon: MessageSquare },
         { label: "Content & Social", path: venue.operations.content, icon: FileText },
-        { label: "Tasks", path: venue.operations.tasks, icon: ClipboardList },
       ],
     },
     {
@@ -90,11 +83,6 @@ function buildNav(venueSlug: string) {
       matchPaths: [
         venue.audience.home,
         venue.audience.people,
-        venue.audience.duplicates,
-      ],
-      children: [
-        { label: "People", path: venue.audience.people, icon: Users },
-        { label: "Duplicates", path: venue.audience.duplicates, icon: AlertTriangle },
       ],
     },
     {
