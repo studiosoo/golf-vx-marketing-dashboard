@@ -121,8 +121,8 @@ function DashboardAppRoutes() {
 
         <Route path="/app/:venueSlug">{params => <Redirect to={appRoutes.venue(params.venueSlug).dashboard} />}</Route>
 
-        <Route path="/404" component={NotFound} />
-        <Route component={NotFound} />
+        <Route path="/404">{() => <NotFound />}</Route>
+        <Route>{() => <NotFound />}</Route>
       </Switch>
     </DashboardLayout>
   );

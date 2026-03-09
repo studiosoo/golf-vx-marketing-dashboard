@@ -985,8 +985,25 @@ function ActionPlanTab() {
 
 type Tab = "chat" | "strategy" | "action-plan";
 
+const FALLBACK_MODELS = {
+  chat: "gemini-2.0-flash-lite",
+  analysis: "gemini-2.5-pro",
+  structured: "gemini-2.5-flash",
+} as const;
+
 export default function AIWorkspace() {
   const [activeTab, setActiveTab] = useState<Tab>("chat");
+  const modelConfigQuery = trpc.aiWorkspace.getModelConfig.useQuery(undefined, {
+    staleTime: 60_000,
+  });
+  const models = modelConfigQuery.data ?? FALLBACK_MODELS;
+
+  const activeModel =
+    activeTab === "chat"
+      ? models.chat
+      : activeTab === "strategy"
+      ? models.analysis
+      : models.structured;
 
   return (
     <div className="h-full flex flex-col">
@@ -1012,7 +1029,7 @@ export default function AIWorkspace() {
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] text-muted-foreground/60">model:</span>
               <span className="text-[10px] font-medium text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded">
-                {activeTab === "chat" ? "gemini-2.0-flash-lite" : activeTab === "strategy" ? "gemini-2.5-pro" : "gemini-2.5-flash"}
+                {activeModel}
               </span>
             </div>
           </div>

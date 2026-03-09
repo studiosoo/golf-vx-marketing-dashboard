@@ -724,6 +724,16 @@ When the user provides data (e.g., "Drive Day had 12 attendees"), acknowledge it
 });
 
 export const aiWorkspaceRouter = router({
+  // Returns active model names based on current env config
+  getModelConfig: protectedProcedure.query(async () => {
+    const { LLM_MODELS } = await import("../_core/llm");
+    const { ENV } = await import("../_core/env");
+    return {
+      chat: LLM_MODELS.chat,
+      analysis: ENV.anthropicApiKey ? "claude-sonnet-4-6" : LLM_MODELS.analysis,
+      structured: LLM_MODELS.structured,
+    };
+  }),
 
   // ── File upload ──────────────────────────────────────────────────────────────
   uploadFile: protectedProcedure
@@ -801,6 +811,7 @@ export const aiWorkspaceRouter = router({
     }))
     .mutation(async ({ input }) => {
       const { invokeLLM, LLM_MODELS } = await import("../_core/llm");
+      const { ENV } = await import("../_core/env");
       const GOLF_VX_CONTEXT = `Golf VX Arlington Heights is an indoor golf simulator venue located at 644 E Rand Rd, Arlington Heights, IL. It offers: hourly bay rentals ($45 off-peak / $65 peak), memberships (All Access Ace, Swing Saver, Golf VX Pro), leagues, lessons, clinics, junior programs (Junior Summer Camp), food & beverage, and private/corporate events. The venue targets local Arlington Heights and Chicago suburb residents. Key programs: $25 Trial Session (off-peak), $35 Trial Session (peak), Winter Clinics, Sunday Clinics (PBGA), Drive Day Clinics, Junior Summer Camp. Website: playgolfvx.com. Linktree: ah.playgolfvx.com.`;
       const typeInstructions: Record<string, string> = {
         competitive_analysis: `You are a golf industry marketing strategist. Analyze the provided content for competitive intelligence relevant to Golf VX Arlington Heights. Identify what competitors are doing, what Golf VX can learn, and specific tactics to adopt or counter. Context: ${GOLF_VX_CONTEXT}`,
@@ -821,25 +832,29 @@ export const aiWorkspaceRouter = router({
         ? `${fileLabel}${input.customPrompt}\n\n---\n\n${contentSection}`
         : `${fileLabel}Please analyze the following and provide a structured response with these sections:\n\n## Executive Summary\n(2-3 sentences capturing the key takeaway)\n\n## Key Insights\n(3-5 specific, data-driven observations)\n\n## Recommended Actions\n(Prioritized list of specific, actionable steps with owner and timeline)\n\n## KPIs to Track\n(Measurable success metrics with target values where possible)\n\n## Risks & Considerations\n(What to watch out for, potential downsides)\n\n---\n\n${contentSection}`;
 
-      const model = LLM_MODELS.analysis;
+      // Claude is preferred for deep analysis when ANTHROPIC_API_KEY is set (text-only paths)
+      const useClaudeForText = Boolean(ENV.anthropicApiKey);
+      const geminiModel = LLM_MODELS.analysis;
+      const model = useClaudeForText ? "claude-sonnet-4-6" : geminiModel;
 
       // Path A: Gemini File API URI → native generateContent (PDF, video, audio)
+      // Always uses Gemini — Gemini File API is Gemini-specific
       if (input.fileType === "gemini" && input.fileUri && input.fileMimeType) {
         const { generateContentWithFile } = await import("../_core/geminiFile");
         const text = await generateContentWithFile({
-          model,
+          model: geminiModel,
           systemPrompt,
           userPrompt,
           fileUri: input.fileUri,
           mimeType: input.fileMimeType,
         });
-        return { analysis: text, analysisType: input.analysisType, model };
+        return { analysis: text, analysisType: input.analysisType, model: geminiModel };
       }
 
-      // Path B: Image data URL → image_url content type
+      // Path B: Image data URL → image_url content type (Gemini only)
       if (input.fileType === "image" && input.fileDataUrl) {
         const response = await invokeLLM({
-          model,
+          model: geminiModel,
           messages: [
             { role: "system", content: systemPrompt },
             {
@@ -853,12 +868,25 @@ export const aiWorkspaceRouter = router({
         });
         const rawContent = response?.choices?.[0]?.message?.content;
         const result = typeof rawContent === "string" ? rawContent : (Array.isArray(rawContent) ? rawContent.map((c: any) => c.text || "").join("") : "No response generated.");
-        return { analysis: result, analysisType: input.analysisType, model };
+        return { analysis: result, analysisType: input.analysisType, model: geminiModel };
       }
 
-      // Path C: Text content (no file, or text file already in content)
+      // Path C: Text content — use Claude when available, otherwise Gemini
+      if (useClaudeForText) {
+        const { invokeClaudeLLM } = await import("../_core/claude");
+        const response = await invokeClaudeLLM({
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+        }, model);
+        const rawContent = response.choices[0]?.message?.content ?? "";
+        const result = typeof rawContent === "string" ? rawContent : "No response generated.";
+        return { analysis: result, analysisType: input.analysisType, model: response.model };
+      }
+
       const response = await invokeLLM({
-        model,
+        model: geminiModel,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
@@ -866,7 +894,7 @@ export const aiWorkspaceRouter = router({
       });
       const rawContent = response?.choices?.[0]?.message?.content;
       const result = typeof rawContent === "string" ? rawContent : (Array.isArray(rawContent) ? rawContent.map((c: any) => c.text || "").join("") : "No response generated.");
-      return { analysis: result, analysisType: input.analysisType, model };
+      return { analysis: result, analysisType: input.analysisType, model: geminiModel };
     }),
 });
 
