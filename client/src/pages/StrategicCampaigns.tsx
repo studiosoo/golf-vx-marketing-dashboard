@@ -7,6 +7,7 @@ import { TrendingUp, Target, DollarSign, BarChart3, ChevronRight, TrendingDown, 
 import { Progress } from "@/components/ui/progress";
 import { useLocation } from "wouter";
 import AsanaTimeline from "@/components/AsanaTimeline";
+import MetaAds from "./MetaAds";
 
 const CAMPAIGN_COLORS: Record<string, string> = {
   trial_conversion: "emerald",
@@ -26,7 +27,7 @@ export default function StrategicCampaigns() {
   const [, setLocation] = useLocation();
   const { data: campaigns, isLoading } = trpc.strategicCampaigns.getOverview.useQuery();
   const { data: kpiData } = trpc.intelligence.getStrategicKPIs.useQuery();
-  const [activeTab, setActiveTab] = useState<"campaigns" | "timeline">("campaigns");
+  const [activeTab, setActiveTab] = useState<"campaigns" | "timeline" | "paid-ads">("campaigns");
 
   if (isLoading) {
     return (
@@ -66,10 +67,18 @@ export default function StrategicCampaigns() {
           >
             <CalendarRange className="w-3.5 h-3.5" />Asana Timeline
           </button>
+          <button
+            onClick={() => setActiveTab("paid-ads")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeTab === "paid-ads" ? "bg-white text-[#111] shadow-sm" : "text-[#666] hover:text-[#333]"}`}
+          >
+            <BarChart3 className="w-3.5 h-3.5" />Paid Ads
+          </button>
         </div>
       </div>
 
       {activeTab === "timeline" && <AsanaTimeline />}
+
+      {activeTab === "paid-ads" && <MetaAds />}
 
       {activeTab === "campaigns" && (<>
 

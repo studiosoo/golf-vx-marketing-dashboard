@@ -1,5 +1,4 @@
 import {
-  BarChart3,
   FileText,
   Flag,
   Gauge,
@@ -72,7 +71,6 @@ function buildNav(venueSlug: string) {
       ],
       children: [
         { label: "Campaigns", path: venue.operations.campaigns, icon: Flag },
-        { label: "Paid Media", path: venue.operations.paidMedia, icon: BarChart3 },
         { label: "Programs", path: venue.operations.programs, icon: Target },
         { label: "Promotions", path: venue.operations.promotions, icon: Lightbulb },
         { label: "Local Marketing", path: venue.operations.localMarketing, icon: MapPin },

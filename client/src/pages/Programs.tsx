@@ -172,6 +172,20 @@ function ProgramCard({ program, onClick }: { program: Program; onClick: () => vo
               <span className="text-[10px] font-semibold text-[#3DB855]">Still Running</span>
             </div>
           )}
+          {/* Metric type indicator */}
+          {!useKpiDisplay && spend > 0 && revenue > 0 ? (
+            <div className="h-5 px-2 rounded-full bg-green-50 border border-green-200 flex items-center">
+              <span className="text-[10px] font-semibold text-green-700">ROAS</span>
+            </div>
+          ) : !useKpiDisplay && spend > 0 ? (
+            <div className="h-5 px-2 rounded-full bg-blue-50 border border-blue-200 flex items-center">
+              <span className="text-[10px] font-semibold text-blue-700">ROI</span>
+            </div>
+          ) : useKpiDisplay ? (
+            <div className="h-5 px-2 rounded-full bg-amber-50 border border-amber-200 flex items-center">
+              <span className="text-[10px] font-semibold text-amber-700">KPI</span>
+            </div>
+          ) : null}
         </div>
         <ArrowRight className="h-3.5 w-3.5 text-[#CCCCCC] group-hover:text-[#888888] transition-colors shrink-0 mt-0.5" />
       </div>
@@ -282,18 +296,27 @@ function ProgramCard({ program, onClick }: { program: Program; onClick: () => vo
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           <div>
             <p className="text-[14px] font-bold text-[#111111] leading-none">{fmtCurrency(spend)}</p>
-            <p className="text-[10px] text-[#AAAAAA] mt-0.5">Spend</p>
+            <p className="text-[10px] text-[#AAAAAA] mt-0.5">Ad Spend</p>
           </div>
           <div>
             <p className="text-[14px] font-bold text-[#111111] leading-none">{fmtCurrency(revenue)}</p>
             <p className="text-[10px] text-[#AAAAAA] mt-0.5">Revenue</p>
           </div>
-          <div>
-            <p className={cn("text-[14px] font-bold leading-none", roi >= 0 ? "text-[#3DB855]" : "text-[#E8453C]")}>
-              {spend > 0 ? (roi >= 0 ? "+" : "") + roi.toFixed(0) + "%" : "—"}
-            </p>
-            <p className="text-[10px] text-[#AAAAAA] mt-0.5">ROI</p>
-          </div>
+          {spend > 0 && revenue > 0 ? (
+            <div>
+              <p className={cn("text-[14px] font-bold leading-none", (revenue / spend) >= 1 ? "text-[#3DB855]" : "text-[#E8453C]")}>
+                {(revenue / spend).toFixed(1)}x
+              </p>
+              <p className="text-[10px] text-[#AAAAAA] mt-0.5">ROAS</p>
+            </div>
+          ) : (
+            <div>
+              <p className={cn("text-[14px] font-bold leading-none", roi >= 0 ? "text-[#3DB855]" : "text-[#E8453C]")}>
+                {spend > 0 ? (roi >= 0 ? "+" : "") + roi.toFixed(0) + "%" : "—"}
+              </p>
+              <p className="text-[10px] text-[#AAAAAA] mt-0.5">ROI</p>
+            </div>
+          )}
         </div>
       )}
 

@@ -633,7 +633,19 @@ export const workspaceRouter = router({
           ]);
           const m = (memberResult as any)[0];
           const c = (campaignResult as any)[0];
-          contextData = `\nLive Golf VX Arlington Heights snapshot:\n- Customer members: ${m?.customerMembers || 0} / 300 goal (${m?.proMembers || 0} Pro)\n- Active campaigns: ${c?.active || 0} of ${c?.total || 0}\n- Marketing spend: $${Number(c?.totalSpend || 0).toFixed(0)} / $${Number(c?.totalBudget || 0).toFixed(0)} budget\n- Total program revenue tracked: $${Number(c?.totalRevenue || 0).toFixed(0)}`;
+          // Toast POS MTD — always include for full revenue context
+          let toastCtx = "";
+          try {
+            const toastResult = await database.execute(
+              `SELECT SUM(bayRevenue) as bayMtd, SUM(foodBevRevenue) as fnbMtd, SUM(totalRevenue) as totalMtd
+               FROM toastDailySummary WHERE date >= DATE_FORMAT(NOW(), '%Y-%m-01')`
+            );
+            const t = (toastResult as any)[0];
+            if (t?.totalMtd > 0) {
+              toastCtx = `\n- Toast POS MTD: $${Number(t.totalMtd || 0).toFixed(0)} total (Bay Rental: $${Number(t.bayMtd || 0).toFixed(0)}, F&B: $${Number(t.fnbMtd || 0).toFixed(0)})`;
+            }
+          } catch (_) {}
+          contextData = `\nLive Golf VX Arlington Heights snapshot:\n- Customer members: ${m?.customerMembers || 0} / 300 goal (${m?.proMembers || 0} Pro)\n- Active campaigns: ${c?.active || 0} of ${c?.total || 0}\n- Marketing spend: $${Number(c?.totalSpend || 0).toFixed(0)} / $${Number(c?.totalBudget || 0).toFixed(0)} budget\n- Total program revenue tracked: $${Number(c?.totalRevenue || 0).toFixed(0)}${toastCtx}`;
 
           // Context-specific data enrichment
           if (context === "members") {
@@ -656,6 +668,18 @@ export const workspaceRouter = router({
             );
             const rev = (revenueResult as any)[0];
             contextData += `\n- Monthly Recurring Revenue (MRR): $${Number(rev?.totalMrr || 0).toFixed(0)}`;
+            try {
+              const lastMonthResult = await database.execute(
+                `SELECT SUM(bayRevenue) as bay, SUM(foodBevRevenue) as fnb, SUM(totalRevenue) as total
+                 FROM toastDailySummary
+                 WHERE date >= DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 1 MONTH), '%Y-%m-01')
+                   AND date < DATE_FORMAT(NOW(), '%Y-%m-01')`
+              );
+              const lm = (lastMonthResult as any)[0];
+              if (lm?.total > 0) {
+                contextData += `\n- Toast Last Month: $${Number(lm.total).toFixed(0)} (Bay: $${Number(lm.bay || 0).toFixed(0)}, F&B: $${Number(lm.fnb || 0).toFixed(0)})`;
+              }
+            } catch (_) {}
           } else if (context === "meta_ads") {
             const adsResult = await database.execute(
               `SELECT name, actualSpend, impressions, clicks FROM campaigns WHERE metaAdsCampaignId IS NOT NULL AND status='active' ORDER BY actualSpend DESC LIMIT 6`

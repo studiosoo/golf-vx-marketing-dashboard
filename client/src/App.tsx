@@ -11,7 +11,6 @@ import AnniversaryGiveaway from "./pages/AnniversaryGiveaway";
 import AnniversaryGiveawayApplication from "./pages/AnniversaryGiveawayApplication";
 import AnniversaryGiveawayThankYou from "./pages/AnniversaryGiveawayThankYou";
 import CampaignDetail from "./pages/CampaignDetail";
-import MetaAdsCampaignDetail from "./pages/MetaAdsCampaignDetail";
 import ProgramDetailRouter from "./pages/ProgramDetailRouter";
 import MemberProfile from "./pages/MemberProfile";
 import { SharedReportPlaceholder } from "./pages/ControlTowerPlaceholders";
@@ -26,7 +25,6 @@ import {
   OperationsCampaignsWrapper,
   OperationsContentWrapper,
   OperationsLocalMarketingWrapper,
-  OperationsPaidMediaWrapper,
   OperationsProgramsWrapper,
   OperationsPromotionsWrapper,
   PerformancePageWrapper,
@@ -79,8 +77,8 @@ function DashboardAppRoutes() {
         <Route path="/app/:venueSlug/operations/calendar" component={OperationsCalendarWrapper} />
         <Route path="/app/:venueSlug/operations/campaigns" component={OperationsCampaignsWrapper} />
         <Route path="/app/:venueSlug/operations/campaigns/:id" component={CampaignDetail} />
-        <Route path="/app/:venueSlug/operations/paid-media" component={OperationsPaidMediaWrapper} />
-        <Route path="/app/:venueSlug/operations/paid-media/:id" component={MetaAdsCampaignDetail} />
+        <Route path="/app/:venueSlug/operations/paid-media">{params => <Redirect to={appRoutes.venue(params.venueSlug).operations.campaigns} />}</Route>
+        <Route path="/app/:venueSlug/operations/paid-media/:id">{params => <Redirect to={appRoutes.venue(params.venueSlug).operations.campaigns} />}</Route>
         <Route path="/app/:venueSlug/operations/programs" component={OperationsProgramsWrapper} />
         <Route path="/app/:venueSlug/operations/programs/:slug" component={ProgramDetailRouter} />
         <Route path="/app/:venueSlug/operations/promotions" component={OperationsPromotionsWrapper} />
