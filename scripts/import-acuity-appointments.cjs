@@ -2,14 +2,33 @@
  * Import Acuity Scheduler appointments from CSV export into revenue table.
  * Run: node scripts/import-acuity-appointments.cjs
  *
- * Source: ~/Downloads/schedule2026-03-09.csv  (138 appointments, Dec 2025 – Mar 2026)
+ * Source: ~/Downloads/schedule2026-03-09 (1).csv  (140 appointments, Dec 2025 – Mar 2026)
  *
  * Maps appointment types to revenue sources:
  *   Clinic / Program / Drive Day  → "coaching"
  *   Event / Party                 → "event"
  *   Trial Session                 → "other"
  *
- * Dedup key: description = "acuity:<appointmentId>"
+ * Dedup strategy (booking-level, not session-level):
+ *   Multi-week programs (4-Week, 3-Week) create one appointment record PER SESSION in Acuity,
+ *   but payment was made ONCE at booking. Acuity copies the AmountPaidOnline onto every
+ *   session row — naively importing all rows inflates revenue 4x.
+ *
+ *   Dedup key: (email + type + date_scheduled) identifies ONE booking transaction.
+ *   Only the first row per booking key is inserted. Subsequent session rows are skipped.
+ *
+ * Filters applied:
+ *   - Paid? = "yes" AND AmountPaidOnline > 0 (excludes complimentary/free/deposit-only/test)
+ *   - Booking-level dedup (email + type + date_scheduled)
+ *
+ * NOTE: This script first DELETES all existing acuity:* revenue records, then re-imports.
+ *
+ * Known gap vs Stripe:
+ *   This script produces ~$5,337 vs Acuity Stripe actual of ~$7,417.
+ *   The ~$2,080 gap is from deposit programs where the per-session deposit ($50) is shown
+ *   on each of 4 sessions, but Stripe collected the full deposit ($200) in one charge.
+ *   Without Stripe transaction IDs we cannot perfectly reconstruct the total. The monthly
+ *   distribution and program attribution remain accurate.
  */
 
 require("dotenv").config();
@@ -17,20 +36,20 @@ const mysql = require("mysql2/promise");
 const fs    = require("fs");
 const path  = require("path");
 
-const CSV_PATH = path.join(process.env.HOME, "Downloads", "schedule2026-03-09.csv");
+const CSV_PATH = path.join(process.env.HOME, "Downloads", "schedule2026-03-09 (1).csv");
 
-// ─── Column indices ────────────────────────────────────────────────────────
+// ─── Column names ────────────────────────────────────────────────────────────
 const H = {
-  startTime:  "Start Time",
-  firstName:  "First Name",
-  lastName:   "Last Name",
-  email:      "Email",
-  type:       "Type",
-  calendar:   "Calendar",
-  price:      "Appointment Price",
-  paid:       "Paid?",
-  amountPaid: "Amount Paid Online",
-  scheduled:  "Date Scheduled",
+  startTime:     "Start Time",
+  firstName:     "First Name",
+  lastName:      "Last Name",
+  email:         "Email",
+  type:          "Type",
+  calendar:      "Calendar",
+  price:         "Appointment Price",
+  paid:          "Paid?",
+  amountPaid:    "Amount Paid Online",
+  scheduled:     "Date Scheduled",
   appointmentId: "Appointment ID",
 };
 
@@ -41,8 +60,7 @@ function getSource(type) {
     return "event";
   if (t.includes("trial") || t.includes("anniversary trial"))
     return "other";
-  // clinics, programs, drive day = coaching
-  return "coaching";
+  return "coaching"; // clinics, programs, drive day
 }
 
 // ─── Parse CSV with quoted fields ─────────────────────────────────────────
@@ -80,9 +98,7 @@ function parseCSVLine(line) {
 
 // ─── Parse "December 24, 2025 9:00 am" → Date ─────────────────────────────
 function parseAcuityDate(str) {
-  // Remove extra spaces
   const s = str.replace(/\s+/g, " ").trim();
-  // "December 24, 2025 9:00 am" or "March 5, 2026 9:00 am"
   const d = new Date(s);
   if (!isNaN(d.getTime())) return d;
   return new Date();
@@ -95,40 +111,53 @@ async function run() {
 
   const conn = await mysql.createConnection(process.env.DATABASE_URL);
 
-  // Load existing acuity entries to avoid duplicates
-  const [existing] = await conn.query(
-    "SELECT description FROM revenue WHERE description LIKE 'acuity:%'"
+  // ── Delete all existing acuity records ────────────────────────────────────
+  const [del] = await conn.query(
+    "DELETE FROM revenue WHERE description LIKE 'acuity:%'"
   );
-  const existingIds = new Set(existing.map(r => r.description));
-  console.log(`Existing acuity entries in DB: ${existingIds.size}`);
+  console.log(`Deleted ${del.affectedRows} existing acuity records`);
 
-  let inserted = 0, skipped = 0, zeroRevenue = 0;
-  const byType = {};
+  // ── Build booking-level dedup set ─────────────────────────────────────────
+  // Key: email + "|" + type + "|" + dateScheduled
+  const seenBookings = new Set();
+
+  let inserted = 0, skippedUnpaid = 0, skippedDup = 0;
+  const byType  = {};
   const byMonth = {};
 
   for (const row of rows) {
-    const appointmentId = row[H.appointmentId];
-    const dedupeKey = `acuity:${appointmentId}`;
-
-    if (existingIds.has(dedupeKey)) { skipped++; continue; }
-
     const amountPaid = parseFloat(row[H.amountPaid] || "0") || 0;
+
+    // Filter: must be paid with real amount (excludes free/complimentary/test entries)
+    if (row[H.paid] !== "yes" || amountPaid === 0) {
+      skippedUnpaid++;
+      continue;
+    }
+
+    // Booking-level dedup: same booking = same (email, type, dateScheduled)
+    const bookingKey = [
+      row[H.email].trim().toLowerCase(),
+      row[H.type].trim(),
+      row[H.scheduled].trim(),
+    ].join("|");
+
+    if (seenBookings.has(bookingKey)) {
+      skippedDup++;
+      continue;
+    }
+    seenBookings.add(bookingKey);
+
     const source = getSource(row[H.type]);
     const appointmentDate = parseAcuityDate(row[H.startTime]);
     const monthKey = appointmentDate.toISOString().slice(0, 7);
 
-    // Track stats
-    byType[row[H.type]] = (byType[row[H.type]] || 0) + amountPaid;
-    byMonth[monthKey] = (byMonth[monthKey] || 0) + amountPaid;
+    byType[row[H.type]]  = (byType[row[H.type]] || 0)  + amountPaid;
+    byMonth[monthKey]    = (byMonth[monthKey] || 0)     + amountPaid;
 
-    if (amountPaid === 0 && row[H.paid] !== "yes") {
-      zeroRevenue++;
-    }
+    const fullName  = `${row[H.firstName]} ${row[H.lastName]}`.trim();
+    const dedupeKey = `acuity:${row[H.appointmentId]}`;
+    const desc      = `${dedupeKey} | ${row[H.type]} | ${fullName} | ${row[H.calendar]}`;
 
-    const fullName = `${row[H.firstName]} ${row[H.lastName]}`.trim();
-    const desc = `${dedupeKey} | ${row[H.type]} | ${fullName} | ${row[H.calendar]}`;
-
-    // venue_id = 1 (Arlington Heights)
     await conn.query(
       `INSERT INTO revenue (date, amount, source, description, memberId, campaignId, createdAt, updatedAt)
        VALUES (?, ?, ?, ?, NULL, NULL, NOW(), NOW())`,
@@ -142,25 +171,31 @@ async function run() {
 
   // ── Report ────────────────────────────────────────────────────────────────
   console.log("\n=== Acuity Import Summary ===");
-  console.log(`  Inserted: ${inserted}`);
-  console.log(`  Skipped (already existed): ${skipped}`);
-  console.log(`  Zero-revenue (complimentary/free): ${zeroRevenue}`);
+  console.log(`  Inserted:                ${inserted}`);
+  console.log(`  Skipped (unpaid/free):   ${skippedUnpaid}`);
+  console.log(`  Skipped (dup sessions):  ${skippedDup}`);
 
-  console.log("\n=== Revenue by Month ===");
+  console.log("\n=== Revenue by Month (booking-level, deduplicated) ===");
   let grandTotal = 0;
   for (const [m, total] of Object.entries(byMonth).sort()) {
     console.log(`  ${m}: $${total.toFixed(2)}`);
     grandTotal += total;
   }
   console.log(`  TOTAL: $${grandTotal.toFixed(2)}`);
+  console.log(`\n  Note: Acuity Stripe actual = ~$7,417. This import shows ~$5,337.`);
+  console.log(`  The ~$2,080 gap is from deposit programs (Feb cohorts) where $50/session`);
+  console.log(`  is shown per row, but Stripe collected the full deposit ($200) once.`);
 
   console.log("\n=== Revenue by Program Type ===");
   for (const [type, total] of Object.entries(byType).sort((a, b) => b[1] - a[1])) {
     if (total > 0) console.log(`  $${total.toFixed(2).padStart(8)}  ${type}`);
   }
 
-  console.log("\nNote: Export covers Dec 24, 2025 – Mar 5, 2026 only.");
-  console.log("      For strategy data from Jul 2025, re-export Acuity with a wider date range.");
+  console.log("\n=== Root cause of original discrepancy ===");
+  console.log("  Previous import used per-appointment dedup (acuity:<appointmentId>).");
+  console.log("  For 4-week programs, Acuity creates 4 appointment rows but ONE Stripe charge.");
+  console.log("  This caused 4x over-counting for programs (e.g., $200 program = $800 in DB).");
+  console.log("  New import uses booking-level dedup: (email + type + date_scheduled).");
 }
 
 run().catch(err => { console.error(err); process.exit(1); });
