@@ -4,19 +4,15 @@ import { useLocation } from "wouter";
 import { getLoginUrl } from "@/const";
 import { Button } from "@/components/ui/button";
 import {
-  Users,
   DollarSign,
   Target,
   TrendingUp,
-  TrendingDown,
   ArrowRight,
   RefreshCw,
   BarChart3,
   Flag,
   UserCheck,
-  ShoppingBag,
-  CreditCard,
-  Award,
+  Users,
   Crosshair,
   X,
   Instagram,
@@ -302,6 +298,8 @@ export default function Home() {
     color: string;
     statusNote?: string | null;
     statusColor?: string;
+    subStats?: Array<{ label: string; value: string }>;
+    onClick?: () => void;
   }> = [
     {
       label: "Annual Revenue (Est.)",
@@ -311,8 +309,13 @@ export default function Home() {
       display: hasAnyRevenue ? fmtCurrency(annualRunRate) : "—",
       goalDisplay: "$2M",
       color: "#F5C72C",
-      statusNote: hasAnyRevenue ? "MRR + Toast run rate · Acuity reported separately" : null,
+      statusNote: hasAnyRevenue ? null : "Revenue APIs connecting…",
       statusColor: "#888888",
+      subStats: hasAnyRevenue ? [
+        ...(mrr > 0 ? [{ label: "MRR", value: fmtCurrency(mrr) }] : []),
+        ...(toastMTD > 0 ? [{ label: "Toast MTD", value: fmtCurrency(toastMTD) }] : []),
+        ...(acuityTotal > 0 ? [{ label: "Acuity", value: fmtCurrency(acuityTotal) }] : []),
+      ] : undefined,
     },
     {
       label: "Members",
@@ -322,6 +325,10 @@ export default function Home() {
       display: fmt(memberTotal),
       goalDisplay: "300",
       color: "#3DB855",
+      onClick: () => setMemberListOpen(true),
+      subStats: memberBreakdown.length > 0
+        ? memberBreakdown.map(t => ({ label: t.label.replace("All Access Ace", "Ace").replace("Swing Saver", "Saver").replace("Golf VX Pro", "Pro"), value: String(t.count) }))
+        : undefined,
     },
     {
       label: "Instagram Followers",
@@ -455,8 +462,16 @@ export default function Home() {
           {KEY_GOALS.map((g) => {
             const pct = g.current != null && g.goal > 0 ? Math.min((g.current / g.goal) * 100, 100) : null;
             const Icon = g.icon;
+            const Wrapper = g.onClick ? "button" : "div";
             return (
-              <div key={g.label} className="rounded-xl border border-[#F0F0F0] bg-[#FAFAFA] p-3">
+              <Wrapper
+                key={g.label}
+                {...(g.onClick ? { onClick: g.onClick } : {})}
+                className={cn(
+                  "rounded-xl border border-[#F0F0F0] bg-[#FAFAFA] p-3 text-left",
+                  g.onClick && "hover:bg-[#F0F0F0] cursor-pointer transition-colors"
+                )}
+              >
                 <div className="flex items-center gap-1.5 mb-2">
                   <div className="h-5 w-5 rounded-md flex items-center justify-center" style={{ background: `${g.color}18` }}>
                     <Icon className="h-3 w-3" style={{ color: g.color }} />
@@ -482,168 +497,23 @@ export default function Home() {
                     {g.statusNote ?? "Connecting…"}
                   </span>
                 )}
-              </div>
+                {g.subStats && g.subStats.length > 0 && (
+                  <div className="flex gap-3 mt-2 pt-2 border-t border-[#EEEEEE]">
+                    {g.subStats.map(s => (
+                      <div key={s.label}>
+                        <p className="text-[11px] font-semibold text-[#111111]">{s.value}</p>
+                        <p className="text-[10px] text-[#AAAAAA]">{s.label}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </Wrapper>
             );
           })}
         </div>
       </div>
 
-      {/* ── Section 1: Members + Goal Progress ── */}
-      <div className="bg-white rounded-xl border border-[#E8E8E8] p-5">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-[#111111]" />
-            <h2 className="text-[14px] font-semibold text-[#111111]">Members</h2>
-          </div>
-          <button onClick={() => setLocation("/list/members")} className="flex items-center gap-1 text-[12px] text-[#888888] hover:text-[#111111] transition-colors">
-            View all <ArrowRight className="h-3 w-3" />
-          </button>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div>
-            <div className="flex items-end gap-3 mb-2">
-              <button
-                onClick={() => setMemberListOpen(true)}
-                className="text-[42px] font-bold text-[#111111] leading-none tracking-tight hover:text-[#F5C72C] transition-colors cursor-pointer"
-                title="View member list"
-              >
-                {snapLoading ? "—" : fmt(memberTotal)}
-              </button>
-              {members?.newThisMonth !== undefined && members.newThisMonth !== 0 && (
-                <span className={cn("text-[13px] font-semibold mb-1.5", members.newThisMonth > 0 ? "text-[#3DB855]" : "text-[#FF3B30]")}>
-                  {members.newThisMonth > 0 ? "+" : ""}{members.newThisMonth} this month
-                </span>
-              )}
-            </div>
-            <p className="text-[13px] text-[#888888]">Active Members</p>
-            {memberBreakdown.length > 0 && (
-              <div className="flex gap-4 mt-3">
-                {memberBreakdown.map(t => (
-                  <div key={t.label}>
-                    <p className="text-[16px] font-bold text-[#111111]">{t.count}</p>
-                    <p className="text-[11px] text-[#AAAAAA]">{t.label}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className="flex flex-col justify-center space-y-2">
-            <p className="text-[12px] text-[#888888]">Goal progress is tracked in the <strong className="text-[#111111]">2026 Key Goals</strong> section above.</p>
-            {members?.newThisMonth === undefined && (
-              <p className="text-[11px] text-[#AAAAAA]">New member count will appear once synced.</p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* ── Section 2: Revenue (merged MRR + Toast + Acuity + Budget) ── */}
-      <div className="bg-white rounded-xl border border-[#E8E8E8] p-5">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4 text-[#111111]" />
-            <h2 className="text-[14px] font-semibold text-[#111111]">Revenue</h2>
-          </div>
-          <button onClick={() => setLocation("/intelligence/reports")} className="flex items-center gap-1 text-[12px] text-[#888888] hover:text-[#111111] transition-colors">
-            Full Report <ArrowRight className="h-3 w-3" />
-          </button>
-        </div>
-
-        {/* Top row: MRR + Toast MTD + Programs */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
-          {mrr > 0 && (
-            <div className="p-3 rounded-lg bg-[#FAFAFA] border border-[#F0F0F0]">
-              <div className="flex items-center gap-1.5 mb-1">
-                {revenue?.mom !== undefined && revenue.mom !== 0 && (
-                  <span className={cn("flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full", revenue.mom > 0 ? "text-[#3DB855] bg-[#F0FAF3]" : "text-[#FF3B30] bg-red-50")}>
-                    {revenue.mom > 0 ? <TrendingUp className="h-2.5 w-2.5" /> : <TrendingDown className="h-2.5 w-2.5" />}
-                    {Math.abs(revenue.mom).toFixed(1)}%
-                  </span>
-                )}
-              </div>
-              <p className="text-[24px] font-bold text-[#111111] leading-none tracking-tight">{snapLoading ? "—" : fmtCurrency(mrr)}</p>
-              <p className="text-[11px] text-[#888888] mt-1">Monthly Recurring</p>
-              {memberBreakdown.length > 0 && (
-                <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1.5">
-                  {memberBreakdown.map(t => (
-                    <span key={t.label} className="text-[10px] text-[#AAAAAA] whitespace-nowrap">{t.count} {t.label}</span>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-          {toastMTD > 0 && (
-            <div className="p-3 rounded-lg bg-[#FAFAFA] border border-[#F0F0F0]">
-              <div className="flex items-center gap-1.5 mb-1">
-                <ShoppingBag className="h-3 w-3 text-[#AAAAAA]" />
-                <span className="text-[10px] text-[#AAAAAA]">Toast POS · MTD</span>
-              </div>
-              <p className="text-[24px] font-bold text-[#111111] leading-none tracking-tight">{fmtCurrency(toastMTD)}</p>
-              <p className="text-[11px] text-[#888888] mt-1">{now.toLocaleDateString("en-US", { month: "long" })} · {toastOrders > 0 ? `${toastOrders} orders` : "No orders yet"}</p>
-              {toastLastMonth > 0 && <p className="text-[10px] text-[#AAAAAA] mt-0.5">Last month: {fmtCurrency(toastLastMonth)}</p>}
-            </div>
-          )}
-          {acuityTotal > 0 && (
-            <div className="p-3 rounded-lg bg-[#FAFAFA] border border-[#F0F0F0]">
-              <div className="flex items-center gap-1.5 mb-1">
-                <CreditCard className="h-3 w-3 text-[#AAAAAA]" />
-                <span className="text-[10px] text-[#AAAAAA]">Programs · Acuity</span>
-              </div>
-              <p className="text-[24px] font-bold text-[#111111] leading-none tracking-tight">{fmtCurrency(acuityTotal)}</p>
-              <p className="text-[11px] text-[#888888] mt-1">All sessions · {acuityBookings > 0 ? `${acuityBookings} bookings` : "No bookings"}</p>
-            </div>
-          )}
-          {hasAnyRevenue && (
-            <div className="p-3 rounded-lg bg-[#F5C72C]/5 border border-[#F5C72C]/20">
-              <div className="flex items-center gap-1.5 mb-1">
-                <Award className="h-3 w-3 text-[#111111]" />
-                <span className="text-[10px] text-[#888888]">Combined MTD + MRR</span>
-              </div>
-              <p className="text-[24px] font-bold text-[#111111] leading-none tracking-tight">{fmtCurrency(mrr + toastMTD)}</p>
-              <p className="text-[11px] text-[#888888] mt-1">MRR + Toast this month</p>
-              <p className="text-[10px] text-[#AAAAAA] mt-0.5">Acuity reported separately above</p>
-            </div>
-          )}
-        </div>
-
-        {/* $0 empty state — APIs not yet connected */}
-        {!snapLoading && !hasAnyRevenue && (
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-[#FAFAFA] border border-dashed border-[#E0E0E0]">
-            <div className="h-7 w-7 rounded-lg bg-[#F5F5F5] flex items-center justify-center shrink-0">
-              <DollarSign className="h-3.5 w-3.5 text-[#AAAAAA]" />
-            </div>
-            <div>
-              <p className="text-[12px] font-semibold text-[#888888]">Revenue data not yet connected</p>
-              <p className="text-[11px] text-[#AAAAAA]">Toast POS and Acuity API connections pending. MRR available once Boomerang syncs.</p>
-            </div>
-          </div>
-        )}
-
-        {/* Annual Revenue Goal — $2M */}
-        <div className="mt-4 pt-4 border-t border-[#F0F0F0]">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-1.5">
-              <TrendingUp className="h-3.5 w-3.5 text-[#111111]" />
-              <span className="text-[13px] font-semibold text-[#111111]">Annual Revenue Goal</span>
-            </div>
-            <div className="text-right">
-              <span className="text-[18px] font-bold text-[#F5C72C]">{annualGoalPct.toFixed(1)}%</span>
-              <span className="text-[11px] text-[#AAAAAA] ml-1">run rate</span>
-            </div>
-          </div>
-          <div className="h-2 bg-[#F2F2F7] rounded-full overflow-hidden">
-            <div className="h-full rounded-full bg-[#F5C72C] transition-all" style={{ width: `${annualGoalPct}%` }} />
-          </div>
-          <div className="flex justify-between mt-1.5">
-            <span className="text-[11px] text-[#AAAAAA]">{fmtCurrency(annualRunRate)} projected / {fmtCurrency(ANNUAL_REVENUE_GOAL)} goal</span>
-            {annualRunRate < ANNUAL_REVENUE_GOAL && (
-              <span className="text-[11px] text-[#AAAAAA]">{fmtCurrency(ANNUAL_REVENUE_GOAL - annualRunRate)} gap</span>
-            )}
-          </div>
-        </div>
-
-      </div>
-
-      {/* ── Section 3: Campaigns (merged from sidebar, no ROI) ── */}
+      {/* ── Section 2: Campaigns ── */}
       {(stratLoading || activeCampaigns.length > 0) && (
         <div className="bg-white rounded-xl border border-[#E8E8E8] p-5">
           <div className="flex items-center justify-between mb-4">
@@ -725,28 +595,36 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {activePrograms.map((p: any) => {
-              const progress = p.goalTarget > 0 ? Math.min((p.kpiActual / p.goalTarget) * 100, 100) : 0;
-              const health = calcHealth(progress);
-              const isOnTrack = progress >= 50;
+              const hasGoalData = p.goalTarget > 0;
+              const progress = hasGoalData ? Math.min((p.kpiActual / p.goalTarget) * 100, 100) : 0;
+              const health = hasGoalData ? calcHealth(progress) : 3;
+              const isOnTrack = hasGoalData && progress >= 50;
               return (
                 <button
                   key={p.id}
-                  onClick={() => setLocation("/programs")}
+                  onClick={() => setLocation("/operations/programs")}
                   className="flex flex-col gap-2 p-3 rounded-xl bg-[#F9F9F9] hover:bg-[#F0F0F0] transition-colors text-left group border border-transparent hover:border-[#E0E0E0]"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <p className="text-[12px] font-semibold text-[#111111] leading-tight">{p.name}</p>
-                    <div className={cn("h-2 w-2 rounded-full shrink-0 mt-1", isOnTrack ? "bg-[#3DB855]" : "bg-[#E0E0E0]")} />
+                    <div className={cn(
+                      "h-2 w-2 rounded-full shrink-0 mt-1",
+                      !hasGoalData ? "bg-[#F5C72C]" : isOnTrack ? "bg-[#3DB855]" : "bg-[#E0E0E0]"
+                    )} />
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 h-1.5 bg-[#E8E8E8] rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all"
-                        style={{ width: `${progress}%`, background: isOnTrack ? "#3DB855" : "#E0E0E0" }}
-                      />
+                  {hasGoalData ? (
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-1.5 bg-[#E8E8E8] rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all"
+                          style={{ width: `${progress}%`, background: "#3DB855" }}
+                        />
+                      </div>
+                      <span className="text-[10px] text-[#AAAAAA] shrink-0">{progress.toFixed(0)}%</span>
                     </div>
-                    <span className="text-[10px] text-[#AAAAAA] shrink-0">{progress.toFixed(0)}%</span>
-                  </div>
+                  ) : (
+                    <p className="text-[10px] text-[#F5C72C]">Active · tracking started</p>
+                  )}
                   <HealthDots score={health} />
                 </button>
               );

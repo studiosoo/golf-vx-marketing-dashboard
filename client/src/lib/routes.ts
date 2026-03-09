@@ -60,6 +60,7 @@ export const appRoutes = {
         communications: `${base}/operations/communications`,
         communicationDetail: (communicationId: string | number) => `${base}/operations/communications/${communicationId}`,
         content: `${base}/operations/content`,
+        localMarketing: `${base}/operations/local-marketing`,
       },
       audience: {
         home: `${base}/audience`,

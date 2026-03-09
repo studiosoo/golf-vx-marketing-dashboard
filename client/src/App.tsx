@@ -25,6 +25,7 @@ import {
   OperationsCalendarWrapper,
   OperationsCampaignsWrapper,
   OperationsContentWrapper,
+  OperationsLocalMarketingWrapper,
   OperationsPaidMediaWrapper,
   OperationsProgramsWrapper,
   OperationsPromotionsWrapper,
@@ -84,6 +85,7 @@ function DashboardAppRoutes() {
         <Route path="/app/:venueSlug/operations/programs/:slug" component={ProgramDetailRouter} />
         <Route path="/app/:venueSlug/operations/promotions" component={OperationsPromotionsWrapper} />
         <Route path="/app/:venueSlug/operations/communications">{params => <Redirect to={appRoutes.venue(params.venueSlug).operations.campaigns} />}</Route>
+        <Route path="/app/:venueSlug/operations/local-marketing" component={OperationsLocalMarketingWrapper} />
         <Route path="/app/:venueSlug/operations/content" component={OperationsContentWrapper} />
 
         <Route path="/app/:venueSlug/audience">{params => <Redirect to={appRoutes.venue(params.venueSlug).audience.people} />}</Route>

@@ -15,6 +15,7 @@ import Autopilot from "./Autopilot";
 import Assistant from "./Assistant";
 import MarketResearch from "./MarketResearch";
 import Integrations from "./Integrations";
+import LocalMarketing from "./LocalMarketing";
 
 export function DashboardPageWrapper() {
   return <Home />;
@@ -46,6 +47,10 @@ export function OperationsPromotionsWrapper() {
 
 export function OperationsCommunicationsWrapper() {
   return <CommunicationsHub />;
+}
+
+export function OperationsLocalMarketingWrapper() {
+  return <LocalMarketing />;
 }
 
 export function OperationsContentWrapper() {

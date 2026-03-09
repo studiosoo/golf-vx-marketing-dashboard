@@ -5,6 +5,7 @@ import {
   Gauge,
   LayoutDashboard,
   Lightbulb,
+  MapPin,
   MessageSquare,
   Search,
   Settings,
@@ -66,6 +67,7 @@ function buildNav(venueSlug: string) {
         venue.operations.paidMedia,
         venue.operations.programs,
         venue.operations.promotions,
+        venue.operations.localMarketing,
         venue.operations.content,
       ],
       children: [
@@ -73,6 +75,7 @@ function buildNav(venueSlug: string) {
         { label: "Paid Media", path: venue.operations.paidMedia, icon: BarChart3 },
         { label: "Programs", path: venue.operations.programs, icon: Target },
         { label: "Promotions", path: venue.operations.promotions, icon: Lightbulb },
+        { label: "Local Marketing", path: venue.operations.localMarketing, icon: MapPin },
         { label: "Content & Social", path: venue.operations.content, icon: FileText },
       ],
     },
