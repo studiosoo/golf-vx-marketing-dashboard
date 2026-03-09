@@ -262,8 +262,9 @@ export default function Home() {
   // Annual revenue goal tracking
   const ANNUAL_REVENUE_GOAL = 2_000_000;
   const annualMrrRunRate = mrr * 12;
-  // Estimate YTD revenue using MRR + Toast MTD * 12 as run rate proxy
-  const annualRunRate = annualMrrRunRate + (toastMTD * 12) + (acuityTotal * 12);
+  // Run rate = MRR annualized + Toast MTD × 12 (month-over-month proxy)
+  // Acuity is all-time cumulative — not projected monthly — so excluded here
+  const annualRunRate = annualMrrRunRate + (toastMTD * 12);
   const annualGoalPct = Math.min((annualRunRate / ANNUAL_REVENUE_GOAL) * 100, 100);
   const hasAnyRevenue = mrr > 0 || toastMTD > 0 || acuityTotal > 0;
 
@@ -310,7 +311,7 @@ export default function Home() {
       display: hasAnyRevenue ? fmtCurrency(annualRunRate) : "—",
       goalDisplay: "$2M",
       color: "#F5C72C",
-      statusNote: hasAnyRevenue ? "Projected run rate · not actual YTD" : null,
+      statusNote: hasAnyRevenue ? "MRR + Toast run rate · Acuity reported separately" : null,
       statusColor: "#888888",
     },
     {

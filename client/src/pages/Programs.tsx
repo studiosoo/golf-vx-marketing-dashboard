@@ -93,12 +93,11 @@ const STRATEGIC_META: Record<StrategicCampaign, { label: string; color: string }
 function getProgramRoute(program: Program): string {
   const name = program.name.toLowerCase();
   const pd = appRoutes.venue(DEFAULT_VENUE_SLUG).operations.programDetail;
+  // Only route to slugs that have a dedicated detail page in ProgramDetailRouter
   if (name.includes("drive day") || name.includes("sunday clinic")) return pd("drive-day");
   if (name.includes("winter clinic")) return pd("winter-clinics");
-  if (name.includes("junior") || name.includes("summer camp")) return pd("summer-camp");
   if (name.includes("league") || name.includes("tournament")) return pd("leagues");
-  if (name.includes("giveaway")) return pd("annual-giveaway");
-  if (name.includes("trial") || name.includes("1-hour")) return pd("trial-session");
+  // Everything else uses numeric ID so GenericProgramDetail can load real campaign data
   return pd(program.id);
 }
 

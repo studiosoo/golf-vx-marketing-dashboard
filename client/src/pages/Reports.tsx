@@ -97,16 +97,16 @@ function RevenueTabContent() {
     <div className="space-y-4">
       {/* KPI Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard icon={DollarSign} label="Total Revenue (MTD)" value={toastSummary ? fmt((toastSummary as any).thisMonthRevenue || 0) : "—"} sub={toastSummary && !(toastSummary as any).thisMonthRevenue ? `Last data: ${String((toastSummary as any).latestDate || '').replace(/(\d{4})(\d{2})(\d{2})/, '$2/$3/$1')}` : undefined} />
-        <StatCard icon={ShoppingBag} label="Toast POS (MTD)" value={toastSummary ? fmt((toastSummary as any).thisMonthRevenue || 0) : "—"} sub={toastSummary ? `${(toastSummary as any).thisMonthOrders || 0} orders this month` : undefined} />
-        <StatCard icon={CreditCard} label="Programs Revenue" value={acuityRevenue ? fmt((acuityRevenue as any).total || 0) : "—"} sub={acuityRevenue ? `${(acuityRevenue as any).totalBookings || 0} bookings` : undefined} />
-        <StatCard icon={TrendingUp} label="Last Month Revenue" value={toastSummary ? fmt((toastSummary as any).lastMonthRevenue || 0) : "—"} sub={toastSummary ? `All-time: ${fmt((toastSummary as any).allTimeRevenue || 0)}` : undefined} />
+        <StatCard icon={ShoppingBag} label="Toast POS · MTD" value={toastSummary ? fmt((toastSummary as any).thisMonthRevenue || 0) : "—"} sub={toastSummary ? `${(toastSummary as any).thisMonthOrders || 0} orders this month` : undefined} />
+        <StatCard icon={TrendingUp} label="Toast · Last Month" value={toastSummary ? fmt((toastSummary as any).lastMonthRevenue || 0) : "—"} sub={toastSummary ? `All-time: ${fmt((toastSummary as any).allTimeRevenue || 0)}` : undefined} />
+        <StatCard icon={CreditCard} label="Acuity · All Sessions" value={acuityRevenue ? fmt((acuityRevenue as any).total || 0) : "—"} sub={acuityRevenue ? `${(acuityRevenue as any).totalBookings || 0} bookings · cumulative` : undefined} />
+        <StatCard icon={DollarSign} label="Membership Revenue" value={summary ? fmt((summary as any).total || 0) : "—"} sub="Member transactions · date-scoped" />
       </div>
 
       {/* Revenue Breakdown Chart */}
       <Card className="bg-card border-border">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold">Revenue Breakdown (Last 30 Days — Toast POS)</CardTitle>
+          <CardTitle className="text-sm font-semibold">Revenue Breakdown · All-time (Toast + Acuity)</CardTitle>
         </CardHeader>
         <CardContent>
           {toastSummary ? (() => {
