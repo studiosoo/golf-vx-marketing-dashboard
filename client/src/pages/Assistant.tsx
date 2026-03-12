@@ -61,10 +61,10 @@ function LeftPanel({
   hasMessages,
 }: LeftPanelProps) {
   return (
-    <aside className="w-[280px] shrink-0 flex flex-col bg-[#F9F9F9] border-r border-[#E0E0E0] overflow-y-auto">
+    <aside className="w-[280px] shrink-0 flex flex-col bg-[#F9F9F9] border-r border-[#DEDEDA] overflow-y-auto">
       {/* Context */}
       <div className="px-4 pt-5 pb-2">
-        <p className="text-[11px] font-semibold text-[#AAAAAA] uppercase tracking-wider mb-3">
+        <p className="text-[11px] font-semibold text-[#A8A8A3] uppercase tracking-wider mb-3">
           Context
         </p>
         <div className="flex flex-col gap-1.5">
@@ -77,15 +77,15 @@ function LeftPanel({
                 onClick={() => onContextChange(opt.value)}
                 className={`flex items-center gap-2.5 w-full px-3 py-2 rounded-[10px] text-sm font-medium transition-all border ${
                   isActive
-                    ? "bg-[#F5C72C] text-[#111111] border-[#F5C72C]"
-                    : "bg-transparent text-[#888888] border-[#E0E0E0] hover:text-[#111111] hover:border-[#CCCCCC]"
+                    ? "bg-[#F2DD48] text-[#222222] border-[#F2DD48]"
+                    : "bg-transparent text-[#6F6F6B] border-[#DEDEDA] hover:text-[#222222] hover:border-[#A8A8A3]"
                 }`}
               >
                 <Icon size={14} />
                 <span>{opt.label}</span>
                 <span
                   className={`ml-auto text-[11px] ${
-                    isActive ? "text-[#111111]/60" : "text-[#AAAAAA]"
+                    isActive ? "text-[#222222]/60" : "text-[#A8A8A3]"
                   }`}
                 >
                   {opt.description}
@@ -96,11 +96,11 @@ function LeftPanel({
         </div>
       </div>
 
-      <div className="mx-4 my-4 border-t border-[#E0E0E0]" />
+      <div className="mx-4 my-4 border-t border-[#DEDEDA]" />
 
       {/* Quick Actions */}
       <div className="px-4 pb-2">
-        <p className="text-[11px] font-semibold text-[#AAAAAA] uppercase tracking-wider mb-3">
+        <p className="text-[11px] font-semibold text-[#A8A8A3] uppercase tracking-wider mb-3">
           Quick Actions
         </p>
         <div className="flex flex-col gap-1.5">
@@ -109,7 +109,7 @@ function LeftPanel({
               key={action}
               onClick={() => onQuickAction(action)}
               disabled={hasMessages}
-              className="w-full text-left px-3 py-2 rounded-[10px] text-sm text-[#111111] border border-[#E0E0E0] bg-white hover:bg-gray-50 hover:border-[#CCCCCC] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full text-left px-3 py-2 rounded-[10px] text-sm text-[#222222] border border-[#DEDEDA] bg-white hover:bg-gray-50 hover:border-[#A8A8A3] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {action}
             </button>
@@ -119,11 +119,11 @@ function LeftPanel({
 
       {suggestedPrompts.length > 0 && (
         <>
-          <div className="mx-4 my-4 border-t border-[#E0E0E0]" />
+          <div className="mx-4 my-4 border-t border-[#DEDEDA]" />
 
           {/* Suggested Prompts */}
           <div className="px-4 pb-4">
-            <p className="text-[11px] font-semibold text-[#AAAAAA] uppercase tracking-wider mb-3">
+            <p className="text-[11px] font-semibold text-[#A8A8A3] uppercase tracking-wider mb-3">
               Suggested Prompts
             </p>
             <div className="flex flex-col gap-1.5">
@@ -131,7 +131,7 @@ function LeftPanel({
                 <button
                   key={index}
                   onClick={() => onSuggestedPrompt(prompt)}
-                  className="w-full text-left px-3 py-2 rounded-[10px] text-sm text-[#888888] border border-[#E0E0E0] bg-white hover:text-[#111111] hover:bg-gray-50 hover:border-[#CCCCCC] transition-all"
+                  className="w-full text-left px-3 py-2 rounded-[10px] text-sm text-[#6F6F6B] border border-[#DEDEDA] bg-white hover:text-[#222222] hover:bg-gray-50 hover:border-[#A8A8A3] transition-all"
                 >
                   {prompt}
                 </button>
@@ -143,7 +143,7 @@ function LeftPanel({
 
       {/* Footer */}
       <div className="mt-auto px-4 py-4">
-        <p className="text-[11px] text-[#AAAAAA] text-center">
+        <p className="text-[11px] text-[#A8A8A3] text-center">
           Powered by Gemini Flash Lite
         </p>
       </div>
@@ -240,8 +240,8 @@ export default function Assistant() {
                 onClick={() => setContext(opt.value)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
                   isActive
-                    ? "bg-[#F5C72C] text-[#111111] border-[#F5C72C]"
-                    : "bg-transparent text-[#888888] border-[#E0E0E0] hover:text-[#111111] hover:border-[#CCCCCC]"
+                    ? "bg-[#F2DD48] text-[#222222] border-[#F2DD48]"
+                    : "bg-transparent text-[#6F6F6B] border-[#DEDEDA] hover:text-[#222222] hover:border-[#A8A8A3]"
                 }`}
               >
                 <Icon size={11} />

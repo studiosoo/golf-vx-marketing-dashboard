@@ -37,20 +37,20 @@ export default function Campaigns() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Campaigns</h1>
-        <p className="text-muted-foreground mt-1">
+        <h1 className="text-2xl font-bold text-[#222222]">Campaigns</h1>
+        <p className="text-[#6F6F6B] mt-1">
           Manage and monitor all marketing campaigns across channels
         </p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {sections.map((section) => (
           <Link key={section.href} href={section.href}>
-            <Card className="bg-card border-border cursor-pointer hover:border-[#F5C72C]/50 transition-colors">
+            <Card className="bg-white border-[#DEDEDA] cursor-pointer hover:border-[#F2DD48]/50 transition-colors">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">{section.icon}</span>
-                    <CardTitle className="text-base text-foreground">
+                    <CardTitle className="text-base text-[#222222]">
                       {section.title}
                     </CardTitle>
                   </div>
@@ -60,10 +60,10 @@ export default function Campaigns() {
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-[#6F6F6B]">
                   {section.description}
                 </p>
-                <p className="text-xs text-[#F5C72C] mt-2">View details →</p>
+                <p className="text-xs text-[#F2DD48] mt-2">View details →</p>
               </CardContent>
             </Card>
           </Link>

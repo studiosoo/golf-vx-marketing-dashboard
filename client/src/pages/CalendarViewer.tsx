@@ -21,8 +21,8 @@ export default function CalendarViewer() {
     <div className="container py-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Calendar</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-3xl font-bold text-[#222222]">Calendar</h1>
+          <p className="text-[#6F6F6B] mt-1">
             Marketing campaigns and venue events in unified view
           </p>
         </div>
@@ -30,7 +30,7 @@ export default function CalendarViewer() {
           href={unifiedCalendarUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+          className="flex items-center gap-2 text-sm text-[#6F6F6B] hover:text-[#F2DD48] transition-colors"
         >
           <ExternalLink className="h-4 w-4" />
           Open in Google Calendar

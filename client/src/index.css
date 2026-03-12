@@ -1,3 +1,4 @@
+@import './styles/design-tokens.css';
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -78,12 +79,54 @@
   --sidebar-border: oklch(0.88 0 0);
   --sidebar-ring: oklch(0.863 0.176 89.9);
   /* Brand color tokens for Recharts / inline styles */
-  --color-brand-primary: #ffcb00;
+  --color-brand-primary: #F2DD48;
   --color-brand-orange: #ef9253;
-  --color-brand-green: #5daf68;
+  --color-brand-green: #72B84A;
   --color-brand-purple: #a87fbe;
   --color-brand-blue: #76addc;
   --color-brand-gray: #6B7280;
+
+  /* ── Golf VX App-Native Design Tokens ── */
+  --gvx-bg-canvas:  #F6F6F4;
+  --gvx-bg-surface: #FFFFFF;
+  --gvx-bg-muted:   #F8F9FA;
+  --gvx-bg-hover:   #F1F1EF;
+  --gvx-border-faint:  #F0F0F0;
+  --gvx-border-light:  #E9E9E6;
+  --gvx-border-strong: #DEDEDA;
+  --gvx-text-primary:   #222222;
+  --gvx-text-secondary: #6F6F6B;
+  --gvx-text-muted:     #A8A8A3;
+  --gvx-text-inverse:   #FFFFFF;
+  --gvx-yellow:      #F2DD48;
+  --gvx-yellow-soft: #FDF9E3;
+  --gvx-charcoal:    #333333;
+  --gvx-status-green-bg:    #E6F0DC;
+  --gvx-status-green-text:  #4C882A;
+  --gvx-status-orange-bg:   #F6E5CF;
+  --gvx-status-orange-text: #B46A0B;
+  --gvx-status-red-bg:      #F9E5E5;
+  --gvx-status-red-text:    #C81E1E;
+  --gvx-status-gray-bg:     #F1F1EF;
+  --gvx-status-gray-text:   #6F6F6B;
+  --gvx-status-blue-bg:     #EAF2FF;
+  --gvx-status-blue-text:   #1A56DB;
+  --gvx-chart-negative:     #FFA7A7;
+
+  /* ── Typography Scale ── */
+  --gvx-text-xs:    11px;
+  --gvx-text-sm:    13px;
+  --gvx-text-base:  15px;
+  --gvx-text-lg:    18px;
+  --gvx-text-xl:    22px;
+  --gvx-text-2xl:   28px;
+  --gvx-text-page:  20px;
+  --gvx-weight-regular:  400;
+  --gvx-weight-medium:   500;
+  --gvx-weight-semibold: 600;
+  --gvx-weight-bold:     700;
+  --gvx-font-primary:   'Inter', sans-serif;
+  --gvx-font-korean:    'Pretendard', sans-serif;
 }
 
 .dark {
@@ -121,12 +164,39 @@
   --sidebar-border: oklch(0.88 0 0);
   --sidebar-ring: oklch(0.863 0.176 89.9);
   /* Brand color tokens for Recharts / inline styles */
-  --color-brand-primary: #ffcb00;
+  --color-brand-primary: #F2DD48;
   --color-brand-orange: #ef9253;
-  --color-brand-green: #5daf68;
+  --color-brand-green: #72B84A;
   --color-brand-purple: #a87fbe;
   --color-brand-blue: #76addc;
   --color-brand-gray: #6B7280;
+
+  /* ── Golf VX App-Native Design Tokens ── */
+  --gvx-bg-canvas:  #F6F6F4;
+  --gvx-bg-surface: #FFFFFF;
+  --gvx-bg-muted:   #F8F9FA;
+  --gvx-bg-hover:   #F1F1EF;
+  --gvx-border-faint:  #F0F0F0;
+  --gvx-border-light:  #E9E9E6;
+  --gvx-border-strong: #DEDEDA;
+  --gvx-text-primary:   #222222;
+  --gvx-text-secondary: #6F6F6B;
+  --gvx-text-muted:     #A8A8A3;
+  --gvx-text-inverse:   #FFFFFF;
+  --gvx-yellow:      #F2DD48;
+  --gvx-yellow-soft: #FDF9E3;
+  --gvx-charcoal:    #333333;
+  --gvx-status-green-bg:    #E6F0DC;
+  --gvx-status-green-text:  #4C882A;
+  --gvx-status-orange-bg:   #F6E5CF;
+  --gvx-status-orange-text: #B46A0B;
+  --gvx-status-red-bg:      #F9E5E5;
+  --gvx-status-red-text:    #C81E1E;
+  --gvx-status-gray-bg:     #F1F1EF;
+  --gvx-status-gray-text:   #6F6F6B;
+  --gvx-status-blue-bg:     #EAF2FF;
+  --gvx-status-blue-text:   #1A56DB;
+  --gvx-chart-negative:     #FFA7A7;
 }
 
 @layer base {

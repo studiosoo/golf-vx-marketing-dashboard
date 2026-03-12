@@ -19,9 +19,9 @@ import { ProgramAIIntelligence } from "@/components/ProgramAIIntelligence";
 const ENROLLMENT_TARGET = 128; // 8 weeks × 16 students per week
 
 const TRACK_CONFIG = {
-  full_day: { label: "Full-Day Program", ageGroup: "Ages 7–17", color: "text-[#F5C72C]", bg: "bg-[#F5C72C]/10 border-[#F5C72C]/30" },
-  half_day: { label: "Half-Day Program", ageGroup: "Ages 7–17", color: "text-[#888888]", bg: "bg-[#888888]/10 border-[#888888]/30" },
-  tots: { label: "Tots Program", ageGroup: "Ages 4–6", color: "text-[#E8453C]", bg: "bg-[#E8453C]/10 border-[#E8453C]/30" },
+  full_day: { label: "Full-Day Program", ageGroup: "Ages 7–17", color: "text-[#F2DD48]", bg: "bg-[#F2DD48]/10 border-[#F2DD48]/30" },
+  half_day: { label: "Half-Day Program", ageGroup: "Ages 7–17", color: "text-[#6F6F6B]", bg: "bg-[#6F6F6B]/10 border-[#6F6F6B]/30" },
+  tots: { label: "Tots Program", ageGroup: "Ages 4–6", color: "text-[#FF3B30]", bg: "bg-[#FF3B30]/10 border-[#FF3B30]/30" },
 };
 
 export default function JuniorCampDashboard() {
@@ -37,19 +37,19 @@ export default function JuniorCampDashboard() {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-3">
-          <button onClick={() => setLocation("/programs")} className="p-2 rounded-lg hover:bg-muted transition-colors">
+          <button onClick={() => setLocation("/programs")} className="p-2 rounded-lg hover:bg-[#F1F1EF] transition-colors">
             <ArrowLeft className="h-5 w-5" />
           </button>
           <div>
             <h1 className="text-2xl font-bold">PBGA Junior Summer Camp</h1>
-            <p className="text-muted-foreground">Loading camp data from Acuity...</p>
+            <p className="text-[#6F6F6B]">Loading camp data from Acuity...</p>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="bg-card border border-border rounded-xl p-5 animate-pulse">
-              <div className="h-4 bg-primary/20 rounded w-2/3 mb-3" />
-              <div className="h-8 bg-primary/20 rounded w-1/2" />
+            <div key={i} className="bg-white border border-[#DEDEDA] rounded-xl p-5 animate-pulse">
+              <div className="h-4 bg-[#F2DD48]/20 rounded w-2/3 mb-3" />
+              <div className="h-8 bg-[#F2DD48]/20 rounded w-1/2" />
             </div>
           ))}
         </div>
@@ -61,12 +61,12 @@ export default function JuniorCampDashboard() {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-3">
-          <button onClick={() => setLocation("/programs")} className="p-2 rounded-lg hover:bg-muted transition-colors">
+          <button onClick={() => setLocation("/programs")} className="p-2 rounded-lg hover:bg-[#F1F1EF] transition-colors">
             <ArrowLeft className="h-5 w-5" />
           </button>
           <div>
             <h1 className="text-2xl font-bold">PBGA Junior Summer Camp</h1>
-            <p className="text-[#E8453C]">Error loading data: {error.message}</p>
+            <p className="text-[#FF3B30]">Error loading data: {error.message}</p>
           </div>
         </div>
       </div>
@@ -98,22 +98,22 @@ export default function JuniorCampDashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <button onClick={() => setLocation("/programs")} className="p-2 rounded-lg hover:bg-muted transition-colors">
+        <button onClick={() => setLocation("/programs")} className="p-2 rounded-lg hover:bg-[#F1F1EF] transition-colors">
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div>
           <h1 className="text-2xl font-bold">PBGA Junior Summer Camp 2026</h1>
-          <p className="text-muted-foreground">Acuity registration data · Jun–Aug 2026 · Coach Chuck Lynch</p>
+          <p className="text-[#6F6F6B]">Acuity registration data · Jun–Aug 2026 · Coach Chuck Lynch</p>
         </div>
       </div>
 
       {/* Registration opens notice */}
       {totalRegistrations === 0 && (
-        <div className="flex items-start gap-3 bg-[#F5C72C]/10 border border-[#F5C72C]/30 rounded-xl p-4">
-          <Info className="h-5 w-5 text-[#F5C72C] mt-0.5 shrink-0" />
+        <div className="flex items-start gap-3 bg-[#F2DD48]/10 border border-[#F2DD48]/30 rounded-xl p-4">
+          <Info className="h-5 w-5 text-[#F2DD48] mt-0.5 shrink-0" />
           <div>
-            <p className="font-semibold text-[#111111]">Registration Not Yet Open</p>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="font-semibold text-[#222222]">Registration Not Yet Open</p>
+            <p className="text-sm text-[#6F6F6B] mt-1">
               Summer Camp runs Jun–Aug 2026. Once registrations open in Acuity, this dashboard will populate automatically.
               Use the Marketing tab below to track campaign efforts ahead of registration launch.
             </p>
@@ -123,51 +123,51 @@ export default function JuniorCampDashboard() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-card border border-border rounded-xl p-5">
-          <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
+        <div className="bg-white border border-[#DEDEDA] rounded-xl p-5">
+          <div className="flex items-center gap-2 text-[#6F6F6B] text-sm mb-2">
             <Users className="h-4 w-4" />
             Enrolled / Goal
           </div>
           <div className="flex items-baseline gap-1.5">
             <span className="text-3xl font-bold">{totalRegistrations}</span>
-            <span className="text-base text-muted-foreground font-medium">/ {ENROLLMENT_TARGET}</span>
+            <span className="text-base text-[#6F6F6B] font-medium">/ {ENROLLMENT_TARGET}</span>
           </div>
-          <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
+          <div className="mt-2 h-1.5 bg-[#F1F1EF] rounded-full overflow-hidden">
             <div
-              className="h-full rounded-full bg-[#F5C72C] transition-all"
+              className="h-full rounded-full bg-[#F2DD48] transition-all"
               style={{ width: `${Math.min(100, (totalRegistrations / ENROLLMENT_TARGET) * 100)}%` }}
             />
           </div>
-          <div className="text-xs text-muted-foreground mt-1">
+          <div className="text-xs text-[#6F6F6B] mt-1">
             {ENROLLMENT_TARGET - totalRegistrations > 0
               ? `${ENROLLMENT_TARGET - totalRegistrations} spots remaining`
               : "Goal reached!"
             }
           </div>
         </div>
-        <div className="bg-card border border-border rounded-xl p-5">
-          <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
+        <div className="bg-white border border-[#DEDEDA] rounded-xl p-5">
+          <div className="flex items-center gap-2 text-[#6F6F6B] text-sm mb-2">
             <DollarSign className="h-4 w-4" />
             Total Revenue
           </div>
           <div className="text-3xl font-bold">${totalRevenue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
-          <div className="text-xs text-muted-foreground mt-1">From Acuity payments</div>
+          <div className="text-xs text-[#6F6F6B] mt-1">From Acuity payments</div>
         </div>
-        <div className="bg-card border border-border rounded-xl p-5">
-          <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
+        <div className="bg-white border border-[#DEDEDA] rounded-xl p-5">
+          <div className="flex items-center gap-2 text-[#6F6F6B] text-sm mb-2">
             <Calendar className="h-4 w-4" />
             Program Weeks
           </div>
           <div className="text-3xl font-bold">8</div>
-          <div className="text-xs text-muted-foreground mt-1">Jun 8 – Aug 7</div>
+          <div className="text-xs text-[#6F6F6B] mt-1">Jun 8 – Aug 7</div>
         </div>
-        <div className="bg-card border border-border rounded-xl p-5">
-          <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
+        <div className="bg-white border border-[#DEDEDA] rounded-xl p-5">
+          <div className="flex items-center gap-2 text-[#6F6F6B] text-sm mb-2">
             <Sun className="h-4 w-4" />
             Program Tracks
           </div>
           <div className="text-3xl font-bold">3</div>
-          <div className="text-xs text-muted-foreground mt-1">Full-Day · Half-Day · Tots</div>
+          <div className="text-xs text-[#6F6F6B] mt-1">Full-Day · Half-Day · Tots</div>
         </div>
       </div>
 
@@ -180,15 +180,15 @@ export default function JuniorCampDashboard() {
             return (
               <div key={key} className={`border rounded-xl p-5 ${cfg.bg}`}>
                 <div className={`text-sm font-semibold mb-1 ${cfg.color}`}>{cfg.label}</div>
-                <div className="text-xs text-muted-foreground mb-3">{cfg.ageGroup}</div>
+                <div className="text-xs text-[#6F6F6B] mb-3">{cfg.ageGroup}</div>
                 <div className="flex justify-between items-end">
                   <div>
                     <div className="text-2xl font-bold">{track.count}</div>
-                    <div className="text-xs text-muted-foreground">registrations</div>
+                    <div className="text-xs text-[#6F6F6B]">registrations</div>
                   </div>
                   <div className="text-right">
                     <div className="text-lg font-semibold">${track.revenue.toLocaleString("en-US", { minimumFractionDigits: 0 })}</div>
-                    <div className="text-xs text-muted-foreground">revenue</div>
+                    <div className="text-xs text-[#6F6F6B]">revenue</div>
                   </div>
                 </div>
               </div>
@@ -200,16 +200,16 @@ export default function JuniorCampDashboard() {
       {/* Weekly Schedule */}
       <div>
         <h2 className="text-lg font-semibold mb-3">Weekly Schedule</h2>
-        <div className="bg-card border border-border rounded-xl overflow-hidden">
+        <div className="bg-white border border-[#DEDEDA] rounded-xl overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-muted/40">
+            <thead className="bg-[#F6F6F4]">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Week</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Dates</th>
-                <th className="text-right px-4 py-3 font-medium text-muted-foreground">Full-Day</th>
-                <th className="text-right px-4 py-3 font-medium text-muted-foreground">Half-Day</th>
-                <th className="text-right px-4 py-3 font-medium text-muted-foreground">Tots</th>
-                <th className="text-right px-4 py-3 font-medium text-muted-foreground">Total</th>
+                <th className="text-left px-4 py-3 font-medium text-[#6F6F6B]">Week</th>
+                <th className="text-left px-4 py-3 font-medium text-[#6F6F6B]">Dates</th>
+                <th className="text-right px-4 py-3 font-medium text-[#6F6F6B]">Full-Day</th>
+                <th className="text-right px-4 py-3 font-medium text-[#6F6F6B]">Half-Day</th>
+                <th className="text-right px-4 py-3 font-medium text-[#6F6F6B]">Tots</th>
+                <th className="text-right px-4 py-3 font-medium text-[#6F6F6B]">Total</th>
               </tr>
             </thead>
             <tbody>
@@ -219,13 +219,13 @@ export default function JuniorCampDashboard() {
                 const totsCount = weeks.filter(w => w.week === pd.week && w.track === 'tots').reduce((s, w) => s + w.registrations, 0);
                 const total = fdCount + hdCount + totsCount;
                 return (
-                  <tr key={i} className="border-t border-border hover:bg-muted/20 transition-colors">
+                  <tr key={i} className="border-t border-[#DEDEDA] hover:bg-[#F1F1EF]/20 transition-colors">
                     <td className="px-4 py-3 font-medium">{pd.label}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{pd.week}</td>
-                    <td className="px-4 py-3 text-right">{fdCount > 0 ? <span className="text-[#F5C72C] font-semibold">{fdCount}</span> : <span className="text-muted-foreground/40">—</span>}</td>
-                    <td className="px-4 py-3 text-right">{hdCount > 0 ? <span className="text-[#888888] font-semibold">{hdCount}</span> : <span className="text-muted-foreground/40">—</span>}</td>
-                    <td className="px-4 py-3 text-right">{totsCount > 0 ? <span className="text-[#E8453C] font-semibold">{totsCount}</span> : <span className="text-muted-foreground/40">—</span>}</td>
-                    <td className="px-4 py-3 text-right font-semibold">{total > 0 ? total : <span className="text-muted-foreground/40">—</span>}</td>
+                    <td className="px-4 py-3 text-[#6F6F6B]">{pd.week}</td>
+                    <td className="px-4 py-3 text-right">{fdCount > 0 ? <span className="text-[#F2DD48] font-semibold">{fdCount}</span> : <span className="text-[#6F6F6B]/40">—</span>}</td>
+                    <td className="px-4 py-3 text-right">{hdCount > 0 ? <span className="text-[#6F6F6B] font-semibold">{hdCount}</span> : <span className="text-[#6F6F6B]/40">—</span>}</td>
+                    <td className="px-4 py-3 text-right">{totsCount > 0 ? <span className="text-[#FF3B30] font-semibold">{totsCount}</span> : <span className="text-[#6F6F6B]/40">—</span>}</td>
+                    <td className="px-4 py-3 text-right font-semibold">{total > 0 ? total : <span className="text-[#6F6F6B]/40">—</span>}</td>
                   </tr>
                 );
               })}
@@ -238,10 +238,10 @@ export default function JuniorCampDashboard() {
       {sortedHowHeard.length > 0 && (
         <div>
           <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-primary" />
+            <BarChart3 className="h-5 w-5 text-[#F2DD48]" />
             Registration Source Breakdown
           </h2>
-          <div className="bg-card border border-border rounded-xl p-5 space-y-3">
+          <div className="bg-white border border-[#DEDEDA] rounded-xl p-5 space-y-3">
             {sortedHowHeard.map(([source, count]) => {
               const pct = totalSourced > 0 ? (count / totalSourced) * 100 : 0;
               return (
@@ -250,8 +250,8 @@ export default function JuniorCampDashboard() {
                     <span>{source}</span>
                     <span className="font-semibold">{count} ({pct.toFixed(0)}%)</span>
                   </div>
-                  <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${pct}%` }} />
+                  <div className="h-2 bg-[#F1F1EF] rounded-full overflow-hidden">
+                    <div className="h-full bg-[#F2DD48] rounded-full transition-all" style={{ width: `${pct}%` }} />
                   </div>
                 </div>
               );
@@ -264,7 +264,7 @@ export default function JuniorCampDashboard() {
       <div className="space-y-4">
         <div>
           <h2 className="text-lg font-semibold">Marketing Intelligence</h2>
-          <p className="text-sm text-muted-foreground mt-1">Meta Ads, Instagram, and newsletter efforts for PBGA Junior Summer Camp.</p>
+          <p className="text-sm text-[#6F6F6B] mt-1">Meta Ads, Instagram, and newsletter efforts for PBGA Junior Summer Camp.</p>
         </div>
         <ProgramMarketingPanel
           programName="PBGA Junior Summer Camp"
@@ -275,9 +275,9 @@ export default function JuniorCampDashboard() {
       <div className="space-y-4">
         <div>
           <h2 className="text-lg font-semibold flex items-center gap-2">
-            <span className="text-[#F5C72C]">❖</span> AI Marketing Intelligence
+            <span className="text-[#F2DD48]">❖</span> AI Marketing Intelligence
           </h2>
-          <p className="text-sm text-muted-foreground mt-1">AI-generated multi-channel marketing strategy based on program performance data.</p>
+          <p className="text-sm text-[#6F6F6B] mt-1">AI-generated multi-channel marketing strategy based on program performance data.</p>
         </div>
         <ProgramAIIntelligence campaignId={4} programName="PBGA Junior Summer Camp" />
       </div>

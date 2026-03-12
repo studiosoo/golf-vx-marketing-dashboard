@@ -82,7 +82,7 @@ export default function CampaignTimeline() {
   if (isLoading) {
     return (
       <div className="container py-6">
-        <div className="text-center text-muted-foreground">Loading timeline...</div>
+        <div className="text-center text-[#6F6F6B]">Loading timeline...</div>
       </div>
     );
   }
@@ -91,8 +91,8 @@ export default function CampaignTimeline() {
     <div className="container py-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Campaign Timeline</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-3xl font-bold text-[#222222]">Marketing Timeline</h1>
+          <p className="text-[#6F6F6B] mt-1">
             Gantt-chart view of all marketing campaigns
           </p>
         </div>
@@ -115,7 +115,7 @@ export default function CampaignTimeline() {
         </CardHeader>
         <CardContent>
           {/* Month headers */}
-          <div className="flex border-b border-border mb-4">
+          <div className="flex border-b border-[#DEDEDA] mb-4">
             {months.map((month) => (
               <div
                 key={month.toISOString()}
@@ -130,7 +130,7 @@ export default function CampaignTimeline() {
           <div className="space-y-8">
             {Object.entries(campaignsByCategory || {}).map(([category, categoryCampaigns]) => (
               <div key={category} className="space-y-2">
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                <h3 className="text-sm font-semibold text-[#6F6F6B] uppercase tracking-wide">
                   {CATEGORY_LABELS[category as keyof typeof CATEGORY_LABELS] || category}
                 </h3>
                 <div className="space-y-2">
@@ -139,7 +139,7 @@ export default function CampaignTimeline() {
                     if (!style) return null;
 
                     return (
-                      <div key={campaign.id} className="relative h-12 bg-muted/30 rounded">
+                      <div key={campaign.id} className="relative h-12 bg-[#F6F6F4] rounded">
                         <div
                           className={`absolute top-1 bottom-1 rounded px-3 py-1 ${
                             CATEGORY_COLORS[category as keyof typeof CATEGORY_COLORS]
@@ -158,7 +158,7 @@ export default function CampaignTimeline() {
           </div>
 
           {!campaigns || campaigns.length === 0 && (
-            <div className="text-center text-muted-foreground py-12">
+            <div className="text-center text-[#6F6F6B] py-12">
               No campaigns with dates found
             </div>
           )}

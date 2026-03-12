@@ -42,6 +42,7 @@ import {
   NewMembershipEvent,
   cfFunnels,
   cfFormSubmissions,
+  activityAssets,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -1262,5 +1263,29 @@ export async function updateFunnelUvPv(cfId: number, uniqueVisitors: number, pag
     .update(cfFunnels)
     .set({ uniqueVisitors, pageViews })
     .where(eq(cfFunnels.cfId, cfId));
+  return { success: true };
+}
+
+// ---------------------------------------------------------------------------
+// Activity Assets
+// ---------------------------------------------------------------------------
+
+export async function getActivityAssets(activityId: string, venueId: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(activityAssets)
+    .where(and(
+      eq(activityAssets.activityId, activityId),
+      eq(activityAssets.venueId, venueId),
+    ))
+    .orderBy(activityAssets.uploadedAt);
+}
+
+export async function deleteActivityAsset(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(activityAssets).where(eq(activityAssets.id, id));
   return { success: true };
 }

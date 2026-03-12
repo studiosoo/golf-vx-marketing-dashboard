@@ -26,7 +26,7 @@ export function TrendChart({ data, title, valueLabel, color = "#3b82f6", height 
       <h4 className="text-sm font-semibold text-muted-foreground">{title}</h4>
       <ResponsiveContainer width="100%" height={height}>
         <LineChart data={data} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+          <CartesianGrid strokeDasharray="4 4" strokeWidth={0.5} stroke="#F0F0F0" vertical={false} />
           <XAxis 
             dataKey="date" 
             tick={{ fontSize: 11 }}
@@ -39,11 +39,11 @@ export function TrendChart({ data, title, valueLabel, color = "#3b82f6", height 
             tick={{ fontSize: 11 }}
             width={50}
           />
-          <Tooltip 
-            contentStyle={{ 
-              backgroundColor: 'white', 
-              border: '1px solid #e5e7eb',
-              borderRadius: '6px',
+          <Tooltip
+            contentStyle={{
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E9E9E6',
+              borderRadius: '8px',
               fontSize: '12px'
             }}
             labelFormatter={(value) => {

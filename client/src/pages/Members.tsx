@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { PageTitle } from "@/components/layout/PageTitle";
 import {
   Users,
   Search,
@@ -44,36 +45,36 @@ const TIER_LABELS: Record<MembershipTier, string> = {
 };
 
 const TIER_COLORS: Record<MembershipTier, string> = {
-  all_access_aces: "bg-primary/10 text-primary border-primary/20",
-  swing_savers: "bg-[#888888]/100/10 text-[#888888] border-blue-500/20",
-  golf_vx_pro: "bg-[#888888]/100/10 text-[#888888] border-purple-500/20",
-  trial: "bg-yellow-500/10 text-[#F5C72C] border-yellow-500/20",
-  monthly: "bg-green-500/10 text-[#3DB855] border-green-500/20",
-  annual: "bg-green-500/10 text-[#3DB855] border-green-500/20",
+  all_access_aces: "bg-[#F2DD48]/10 text-[#F2DD48] border-[#F2DD48]/20",
+  swing_savers: "bg-[#6F6F6B]/100/10 text-[#6F6F6B] border-blue-500/20",
+  golf_vx_pro: "bg-[#6F6F6B]/100/10 text-[#6F6F6B] border-purple-500/20",
+  trial: "bg-yellow-500/10 text-[#F2DD48] border-yellow-500/20",
+  monthly: "bg-green-500/10 text-[#72B84A] border-green-500/20",
+  annual: "bg-green-500/10 text-[#72B84A] border-green-500/20",
   corporate: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
-  none: "bg-muted text-muted-foreground border-border",
+  none: "bg-[#F1F1EF] text-[#6F6F6B] border-[#DEDEDA]",
 };
 
 const STATUS_COLORS: Record<MemberStatus, string> = {
-  active: "bg-green-500/10 text-[#3DB855]",
-  inactive: "bg-muted text-muted-foreground",
-  cancelled: "bg-[#E8453C]/10 text-[#E8453C]",
-  trial: "bg-yellow-500/10 text-[#F5C72C]",
+  active: "bg-green-500/10 text-[#72B84A]",
+  inactive: "bg-[#F1F1EF] text-[#6F6F6B]",
+  cancelled: "bg-[#FF3B30]/10 text-[#FF3B30]",
+  trial: "bg-yellow-500/10 text-[#F2DD48]",
 };
 
 function MemberRow({ member }: { member: Member }) {
   return (
-    <tr className="border-b border-border hover:bg-muted/30 transition-colors">
+    <tr className="border-b border-[#DEDEDA] hover:bg-[#F6F6F4] transition-colors">
       <td className="px-4 py-3">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-            <span className="text-xs font-bold text-primary">
+          <div className="w-8 h-8 rounded-full bg-[#F2DD48]/10 flex items-center justify-center shrink-0">
+            <span className="text-xs font-bold text-[#F2DD48]">
               {member.name[0].toUpperCase()}
             </span>
           </div>
           <div>
-            <div className="font-medium text-sm text-foreground">{member.name}</div>
-            <div className="text-xs text-muted-foreground">{member.email}</div>
+            <div className="font-medium text-sm text-[#222222]">{member.name}</div>
+            <div className="text-xs text-[#6F6F6B]">{member.email}</div>
           </div>
         </div>
       </td>
@@ -87,10 +88,10 @@ function MemberRow({ member }: { member: Member }) {
           {member.status}
         </span>
       </td>
-      <td className="px-4 py-3 text-sm text-muted-foreground">
+      <td className="px-4 py-3 text-sm text-[#6F6F6B]">
         {member.monthlyAmount ? `$${parseFloat(member.monthlyAmount).toFixed(0)}/mo` : "—"}
       </td>
-      <td className="px-4 py-3 text-sm text-muted-foreground">
+      <td className="px-4 py-3 text-sm text-[#6F6F6B]">
         {member.phone ? (
           <span className="flex items-center gap-1">
             <Phone size={12} />
@@ -98,7 +99,7 @@ function MemberRow({ member }: { member: Member }) {
           </span>
         ) : "—"}
       </td>
-      <td className="px-4 py-3 text-sm text-muted-foreground">
+      <td className="px-4 py-3 text-sm text-[#6F6F6B]">
         {member.joinDate
           ? new Date(member.joinDate).toLocaleDateString("en-US", {
               month: "short",
@@ -107,7 +108,7 @@ function MemberRow({ member }: { member: Member }) {
             })
           : "—"}
       </td>
-      <td className="px-4 py-3 text-sm text-muted-foreground">
+      <td className="px-4 py-3 text-sm text-[#6F6F6B]">
         {member.acquisitionSource || "—"}
       </td>
     </tr>
@@ -132,53 +133,46 @@ export default function Members() {
   const swingSaverCount = (members as Member[]).filter((m) => m.membershipTier === "swing_savers").length;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-8 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
-            Members
-          </h1>
-          <p className="text-sm text-muted-foreground">Member management and analytics</p>
+          <PageTitle>Members</PageTitle>
+          <p className="text-sm text-[#6F6F6B]">Member management and analytics</p>
         </div>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-card border border-border rounded-lg p-4">
-          <div className="text-sm text-muted-foreground mb-1">Total Members</div>
-          <div className="text-3xl font-bold text-foreground">{(members as Member[]).length}</div>
-        </div>
-        <div className="bg-card border border-border rounded-lg p-4">
-          <div className="text-sm text-muted-foreground mb-1">Active</div>
-          <div className="text-3xl font-bold text-[#3DB855]">{activeMembers.length}</div>
-        </div>
-        <div className="bg-card border border-border rounded-lg p-4">
-          <div className="text-sm text-muted-foreground mb-1">All Access Ace</div>
-          <div className="text-3xl font-bold text-primary">{allAccessCount}</div>
-        </div>
-        <div className="bg-card border border-border rounded-lg p-4">
-          <div className="text-sm text-muted-foreground mb-1">Swing Saver</div>
-          <div className="text-3xl font-bold text-[#888888]">{swingSaverCount}</div>
-        </div>
+        {[
+          { label: "TOTAL MEMBERS",   value: (members as Member[]).length, color: "text-[#222222]" },
+          { label: "ACTIVE",          value: activeMembers.length,         color: "text-[#72B84A]" },
+          { label: "ALL ACCESS ACE",  value: allAccessCount,               color: "text-[#222222]" },
+          { label: "SWING SAVER",     value: swingSaverCount,              color: "text-[#222222]" },
+        ].map(({ label, value, color }) => (
+          <div key={label} className="bg-white border border-[#DEDEDA] rounded-lg p-4">
+            <div className="text-[11px] font-normal text-[#6F6F6B] uppercase tracking-[0.05em] mb-1">{label}</div>
+            <div className={`text-[22px] font-bold leading-none ${color}`}>{value}</div>
+          </div>
+        ))}
       </div>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-48">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6F6F6B]" />
           <input
             type="text"
             placeholder="Search by name or email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-card border border-border rounded-md text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+            className="w-full pl-9 pr-4 py-2 bg-white border border-[#DEDEDA] rounded-md text-sm text-[#222222] placeholder:text-[#6F6F6B] focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as MemberStatus | "")}
-          className="px-3 py-2 bg-card border border-border rounded-md text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+          className="px-3 py-2 bg-white border border-[#DEDEDA] rounded-md text-sm text-[#222222] focus:outline-none focus:ring-1 focus:ring-primary"
         >
           <option value="">All Statuses</option>
           <option value="active">Active</option>
@@ -189,7 +183,7 @@ export default function Members() {
         <select
           value={tierFilter}
           onChange={(e) => setTierFilter(e.target.value as MembershipTier | "")}
-          className="px-3 py-2 bg-card border border-border rounded-md text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+          className="px-3 py-2 bg-white border border-[#DEDEDA] rounded-md text-sm text-[#222222] focus:outline-none focus:ring-1 focus:ring-primary"
         >
           <option value="">All Tiers</option>
           <option value="all_access_aces">All Access Ace</option>
@@ -204,41 +198,41 @@ export default function Members() {
       {/* Table */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 size={24} className="animate-spin text-primary" />
+          <Loader2 size={24} className="animate-spin text-[#F2DD48]" />
         </div>
       ) : (members as Member[]).length === 0 ? (
-        <div className="text-center py-12 border border-dashed border-border rounded-lg">
-          <Users size={32} className="text-muted-foreground mx-auto mb-3" />
-          <p className="text-muted-foreground">No members found</p>
+        <div className="text-center py-12 border border-dashed border-[#DEDEDA] rounded-lg">
+          <Users size={32} className="text-[#6F6F6B] mx-auto mb-3" />
+          <p className="text-[#6F6F6B]">No members found</p>
           {(search || statusFilter || tierFilter) && (
-            <p className="text-sm text-muted-foreground mt-1">Try adjusting your filters</p>
+            <p className="text-sm text-[#6F6F6B] mt-1">Try adjusting your filters</p>
           )}
         </div>
       ) : (
-        <div className="bg-card border border-border rounded-lg overflow-hidden">
+        <div className="bg-white border border-[#DEDEDA] rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-border bg-muted/30">
-                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                <tr className="border-b border-[#DEDEDA] bg-[#F6F6F4]">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-[#6F6F6B] uppercase tracking-wider">
                     Member
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-[#6F6F6B] uppercase tracking-wider">
                     Tier
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-[#6F6F6B] uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-[#6F6F6B] uppercase tracking-wider">
                     Monthly
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-[#6F6F6B] uppercase tracking-wider">
                     Phone
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-[#6F6F6B] uppercase tracking-wider">
                     Join Date
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-[#6F6F6B] uppercase tracking-wider">
                     Source
                   </th>
                 </tr>
@@ -250,7 +244,7 @@ export default function Members() {
               </tbody>
             </table>
           </div>
-          <div className="px-4 py-3 border-t border-border text-xs text-muted-foreground">
+          <div className="px-4 py-3 border-t border-[#DEDEDA] text-xs text-[#6F6F6B]">
             Showing {(members as Member[]).length} members
           </div>
         </div>

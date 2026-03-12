@@ -1790,3 +1790,25 @@ export const promoLeads = mysqlTable("promo_leads", {
 }));
 export type PromoLead = typeof promoLeads.$inferSelect;
 export type NewPromoLead = typeof promoLeads.$inferInsert;
+
+// ---------------------------------------------------------------------------
+// Activity Assets — collateral files linked to Activities entries
+// ---------------------------------------------------------------------------
+export const activityAssets = mysqlTable("activity_assets", {
+  id: int("id").autoincrement().primaryKey(),
+  venueId: varchar("venueId", { length: 50 }).notNull(),
+  activityId: varchar("activityId", { length: 100 }).notNull(),
+  label: varchar("label", { length: 200 }),
+  period: varchar("period", { length: 100 }),
+  format: varchar("format", { length: 100 }),
+  imageUrl: varchar("imageUrl", { length: 500 }),
+  thumbnailUrl: varchar("thumbnailUrl", { length: 500 }),
+  notes: text("notes"),
+  uploadedAt: timestamp("uploadedAt").defaultNow(),
+  uploadedBy: varchar("uploadedBy", { length: 100 }),
+}, (table) => ({
+  activityVenueIdx: index("activity_venue_idx").on(table.activityId, table.venueId),
+}));
+
+export type ActivityAsset = typeof activityAssets.$inferSelect;
+export type NewActivityAsset = typeof activityAssets.$inferInsert;

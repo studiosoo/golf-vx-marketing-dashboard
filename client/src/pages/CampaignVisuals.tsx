@@ -78,7 +78,7 @@ export default function CampaignVisuals() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#6F6F6B]" />
       </div>
     );
   }
@@ -87,7 +87,7 @@ export default function CampaignVisuals() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Campaign Visual Assets</h1>
-        <p className="text-muted-foreground mt-2">
+        <p className="text-[#6F6F6B] mt-2">
           Upload and manage visual assets for each campaign (landing pages, posters, reels)
         </p>
       </div>
@@ -105,12 +105,12 @@ export default function CampaignVisuals() {
                 onClick={() => setSelectedCampaign(campaign.id)}
                 className={`p-4 rounded-lg border-2 text-left transition-colors ${
                   selectedCampaign === campaign.id
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-primary/50"
+                    ? "border-primary bg-[#FDF9E3]"
+                    : "border-[#DEDEDA] hover:border-[#F2DD48]/50"
                 }`}
               >
                 <div className="font-semibold">{campaign.name}</div>
-                <div className="text-sm text-muted-foreground capitalize">
+                <div className="text-sm text-[#6F6F6B] capitalize">
                   {campaign.category.replace("_", " ")}
                 </div>
               </button>
@@ -196,7 +196,7 @@ function VisualAssetCard({
       </CardHeader>
       <CardContent className="space-y-4">
         {currentUrl && (
-          <div className="relative rounded-lg overflow-hidden border border-border">
+          <div className="relative rounded-lg overflow-hidden border border-[#DEDEDA]">
             <img
               src={currentUrl}
               alt={title}
@@ -206,7 +206,7 @@ function VisualAssetCard({
               href={currentUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="absolute top-2 right-2 p-2 bg-background/80 backdrop-blur-sm rounded-md hover:bg-background transition-colors"
+              className="absolute top-2 right-2 p-2 bg-white/80 backdrop-blur-sm rounded-md hover:bg-white transition-colors"
             >
               <ExternalLink className="h-4 w-4" />
             </a>
@@ -215,7 +215,7 @@ function VisualAssetCard({
 
         <div className="space-y-2">
           <Label htmlFor={`file-${title}`} className="cursor-pointer">
-            <div className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-border rounded-lg hover:border-primary transition-colors">
+            <div className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-[#DEDEDA] rounded-lg hover:border-[#F2DD48] transition-colors">
               {uploading ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
               ) : (

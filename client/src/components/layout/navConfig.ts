@@ -1,16 +1,15 @@
 import {
   FileText,
   Flag,
-  Gauge,
+  Grid,
+  Layers,
   LayoutDashboard,
-  Lightbulb,
-  MapPin,
   MessageSquare,
   Search,
   Settings,
-  Target,
   Users,
   Workflow,
+  Zap,
 } from "lucide-react";
 import { appRoutes, DEFAULT_VENUE_SLUG, getVenueBasePath, withDefaultVenueSlug } from "@/lib/routes";
 
@@ -39,7 +38,7 @@ function buildNav(venueSlug: string) {
 
   return [
     {
-      label: "Dashboard",
+      label: "Overview",
       path: venue.dashboard,
       icon: LayoutDashboard,
       matchPaths: [venue.dashboard],
@@ -51,16 +50,16 @@ function buildNav(venueSlug: string) {
       matchPaths: [venue.reports.home],
     },
     {
-      label: "Performance",
-      path: venue.performance,
-      icon: Gauge,
-      matchPaths: [venue.performance],
-    },
-    {
-      label: "Operations",
-      path: venue.operations.campaigns,
+      label: "Studio Soo",
+      path: venue.studioSoo.autopilot,
       icon: Workflow,
       matchPaths: [
+        venue.studioSoo.home,
+        venue.studioSoo.autopilot,
+        venue.studioSoo.campaigns,
+        venue.studioSoo.activities,
+        venue.studioSoo.production,
+        // Keep matching old operations paths (backward compat)
         venue.operations.home,
         venue.operations.campaigns,
         venue.operations.paidMedia,
@@ -70,11 +69,10 @@ function buildNav(venueSlug: string) {
         venue.operations.content,
       ],
       children: [
-        { label: "Campaigns", path: venue.operations.campaigns, icon: Flag },
-        { label: "Programs", path: venue.operations.programs, icon: Target },
-        { label: "Promotions", path: venue.operations.promotions, icon: Lightbulb },
-        { label: "Local Marketing", path: venue.operations.localMarketing, icon: MapPin },
-        { label: "Content & Social", path: venue.operations.content, icon: FileText },
+        { label: "Autopilot",   path: venue.studioSoo.autopilot,   icon: Zap },
+        { label: "Campaigns",   path: venue.studioSoo.campaigns,   icon: Flag },
+        { label: "Activities",  path: venue.studioSoo.activities,  icon: Grid },
+        { label: "Production",  path: venue.studioSoo.production,  icon: Layers },
       ],
     },
     {
@@ -88,17 +86,15 @@ function buildNav(venueSlug: string) {
     },
     {
       label: "Insights",
-      path: venue.insights.recommendations,
+      path: venue.insights.ask,
       icon: Search,
       matchPaths: [
         venue.insights.home,
-        venue.insights.recommendations,
         venue.insights.ask,
         venue.insights.research,
       ],
       children: [
-        { label: "Recommendations", path: venue.insights.recommendations, icon: Lightbulb },
-        { label: "Ask", path: venue.insights.ask, icon: MessageSquare },
+        { label: "Ask",      path: venue.insights.ask,      icon: MessageSquare },
         { label: "Research", path: venue.insights.research, icon: Search },
       ],
     },
@@ -153,5 +149,5 @@ export function getActiveLabel(location: string): string {
 
   if (location.startsWith("/public/")) return "Public";
   if (location.startsWith("/r/")) return "Shared Report";
-  return "Dashboard";
+  return "Overview";
 }

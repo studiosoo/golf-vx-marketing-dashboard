@@ -32,7 +32,7 @@ function BackToProgramsButton() {
   return (
     <button
       onClick={() => setLocation(appRoutes.venue(DEFAULT_VENUE_SLUG).operations.programs)}
-      className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+      className="flex items-center gap-1.5 text-sm text-[#6F6F6B] hover:text-[#222222] transition-colors mb-4"
     >
       <ArrowLeft size={14} />
       Back to Programs
@@ -62,8 +62,8 @@ function GenericProgramDetail({ slug }: { slug: string }) {
       <div className="p-6 space-y-4 max-w-3xl">
         <BackToProgramsButton />
         <div className="space-y-3">
-          <div className="h-6 bg-muted animate-pulse rounded w-48" />
-          <div className="h-4 bg-muted animate-pulse rounded w-32" />
+          <div className="h-6 bg-[#F1F1EF] animate-pulse rounded w-48" />
+          <div className="h-4 bg-[#F1F1EF] animate-pulse rounded w-32" />
         </div>
       </div>
     );
@@ -74,9 +74,9 @@ function GenericProgramDetail({ slug }: { slug: string }) {
     return (
       <div className="p-6 space-y-4 max-w-3xl">
         <BackToProgramsButton />
-        <div className="rounded-lg border border-border bg-muted/20 p-6 text-center space-y-1">
-          <p className="text-sm font-semibold text-foreground">Program not found</p>
-          <p className="text-xs text-muted-foreground">No program with ID {numericId} exists. It may have been deleted or the link is incorrect.</p>
+        <div className="rounded-lg border border-[#DEDEDA] bg-[#F1F1EF]/20 p-6 text-center space-y-1">
+          <p className="text-sm font-semibold text-[#222222]">Program not found</p>
+          <p className="text-xs text-[#6F6F6B]">No program with ID {numericId} exists. It may have been deleted or the link is incorrect.</p>
         </div>
       </div>
     );
@@ -90,9 +90,9 @@ function GenericProgramDetail({ slug }: { slug: string }) {
     <div className="p-6 space-y-4 max-w-3xl">
       <BackToProgramsButton />
       <div className="space-y-1">
-        <h1 className="text-xl font-semibold text-foreground">{programName}</h1>
+        <h1 className="text-xl font-semibold text-[#222222]">{programName}</h1>
         {program && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-[#6F6F6B]">
             {(program as any).description || (program as any).category || "Program"}
           </p>
         )}
@@ -108,16 +108,16 @@ function GenericProgramDetail({ slug }: { slug: string }) {
             { label: "Budget", value: (program as any).budget ? `$${parseFloat(String((program as any).budget)).toLocaleString()}` : "—" },
             { label: "Actual Spend", value: (program as any).actualSpend ? `$${parseFloat(String((program as any).actualSpend)).toLocaleString()}` : "—" },
           ].map(({ label, value }) => (
-            <div key={label} className="rounded-lg border border-border bg-card p-3">
-              <p className="text-[11px] text-muted-foreground mb-1">{label}</p>
-              <p className="text-sm font-semibold text-foreground capitalize">{value || "—"}</p>
+            <div key={label} className="rounded-lg border border-[#DEDEDA] bg-white p-3">
+              <p className="text-[11px] text-[#6F6F6B] mb-1">{label}</p>
+              <p className="text-sm font-semibold text-[#222222] capitalize">{value || "—"}</p>
             </div>
           ))}
         </div>
       )}
 
-      <div className="rounded-lg border border-border bg-muted/20 p-4 text-sm text-muted-foreground space-y-1">
-        <p className="font-medium text-foreground text-xs uppercase tracking-wide mb-2">Performance Data</p>
+      <div className="rounded-lg border border-[#DEDEDA] bg-[#F1F1EF]/20 p-4 text-sm text-[#6F6F6B] space-y-1">
+        <p className="font-medium text-[#222222] text-xs uppercase tracking-wide mb-2">Performance Data</p>
         <p>Awaiting source data — attendance, revenue, and lead metrics will appear here once connected to Acuity or a manual data sheet.</p>
       </div>
     </div>

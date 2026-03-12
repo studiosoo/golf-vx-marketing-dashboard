@@ -1,90 +1,31 @@
-import Home from "./Home";
-import Reports from "./Reports";
-import Performance from "./Performance";
-import StrategicCampaigns from "./StrategicCampaigns";
-import MetaAds from "./MetaAds";
-import Programs from "./Programs";
-import PromotionsHub from "./PromotionsHub";
-import CommunicationsHub from "./CommunicationsHub";
-import CalendarViewer from "./CalendarViewer";
-import Tasks from "./Tasks";
-import InstagramFeed from "./InstagramFeed";
-import Members from "./Members";
-import Duplicates from "./Duplicates";
-import Autopilot from "./Autopilot";
-import Assistant from "./Assistant";
-import MarketResearch from "./MarketResearch";
-import Integrations from "./Integrations";
-import LocalMarketing from "./LocalMarketing";
+import { lazy } from "react";
 
-export function DashboardPageWrapper() {
-  return <Home />;
-}
+const Home            = lazy(() => import("./Home"));
+const Reports         = lazy(() => import("./Reports"));
+const StrategicCampaigns = lazy(() => import("./StrategicCampaigns"));
+const Production      = lazy(() => import("./Production"));
+const Programs        = lazy(() => import("./Programs"));
+const PromotionsHub   = lazy(() => import("./PromotionsHub"));
+const CalendarViewer  = lazy(() => import("./CalendarViewer"));
+const InstagramFeed   = lazy(() => import("./InstagramFeed"));
+const Members         = lazy(() => import("./Members"));
+const Autopilot       = lazy(() => import("./Autopilot"));
+const Assistant       = lazy(() => import("./Assistant"));
+const MarketResearch  = lazy(() => import("./MarketResearch"));
+const Integrations    = lazy(() => import("./Integrations"));
+const LocalMarketing  = lazy(() => import("./LocalMarketing"));
 
-export function ReportsPageWrapper() {
-  return <Reports />;
-}
-
-export function PerformancePageWrapper() {
-  return <Performance />;
-}
-
-export function OperationsCampaignsWrapper() {
-  return <StrategicCampaigns />;
-}
-
-export function OperationsPaidMediaWrapper() {
-  return <MetaAds />;
-}
-
-export function OperationsProgramsWrapper() {
-  return <Programs />;
-}
-
-export function OperationsPromotionsWrapper() {
-  return <PromotionsHub />;
-}
-
-export function OperationsCommunicationsWrapper() {
-  return <CommunicationsHub />;
-}
-
-export function OperationsLocalMarketingWrapper() {
-  return <LocalMarketing />;
-}
-
-export function OperationsContentWrapper() {
-  return <InstagramFeed />;
-}
-
-export function OperationsCalendarWrapper() {
-  return <CalendarViewer />;
-}
-
-export function OperationsTasksWrapper() {
-  return <Tasks />;
-}
-
-export function AudiencePeopleWrapper() {
-  return <Members />;
-}
-
-export function AudienceDuplicatesWrapper() {
-  return <Duplicates />;
-}
-
-export function InsightsRecommendationsWrapper() {
-  return <Autopilot />;
-}
-
-export function InsightsAskWrapper() {
-  return <Assistant />;
-}
-
-export function InsightsResearchWrapper() {
-  return <MarketResearch />;
-}
-
-export function AdminIntegrationsWrapper() {
-  return <Integrations />;
-}
+export function DashboardPageWrapper()           { return <Home />; }
+export function ReportsPageWrapper()             { return <Reports />; }
+export function StudioSooAutopilotWrapper()      { return <Autopilot />; }
+export function StudioSooProductionWrapper()     { return <Production />; }
+export function OperationsCampaignsWrapper()     { return <StrategicCampaigns />; }
+export function OperationsProgramsWrapper()      { return <Programs />; }
+export function OperationsPromotionsWrapper()    { return <PromotionsHub />; }
+export function OperationsLocalMarketingWrapper(){ return <LocalMarketing />; }
+export function OperationsContentWrapper()       { return <InstagramFeed />; }
+export function OperationsCalendarWrapper()      { return <CalendarViewer />; }
+export function AudiencePeopleWrapper()          { return <Members />; }
+export function InsightsAskWrapper()             { return <Assistant />; }
+export function InsightsResearchWrapper()        { return <MarketResearch />; }
+export function AdminIntegrationsWrapper()       { return <Integrations />; }

@@ -11,7 +11,7 @@ const badgeVariants = cva(
       variant: {
         // Primary — Golf VX yellow for active/primary state
         default:
-          "border-transparent bg-[#F5C72C] text-[#111111] [a&]:hover:brightness-95",
+          "border-transparent bg-[#F2DD48] text-[#111111] [a&]:hover:brightness-95",
         // Secondary — neutral gray for inactive/default labels
         secondary:
           "border-transparent bg-[#F2F2F7] text-[#555555] [a&]:hover:bg-[#E8E8ED]",

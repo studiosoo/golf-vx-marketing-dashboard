@@ -1,21 +1,21 @@
 // Golf VX style palette — gray-tones + accent colors from design guide
 export const GVX_COLORS = {
-  yellow: "#F5C72C",
-  black: "#111111",
+  yellow: "#F2DD48",
+  black: "#222222",
   charcoal: "#545A60",
-  gray600: "#888888",
+  gray600: "#6F6F6B",
   gray400: "#AAAAAA",
-  gray200: "#E0E0E0",
+  gray200: "#E9E9E6",
   gray100: "#F2F2F7",
-  green: "#3DB855",
+  green: "#72B84A",
   greenBg: "#F0FAF3",
-  blue: "#007AFF",
+  blue: "#1A56DB",
 };
 
 // Palette for charts — using Golf VX gray-tones + accent colors
 export const CHART_PALETTE = [
-  "#545A60", "#888888", "#F5C72C", "#AAAAAA", "#3DB855",
-  "#007AFF", "#C0C0C8", "#2C2C2C", "#D4A017", "#6B7280"
+  "#545A60", "#6F6F6B", "#F2DD48", "#AAAAAA", "#72B84A",
+  "#1A56DB", "#C0C0C8", "#2C2C2C", "#D4A017", "#6B7280"
 ];
 
 // Funnel steps from ClickFunnels screenshot

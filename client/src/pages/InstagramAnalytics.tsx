@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { BRAND_ASSETS } from '@/lib/brandAssets';
 import {
   TrendingUp, TrendingDown, Users, Eye, MousePointerClick, Target,
   Sparkles, BarChart3, Calendar, RefreshCw, Copy, CheckCircle2,
@@ -52,8 +53,8 @@ function DailyAnalysisTab() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
-        <Loader2 className="h-8 w-8 animate-spin text-[#F5C72C]" />
-        <p className="text-sm text-muted-foreground">Analyzing your recent posts with AI…</p>
+        <Loader2 className="h-8 w-8 animate-spin text-[#F2DD48]" />
+        <p className="text-sm text-[#6F6F6B]">Analyzing your recent posts with AI…</p>
       </div>
     );
   }
@@ -61,8 +62,8 @@ function DailyAnalysisTab() {
   if (error || !analysis) {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-4">
-        <AlertTriangle className="h-8 w-8 text-[#E8453C]" />
-        <p className="text-sm text-muted-foreground">Could not load daily analysis.</p>
+        <AlertTriangle className="h-8 w-8 text-[#FF3B30]" />
+        <p className="text-sm text-[#6F6F6B]">Could not load daily analysis.</p>
         <Button size="sm" variant="outline" onClick={() => refetch()}>
           <RefreshCw className="h-4 w-4 mr-1.5" /> Retry
         </Button>
@@ -71,7 +72,7 @@ function DailyAnalysisTab() {
   }
 
   const engagementNum = parseFloat(analysis.metrics.avgEngagement);
-  const engagementColor = engagementNum >= 3 ? 'text-[#3DB855]' : engagementNum >= 1 ? 'text-[#F5C72C]' : 'text-[#E8453C]';
+  const engagementColor = engagementNum >= 3 ? 'text-[#72B84A]' : engagementNum >= 1 ? 'text-[#F2DD48]' : 'text-[#FF3B30]';
   const engagementLabel = engagementNum >= 3 ? 'Excellent' : engagementNum >= 1 ? 'Good' : 'Needs Work';
   const followerGoal = 500;
   const followerPct = Math.min(100, Math.round((analysis.metrics.followers / followerGoal) * 100));
@@ -92,11 +93,11 @@ function DailyAnalysisTab() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-[#F5C72C]" />
+          <h2 className="text-lg font-bold text-[#222222] flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-[#F2DD48]" />
             Daily AI Analysis
           </h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <p className="text-xs text-[#6F6F6B] mt-0.5">
             Based on your last {postsAnalyzed} posts · {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
           </p>
         </div>
@@ -105,7 +106,7 @@ function DailyAnalysisTab() {
           variant="outline"
           onClick={() => refetch()}
           disabled={isFetching}
-          className="border-[#E0E0E0] text-[#555]"
+          className="border-[#DEDEDA] text-[#6F6F6B]"
         >
           {isFetching ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
           <span className="ml-1.5 hidden sm:inline">Refresh</span>
@@ -114,67 +115,67 @@ function DailyAnalysisTab() {
 
       {/* Metrics Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Card className="bg-card border-border">
+        <Card className="bg-white border-[#DEDEDA]">
           <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Followers</p>
-            <p className="text-2xl font-bold text-foreground">{(analysis.metrics.followers ?? 0).toLocaleString()}</p>
+            <p className="text-xs text-[#6F6F6B]">Followers</p>
+            <p className="text-2xl font-bold text-[#222222]">{(analysis.metrics.followers ?? 0).toLocaleString()}</p>
             <div className="mt-1.5">
-              <div className="flex justify-between text-[10px] text-muted-foreground mb-0.5">
+              <div className="flex justify-between text-[10px] text-[#6F6F6B] mb-0.5">
                 <span>Goal: {followerGoal}</span>
                 <span>{followerPct}%</span>
               </div>
-              <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                <div className="h-full bg-[#F5C72C] rounded-full transition-all" style={{ width: `${followerPct}%` }} />
+              <div className="h-1.5 rounded-full bg-[#F1F1EF] overflow-hidden">
+                <div className="h-full bg-[#F2DD48] rounded-full transition-all" style={{ width: `${followerPct}%` }} />
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border">
+        <Card className="bg-white border-[#DEDEDA]">
           <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Avg Engagement</p>
+            <p className="text-xs text-[#6F6F6B]">Avg Engagement</p>
             <p className={`text-2xl font-bold ${engagementColor}`}>{analysis.metrics.avgEngagement}%</p>
             <p className={`text-xs mt-1 ${engagementColor}`}>{engagementLabel}</p>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border">
+        <Card className="bg-white border-[#DEDEDA]">
           <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Total Posts</p>
-            <p className="text-2xl font-bold text-foreground">{analysis.metrics.totalPosts}</p>
-            <p className="text-xs text-muted-foreground mt-1">All time</p>
+            <p className="text-xs text-[#6F6F6B]">Total Posts</p>
+            <p className="text-2xl font-bold text-[#222222]">{analysis.metrics.totalPosts}</p>
+            <p className="text-xs text-[#6F6F6B] mt-1">All time</p>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border">
+        <Card className="bg-white border-[#DEDEDA]">
           <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Avg Likes</p>
-            <p className="text-2xl font-bold text-foreground">{analysis.metrics.avgLikes}</p>
-            <p className="text-xs text-muted-foreground mt-1">per post</p>
+            <p className="text-xs text-[#6F6F6B]">Avg Likes</p>
+            <p className="text-2xl font-bold text-[#222222]">{analysis.metrics.avgLikes}</p>
+            <p className="text-xs text-[#6F6F6B] mt-1">per post</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Today's Post Idea */}
-      <Card className="bg-card border-border">
+      <Card className="bg-white border-[#DEDEDA]">
         <CardHeader className="pb-2 pt-4 px-4">
-          <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-[#F5C72C]" />
+          <CardTitle className="text-sm font-semibold text-[#222222] flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-[#F2DD48]" />
             Today's Post Idea
           </CardTitle>
         </CardHeader>
         <CardContent className="px-4 pb-4 space-y-3">
-          <div className="bg-[#FFFBEA] border border-[#F5C72C]/30 rounded-lg p-3">
-            <p className="text-sm text-[#111111] leading-relaxed whitespace-pre-wrap">{todayCaption}</p>
+          <div className="bg-[#FFFBEA] border border-[#F2DD48]/30 rounded-lg p-3">
+            <p className="text-sm text-[#222222] leading-relaxed whitespace-pre-wrap">{todayCaption}</p>
           </div>
           <div className="flex items-center gap-2">
             <Button
               size="sm"
               variant="outline"
               onClick={() => handleCopyCaption(todayCaption)}
-              className="border-[#E0E0E0] text-[#555] hover:text-[#111]"
+              className="border-[#DEDEDA] text-[#6F6F6B] hover:text-[#111]"
             >
-              {copiedCaption ? <CheckCircle2 className="h-3.5 w-3.5 mr-1 text-[#3DB855]" /> : <Copy className="h-3.5 w-3.5 mr-1" />}
+              {copiedCaption ? <CheckCircle2 className="h-3.5 w-3.5 mr-1 text-[#72B84A]" /> : <Copy className="h-3.5 w-3.5 mr-1" />}
               {copiedCaption ? 'Copied!' : 'Copy Caption'}
             </Button>
-            <span className="text-xs text-muted-foreground flex items-center gap-1">
+            <span className="text-xs text-[#6F6F6B] flex items-center gap-1">
               <Clock className="h-3 w-3" />
               Best time: {bestPostingTime}
             </span>
@@ -184,18 +185,18 @@ function DailyAnalysisTab() {
 
       {/* Insights + Quick Win */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="bg-card border-border">
+        <Card className="bg-white border-[#DEDEDA]">
           <CardHeader className="pb-2 pt-4 px-4">
-            <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-[#F5C72C]" />
+            <CardTitle className="text-sm font-semibold text-[#222222] flex items-center gap-2">
+              <BarChart3 className="h-4 w-4 text-[#F2DD48]" />
               Key Insights
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4">
             <ul className="space-y-2">
               {insights.map((insight, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-foreground">
-                  <span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-[#F5C72C] flex-shrink-0" />
+                <li key={i} className="flex items-start gap-2 text-sm text-[#222222]">
+                  <span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-[#F2DD48] flex-shrink-0" />
                   {insight}
                 </li>
               ))}
@@ -203,38 +204,38 @@ function DailyAnalysisTab() {
           </CardContent>
         </Card>
 
-        <Card className="bg-card border-border">
+        <Card className="bg-white border-[#DEDEDA]">
           <CardHeader className="pb-2 pt-4 px-4">
-            <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-[#3DB855]" />
+            <CardTitle className="text-sm font-semibold text-[#222222] flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-[#72B84A]" />
               Quick Win (15 min)
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4">
-            <p className="text-sm text-foreground leading-relaxed">{quickWin}</p>
+            <p className="text-sm text-[#222222] leading-relaxed">{quickWin}</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Top Posts */}
       {topPosts && topPosts.length > 0 && (
-        <Card className="bg-card border-border">
+        <Card className="bg-white border-[#DEDEDA]">
           <CardHeader className="pb-2 pt-4 px-4">
-            <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-[#F5C72C]" />
+            <CardTitle className="text-sm font-semibold text-[#222222] flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-[#F2DD48]" />
               Top Performing Posts
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4">
             <div className="space-y-3">
               {topPosts.slice(0, 3).map((post: any) => (
-                <div key={post.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                <div key={post.id} className="flex items-start gap-3 p-3 rounded-lg bg-[#F6F6F4] hover:bg-[#F1F1EF] transition-colors">
                   {post.thumbnail_url && (
                     <img src={post.thumbnail_url} alt="" className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-foreground line-clamp-2">{post.caption || '(No caption)'}</p>
-                    <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
+                    <p className="text-xs text-[#222222] line-clamp-2">{post.caption || '(No caption)'}</p>
+                    <div className="flex items-center gap-3 mt-1.5 text-xs text-[#6F6F6B]">
                       <span>❤️ {post.like_count ?? 0}</span>
                       <span>💬 {post.comments_count ?? 0}</span>
                       <span>{timeAgo(post.timestamp)}</span>
@@ -281,18 +282,18 @@ function SchedulerForm({ onClose }: { onClose: () => void }) {
     <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <Label className="text-xs text-muted-foreground">Topic</Label>
+          <Label className="text-xs text-[#6F6F6B]">Topic</Label>
           <Input
             value={form.topic}
             onChange={(e) => setForm((f) => ({ ...f, topic: e.target.value }))}
             placeholder="e.g. Sunday Clinic"
-            className="mt-1 border-[#E0E0E0]"
+            className="mt-1 border-[#DEDEDA]"
           />
         </div>
         <div>
-          <Label className="text-xs text-muted-foreground">Tone</Label>
+          <Label className="text-xs text-[#6F6F6B]">Tone</Label>
           <Select value={form.tone} onValueChange={(v) => setForm((f) => ({ ...f, tone: v as any }))}>
-            <SelectTrigger className="mt-1 border-[#E0E0E0]"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="mt-1 border-[#DEDEDA]"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="casual">Casual</SelectItem>
               <SelectItem value="professional">Professional</SelectItem>
@@ -307,44 +308,44 @@ function SchedulerForm({ onClose }: { onClose: () => void }) {
         variant="outline"
         onClick={() => generateMutation.mutate({ topic: form.topic || 'golf', tone: form.tone })}
         disabled={generateMutation.isPending}
-        className="w-full border-[#F5C72C]/50 text-[#111] hover:bg-[#FFFBEA]"
+        className="w-full border-[#F2DD48]/50 text-[#111] hover:bg-[#FFFBEA]"
       >
-        {generateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Sparkles className="h-4 w-4 mr-1.5 text-[#F5C72C]" />}
+        {generateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Sparkles className="h-4 w-4 mr-1.5 text-[#F2DD48]" />}
         Generate Caption with AI
       </Button>
       <div>
-        <Label className="text-xs text-muted-foreground">Caption</Label>
+        <Label className="text-xs text-[#6F6F6B]">Caption</Label>
         <Textarea
           value={form.caption}
           onChange={(e) => setForm((f) => ({ ...f, caption: e.target.value }))}
           placeholder="Write your caption…"
           rows={4}
-          className="mt-1 border-[#E0E0E0] resize-none"
+          className="mt-1 border-[#DEDEDA] resize-none"
         />
       </div>
       <div>
-        <Label className="text-xs text-muted-foreground">Hashtags</Label>
+        <Label className="text-xs text-[#6F6F6B]">Hashtags</Label>
         <Input
           value={form.hashtags}
           onChange={(e) => setForm((f) => ({ ...f, hashtags: e.target.value }))}
           placeholder="#golf #golfvx #arlingtonheights"
-          className="mt-1 border-[#E0E0E0]"
+          className="mt-1 border-[#DEDEDA]"
         />
       </div>
       <div>
-        <Label className="text-xs text-muted-foreground">Image URL (optional)</Label>
+        <Label className="text-xs text-[#6F6F6B]">Image URL (optional)</Label>
         <Input
           value={form.imageUrl}
           onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))}
           placeholder="https://…"
-          className="mt-1 border-[#E0E0E0]"
+          className="mt-1 border-[#DEDEDA]"
         />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <Label className="text-xs text-muted-foreground">Content Type</Label>
+          <Label className="text-xs text-[#6F6F6B]">Content Type</Label>
           <Select value={form.contentType} onValueChange={(v) => setForm((f) => ({ ...f, contentType: v as any }))}>
-            <SelectTrigger className="mt-1 border-[#E0E0E0]"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="mt-1 border-[#DEDEDA]"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="feed_post">Feed Post</SelectItem>
               <SelectItem value="story">Story</SelectItem>
@@ -354,18 +355,18 @@ function SchedulerForm({ onClose }: { onClose: () => void }) {
           </Select>
         </div>
         <div>
-          <Label className="text-xs text-muted-foreground">Schedule For</Label>
+          <Label className="text-xs text-[#6F6F6B]">Schedule For</Label>
           <Input
             type="datetime-local"
             value={form.scheduledFor}
             onChange={(e) => setForm((f) => ({ ...f, scheduledFor: e.target.value }))}
-            className="mt-1 border-[#E0E0E0]"
+            className="mt-1 border-[#DEDEDA]"
           />
         </div>
       </div>
       <div className="flex gap-2 pt-2">
         <Button
-          className="flex-1 bg-[#F5C72C] text-black hover:bg-[#F5C72C]/90"
+          className="flex-1 bg-[#F2DD48] text-black hover:bg-[#F2DD48]/90"
           onClick={() => scheduleMutation.mutate({
             caption: form.caption,
             hashtags: form.hashtags,
@@ -378,7 +379,7 @@ function SchedulerForm({ onClose }: { onClose: () => void }) {
           {scheduleMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Calendar className="h-4 w-4 mr-1.5" />}
           Schedule Post
         </Button>
-        <Button variant="outline" onClick={onClose} className="border-[#E0E0E0]">Cancel</Button>
+        <Button variant="outline" onClick={onClose} className="border-[#DEDEDA]">Cancel</Button>
       </div>
     </div>
   );
@@ -399,22 +400,22 @@ function ScheduledPostRow({ post, onRefresh }: { post: any; onRefresh: () => voi
   });
 
   return (
-    <div className="flex items-start gap-3 p-4 rounded-xl bg-card border border-border hover:border-[#F5C72C]/40 transition-colors">
+    <div className="flex items-start gap-3 p-4 rounded-xl bg-white border border-[#DEDEDA] hover:border-[#F2DD48]/40 transition-colors">
       {post.imageUrl ? (
-        <img src={post.imageUrl} alt="" className="w-14 h-14 rounded-lg object-cover flex-shrink-0 border border-border" />
+        <img src={post.imageUrl} alt="" className="w-14 h-14 rounded-lg object-cover flex-shrink-0 border border-[#DEDEDA]" />
       ) : (
-        <div className="w-14 h-14 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-          <Image className="h-5 w-5 text-muted-foreground" />
+        <div className="w-14 h-14 rounded-lg bg-[#F1F1EF] flex items-center justify-center flex-shrink-0">
+          <Image className="h-5 w-5 text-[#6F6F6B]" />
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-foreground line-clamp-2">{post.caption}</p>
+        <p className="text-sm text-[#222222] line-clamp-2">{post.caption}</p>
         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-          <Badge variant="outline" className="text-[10px] border-[#E0E0E0] text-[#888]">{post.contentType}</Badge>
+          <Badge variant="outline" className="text-[10px] border-[#DEDEDA] text-[#6F6F6B]">{post.contentType}</Badge>
           {post.status === 'posted' ? (
-            <Badge className="text-[10px] bg-[#F0FAF3] text-[#3DB855] border-[#3DB855]/30">Posted</Badge>
+            <Badge className="text-[10px] bg-[#E6F0DC] text-[#72B84A] border-[#72B84A]/30">Posted</Badge>
           ) : (
-            <span className={`flex items-center gap-1 text-[10px] ${isOverdue ? 'text-[#E8453C]' : 'text-[#888]'}`}>
+            <span className={`flex items-center gap-1 text-[10px] ${isOverdue ? 'text-[#FF3B30]' : 'text-[#6F6F6B]'}`}>
               <Clock className="h-3 w-3" />
               {post.scheduledFor ? new Date(post.scheduledFor).toLocaleString() : 'Unscheduled'}
               {isOverdue && ' (overdue)'}
@@ -429,7 +430,7 @@ function ScheduledPostRow({ post, onRefresh }: { post: any; onRefresh: () => voi
             variant="outline"
             disabled={publishMutation.isPending}
             onClick={() => publishMutation.mutate({ id: post.id })}
-            className="h-7 px-2 text-xs border-[#F5C72C]/40 text-[#F5C72C] hover:bg-[#FFFBEA]"
+            className="h-7 px-2 text-xs border-[#F2DD48]/40 text-[#F2DD48] hover:bg-[#FFFBEA]"
           >
             {publishMutation.isPending ? <RefreshCw className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
           </Button>
@@ -439,7 +440,7 @@ function ScheduledPostRow({ post, onRefresh }: { post: any; onRefresh: () => voi
           variant="ghost"
           disabled={deleteMutation.isPending}
           onClick={() => deleteMutation.mutate({ id: post.id })}
-          className="h-7 px-2 text-xs text-[#E8453C] hover:text-[#E8453C] hover:bg-[#E8453C]/10"
+          className="h-7 px-2 text-xs text-[#FF3B30] hover:text-[#FF3B30] hover:bg-[#FF3B30]/10"
         >
           <Trash2 className="h-3 w-3" />
         </Button>
@@ -457,18 +458,18 @@ function SchedulerTab() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-[#F5C72C]" />
+          <h2 className="text-lg font-bold text-[#222222] flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-[#F2DD48]" />
             Content Scheduler
           </h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <p className="text-xs text-[#6F6F6B] mt-0.5">
             {scheduledPosts?.length ?? 0} post{(scheduledPosts?.length ?? 0) !== 1 ? 's' : ''} in queue
           </p>
         </div>
         <Button
           size="sm"
           onClick={() => setScheduleOpen(true)}
-          className="bg-[#F5C72C] text-black hover:bg-[#F5C72C]/90"
+          className="bg-[#F2DD48] text-black hover:bg-[#F2DD48]/90"
         >
           <Plus className="h-4 w-4 mr-1.5" />
           Schedule Post
@@ -482,14 +483,14 @@ function SchedulerTab() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-16 text-muted-foreground">
-          <Calendar className="h-10 w-10 mx-auto mb-3 text-[#E0E0E0]" />
-          <p className="font-medium text-foreground">No scheduled posts yet</p>
+        <div className="text-center py-16 text-[#6F6F6B]">
+          <Calendar className="h-10 w-10 mx-auto mb-3 text-[#DEDEDA]" />
+          <p className="font-medium text-[#222222]">No scheduled posts yet</p>
           <p className="text-sm mt-1 mb-4">Plan your content in advance to stay consistent.</p>
           <Button
             size="sm"
             onClick={() => setScheduleOpen(true)}
-            className="bg-[#F5C72C] text-black hover:bg-[#F5C72C]/90"
+            className="bg-[#F2DD48] text-black hover:bg-[#F2DD48]/90"
           >
             <Plus className="h-4 w-4 mr-1.5" />
             Schedule First Post
@@ -501,7 +502,7 @@ function SchedulerTab() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-[#F5C72C]" />
+              <Calendar className="h-5 w-5 text-[#F2DD48]" />
               Schedule Instagram Post
             </DialogTitle>
           </DialogHeader>
@@ -539,7 +540,7 @@ function AnalyticsTab() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Loader2 className="h-6 w-6 animate-spin text-[#F5C72C]" />
+        <Loader2 className="h-6 w-6 animate-spin text-[#F2DD48]" />
       </div>
     );
   }
@@ -547,9 +548,9 @@ function AnalyticsTab() {
   if (!insights || insights.length === 0) {
     return (
       <div className="text-center py-16">
-        <BarChart3 className="h-10 w-10 mx-auto mb-3 text-[#E0E0E0]" />
-        <p className="font-medium text-foreground">No Analytics Data Yet</p>
-        <p className="text-sm text-muted-foreground mt-1 mb-4">Sync your Instagram insights to see performance trends.</p>
+        <BarChart3 className="h-10 w-10 mx-auto mb-3 text-[#DEDEDA]" />
+        <p className="font-medium text-[#222222]">No Analytics Data Yet</p>
+        <p className="text-sm text-[#6F6F6B] mt-1 mb-4">Sync your Instagram insights to see performance trends.</p>
       </div>
     );
   }
@@ -576,72 +577,72 @@ function AnalyticsTab() {
     <div className="space-y-6">
       {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card className="p-5 bg-card border-border">
+        <Card className="p-5 bg-white border-[#DEDEDA]">
           <div className="flex items-center justify-between mb-2">
-            <div className="text-sm text-muted-foreground">Followers</div>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <div className="text-sm text-[#6F6F6B]">Followers</div>
+            <Users className="h-4 w-4 text-[#6F6F6B]" />
           </div>
-          <div className="text-2xl font-bold text-foreground">{latest.followersCount.toLocaleString()}</div>
-          <div className={`flex items-center text-xs mt-1 ${followerGrowth >= 0 ? 'text-[#3DB855]' : 'text-[#E8453C]'}`}>
+          <div className="text-2xl font-bold text-[#222222]">{latest.followersCount.toLocaleString()}</div>
+          <div className={`flex items-center text-xs mt-1 ${followerGrowth >= 0 ? 'text-[#72B84A]' : 'text-[#FF3B30]'}`}>
             {followerGrowth >= 0 ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
             {followerGrowth >= 0 ? '+' : ''}{followerGrowth} ({followerGrowthPercent}%)
           </div>
         </Card>
-        <Card className="p-5 bg-card border-border">
+        <Card className="p-5 bg-white border-[#DEDEDA]">
           <div className="flex items-center justify-between mb-2">
-            <div className="text-sm text-muted-foreground">Avg Engagement</div>
-            <Target className="h-4 w-4 text-muted-foreground" />
+            <div className="text-sm text-[#6F6F6B]">Avg Engagement</div>
+            <Target className="h-4 w-4 text-[#6F6F6B]" />
           </div>
-          <div className="text-2xl font-bold text-foreground">{avgEngagementRate.toFixed(2)}%</div>
-          <div className="text-xs text-muted-foreground mt-1">
+          <div className="text-2xl font-bold text-[#222222]">{avgEngagementRate.toFixed(2)}%</div>
+          <div className="text-xs text-[#6F6F6B] mt-1">
             {avgEngagementRate > 3 ? 'Excellent' : avgEngagementRate > 1 ? 'Good' : 'Needs improvement'}
           </div>
         </Card>
-        <Card className="p-5 bg-card border-border">
+        <Card className="p-5 bg-white border-[#DEDEDA]">
           <div className="flex items-center justify-between mb-2">
-            <div className="text-sm text-muted-foreground">Total Reach</div>
-            <Eye className="h-4 w-4 text-muted-foreground" />
+            <div className="text-sm text-[#6F6F6B]">Total Reach</div>
+            <Eye className="h-4 w-4 text-[#6F6F6B]" />
           </div>
-          <div className="text-2xl font-bold text-foreground">{totalReach.toLocaleString()}</div>
-          <div className="text-xs text-muted-foreground mt-1">Last {insights.length} days</div>
+          <div className="text-2xl font-bold text-[#222222]">{totalReach.toLocaleString()}</div>
+          <div className="text-xs text-[#6F6F6B] mt-1">Last {insights.length} days</div>
         </Card>
-        <Card className="p-5 bg-card border-border">
+        <Card className="p-5 bg-white border-[#DEDEDA]">
           <div className="flex items-center justify-between mb-2">
-            <div className="text-sm text-muted-foreground">Profile Views</div>
-            <MousePointerClick className="h-4 w-4 text-muted-foreground" />
+            <div className="text-sm text-[#6F6F6B]">Profile Views</div>
+            <MousePointerClick className="h-4 w-4 text-[#6F6F6B]" />
           </div>
-          <div className="text-2xl font-bold text-foreground">{(latest.profileViews || 0).toLocaleString()}</div>
-          <div className="text-xs text-muted-foreground mt-1">Last 7 days</div>
+          <div className="text-2xl font-bold text-[#222222]">{(latest.profileViews || 0).toLocaleString()}</div>
+          <div className="text-xs text-[#6F6F6B] mt-1">Last 7 days</div>
         </Card>
       </div>
 
       {/* Follower Growth Chart */}
-      <Card className="p-5 bg-card border-border">
-        <h3 className="text-sm font-semibold text-foreground mb-4">Follower Growth</h3>
+      <Card className="p-5 bg-white border-[#DEDEDA]">
+        <h3 className="text-sm font-semibold text-[#222222] mb-4">Follower Growth</h3>
         <ResponsiveContainer width="100%" height={240}>
           <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#E0E0E0" />
+            <CartesianGrid strokeDasharray="4 4" strokeWidth={0.5} stroke="#F0F0F0" vertical={false} />
             <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#888' }} />
             <YAxis tick={{ fontSize: 11, fill: '#888' }} />
             <Tooltip />
-            <Line type="monotone" dataKey="followers" stroke="#F5C72C" strokeWidth={2} dot={{ fill: '#F5C72C' }} />
+            <Line type="monotone" dataKey="followers" stroke={BRAND_ASSETS.instagram.solidColor} strokeWidth={2} dot={{ fill: BRAND_ASSETS.instagram.solidColor }} />
           </LineChart>
         </ResponsiveContainer>
       </Card>
 
       {/* Engagement Chart */}
-      <Card className="p-5 bg-card border-border">
-        <h3 className="text-sm font-semibold text-foreground mb-4">Engagement Rate (%)</h3>
+      <Card className="p-5 bg-white border-[#DEDEDA]">
+        <h3 className="text-sm font-semibold text-[#222222] mb-4">Engagement Rate (%)</h3>
         <ResponsiveContainer width="100%" height={200}>
           <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#E0E0E0" />
+            <CartesianGrid strokeDasharray="4 4" strokeWidth={0.5} stroke="#F0F0F0" vertical={false} />
             <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#888' }} />
             <YAxis tick={{ fontSize: 11, fill: '#888' }} />
             <Tooltip />
-            <Line type="monotone" dataKey="engagement" stroke="#111111" strokeWidth={2} name="Engagement Rate" />
+            <Line type="monotone" dataKey="engagement" stroke="#222222" strokeWidth={2} name="Engagement Rate" />
           </LineChart>
         </ResponsiveContainer>
-        <div className="mt-3 p-3 bg-[#F5F5F5] rounded-lg text-xs text-[#555] space-y-1">
+        <div className="mt-3 p-3 bg-[#F1F1EF] rounded-lg text-xs text-[#6F6F6B] space-y-1">
           <p><strong className="text-[#111]">Excellent:</strong> &gt;3% — Highly engaging content</p>
           <p><strong className="text-[#111]">Good:</strong> 1–3% — Industry average</p>
           <p><strong className="text-[#111]">Needs Improvement:</strong> &lt;1% — Focus on content quality and timing</p>
@@ -649,10 +650,10 @@ function AnalyticsTab() {
       </Card>
 
       {/* AI Recommendations */}
-      <Card className="p-5 bg-card border-border">
+      <Card className="p-5 bg-white border-[#DEDEDA]">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-[#F5C72C]" />
+          <h3 className="text-sm font-semibold text-[#222222] flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-[#F2DD48]" />
             AI Content Recommendations
           </h3>
           <Button
@@ -660,30 +661,30 @@ function AnalyticsTab() {
             variant="outline"
             onClick={() => generateMutation.mutate()}
             disabled={generateMutation.isPending}
-            className="border-[#E0E0E0] text-[#555]"
+            className="border-[#DEDEDA] text-[#6F6F6B]"
           >
-            {generateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Sparkles className="h-4 w-4 mr-1.5 text-[#F5C72C]" />}
+            {generateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Sparkles className="h-4 w-4 mr-1.5 text-[#F2DD48]" />}
             Generate
           </Button>
         </div>
         {recommendations && recommendations.length > 0 ? (
           <div className="space-y-3">
             {recommendations.map((rec) => (
-              <div key={rec.id} className="border border-[#E0E0E0] rounded-lg p-4 hover:border-[#F5C72C]/40 transition-colors">
+              <div key={rec.id} className="border border-[#DEDEDA] rounded-lg p-4 hover:border-[#F2DD48]/40 transition-colors">
                 <div className="flex items-start gap-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                      <h4 className="font-medium text-sm text-foreground">{rec.title}</h4>
+                      <h4 className="font-medium text-sm text-[#222222]">{rec.title}</h4>
                       <Badge variant={rec.priority === 'high' ? 'destructive' : rec.priority === 'medium' ? 'default' : 'secondary'} className="text-[10px]">
                         {rec.priority}
                       </Badge>
-                      <Badge variant="outline" className="text-[10px] border-[#E0E0E0] text-[#888]">{rec.type}</Badge>
+                      <Badge variant="outline" className="text-[10px] border-[#DEDEDA] text-[#6F6F6B]">{rec.type}</Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground mb-2">{rec.description}</p>
-                    <div className="bg-[#FFFBEA] border border-[#F5C72C]/20 p-2.5 rounded text-xs text-[#111] mb-2">
+                    <p className="text-xs text-[#6F6F6B] mb-2">{rec.description}</p>
+                    <div className="bg-[#FFFBEA] border border-[#F2DD48]/20 p-2.5 rounded text-xs text-[#111] mb-2">
                       <strong>Content Idea:</strong> {rec.contentIdea}
                     </div>
-                    <div className="flex gap-4 text-xs text-muted-foreground">
+                    <div className="flex gap-4 text-xs text-[#6F6F6B]">
                       <span><strong>Impact:</strong> {rec.expectedImpact}</span>
                       <span><strong>Confidence:</strong> {rec.confidence}%</span>
                     </div>
@@ -693,16 +694,16 @@ function AnalyticsTab() {
                     variant="outline"
                     onClick={() => implementMutation.mutate({ id: rec.id })}
                     disabled={rec.status === 'implemented'}
-                    className="flex-shrink-0 border-[#E0E0E0] text-[#555] text-xs"
+                    className="flex-shrink-0 border-[#DEDEDA] text-[#6F6F6B] text-xs"
                   >
-                    {rec.status === 'implemented' ? <CheckCircle2 className="h-3.5 w-3.5 text-[#3DB855]" /> : 'Done'}
+                    {rec.status === 'implemented' ? <CheckCircle2 className="h-3.5 w-3.5 text-[#72B84A]" /> : 'Done'}
                   </Button>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="text-center py-8 text-muted-foreground text-sm">
+          <div className="text-center py-8 text-[#6F6F6B] text-sm">
             Click "Generate" to get AI-powered content ideas based on your performance data.
           </div>
         )}
@@ -724,33 +725,33 @@ export default function InstagramAnalytics() {
     <div className="p-6 space-y-6 max-w-5xl">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-          <BarChart3 className="h-6 w-6 text-[#F5C72C]" />
+        <h1 className="text-2xl font-bold text-[#222222] flex items-center gap-2">
+          <BarChart3 className="h-6 w-6 text-[#F2DD48]" />
           Instagram Analytics
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-sm text-[#6F6F6B] mt-1">
           @golfvxarlingtonheights · AI daily analysis, performance trends &amp; content scheduler
         </p>
       </div>
 
       {/* Token expired — setup banner */}
       {tokenInvalid && (
-        <div className="rounded-xl border border-[#E8453C]/30 bg-[#E8453C]/5 p-5 space-y-3">
+        <div className="rounded-xl border border-[#FF3B30]/30 bg-[#FF3B30]/5 p-5 space-y-3">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-[#E8453C] shrink-0 mt-0.5" />
+            <AlertTriangle className="h-5 w-5 text-[#FF3B30] shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-[#E8453C]">Instagram Access Token Expired</p>
-              <p className="text-[13px] text-[#888888] mt-1">
+              <p className="font-semibold text-[#FF3B30]">Instagram Access Token Expired</p>
+              <p className="text-[13px] text-[#6F6F6B] mt-1">
                 Analytics and AI analysis require a valid Instagram access token. Renew your token to restore these features.
               </p>
             </div>
           </div>
-          <div className="bg-white rounded-lg border border-[#E0E0E0] p-4 text-[13px] space-y-2">
-            <p className="font-semibold text-[#111111]">To renew:</p>
+          <div className="bg-white rounded-lg border border-[#DEDEDA] p-4 text-[13px] space-y-2">
+            <p className="font-semibold text-[#222222]">To renew:</p>
             <ol className="space-y-1.5 text-[#555555] list-decimal list-inside">
-              <li>Go to <a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noopener noreferrer" className="text-[#007AFF] underline">Meta Graph API Explorer</a></li>
+              <li>Go to <a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noopener noreferrer" className="text-[#1A56DB] underline">Meta Graph API Explorer</a></li>
               <li>Generate a User Access Token with Instagram permissions</li>
-              <li>Exchange for a long-lived token and update <code className="bg-[#F5F5F5] px-1 rounded text-[11px]">INSTAGRAM_ACCESS_TOKEN</code> in your environment</li>
+              <li>Exchange for a long-lived token and update <code className="bg-[#F1F1EF] px-1 rounded text-[11px]">INSTAGRAM_ACCESS_TOKEN</code> in your environment</li>
             </ol>
           </div>
         </div>
@@ -758,24 +759,24 @@ export default function InstagramAnalytics() {
 
       {/* Tabs — show Scheduler always, hide data tabs when token invalid */}
       <Tabs defaultValue={tokenInvalid ? "scheduler" : "daily"} className="space-y-4">
-        <TabsList className="bg-[#F5F5F5] border border-[#E0E0E0]">
+        <TabsList className="bg-[#F1F1EF] border border-[#DEDEDA]">
           <TabsTrigger
             value="daily"
-            className="data-[state=active]:bg-[#F5C72C] data-[state=active]:text-black data-[state=active]:shadow-none"
+            className="data-[state=active]:bg-[#F2DD48] data-[state=active]:text-black data-[state=active]:shadow-none"
           >
             <Sparkles className="h-3.5 w-3.5 mr-1.5" />
             Daily Analysis
           </TabsTrigger>
           <TabsTrigger
             value="analytics"
-            className="data-[state=active]:bg-[#F5C72C] data-[state=active]:text-black data-[state=active]:shadow-none"
+            className="data-[state=active]:bg-[#F2DD48] data-[state=active]:text-black data-[state=active]:shadow-none"
           >
             <BarChart3 className="h-3.5 w-3.5 mr-1.5" />
             Analytics
           </TabsTrigger>
           <TabsTrigger
             value="scheduler"
-            className="data-[state=active]:bg-[#F5C72C] data-[state=active]:text-black data-[state=active]:shadow-none"
+            className="data-[state=active]:bg-[#F2DD48] data-[state=active]:text-black data-[state=active]:shadow-none"
           >
             <Calendar className="h-3.5 w-3.5 mr-1.5" />
             Scheduler

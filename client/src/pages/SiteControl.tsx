@@ -20,23 +20,23 @@ export default function SiteControl() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Site Control</h1>
-          <p className="text-muted-foreground text-sm mt-1">Manage website content and settings</p>
+          <h1 className="text-2xl font-bold text-[#222222]">Site Control</h1>
+          <p className="text-[#6F6F6B] text-sm mt-1">Manage website content and settings</p>
         </div>
-        <Button size="sm" className="bg-[#F5C72C] text-black hover:bg-yellow-500" onClick={handleSave}>
+        <Button size="sm" className="bg-[#F2DD48] text-black hover:bg-yellow-500" onClick={handleSave}>
           <Save size={14} />
           Save Changes
         </Button>
       </div>
       <Tabs defaultValue="hero">
-        <TabsList className="bg-muted">
+        <TabsList className="bg-[#F1F1EF]">
           <TabsTrigger value="hero">Hero Content</TabsTrigger>
           <TabsTrigger value="announcements">Announcements</TabsTrigger>
           <TabsTrigger value="promotions">Promotions</TabsTrigger>
           <TabsTrigger value="seo">SEO</TabsTrigger>
         </TabsList>
         <TabsContent value="hero" className="mt-4">
-          <Card className="bg-card border-border">
+          <Card className="bg-white border-[#DEDEDA]">
             <CardHeader><CardTitle className="text-sm font-medium">Hero Section</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -61,7 +61,7 @@ export default function SiteControl() {
           </Card>
         </TabsContent>
         <TabsContent value="announcements" className="mt-4">
-          <Card className="bg-card border-border">
+          <Card className="bg-white border-[#DEDEDA]">
             <CardHeader><CardTitle className="text-sm font-medium">Site Announcements</CardTitle></CardHeader>
             <CardContent>
               <Textarea placeholder="Enter announcement text to display on the website..." className="min-h-[120px]" />
@@ -69,7 +69,7 @@ export default function SiteControl() {
           </Card>
         </TabsContent>
         <TabsContent value="promotions" className="mt-4">
-          <Card className="bg-card border-border">
+          <Card className="bg-white border-[#DEDEDA]">
             <CardHeader><CardTitle className="text-sm font-medium">Active Promotions</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -84,7 +84,7 @@ export default function SiteControl() {
           </Card>
         </TabsContent>
         <TabsContent value="seo" className="mt-4">
-          <Card className="bg-card border-border">
+          <Card className="bg-white border-[#DEDEDA]">
             <CardHeader><CardTitle className="text-sm font-medium">SEO Settings</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <div>

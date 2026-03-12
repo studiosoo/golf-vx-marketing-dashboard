@@ -80,11 +80,11 @@ export function ApplicationsTab({ applications, totalApplications, onStatusChang
 
   return (
     <>
-      <Card className="border border-[#E0E0E0] shadow-none">
+      <Card className="border border-[#E9E9E6] shadow-none">
         <CardHeader>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
-              <CardTitle className="text-[#111111]">Applications</CardTitle>
+              <CardTitle className="text-[#222222]">Applications</CardTitle>
               <CardDescription className="text-[#AAAAAA]">Manage and track all giveaway submissions</CardDescription>
             </div>
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
@@ -92,10 +92,10 @@ export function ApplicationsTab({ applications, totalApplications, onStatusChang
                 placeholder="Search name, email, city..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full sm:w-48 border-[#E0E0E0] text-sm"
+                className="w-full sm:w-48 border-[#E9E9E6] text-sm"
               />
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-36 border-[#E0E0E0] text-sm">
+                <SelectTrigger className="w-full sm:w-36 border-[#E9E9E6] text-sm">
                   <SelectValue placeholder="Filter status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -109,19 +109,19 @@ export function ApplicationsTab({ applications, totalApplications, onStatusChang
             </div>
           </div>
           {selectedIds.size > 0 && (
-            <div className="flex items-center gap-2 mt-2 p-2 bg-[#F2F2F7] rounded-lg">
+            <div className="flex items-center gap-2 mt-2 p-2 bg-[#F1F1EF] rounded-lg">
               <span className="text-xs text-[#545A60]">{selectedIds.size} selected</span>
               <Button
                 size="sm"
                 variant="outline"
-                className="h-7 text-xs border-[#E0E0E0]"
+                className="h-7 text-xs border-[#E9E9E6]"
                 onClick={() => enchargeSync.mutate({ applicantIds: Array.from(selectedIds), tags: ["giveaway-2026"] })}
                 disabled={enchargeSync.isPending}
               >
                 {enchargeSync.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Mail className="h-3 w-3" />}
                 <span className="ml-1">Sync to Encharge</span>
               </Button>
-              <Button size="sm" variant="ghost" className="h-7 text-xs text-[#888888]" onClick={() => setSelectedIds(new Set())}>
+              <Button size="sm" variant="ghost" className="h-7 text-xs text-[#6F6F6B]" onClick={() => setSelectedIds(new Set())}>
                 Clear
               </Button>
             </div>
@@ -131,7 +131,7 @@ export function ApplicationsTab({ applications, totalApplications, onStatusChang
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="border-b border-[#E0E0E0]">
+                <TableRow className="border-b border-[#E9E9E6]">
                   <TableHead className="w-10">
                     <Checkbox
                       checked={selectedIds.size === filteredApplications.length && filteredApplications.length > 0}
@@ -154,12 +154,12 @@ export function ApplicationsTab({ applications, totalApplications, onStatusChang
                 {filteredApplications.map((app) => (
                   <TableRow
                     key={app.id}
-                    className={`border-b border-[#F0F0F0] ${selectedIds.has(app.id) ? "bg-[#F5C72C]/5" : "hover:bg-[#F2F2F7]"}`}
+                    className={`border-b border-[#F0F0F0] ${selectedIds.has(app.id) ? "bg-[#F2DD48]/5" : "hover:bg-[#F1F1EF]"}`}
                   >
                     <TableCell>
                       <Checkbox checked={selectedIds.has(app.id)} onCheckedChange={() => toggleSelect(app.id)} />
                     </TableCell>
-                    <TableCell className="font-medium text-sm text-[#111111]">
+                    <TableCell className="font-medium text-sm text-[#222222]">
                       {app.name}
                       <span className="block md:hidden text-xs text-[#AAAAAA]">{app.email}</span>
                     </TableCell>
@@ -172,7 +172,7 @@ export function ApplicationsTab({ applications, totalApplications, onStatusChang
                         value={app.status || "pending"}
                         onValueChange={(val) => onStatusChange(app.id, val)}
                       >
-                        <SelectTrigger className="h-7 w-28 text-xs border-[#E0E0E0]">
+                        <SelectTrigger className="h-7 w-28 text-xs border-[#E9E9E6]">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -189,7 +189,7 @@ export function ApplicationsTab({ applications, totalApplications, onStatusChang
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-7 w-7 p-0 text-[#AAAAAA] hover:text-[#111111]"
+                          className="h-7 w-7 p-0 text-[#AAAAAA] hover:text-[#222222]"
                           title="Generate email draft"
                           onClick={() => {
                             setEmailDraftModal({ open: true, applicantId: app.id, draft: null });
@@ -201,7 +201,7 @@ export function ApplicationsTab({ applications, totalApplications, onStatusChang
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-7 w-7 p-0 text-[#AAAAAA] hover:text-[#111111]"
+                          className="h-7 w-7 p-0 text-[#AAAAAA] hover:text-[#222222]"
                           title="Check visit history"
                           onClick={() => setVisitHistoryModal({ open: true, applicantId: app.id })}
                         >

@@ -1,0 +1,54 @@
+/* ============================================================
+   Golf VX Dashboard — Design Tokens
+   Source: Golf VX App-Native UI/UX Style Guide
+
+   RULES:
+   - Never hardcode hex values in components. Always use these variables.
+   - Never add new color variables without updating CLAUDE.md Layer 2.
+   - --gvx-yellow (#F2DD48) is reserved for CTAs, active states,
+     and primary chart bars only. Not for decorative use.
+   ============================================================ */
+
+:root {
+  /* Surfaces & Canvas */
+  --gvx-bg-canvas: #F6F6F4;
+  --gvx-bg-surface: #FFFFFF;
+  --gvx-bg-muted: #F8F9FA;
+  --gvx-bg-hover: #F1F1EF;
+
+  /* Borders & Dividers */
+  --gvx-border-faint: #F0F0F0;
+  --gvx-border-light: #E9E9E6;
+  --gvx-border-strong: #DEDEDA;
+
+  /* Typography */
+  --gvx-text-primary: #222222;
+  --gvx-text-secondary: #6F6F6B;
+  --gvx-text-muted: #A8A8A3;
+  --gvx-text-inverse: #FFFFFF;
+
+  /* Brand Accents */
+  --gvx-yellow: #F2DD48;
+  --gvx-yellow-soft: #FDF9E3;
+  --gvx-charcoal: #333333;
+
+  /* Semantic Status */
+  --gvx-status-green-bg: #E6F0DC;
+  --gvx-status-green-text: #4C882A;
+  --gvx-status-orange-bg: #F6E5CF;
+  --gvx-status-orange-text: #B46A0B;
+  --gvx-status-red-bg: #F9E5E5;
+  --gvx-status-red-text: #C81E1E;
+  --gvx-status-gray-bg: #F1F1EF;
+  --gvx-status-gray-text: #6F6F6B;
+  --gvx-status-blue-bg: #EAF2FF;
+  --gvx-status-blue-text: #1A56DB;
+
+  /* Golf-Specific Semantic */
+  --gvx-golf-eagle: #F5A623;
+  --gvx-golf-birdie: #F9D671;
+  --gvx-golf-par: #E9E9E6;
+  --gvx-golf-bogey: #7DC1E8;
+  --gvx-golf-double: #4A90E2;
+  --gvx-chart-negative: #FFA7A7;
+}

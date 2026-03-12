@@ -99,7 +99,7 @@ export default function AsanaTaskModal({ isOpen, onClose, suggestedTasks, title 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E0E0E0]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E9E9E6]">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-[#F06A35]/10 flex items-center justify-center">
               <svg className="w-4 h-4 text-[#F06A35]" viewBox="0 0 32 32" fill="currentColor">
@@ -108,35 +108,35 @@ export default function AsanaTaskModal({ isOpen, onClose, suggestedTasks, title 
             </div>
             <div>
               <h2 className="text-sm font-semibold text-[#111]">{title || "Add to Asana"}</h2>
-              <p className="text-xs text-[#888]">Marketing Master Timeline / Control Tower</p>
+              <p className="text-xs text-[#6F6F6B]">Marketing Master Timeline / Control Tower</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#F5F5F5] transition-colors">
-            <X className="w-4 h-4 text-[#666]" />
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#F1F1EF] transition-colors">
+            <X className="w-4 h-4 text-[#6F6F6B]" />
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
           {isDone ? (
             <div className="space-y-3">
-              <div className="flex items-center gap-2 text-[#3DB855]">
+              <div className="flex items-center gap-2 text-[#72B84A]">
                 <CheckCircle2 className="w-5 h-5" />
                 <span className="text-sm font-medium">{createdTasks.length} task{createdTasks.length !== 1 ? "s" : ""} created in Asana</span>
               </div>
               {createdTasks.map((t, i) => (
                 <a key={i} href={t.permalink_url} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2.5 bg-[#FAFAFA] border border-[#E0E0E0] rounded-lg hover:bg-[#F0F0F0] transition-colors group">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#3DB855] flex-shrink-0" />
+                  className="flex items-center gap-2 px-4 py-2.5 bg-[#F6F6F4] border border-[#E9E9E6] rounded-lg hover:bg-[#F0F0F0] transition-colors group">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#72B84A] flex-shrink-0" />
                   <span className="text-sm text-[#333] flex-1 truncate">{t.name}</span>
-                  <ExternalLink className="w-3.5 h-3.5 text-[#AAA] group-hover:text-[#666] flex-shrink-0" />
+                  <ExternalLink className="w-3.5 h-3.5 text-[#AAA] group-hover:text-[#6F6F6B] flex-shrink-0" />
                 </a>
               ))}
             </div>
           ) : (
             tasks.map((task, idx) => (
-              <div key={task.id} className="border border-[#E0E0E0] rounded-xl p-4 space-y-3">
+              <div key={task.id} className="border border-[#E9E9E6] rounded-xl p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-[#888]">Task {idx + 1}</span>
+                  <span className="text-xs font-medium text-[#6F6F6B]">Task {idx + 1}</span>
                   {tasks.length > 1 && (
                     <button onClick={() => removeTask(task.id)} className="p-1 rounded hover:bg-red-50 text-[#CCC] hover:text-[#E8453C] transition-colors">
                       <Trash2 className="w-3.5 h-3.5" />
@@ -148,31 +148,31 @@ export default function AsanaTaskModal({ isOpen, onClose, suggestedTasks, title 
                   placeholder="Task name *"
                   value={task.name}
                   onChange={e => updateTask(task.id, "name", e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F5C72C]/50 focus:border-[#F5C72C]"
+                  className="w-full px-3 py-2 text-sm border border-[#E9E9E6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F2DD48]/50 focus:border-[#F2DD48]"
                 />
                 <textarea
                   placeholder="Notes / description (optional)"
                   value={task.notes}
                   onChange={e => updateTask(task.id, "notes", e.target.value)}
                   rows={2}
-                  className="w-full px-3 py-2 text-sm border border-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F5C72C]/50 focus:border-[#F5C72C] resize-none"
+                  className="w-full px-3 py-2 text-sm border border-[#E9E9E6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F2DD48]/50 focus:border-[#F2DD48] resize-none"
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs text-[#888] mb-1">Due date</label>
+                    <label className="block text-xs text-[#6F6F6B] mb-1">Due date</label>
                     <input
                       type="date"
                       value={task.due_on}
                       onChange={e => updateTask(task.id, "due_on", e.target.value)}
-                      className="w-full px-3 py-2 text-sm border border-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F5C72C]/50 focus:border-[#F5C72C]"
+                      className="w-full px-3 py-2 text-sm border border-[#E9E9E6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F2DD48]/50 focus:border-[#F2DD48]"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-[#888] mb-1">Campaign section</label>
+                    <label className="block text-xs text-[#6F6F6B] mb-1">Campaign section</label>
                     <select
                       value={task.campaignSection}
                       onChange={e => updateTask(task.id, "campaignSection", e.target.value)}
-                      className="w-full px-3 py-2 text-sm border border-[#E0E0E0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F5C72C]/50 focus:border-[#F5C72C] bg-white"
+                      className="w-full px-3 py-2 text-sm border border-[#E9E9E6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F2DD48]/50 focus:border-[#F2DD48] bg-white"
                     >
                       {CAMPAIGN_SECTIONS.map(s => (
                         <option key={s} value={s}>{s}</option>
@@ -185,7 +185,7 @@ export default function AsanaTaskModal({ isOpen, onClose, suggestedTasks, title 
           )}
         </div>
 
-        <div className="px-6 py-4 border-t border-[#E0E0E0] flex items-center justify-between gap-3">
+        <div className="px-6 py-4 border-t border-[#E9E9E6] flex items-center justify-between gap-3">
           {isDone ? (
             <button onClick={onClose} className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-[#111] rounded-xl hover:bg-[#333] transition-colors">
               Done
@@ -193,12 +193,12 @@ export default function AsanaTaskModal({ isOpen, onClose, suggestedTasks, title 
           ) : (
             <>
               <button onClick={addTask} disabled={createBatch.isPending}
-                className="flex items-center gap-1.5 px-3 py-2 text-sm text-[#666] border border-[#E0E0E0] rounded-xl hover:bg-[#F5F5F5] transition-colors disabled:opacity-50">
+                className="flex items-center gap-1.5 px-3 py-2 text-sm text-[#6F6F6B] border border-[#E9E9E6] rounded-xl hover:bg-[#F1F1EF] transition-colors disabled:opacity-50">
                 <Plus className="w-4 h-4" />Add task
               </button>
               <div className="flex items-center gap-2">
                 <button onClick={onClose} disabled={createBatch.isPending}
-                  className="px-4 py-2.5 text-sm text-[#666] border border-[#E0E0E0] rounded-xl hover:bg-[#F5F5F5] transition-colors disabled:opacity-50">
+                  className="px-4 py-2.5 text-sm text-[#6F6F6B] border border-[#E9E9E6] rounded-xl hover:bg-[#F1F1EF] transition-colors disabled:opacity-50">
                   Cancel
                 </button>
                 <button onClick={handleSubmit} disabled={createBatch.isPending}

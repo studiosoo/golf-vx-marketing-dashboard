@@ -16,7 +16,7 @@ import {
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const YELLOW = "#F5C72C";
+const YELLOW = "#F2DD48";
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
 // ─── Promotions Data ─────────────────────────────────────────────────────────
@@ -112,12 +112,12 @@ type SeasonalView = "demand" | "promotions";
 // ─── Helper Components ────────────────────────────────────────────────────────
 
 function ThreatBadge({ level }: { level: string }) {
-  const map: Record<string, string> = { high: "bg-red-50 text-red-700 border border-red-200", medium: "bg-yellow-50 text-yellow-700 border border-yellow-200", low: "bg-green-50 text-[#3DB855] border border-green-200" };
+  const map: Record<string, string> = { high: "bg-red-50 text-red-700 border border-red-200", medium: "bg-yellow-50 text-yellow-700 border border-yellow-200", low: "bg-green-50 text-[#72B84A] border border-green-200" };
   return <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${map[level] || map.low}`}>{level} threat</span>;
 }
 
 function PriorityDot({ level }: { level: string }) {
-  const map: Record<string, string> = { high: "bg-[#E8453C]", medium: "bg-yellow-500", low: "bg-[#AAAAAA]" };
+  const map: Record<string, string> = { high: "bg-[#FF3B30]", medium: "bg-yellow-500", low: "bg-[#A8A8A3]" };
   return <span className={`w-2 h-2 rounded-full ${map[level] || map.low} inline-block flex-shrink-0 mt-1.5`} />;
 }
 
@@ -131,8 +131,8 @@ const CHANNEL_COLORS: Record<PromoChannel, string> = {
 };
 
 const STATUS_STYLES: Record<PromoStatus, string> = {
-  completed: "bg-green-50 text-[#3DB855] border border-green-200",
-  active: "bg-[#888888]/10 text-[#888888] border border-blue-200",
+  completed: "bg-green-50 text-[#72B84A] border border-green-200",
+  active: "bg-[#6F6F6B]/10 text-[#6F6F6B] border border-blue-200",
   planned: "bg-gray-50 text-gray-600 border border-gray-200",
 };
 
@@ -160,54 +160,54 @@ function PromoForm({ initial, onSave, onCancel }: {
     setForm(f => ({ ...f, [k]: e.target.value }));
 
   return (
-    <div className="bg-[#FAFAFA] border border-[#E0E0E0] rounded-xl p-4 space-y-3">
+    <div className="bg-[#F6F6F4] border border-[#DEDEDA] rounded-xl p-4 space-y-3">
       <div className="grid grid-cols-2 gap-3">
         <div className="col-span-2">
-          <label className="text-xs font-medium text-[#666] block mb-1">Promotion Name</label>
-          <input value={form.name} onChange={set("name")} placeholder="e.g. Spring Membership Push" className="w-full text-sm border border-[#D0D0D0] rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-[#F5C72C]" />
+          <label className="text-xs font-medium text-[#6F6F6B] block mb-1">Promotion Name</label>
+          <input value={form.name} onChange={set("name")} placeholder="e.g. Spring Membership Push" className="w-full text-sm border border-[#D0D0D0] rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-[#F2DD48]" />
         </div>
         <div>
-          <label className="text-xs font-medium text-[#666] block mb-1">Month</label>
-          <select value={form.month} onChange={set("month")} className="w-full text-sm border border-[#D0D0D0] rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-[#F5C72C]">
+          <label className="text-xs font-medium text-[#6F6F6B] block mb-1">Month</label>
+          <select value={form.month} onChange={set("month")} className="w-full text-sm border border-[#D0D0D0] rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-[#F2DD48]">
             {MONTHS.map(m => <option key={m}>{m}</option>)}
           </select>
         </div>
         <div>
-          <label className="text-xs font-medium text-[#666] block mb-1">Channel</label>
-          <select value={form.channel} onChange={set("channel")} className="w-full text-sm border border-[#D0D0D0] rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-[#F5C72C]">
+          <label className="text-xs font-medium text-[#6F6F6B] block mb-1">Channel</label>
+          <select value={form.channel} onChange={set("channel")} className="w-full text-sm border border-[#D0D0D0] rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-[#F2DD48]">
             {(["Meta Ads","Email","SMS","Organic","Event","Referral"] as PromoChannel[]).map(c => <option key={c}>{c}</option>)}
           </select>
         </div>
         <div>
-          <label className="text-xs font-medium text-[#666] block mb-1">Budget ($)</label>
-          <input type="number" value={form.budget} onChange={set("budget")} placeholder="0" className="w-full text-sm border border-[#D0D0D0] rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-[#F5C72C]" />
+          <label className="text-xs font-medium text-[#6F6F6B] block mb-1">Budget ($)</label>
+          <input type="number" value={form.budget} onChange={set("budget")} placeholder="0" className="w-full text-sm border border-[#D0D0D0] rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-[#F2DD48]" />
         </div>
         <div>
-          <label className="text-xs font-medium text-[#666] block mb-1">Reach / Impressions</label>
-          <input type="number" value={form.reach} onChange={set("reach")} placeholder="0" className="w-full text-sm border border-[#D0D0D0] rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-[#F5C72C]" />
+          <label className="text-xs font-medium text-[#6F6F6B] block mb-1">Reach / Impressions</label>
+          <input type="number" value={form.reach} onChange={set("reach")} placeholder="0" className="w-full text-sm border border-[#D0D0D0] rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-[#F2DD48]" />
         </div>
         <div>
-          <label className="text-xs font-medium text-[#666] block mb-1">Conversions / Leads</label>
-          <input type="number" value={form.conversions} onChange={set("conversions")} placeholder="0" className="w-full text-sm border border-[#D0D0D0] rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-[#F5C72C]" />
+          <label className="text-xs font-medium text-[#6F6F6B] block mb-1">Conversions / Leads</label>
+          <input type="number" value={form.conversions} onChange={set("conversions")} placeholder="0" className="w-full text-sm border border-[#D0D0D0] rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-[#F2DD48]" />
         </div>
         <div>
-          <label className="text-xs font-medium text-[#666] block mb-1">Status</label>
-          <select value={form.status} onChange={set("status")} className="w-full text-sm border border-[#D0D0D0] rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-[#F5C72C]">
+          <label className="text-xs font-medium text-[#6F6F6B] block mb-1">Status</label>
+          <select value={form.status} onChange={set("status")} className="w-full text-sm border border-[#D0D0D0] rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-[#F2DD48]">
             <option value="completed">Completed</option>
             <option value="active">Active</option>
             <option value="planned">Planned</option>
           </select>
         </div>
         <div className="col-span-2">
-          <label className="text-xs font-medium text-[#666] block mb-1">Notes</label>
-          <textarea value={form.notes} onChange={set("notes")} rows={2} placeholder="Campaign context, results, learnings…" className="w-full text-sm border border-[#D0D0D0] rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-[#F5C72C] resize-none" />
+          <label className="text-xs font-medium text-[#6F6F6B] block mb-1">Notes</label>
+          <textarea value={form.notes} onChange={set("notes")} rows={2} placeholder="Campaign context, results, learnings…" className="w-full text-sm border border-[#D0D0D0] rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-[#F2DD48] resize-none" />
         </div>
       </div>
       <div className="flex gap-2 justify-end">
         <Button size="sm" variant="outline" onClick={onCancel} className="text-xs h-8">
           <X className="w-3 h-3 mr-1" /> Cancel
         </Button>
-        <Button size="sm" onClick={() => { if (!form.name.trim()) { toast.error("Promotion name is required"); return; } onSave(form); }} className="text-xs h-8 bg-[#F5C72C] hover:bg-[#E6B800] text-[#111] border-0">
+        <Button size="sm" onClick={() => { if (!form.name.trim()) { toast.error("Promotion name is required"); return; } onSave(form); }} className="text-xs h-8 bg-[#F2DD48] hover:bg-[#E6B800] text-[#111] border-0">
           <Check className="w-3 h-3 mr-1" /> Save
         </Button>
       </div>
@@ -220,12 +220,12 @@ function PromoForm({ initial, onSave, onCancel }: {
 function PromoTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white border border-[#E0E0E0] rounded-xl shadow-lg p-3 text-xs max-w-xs">
+    <div className="bg-white border border-[#DEDEDA] rounded-xl shadow-lg p-3 text-xs max-w-xs">
       <p className="font-semibold text-[#111] mb-2">{label}</p>
       {payload.map((p: any) => (
         <div key={p.name} className="flex items-center gap-2 mb-1">
           <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: p.color }} />
-          <span className="text-[#666]">{p.name}:</span>
+          <span className="text-[#6F6F6B]">{p.name}:</span>
           <span className="font-medium text-[#111]">
             {p.name === "Budget ($)" ? `$${p.value.toLocaleString()}` : p.name === "Conversions" ? p.value : p.value}
           </span>
@@ -252,12 +252,12 @@ function GapAnalysis({ promotions }: { promotions: Promotion[] }) {
   }).sort((a, b) => b.gap - a.gap);
 
   return (
-    <div className="bg-white border border-[#E0E0E0] rounded-xl overflow-hidden">
+    <div className="bg-white border border-[#DEDEDA] rounded-xl overflow-hidden">
       <div className="px-4 py-3 border-b border-[#F0F0F0] flex items-center gap-2">
         <AlertTriangle className="w-4 h-4 text-amber-500" />
         <h3 className="text-sm font-semibold text-[#111]">Gap Analysis — Demand vs. Promotion Coverage</h3>
       </div>
-      <div className="divide-y divide-[#F5F5F5]">
+      <div className="divide-y divide-[#F1F1EF]">
         {gaps.map(({ month, demandScore, spend, gap, note }) => {
           const severity = gap > 50 ? "high" : gap > 20 ? "medium" : "low";
           const barColor = severity === "high" ? "#EF4444" : severity === "medium" ? "#F59E0B" : "#22C55E";
@@ -267,19 +267,19 @@ function GapAnalysis({ promotions }: { promotions: Promotion[] }) {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <div className="flex-1 bg-[#F0F0F0] rounded-full h-1.5 overflow-hidden">
-                    <div className="h-full rounded-full" style={{ width: `${Math.min(demandScore, 100)}%`, background: "#F5C72C" }} />
+                    <div className="h-full rounded-full" style={{ width: `${Math.min(demandScore, 100)}%`, background: "#F2DD48" }} />
                   </div>
-                  <span className="text-xs text-[#888] w-14 text-right">Demand {demandScore}</span>
+                  <span className="text-xs text-[#6F6F6B] w-14 text-right">Demand {demandScore}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 bg-[#F0F0F0] rounded-full h-1.5 overflow-hidden">
                     <div className="h-full rounded-full" style={{ width: `${Math.min(spend / 10, 100)}%`, background: "#1877F2" }} />
                   </div>
-                  <span className="text-xs text-[#888] w-14 text-right">${spend.toLocaleString()}</span>
+                  <span className="text-xs text-[#6F6F6B] w-14 text-right">${spend.toLocaleString()}</span>
                 </div>
               </div>
               <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
-                <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${severity === "high" ? "bg-red-50 text-red-700" : severity === "medium" ? "bg-yellow-50 text-yellow-700" : "bg-green-50 text-[#3DB855]"}`}>
+                <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${severity === "high" ? "bg-red-50 text-red-700" : severity === "medium" ? "bg-yellow-50 text-yellow-700" : "bg-green-50 text-[#72B84A]"}`}>
                   {severity === "high" ? "⚠ Gap" : severity === "medium" ? "~ Partial" : "✓ Covered"}
                 </span>
               </div>
@@ -287,9 +287,9 @@ function GapAnalysis({ promotions }: { promotions: Promotion[] }) {
           );
         })}
       </div>
-      <div className="px-4 py-3 bg-[#FAFAFA] border-t border-[#F0F0F0]">
-        <p className="text-xs text-[#888]">
-          <span className="inline-block w-3 h-1.5 rounded bg-[#F5C72C] mr-1 align-middle" /> Demand index (avg indoor + sports bar)
+      <div className="px-4 py-3 bg-[#F6F6F4] border-t border-[#F0F0F0]">
+        <p className="text-xs text-[#6F6F6B]">
+          <span className="inline-block w-3 h-1.5 rounded bg-[#F2DD48] mr-1 align-middle" /> Demand index (avg indoor + sports bar)
           <span className="inline-block w-3 h-1.5 rounded bg-[#1877F2] ml-3 mr-1 align-middle" /> Promotion spend (normalised)
         </p>
       </div>
@@ -403,12 +403,12 @@ export default function MarketResearch() {
   // ─── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="p-6 space-y-6 bg-[#FAFAFA] min-h-full">
+    <div className="p-6 space-y-6 bg-[#F6F6F4] min-h-full">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[#111] tracking-tight">Market Research</h1>
-          <p className="text-sm text-[#666] mt-1 flex items-center gap-1.5">
+          <p className="text-sm text-[#6F6F6B] mt-1 flex items-center gap-1.5">
             <MapPin className="w-3.5 h-3.5" />
             Arlington Heights, IL — local market intelligence and competitive landscape
           </p>
@@ -419,7 +419,7 @@ export default function MarketResearch() {
             context: "general",
           })}
           disabled={aiResearchMutation.isPending}
-          className="flex items-center gap-2 bg-[#F5C72C] hover:bg-[#E6B800] text-[#111] font-semibold text-sm px-4 py-2 rounded-lg border-0"
+          className="flex items-center gap-2 bg-[#F2DD48] hover:bg-[#E6B800] text-[#111] font-semibold text-sm px-4 py-2 rounded-lg border-0"
         >
           {aiResearchMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
           {aiResearchMutation.isPending ? "Researching…" : "AI Update"}
@@ -427,10 +427,10 @@ export default function MarketResearch() {
       </div>
 
       {/* Section tabs */}
-      <div className="flex gap-1 bg-white border border-[#E0E0E0] rounded-xl p-1 w-fit flex-wrap">
+      <div className="flex gap-1 bg-white border border-[#DEDEDA] rounded-xl p-1 w-fit flex-wrap">
         {sections.map(({ id, label, icon: Icon }) => (
           <button key={id} onClick={() => setActiveSection(id)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${activeSection === id ? "bg-[#F5C72C] text-[#111]" : "text-[#666] hover:text-[#111] hover:bg-[#F5F5F5]"}`}>
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${activeSection === id ? "bg-[#F2DD48] text-[#111]" : "text-[#6F6F6B] hover:text-[#111] hover:bg-[#F1F1EF]"}`}>
             <Icon className="w-3.5 h-3.5" />{label}
           </button>
         ))}
@@ -440,24 +440,31 @@ export default function MarketResearch() {
       {activeSection === "insights" && (
         <div className="space-y-3">
           {MARKET_CONTEXT.keyInsights.map((insight, i) => (
-            <div key={i} className="bg-white border border-[#E0E0E0] rounded-xl overflow-hidden hover:border-[#F5C72C]/50 transition-colors">
-              <button className="w-full flex items-start gap-3 p-4 text-left" onClick={() => setExpandedInsight(expandedInsight === i ? null : i)}>
-                <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${insight.urgency === "high" ? "bg-[#E8453C]" : insight.urgency === "medium" ? "bg-yellow-500" : "bg-green-500"}`} />
+            <div
+              key={i}
+              className="rounded overflow-hidden"
+              style={{
+                background: "rgba(245,199,44,0.12)",
+                borderLeft: "2px solid rgba(245,199,44,0.6)",
+                borderRadius: "4px",
+              }}
+            >
+              <button className="w-full flex items-start gap-3 px-4 py-3 text-left" onClick={() => setExpandedInsight(expandedInsight === i ? null : i)}>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-semibold text-[#111]">{insight.title}</span>
-                    <span className={`text-xs px-2 py-0.5 rounded border font-medium ${insight.urgency === "high" ? "bg-red-50 text-red-700 border-red-200" : insight.urgency === "medium" ? "bg-yellow-50 text-yellow-700 border-yellow-200" : "bg-[#3DB855]/10 text-[#3DB855] border-[#3DB855]/30"}`}>{insight.urgency} priority</span>
+                    <span className="text-sm font-semibold text-[#222222]">{insight.title}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded border font-medium ${insight.urgency === "high" ? "bg-red-50 text-red-700 border-red-200" : insight.urgency === "medium" ? "bg-[#F1F1EF] text-[#6F6F6B] border-[#DEDEDA]" : "bg-[#72B84A]/10 text-[#72B84A] border-[#72B84A]/30"}`}>{insight.urgency} priority</span>
                   </div>
-                  {expandedInsight !== i && <p className="text-xs text-[#888] mt-0.5 line-clamp-1">{insight.body}</p>}
+                  {expandedInsight !== i && <p className="text-xs text-[#6F6F6B] mt-0.5 line-clamp-1">{insight.body}</p>}
                 </div>
                 {expandedInsight === i ? <ChevronUp className="w-4 h-4 text-[#999] flex-shrink-0" /> : <ChevronDown className="w-4 h-4 text-[#999] flex-shrink-0" />}
               </button>
               {expandedInsight === i && (
-                <div className="px-4 pb-4 pt-0 space-y-3 border-t border-[#F0F0F0]">
-                  <p className="text-sm text-[#444] leading-relaxed">{insight.body}</p>
-                  <div className="flex items-start gap-2 p-3 bg-[#F5C72C]/5 border border-[#F5C72C]/20 rounded-lg">
+                <div className="px-4 pb-3 pt-0 space-y-3 border-t border-[rgba(245,199,44,0.2)]">
+                  <p className="text-sm text-[#444] leading-relaxed pt-3">{insight.body}</p>
+                  <div className="flex items-start gap-2 p-3 bg-white/60 border border-[#DEDEDA] rounded">
                     <Target className="w-4 h-4 text-[#8B6E00] mt-0.5 flex-shrink-0" />
-                    <div><p className="text-xs font-semibold text-[#8B6E00] mb-0.5">Recommended Action</p><p className="text-xs text-[#555]">{insight.action}</p></div>
+                    <div><p className="text-xs font-semibold text-[#8B6E00] mb-0.5">Recommended Action</p><p className="text-xs text-[#6F6F6B]">{insight.action}</p></div>
                   </div>
                 </div>
               )}
@@ -475,15 +482,15 @@ export default function MarketResearch() {
             { label: "Median Age", value: MARKET_CONTEXT.medianAge, icon: BarChart3, sub: "Prime golf demographic" },
             { label: "Golf Participation", value: MARKET_CONTEXT.golfParticipationRate, icon: TrendingUp, sub: "~9,300 local golfers" },
           ].map(({ label, value, icon: Icon, sub }) => (
-            <div key={label} className="bg-white border border-[#E0E0E0] rounded-xl p-5">
-              <div className="flex items-center gap-2 mb-2"><Icon className="w-4 h-4 text-[#F5C72C]" /><span className="text-xs font-medium text-[#888] uppercase tracking-wide">{label}</span></div>
+            <div key={label} className="bg-white border border-[#DEDEDA] rounded-xl p-5">
+              <div className="flex items-center gap-2 mb-2"><Icon className="w-4 h-4 text-[#F2DD48]" /><span className="text-xs font-medium text-[#6F6F6B] uppercase tracking-wide">{label}</span></div>
               <div className="text-2xl font-bold text-[#111]">{value}</div>
               <div className="text-xs text-[#999] mt-0.5">{sub}</div>
             </div>
           ))}
-          <div className="col-span-2 bg-white border border-[#E0E0E0] rounded-xl p-5">
+          <div className="col-span-2 bg-white border border-[#DEDEDA] rounded-xl p-5">
             <h3 className="text-sm font-semibold text-[#111] mb-3">Market Opportunity Summary</h3>
-            <p className="text-sm text-[#555] leading-relaxed">Arlington Heights is an affluent, family-oriented suburb with a strong golf culture. The median household income of $95,400 is 35% above the national average, and the 38.2 median age aligns perfectly with Golf VX's core membership demographic. With ~9,300 local golfers and no competing premium indoor simulator club within 10 miles, Golf VX holds a strong market position. Beyond golf, the Sports Bar opportunity is significant — no golf-themed sports bar exists within 5 miles, and WJ Golf's model proves the concept works. The primary growth opportunities are: (1) Sports Bar F&B expansion, (2) junior programs, (3) corporate events, and (4) spring acquisition window (March–April).</p>
+            <p className="text-sm text-[#6F6F6B] leading-relaxed">Arlington Heights is an affluent, family-oriented suburb with a strong golf culture. The median household income of $95,400 is 35% above the national average, and the 38.2 median age aligns perfectly with Golf VX's core membership demographic. With ~9,300 local golfers and no competing premium indoor simulator club within 10 miles, Golf VX holds a strong market position. Beyond golf, the Sports Bar opportunity is significant — no golf-themed sports bar exists within 5 miles, and WJ Golf's model proves the concept works. The primary growth opportunities are: (1) Sports Bar F&B expansion, (2) junior programs, (3) corporate events, and (4) spring acquisition window (March–April).</p>
           </div>
         </div>
       )}
@@ -497,7 +504,7 @@ export default function MarketResearch() {
               { title: "Indoor Golf Market", icon: Target, color: YELLOW, data: MARKET_CONTEXT.marketComparison.indoorGolf },
               { title: "Sports Bar Market", icon: Beer, color: "#E57373", data: MARKET_CONTEXT.marketComparison.sportsBar },
             ].map(({ title, icon: Icon, color, data }) => (
-              <div key={title} className="bg-white border border-[#E0E0E0] rounded-xl p-5 space-y-3">
+              <div key={title} className="bg-white border border-[#DEDEDA] rounded-xl p-5 space-y-3">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${color}20` }}><Icon className="w-4 h-4" style={{ color }} /></div>
                   <h3 className="text-sm font-semibold text-[#111]">{title}</h3>
@@ -509,7 +516,7 @@ export default function MarketResearch() {
                     { label: "Key Barriers", value: data.barriers }, { label: "Arlington Heights", value: data.arlingtonHeights },
                   ].map(({ label, value }) => (
                     <div key={label} className="flex flex-col gap-0.5">
-                      <span className="text-xs font-medium text-[#888]">{label}</span>
+                      <span className="text-xs font-medium text-[#6F6F6B]">{label}</span>
                       <span className="text-xs text-[#444]">{value}</span>
                     </div>
                   ))}
@@ -517,9 +524,9 @@ export default function MarketResearch() {
               </div>
             ))}
           </div>
-          <div className="bg-white border border-[#E0E0E0] rounded-xl p-5">
+          <div className="bg-white border border-[#DEDEDA] rounded-xl p-5">
             <h3 className="text-sm font-semibold text-[#111] mb-1">Golf VX AH Positioning</h3>
-            <p className="text-xs text-[#888] mb-4">Golf VX sits at the intersection of all three markets — a unique competitive advantage</p>
+            <p className="text-xs text-[#6F6F6B] mb-4">Golf VX sits at the intersection of all three markets — a unique competitive advantage</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
               {[
                 { label: "General Golf", color: "#4CAF50", textColor: "#2E7D32", bg: "#4CAF50", body: "Captures outdoor golfers seeking year-round practice. Complements, not competes with outdoor courses." },
@@ -528,7 +535,7 @@ export default function MarketResearch() {
               ].map(({ label, textColor, bg, body }) => (
                 <div key={label} className="p-3 rounded-lg border" style={{ background: `${bg}0D`, borderColor: `${bg}33` }}>
                   <div className="text-xs font-semibold mb-1" style={{ color: textColor }}>{label}</div>
-                  <div className="text-xs text-[#555]">{body}</div>
+                  <div className="text-xs text-[#6F6F6B]">{body}</div>
                 </div>
               ))}
             </div>
@@ -540,15 +547,15 @@ export default function MarketResearch() {
       {activeSection === "competitors" && (
         <div className="space-y-3">
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-            <Star className="w-4 h-4 text-[#F5C72C] mt-0.5 flex-shrink-0" />
-            <p className="text-xs text-[#111111]"><strong>Key differentiator:</strong> Golf VX is the only premium year-round indoor golf membership club within 10 miles. WJ Golf (Buffalo Grove, 8 mi) is the primary competitive threat — same model, but Golf VX has franchise backing, coaching programs, and a stronger community focus.</p>
+            <Star className="w-4 h-4 text-[#F2DD48] mt-0.5 flex-shrink-0" />
+            <p className="text-xs text-[#222222]"><strong>Key differentiator:</strong> Golf VX is the only premium year-round indoor golf membership club within 10 miles. WJ Golf (Buffalo Grove, 8 mi) is the primary competitive threat — same model, but Golf VX has franchise backing, coaching programs, and a stronger community focus.</p>
           </div>
-          <div className="bg-white border border-[#E0E0E0] rounded-xl overflow-hidden">
-            <div className="px-4 py-3 border-b border-[#F0F0F0]"><h3 className="text-sm font-semibold text-[#111]">Competitive Landscape</h3><p className="text-xs text-[#888] mt-0.5">Click any competitor to see details</p></div>
-            <div className="divide-y divide-[#F5F5F5]">
+          <div className="bg-white border border-[#DEDEDA] rounded-xl overflow-hidden">
+            <div className="px-4 py-3 border-b border-[#F0F0F0]"><h3 className="text-sm font-semibold text-[#111]">Competitive Landscape</h3><p className="text-xs text-[#6F6F6B] mt-0.5">Click any competitor to see details</p></div>
+            <div className="divide-y divide-[#F1F1EF]">
               {MARKET_CONTEXT.nearbyCompetitors.map((comp, i) => (
                 <div key={i}>
-                  <button className="w-full flex items-center gap-4 px-4 py-3 text-left hover:bg-[#FAFAFA] transition-colors" onClick={() => setExpandedCompetitor(expandedCompetitor === i ? null : i)}>
+                  <button className="w-full flex items-center gap-4 px-4 py-3 text-left hover:bg-[#F6F6F4] transition-colors" onClick={() => setExpandedCompetitor(expandedCompetitor === i ? null : i)}>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-sm font-medium text-[#111]">{comp.name}</span>
@@ -556,15 +563,15 @@ export default function MarketResearch() {
                         {comp.name.includes("WJ Golf") && <span className="text-xs bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded font-medium">⚠ Primary Threat</span>}
                       </div>
                       <div className="flex items-center gap-3 mt-0.5">
-                        <span className="text-xs text-[#888]">{comp.type}</span>
-                        <span className="text-xs text-[#AAAAAA]">·</span>
-                        <span className="text-xs text-[#888]">{comp.distance}</span>
+                        <span className="text-xs text-[#6F6F6B]">{comp.type}</span>
+                        <span className="text-xs text-[#A8A8A3]">·</span>
+                        <span className="text-xs text-[#6F6F6B]">{comp.distance}</span>
                         {comp.website && <a href={`https://${comp.website}`} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 hover:underline" onClick={e => e.stopPropagation()}>{comp.website}</a>}
                       </div>
                     </div>
                     {expandedCompetitor === i ? <ChevronUp className="w-4 h-4 text-[#999] flex-shrink-0" /> : <ChevronDown className="w-4 h-4 text-[#999] flex-shrink-0" />}
                   </button>
-                  {expandedCompetitor === i && <div className="px-4 pb-4 pt-0 border-t border-[#F5F5F5] bg-[#FAFAFA]"><p className="text-xs text-[#555] leading-relaxed pt-3">{comp.details}</p></div>}
+                  {expandedCompetitor === i && <div className="px-4 pb-4 pt-0 border-t border-[#F1F1EF] bg-[#F6F6F4]"><p className="text-xs text-[#6F6F6B] leading-relaxed pt-3">{comp.details}</p></div>}
                 </div>
               ))}
             </div>
@@ -576,15 +583,15 @@ export default function MarketResearch() {
       {activeSection === "demographics" && (
         <div className="space-y-3">
           {MARKET_CONTEXT.demographics.map((seg, i) => (
-            <div key={i} className="bg-white border border-[#E0E0E0] rounded-xl p-4">
+            <div key={i} className="bg-white border border-[#DEDEDA] rounded-xl p-4">
               <div className="flex items-start gap-3">
                 <PriorityDot level={seg.priority} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <span className="text-sm font-semibold text-[#111]">{seg.segment}</span>
-                    <span className="text-xs text-[#888] bg-[#F5F5F5] px-2 py-0.5 rounded">{seg.size}</span>
+                    <span className="text-xs text-[#6F6F6B] bg-[#F1F1EF] px-2 py-0.5 rounded">{seg.size}</span>
                   </div>
-                  <p className="text-xs text-[#555]"><span className="font-medium text-[#888]">Opportunity: </span>{seg.opportunity}</p>
+                  <p className="text-xs text-[#6F6F6B]"><span className="font-medium text-[#6F6F6B]">Opportunity: </span>{seg.opportunity}</p>
                 </div>
               </div>
             </div>
@@ -597,11 +604,11 @@ export default function MarketResearch() {
         <div className="space-y-4">
 
           {/* Sub-view toggle */}
-          <div className="flex gap-1 bg-white border border-[#E0E0E0] rounded-xl p-1 w-fit">
-            <button onClick={() => setSeasonalView("demand")} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${seasonalView === "demand" ? "bg-[#F5C72C] text-[#111]" : "text-[#666] hover:text-[#111] hover:bg-[#F5F5F5]"}`}>
+          <div className="flex gap-1 bg-white border border-[#DEDEDA] rounded-xl p-1 w-fit">
+            <button onClick={() => setSeasonalView("demand")} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${seasonalView === "demand" ? "bg-[#F2DD48] text-[#111]" : "text-[#6F6F6B] hover:text-[#111] hover:bg-[#F1F1EF]"}`}>
               <TrendingUp className="w-3.5 h-3.5" /> Demand Index
             </button>
-            <button onClick={() => setSeasonalView("promotions")} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${seasonalView === "promotions" ? "bg-[#F5C72C] text-[#111]" : "text-[#666] hover:text-[#111] hover:bg-[#F5F5F5]"}`}>
+            <button onClick={() => setSeasonalView("promotions")} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${seasonalView === "promotions" ? "bg-[#F2DD48] text-[#111]" : "text-[#6F6F6B] hover:text-[#111] hover:bg-[#F1F1EF]"}`}>
               <Megaphone className="w-3.5 h-3.5" /> Promotions vs. Demand
             </button>
           </div>
@@ -609,29 +616,29 @@ export default function MarketResearch() {
           {/* ── Demand Index view ── */}
           {seasonalView === "demand" && (
             <>
-              <div className="bg-white border border-[#E0E0E0] rounded-xl p-5">
+              <div className="bg-white border border-[#DEDEDA] rounded-xl p-5">
                 <div className="mb-4">
                   <h3 className="text-sm font-semibold text-[#111]">Demand Index by Month — Golf VX AH (3 Revenue Streams)</h3>
-                  <p className="text-xs text-[#888] mt-0.5">Relative demand index (100 = peak). Indoor golf peaks in winter; Sports Bar peaks in fall/winter with NFL season.</p>
+                  <p className="text-xs text-[#6F6F6B] mt-0.5">Relative demand index (100 = peak). Indoor golf peaks in winter; Sports Bar peaks in fall/winter with NFL season.</p>
                 </div>
                 <ResponsiveContainer width="100%" height={220}>
                   <ComposedChart data={MARKET_CONTEXT.seasonalTrends.general} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
                     <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#888" }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fontSize: 10, fill: "#888" }} axisLine={false} tickLine={false} domain={[0, 110]} />
-                    <Tooltip contentStyle={{ background: "#fff", border: "1px solid #E0E0E0", borderRadius: 8, fontSize: 12 }} formatter={(value: any, name: string) => [`${value}`, name]} />
+                    <Tooltip contentStyle={{ background: "#fff", border: "1px solid #DEDEDA", borderRadius: 8, fontSize: 12 }} formatter={(value: any, name: string) => [`${value}`, name]} />
                     <Legend wrapperStyle={{ fontSize: 11 }} />
-                    <Bar dataKey="outdoor" name="Outdoor Golf" fill="#4CAF50" opacity={0.7} radius={[2, 2, 0, 0]} />
-                    <Bar dataKey="indoor" name="Indoor Golf" fill={YELLOW} opacity={0.9} radius={[2, 2, 0, 0]}>
+                    <Bar dataKey="outdoor" name="Outdoor Golf" fill="#60A5FA" opacity={0.85} radius={[2, 2, 0, 0]} />
+                    <Bar dataKey="indoor" name="Indoor Golf" fill="#4ADE80" opacity={0.85} radius={[2, 2, 0, 0]}>
                       {MARKET_CONTEXT.seasonalTrends.general.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.month === currentMonth ? "#E6B800" : YELLOW} opacity={entry.month === currentMonth ? 1 : 0.75} />
+                        <Cell key={`cell-${index}`} fill={entry.month === currentMonth ? "#22C55E" : "#4ADE80"} opacity={entry.month === currentMonth ? 1 : 0.85} />
                       ))}
                     </Bar>
-                    <Bar dataKey="sportsBar" name="Sports Bar" fill="#E57373" opacity={0.7} radius={[2, 2, 0, 0]} />
+                    <Bar dataKey="sportsBar" name="Sports Bar" fill="#A78BFA" opacity={0.85} radius={[2, 2, 0, 0]} />
                   </ComposedChart>
                 </ResponsiveContainer>
               </div>
 
-              <div className="bg-white border border-[#E0E0E0] rounded-xl p-5">
+              <div className="bg-white border border-[#DEDEDA] rounded-xl p-5">
                 <h3 className="text-sm font-semibold text-[#111] mb-3">Current & Upcoming Month Highlights</h3>
                 <div className="space-y-2">
                   {MARKET_CONTEXT.seasonalTrends.general
@@ -642,33 +649,33 @@ export default function MarketResearch() {
                       return t.month === currentMonth || t.month === nextMonth;
                     })
                     .map(({ month, indoor, outdoor, sportsBar, note }) => (
-                      <div key={month} className="flex items-start gap-3 p-3 bg-[#F5C72C]/5 border border-[#F5C72C]/20 rounded-lg">
+                      <div key={month} className="flex items-start gap-3 p-3 bg-[#F2DD48]/5 border border-[#F2DD48]/20 rounded-lg">
                         <span className="text-sm font-bold text-[#111] w-8 flex-shrink-0">{month}</span>
                         <div className="flex-1">
                           <div className="flex gap-3 mb-1 flex-wrap">
-                            <span className="text-xs text-[#4CAF50] font-medium">Outdoor: {outdoor}</span>
-                            <span className="text-xs text-[#8B6E00] font-medium">Indoor: {indoor}</span>
-                            <span className="text-xs text-[#C62828] font-medium">Sports Bar: {sportsBar}</span>
+                            <span className="text-xs text-[#60A5FA] font-medium">Outdoor: {outdoor}</span>
+                            <span className="text-xs text-[#4ADE80] font-medium">Indoor: {indoor}</span>
+                            <span className="text-xs text-[#A78BFA] font-medium">Sports Bar: {sportsBar}</span>
                           </div>
-                          <span className="text-xs text-[#555]">{note}</span>
+                          <span className="text-xs text-[#6F6F6B]">{note}</span>
                         </div>
                       </div>
                     ))}
                 </div>
               </div>
 
-              <div className="bg-white border border-[#E0E0E0] rounded-xl p-5">
+              <div className="bg-white border border-[#DEDEDA] rounded-xl p-5">
                 <h3 className="text-sm font-semibold text-[#111] mb-3">Seasonal Strategy Recommendations</h3>
                 <div className="space-y-2">
                   {[
-                    { period: "Jan–Mar (Now)", strategy: "Peak indoor acquisition window. Maximize Annual Membership Giveaway reach. Sports Bar: Super Bowl, March Madness events. Target golfers frustrated by Chicago winters.", color: YELLOW },
-                    { period: "Apr–Jun", strategy: "Spring outdoor transition. Emphasize year-round access. Launch Junior Summer Camp marketing. Corporate event season begins.", color: "#4CAF50" },
-                    { period: "Jul–Sep", strategy: "Peak outdoor season. Retain members with leagues and clinics. Sports Bar: MLB season, golf majors watch parties.", color: "#66BB6A" },
-                    { period: "Oct–Dec", strategy: "Indoor transition. Holiday gift card campaigns. NFL season Sports Bar push. Year-end membership renewals.", color: "#E57373" },
+                    { period: "Jan–Mar (Now)", strategy: "Peak indoor acquisition window. Maximize Annual Membership Giveaway reach. Sports Bar: Super Bowl, March Madness events. Target golfers frustrated by Chicago winters.", color: "#4ADE80" },
+                    { period: "Apr–Jun", strategy: "Spring outdoor transition. Emphasize year-round access. Launch Junior Summer Camp marketing. Corporate event season begins.", color: "#60A5FA" },
+                    { period: "Jul–Sep", strategy: "Peak outdoor season. Retain members with leagues and clinics. Sports Bar: MLB season, golf majors watch parties.", color: "#60A5FA" },
+                    { period: "Oct–Dec", strategy: "Indoor transition. Holiday gift card campaigns. NFL season Sports Bar push. Year-end membership renewals.", color: "#A78BFA" },
                   ].map(({ period, strategy, color }) => (
                     <div key={period} className="flex items-start gap-3 p-3 rounded-lg border border-[#E8E8E8]">
                       <div className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ background: color }} />
-                      <div><span className="text-xs font-semibold text-[#111]">{period}: </span><span className="text-xs text-[#555]">{strategy}</span></div>
+                      <div><span className="text-xs font-semibold text-[#111]">{period}: </span><span className="text-xs text-[#6F6F6B]">{strategy}</span></div>
                     </div>
                   ))}
                 </div>
@@ -687,35 +694,35 @@ export default function MarketResearch() {
                   { label: "Total Conversions", value: totalConversions, icon: Target, color: "#4CAF50" },
                   { label: "Planned", value: plannedCount, icon: Calendar, color: "#9C27B0" },
                 ].map(({ label, value, icon: Icon, color }) => (
-                  <div key={label} className="bg-white border border-[#E0E0E0] rounded-xl p-4 flex items-center gap-3">
+                  <div key={label} className="bg-white border border-[#DEDEDA] rounded-xl p-4 flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${color}15` }}>
                       <Icon className="w-4 h-4" style={{ color }} />
                     </div>
                     <div>
                       <div className="text-lg font-bold text-[#111]">{value}</div>
-                      <div className="text-xs text-[#888]">{label}</div>
+                      <div className="text-xs text-[#6F6F6B]">{label}</div>
                     </div>
                   </div>
                 ))}
               </div>
 
               {/* Combo chart: demand bars + promotion spend line */}
-              <div className="bg-white border border-[#E0E0E0] rounded-xl p-5">
+              <div className="bg-white border border-[#DEDEDA] rounded-xl p-5">
                 <div className="mb-4">
                   <h3 className="text-sm font-semibold text-[#111]">Promotions vs. Market Demand — Monthly Overlay</h3>
-                  <p className="text-xs text-[#888] mt-0.5">
+                  <p className="text-xs text-[#6F6F6B] mt-0.5">
                     Bars = indoor golf demand index. Line = promotion budget spend. Gaps between high demand and low spend reveal missed acquisition windows.
                   </p>
                 </div>
                 <ResponsiveContainer width="100%" height={260}>
                   <ComposedChart data={promoChartData} margin={{ top: 10, right: 20, left: -10, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" vertical={false} />
+                    <CartesianGrid strokeDasharray="4 4" strokeWidth={0.5} stroke="#F0F0F0" vertical={false} />
                     <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#888" }} axisLine={false} tickLine={false} />
                     <YAxis yAxisId="demand" orientation="left" tick={{ fontSize: 10, fill: "#888" }} axisLine={false} tickLine={false} domain={[0, 110]} label={{ value: "Demand", angle: -90, position: "insideLeft", offset: 15, style: { fontSize: 10, fill: "#AAA" } }} />
                     <YAxis yAxisId="budget" orientation="right" tick={{ fontSize: 10, fill: "#888" }} axisLine={false} tickLine={false} tickFormatter={v => `$${v}`} label={{ value: "Budget ($)", angle: 90, position: "insideRight", offset: 15, style: { fontSize: 10, fill: "#AAA" } }} />
                     <Tooltip content={<PromoTooltip />} />
                     <Legend wrapperStyle={{ fontSize: 11 }} />
-                    <ReferenceLine yAxisId="demand" x={currentMonth} stroke="#F5C72C" strokeWidth={2} strokeDasharray="4 2" label={{ value: "Now", position: "top", fontSize: 10, fill: "#8B6E00" }} />
+                    <ReferenceLine yAxisId="demand" x={currentMonth} stroke="#F2DD48" strokeWidth={2} strokeDasharray="4 2" label={{ value: "Now", position: "top", fontSize: 10, fill: "#8B6E00" }} />
                     <Bar yAxisId="demand" dataKey="indoor" name="Indoor Demand" fill={YELLOW} opacity={0.55} radius={[3, 3, 0, 0]} />
                     <Bar yAxisId="demand" dataKey="sportsBar" name="Sports Bar Demand" fill="#E57373" opacity={0.45} radius={[3, 3, 0, 0]} />
                     <Line yAxisId="budget" type="monotone" dataKey="budget" name="Budget ($)" stroke="#1877F2" strokeWidth={2.5} dot={{ r: 4, fill: "#1877F2", stroke: "#fff", strokeWidth: 2 }} activeDot={{ r: 6 }} />
@@ -728,25 +735,25 @@ export default function MarketResearch() {
               <GapAnalysis promotions={promotions} />
 
               {/* Promotions list with filters + CRUD */}
-              <div className="bg-white border border-[#E0E0E0] rounded-xl overflow-hidden">
+              <div className="bg-white border border-[#DEDEDA] rounded-xl overflow-hidden">
                 <div className="px-4 py-3 border-b border-[#F0F0F0] flex items-center justify-between gap-3 flex-wrap">
                   <div className="flex items-center gap-2">
-                    <Megaphone className="w-4 h-4 text-[#888]" />
+                    <Megaphone className="w-4 h-4 text-[#6F6F6B]" />
                     <h3 className="text-sm font-semibold text-[#111]">Promotion History & Plan</h3>
-                    <span className="text-xs text-[#888] bg-[#F5F5F5] px-2 py-0.5 rounded">{filteredPromos.length} shown</span>
+                    <span className="text-xs text-[#6F6F6B] bg-[#F1F1EF] px-2 py-0.5 rounded">{filteredPromos.length} shown</span>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <select value={filterChannel} onChange={e => setFilterChannel(e.target.value)} className="text-xs border border-[#D0D0D0] rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-[#F5C72C]">
+                    <select value={filterChannel} onChange={e => setFilterChannel(e.target.value)} className="text-xs border border-[#D0D0D0] rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-[#F2DD48]">
                       <option value="All">All Channels</option>
                       {(["Meta Ads","Email","SMS","Organic","Event","Referral"] as PromoChannel[]).map(c => <option key={c}>{c}</option>)}
                     </select>
-                    <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="text-xs border border-[#D0D0D0] rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-[#F5C72C]">
+                    <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="text-xs border border-[#D0D0D0] rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-[#F2DD48]">
                       <option value="All">All Status</option>
                       <option value="completed">Completed</option>
                       <option value="active">Active</option>
                       <option value="planned">Planned</option>
                     </select>
-                    <Button size="sm" onClick={() => { setShowAddForm(true); setEditingId(null); }} className="text-xs h-8 bg-[#F5C72C] hover:bg-[#E6B800] text-[#111] border-0">
+                    <Button size="sm" onClick={() => { setShowAddForm(true); setEditingId(null); }} className="text-xs h-8 bg-[#F2DD48] hover:bg-[#E6B800] text-[#111] border-0">
                       <Plus className="w-3 h-3 mr-1" /> Add
                     </Button>
                   </div>
@@ -759,7 +766,7 @@ export default function MarketResearch() {
                   </div>
                 )}
 
-                <div className="divide-y divide-[#F5F5F5]">
+                <div className="divide-y divide-[#F1F1EF]">
                   {filteredPromos.length === 0 && (
                     <div className="px-4 py-8 text-center text-xs text-[#999]">No promotions match the current filters.</div>
                   )}
@@ -774,7 +781,7 @@ export default function MarketResearch() {
                           />
                         </div>
                       ) : (
-                        <div className="flex items-start gap-3 px-4 py-3 hover:bg-[#FAFAFA] transition-colors group">
+                        <div className="flex items-start gap-3 px-4 py-3 hover:bg-[#F6F6F4] transition-colors group">
                           <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: `${CHANNEL_COLORS[promo.channel]}15` }}>
                             <Megaphone className="w-3.5 h-3.5" style={{ color: CHANNEL_COLORS[promo.channel] }} />
                           </div>
@@ -782,20 +789,20 @@ export default function MarketResearch() {
                             <div className="flex items-center gap-2 flex-wrap mb-0.5">
                               <span className="text-sm font-medium text-[#111]">{promo.name}</span>
                               <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${STATUS_STYLES[promo.status]}`}>{promo.status}</span>
-                              <span className="text-xs px-1.5 py-0.5 rounded font-medium bg-[#F5F5F5] text-[#666]">{promo.month}</span>
+                              <span className="text-xs px-1.5 py-0.5 rounded font-medium bg-[#F1F1EF] text-[#6F6F6B]">{promo.month}</span>
                               <span className="text-xs font-medium" style={{ color: CHANNEL_COLORS[promo.channel] }}>{promo.channel}</span>
                             </div>
-                            <div className="flex items-center gap-4 text-xs text-[#888] flex-wrap">
-                              {promo.budget > 0 && <span><span className="font-medium text-[#555]">${promo.budget.toLocaleString()}</span> budget</span>}
-                              {promo.reach > 0 && <span><span className="font-medium text-[#555]">{promo.reach.toLocaleString()}</span> reach</span>}
+                            <div className="flex items-center gap-4 text-xs text-[#6F6F6B] flex-wrap">
+                              {promo.budget > 0 && <span><span className="font-medium text-[#6F6F6B]">${promo.budget.toLocaleString()}</span> budget</span>}
+                              {promo.reach > 0 && <span><span className="font-medium text-[#6F6F6B]">{promo.reach.toLocaleString()}</span> reach</span>}
                               {promo.conversions > 0 && <span><span className="font-medium text-[#4CAF50]">{promo.conversions}</span> conversions</span>}
-                              {promo.budget > 0 && promo.conversions > 0 && <span className="text-[#888]">CPL: <span className="font-medium text-[#555]">${Math.round(promo.budget / promo.conversions)}</span></span>}
+                              {promo.budget > 0 && promo.conversions > 0 && <span className="text-[#6F6F6B]">CPL: <span className="font-medium text-[#6F6F6B]">${Math.round(promo.budget / promo.conversions)}</span></span>}
                             </div>
                             {promo.notes && <p className="text-xs text-[#AAA] mt-0.5 line-clamp-1">{promo.notes}</p>}
                           </div>
                           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-                            <button onClick={() => { setEditingId(promo.id); setShowAddForm(false); }} className="p-1.5 rounded-lg hover:bg-[#F0F0F0] text-[#888] hover:text-[#111] transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
-                            <button onClick={() => deletePromo(promo.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-[#888] hover:text-red-600 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => { setEditingId(promo.id); setShowAddForm(false); }} className="p-1.5 rounded-lg hover:bg-[#F0F0F0] text-[#6F6F6B] hover:text-[#111] transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => deletePromo(promo.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-[#6F6F6B] hover:text-red-600 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                           </div>
                         </div>
                       )}

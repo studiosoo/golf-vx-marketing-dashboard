@@ -1,633 +1,1220 @@
-import { useState, useMemo } from "react";
+/**
+ * Golf VX Dashboard · Reports
+ * ─────────────────────────────────────────────────────────────────────
+ * Role:  Full marketing performance narrative for CEO / investor-level review.
+ *        Structured analytical report with collapsible sections.
+ *        Source of truth for quarterly storytelling and agency deliverables.
+ * Data:  trpc.preview.getSnapshot · trpc.revenue.getToastSummary
+ *        trpc.revenue.getAcuityRevenue · static reportCampaignData.ts
+ * Users: studio_soo (full access) · hq_admin (read) · location_staff (read)
+ *
+ * Section map:
+ *  [A] Executive Summary      — expanded
+ *  [B] Revenue & Operations   — expanded
+ *  [C] Marketing Performance Highlights — expanded (activity cards, Jan–Mar 2026)
+ *  [D] Marketing Timeline     — always visible
+ *  [E] Campaign Performance   — expanded (4 campaign rows)
+ *  [F] Studio Soo Execution   — collapsed by default
+ *  [G] Performance Analysis   — collapsed by default
+ *  [H] Forward Look           — expanded
+ *  [I] Local SEO              — collapsed by default
+ */
+import { useState } from "react";
 import { trpc } from "@/lib/trpc";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend,
+  ChevronDown,
+  ChevronRight,
+  Target,
+  UserCheck,
+  Users,
+  Flag,
+  ExternalLink,
+  Loader2,
+  LayoutDashboard,
+  Megaphone,
+  MapPin,
+  ImageIcon,
+} from "lucide-react";
+import { ReportTimeline } from "@/components/reports/ReportTimeline";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceLine,
+  Cell,
 } from "recharts";
-import { TrendingUp, Activity, ShoppingBag, CreditCard, Award, Info } from "lucide-react";
 
-// ─── Design Tokens (Golf VX Style Guide v2) ────────────────────────────────────
-const YELLOW  = "#F5C72C";   // App yellow — CTAs, active states, chart fills
-const TEXT_P  = "#222222";   // --gvx-text-primary
-const TEXT_S  = "#6F6F6B";   // --gvx-text-secondary
-const TEXT_M  = "#A8A8A3";   // --gvx-text-muted
-const BORDER  = "#DEDEDA";   // --gvx-border-subtle
-const BG_S    = "#F1F1EF";   // --gvx-bg-subtle
-const GRN_TXT = "#72B84A";   // --gvx-green-solid
-const GRN_BG  = "#E6F0DC";   // --gvx-green-soft
-const ORG_TXT = "#D89A3C";   // --gvx-orange-solid (ended / completed states)
-const ORG_BG  = "#F6E5CF";   // --gvx-orange-soft
+// Compute YYYYMMDD string for N days ago (used for weekly Toast query)
+function yyyymmdd(daysOffset = 0) {
+  const d = new Date();
+  d.setDate(d.getDate() + daysOffset);
+  return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+}
+
+// ─── Design Tokens ────────────────────────────────────────────────────────────
+const YELLOW  = "#F2DD48";
+const TEXT_P  = "#222222";
+const TEXT_S  = "#6F6F6B";
+const TEXT_M  = "#A8A8A3";
+const BORDER  = "#DEDEDA";
+const BG_S    = "#F1F1EF";
+const GRN_TXT = "#72B84A";
+const ORG_TXT = "#D89A3C";
+const RED_TXT = "#C81E1E";
+
+// ─── Verified Revenue Data ────────────────────────────────────────────────────
+const MONTHLY_REVENUE = [
+  { month: "Nov", fullMonth: "Nov 2025", value: 56257.90,  partial: false },
+  { month: "Dec", fullMonth: "Dec 2025", value: 103811.32, partial: false },
+  { month: "Jan", fullMonth: "Jan 2026", value: 129637.97, partial: false },
+  { month: "Feb", fullMonth: "Feb 2026", value: 116401.75, partial: false },
+  { month: "Mar", fullMonth: "Mar 2026", value: 29983.27,  partial: true  },
+];
+
+const REVENUE_MIX = [
+  { category: "Bay Usage", value: 193608.98, pct: 70.1, color: "#F5C72C" },
+  { category: "F&B",       value: 80444.43,  pct: 29.2, color: "#72B84A" },
+  { category: "Other",     value: 1922.58,   pct: 0.7,  color: "#E0E0E0" },
+];
+
+// ─── Studio Soo Production Timeline ──────────────────────────────────────────
+const PRODUCTION_TIMELINE = [
+  { month: "Oct 2025", items: ["Asana setup", "Danny Woj Wedge Clinic", "Social accounts"] },
+  { month: "Nov 2025", items: ["Black Friday Swing Saver", "EDDM", "Referral promo concept"] },
+  { month: "Dec 2025", items: ["PBGA Clinics content", "Season of Giving", "Year-End Membership Special"] },
+  { month: "Jan 2026", items: ["Dashboard MVP", "ah.playgolfvx.com", "Instagram Giveaway", "Feb Tournament"] },
+  { month: "Feb 2026", items: ["PBGA Winter Clinic landing page", "Summer Camp ads", "Stroll AH", "Happenings"] },
+  { month: "Mar 2026", items: ["Annual Membership Giveaway", "Gift Card Promo tracking", "Drive Day", "This report"] },
+];
 
 function fmt(v: number | string) {
   const n = parseFloat(String(v || 0));
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 }
-
-/** Convert YYYYMMDD → YYYY-MM-DD for display */
-function fmtDate(raw: string) {
-  if (!raw || raw.length < 8) return raw;
-  return `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}`;
+function pctOf(cur: number, target: number) {
+  return target > 0 ? Math.min(100, (cur / target) * 100) : 0;
 }
 
-function calcHealthScore(p: {
-  goalCompletionPct: number; attendancePct: number; revenuePct: number;
-  leadCapturePct: number; socialPct: number;
-}) {
-  const w = p.goalCompletionPct * 0.30 + p.attendancePct * 0.25 + p.revenuePct * 0.20 +
-    p.leadCapturePct * 0.15 + p.socialPct * 0.10;
-  return Math.min(5, Math.max(1, Math.round((w / 100) * 4 + 1)));
-}
+// ─── Executive Summary ────────────────────────────────────────────────────────
+function ExecutiveSummary() {
+  const [open, setOpen] = useState(true);
 
-function HealthDots({ score }: { score: number }) {
   return (
-    <div className="flex gap-1 items-center">
-      {[1, 2, 3, 4, 5].map(i => (
-        <div key={i} className="w-2 h-2 rounded-full" style={{ background: i <= score ? YELLOW : BORDER }} />
-      ))}
-      <span className="text-xs ml-1" style={{ color: TEXT_M }}>{score}/5</span>
+    <div className="rounded-xl border overflow-hidden" style={{ background: "white", borderColor: BORDER }}>
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="w-full px-5 py-4 flex items-center justify-between hover:bg-[#F6F6F4] transition-colors"
+      >
+        <div>
+          <h2 className="text-[15px] font-semibold text-left" style={{ color: TEXT_P }}>Executive Summary</h2>
+          <p className="text-xs mt-0.5 text-left" style={{ color: TEXT_S }}>Strategic context · key decisions · data confidence</p>
+        </div>
+        {open
+          ? <ChevronDown size={16} style={{ color: TEXT_M }} />
+          : <ChevronRight size={16} style={{ color: TEXT_M }} />
+        }
+      </button>
+
+      {open && (
+        <div className="p-5 space-y-4" style={{ borderTop: `1px solid ${BORDER}` }}>
+          {/* Block A — What Happened */}
+          <div>
+            <h3 className="text-[11px] font-semibold uppercase tracking-widest mb-2" style={{ color: TEXT_M }}>What Happened</h3>
+            <ul className="space-y-2">
+              {[
+                "Winter seasonality drove a 130% revenue surge from November ($56.3K) to January peak ($129.6K). February held strong, confirming sustained demand — not a one-month spike.",
+                "Bay Usage and F&B dominate tracked operating revenue. Membership recurring revenue is tracked separately as a known floor estimate.",
+                "Studio Soo has been managing the full local marketing system — campaigns, website, landing pages, physical displays, content, and this reporting infrastructure — simultaneously.",
+              ].map((bullet, i) => (
+                <li key={i} className="flex items-start gap-2 text-[13px]" style={{ color: TEXT_P }}>
+                  <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: YELLOW }} />
+                  {bullet}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Block B — What Matters Now */}
+          <div>
+            <h3 className="text-[11px] font-semibold uppercase tracking-widest mb-2" style={{ color: TEXT_M }}>What Matters Now</h3>
+            <ul className="space-y-2">
+              {[
+                "Protect revenue as winter demand softens into spring — push memberships, trials, clinics, and events to offset seasonal reduction.",
+                "Convert current giveaway and trial interest into visits and memberships before March 31 (Gift Card Promo expiry) and April 4 (Giveaway deadline).",
+                "Stripe integration is the single highest-value remaining reporting unlock.",
+              ].map((bullet, i) => (
+                <li key={i} className="flex items-start gap-2 text-[13px]" style={{ color: TEXT_P }}>
+                  <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: GRN_TXT }} />
+                  {bullet}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Block C — Why This Dashboard Matters */}
+          <div className="rounded-xl px-4 py-3" style={{ background: BG_S, border: `1px solid ${BORDER}` }}>
+            <h3 className="text-[11px] font-semibold uppercase tracking-widest mb-2" style={{ color: TEXT_M }}>Why This Dashboard Matters</h3>
+            <p className="text-[13px]" style={{ color: TEXT_S }}>
+              "This is the first integrated branch-level report for Arlington Heights that connects operating revenue, marketing execution, program activity, in-venue promotion, and forward planning in one place. Even with partial integrations, it already supports strategic decisions. With Stripe access, it becomes materially stronger."
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function MetricTag({ type, value }: { type: "ROAS" | "ROI" | "KPI"; value: string }) {
-  const styles =
-    type === "ROAS" ? { bg: GRN_BG,  text: GRN_TXT } :
-    type === "ROI"  ? { bg: "#EAF2FF", text: "#4E8DF4" } :
-                     { bg: "#F8F1C8", text: "#b8900a" };
-  return (
-    <span
-      className="inline-flex px-2 py-0.5 text-[10px] font-semibold rounded-full border"
-      style={{ background: styles.bg, color: styles.text, borderColor: styles.bg }}
-    >
-      {type}: {value}
-    </span>
-  );
-}
+// ─── Revenue & Operations ─────────────────────────────────────────────────────
+function RevenueOperations({ snapshot, toastSummary }: { snapshot: any; toastSummary: any }) {
+  const [open, setOpen] = useState(true);
 
-// ─── Card (Golf VX v2: 16px radius, minimal shadow) ───────────────────────────
-function Card({ children, className = "", accent = false }: {
-  children: React.ReactNode; className?: string; accent?: boolean;
-}) {
+  const totalTracked = MONTHLY_REVENUE.filter(m => !m.partial).reduce((s, m) => s + m.value, 0);
+
   return (
-    <div
-      className={`bg-white rounded-2xl shadow-[0_1px_2px_rgba(0,0,0,0.04)] ${className}`}
-      style={{
-        border: accent ? `1px solid ${BORDER}` : `1px solid ${BORDER}`,
-        ...(accent ? { borderLeft: `4px solid ${YELLOW}` } : {}),
-      }}
-    >
-      {children}
+    <div className="rounded-xl border overflow-hidden" style={{ background: "white", borderColor: BORDER }}>
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="w-full px-5 py-4 flex items-center justify-between hover:bg-[#F6F6F4] transition-colors"
+      >
+        <div>
+          <h2 className="text-[15px] font-semibold text-left" style={{ color: TEXT_P }}>Revenue &amp; Operations</h2>
+          <p className="text-xs mt-0.5 text-left" style={{ color: TEXT_S }}>
+            Monthly operating revenue · revenue mix · recurring revenue visibility
+          </p>
+        </div>
+        {open
+          ? <ChevronDown size={16} style={{ color: TEXT_M }} />
+          : <ChevronRight size={16} style={{ color: TEXT_M }} />
+        }
+      </button>
+
+      {open && (
+        <div className="p-5 space-y-6" style={{ borderTop: `1px solid ${BORDER}` }}>
+
+          {/* R-3a — Monthly Revenue Bar Chart */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-[13px] font-semibold" style={{ color: TEXT_P }}>Monthly Operating Revenue</h3>
+              <span className="text-[11px]" style={{ color: TEXT_M }}>Nov 2025 – Mar 2026</span>
+            </div>
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={MONTHLY_REVENUE} margin={{ top: 10, right: 8, left: 8, bottom: 0 }}>
+                <CartesianGrid vertical={false} strokeDasharray="3 3" stroke={BORDER} />
+                <XAxis dataKey="month" tick={{ fontSize: 11, fill: TEXT_M }} axisLine={false} tickLine={false} />
+                <YAxis
+                  tick={{ fontSize: 11, fill: TEXT_M }}
+                  tickFormatter={(v: number) => "$" + (v / 1000).toFixed(0) + "K"}
+                  axisLine={false}
+                  tickLine={false}
+                  width={48}
+                />
+                <Tooltip
+                  formatter={(value: number) => ["$" + value.toLocaleString(), "Revenue"]}
+                  labelFormatter={(label: string) => {
+                    const entry = MONTHLY_REVENUE.find(m => m.month === label);
+                    return entry ? entry.fullMonth + (entry.partial ? " (partial)" : "") : label;
+                  }}
+                  contentStyle={{ fontSize: 12, borderRadius: 8, border: `1px solid ${BORDER}` }}
+                />
+                <ReferenceLine
+                  y={100000}
+                  stroke={BORDER}
+                  strokeDasharray="4 4"
+                  label={{ value: "$100K", position: "insideTopLeft", fontSize: 11, fill: TEXT_M }}
+                />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                  {MONTHLY_REVENUE.map((entry, index) => (
+                    <Cell key={index} fill={entry.partial ? "#A8A8A3" : "#F5C72C"} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+            <p className="text-[13px] mt-2" style={{ color: TEXT_S }}>
+              Revenue grew 130% from November to January peak, then held strong in February — indicating sustained demand, not seasonal variance. March is in-progress.
+            </p>
+            <p className="text-[11px] mt-1" style={{ color: TEXT_M }}>
+              Source: Boomerang POS (Bay + F&B). Membership recurring revenue tracked separately. Mar 2026 is partial (gray).
+            </p>
+          </div>
+
+          {/* R-3b — Revenue Mix */}
+          <div>
+            <h3 className="text-[13px] font-semibold mb-3" style={{ color: TEXT_P }}>Revenue Mix · Nov 2025 – Feb 2026</h3>
+            <div className="flex h-6 rounded-lg overflow-hidden mb-3">
+              {REVENUE_MIX.map(seg => (
+                <div
+                  key={seg.category}
+                  style={{ width: `${seg.pct}%`, background: seg.color }}
+                  title={`${seg.category}: ${seg.pct}%`}
+                />
+              ))}
+            </div>
+            <div className="space-y-2">
+              {REVENUE_MIX.map(seg => (
+                <div key={seg.category} className="flex items-center gap-3">
+                  <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: seg.color }} />
+                  <span className="text-[13px] flex-1" style={{ color: TEXT_P }}>{seg.category}</span>
+                  <span className="text-[13px] font-semibold" style={{ color: TEXT_P }}>{fmt(seg.value)}</span>
+                  <span className="text-[12px] w-10 text-right" style={{ color: TEXT_M }}>{seg.pct}%</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-[13px] mt-3" style={{ color: TEXT_S }}>
+              Bay Usage is the dominant revenue driver at 70%. F&B at 29% is a meaningful contributor and should be treated as a core category — not a side item.
+            </p>
+            <p className="text-[11px] mt-1" style={{ color: TEXT_M }}>
+              Total tracked (Nov–Feb, 4 full months): {fmt(totalTracked)}
+            </p>
+          </div>
+
+          {/* R-3c — Recurring Revenue Visibility Panel */}
+          <div className="rounded-xl border overflow-hidden" style={{ borderColor: BORDER }}>
+            <div className="px-5 py-3 flex items-center justify-between" style={{ borderBottom: `1px solid ${BORDER}` }}>
+              <span className="text-[13px] font-semibold" style={{ color: TEXT_P }}>Recurring Revenue Visibility</span>
+              <span className="text-[12px] text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">ESTIMATED</span>
+            </div>
+            <table className="w-full">
+              <thead>
+                <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
+                  <th className="text-left px-5 py-2 text-[11px] font-normal" style={{ color: TEXT_M }}>Tier</th>
+                  <th className="text-right px-5 py-2 text-[11px] font-normal" style={{ color: TEXT_M }}>Members</th>
+                  <th className="text-right px-5 py-2 text-[11px] font-normal" style={{ color: TEXT_M }}>Rate</th>
+                  <th className="text-right px-5 py-2 text-[11px] font-normal" style={{ color: TEXT_M }}>Monthly</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
+                  <td className="px-5 py-2.5 text-[13px]" style={{ color: TEXT_P }}>Aces</td>
+                  <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_P }}>54</td>
+                  <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_S }}>$325/mo</td>
+                  <td className="px-5 py-2.5 text-[13px] font-semibold text-right" style={{ color: TEXT_P }}>$17,550</td>
+                </tr>
+                <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
+                  <td className="px-5 py-2.5 text-[13px]" style={{ color: TEXT_P }}>Savers</td>
+                  <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_P }}>33</td>
+                  <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_S }}>$225/mo</td>
+                  <td className="px-5 py-2.5 text-[13px] font-semibold text-right" style={{ color: TEXT_P }}>$7,425</td>
+                </tr>
+                <tr style={{ borderBottom: `1px solid ${BORDER}`, borderLeft: "4px solid #F2DD48", background: "#FFFDE7" }}>
+                  <td className="px-5 py-2.5 text-[13px] font-bold" style={{ color: TEXT_P }}>MRR Floor</td>
+                  <td className="px-5 py-2.5 text-[13px] font-bold text-right" style={{ color: TEXT_P }}>87</td>
+                  <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_S }}>—</td>
+                  <td className="px-5 py-2.5 text-[13px] font-bold text-right" style={{ color: TEXT_P }}>$24,975</td>
+                </tr>
+                <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
+                  <td className="px-5 py-2.5 text-[13px]" style={{ color: TEXT_M }}>Pro</td>
+                  <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_M }}>4</td>
+                  <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_M }}>—</td>
+                  <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_M }}>Revenue unconfirmed</td>
+                </tr>
+                <tr>
+                  <td className="px-5 py-2.5 text-[13px]" style={{ color: TEXT_M }}>General / No Tier</td>
+                  <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_M }}>188</td>
+                  <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_M }}>—</td>
+                  <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_M }}>Billing unmapped — excluded</td>
+                </tr>
+              </tbody>
+            </table>
+            <div className="px-5 py-3 text-[13px] text-amber-600 bg-amber-50" style={{ borderTop: `1px solid ${BORDER}` }}>
+              This panel shows a known recurring revenue floor, not total recurring revenue. Stripe API integration will unlock full visibility.
+            </div>
+          </div>
+
+        </div>
+      )}
     </div>
   );
 }
 
-// ─── Custom Tab Bar (yellow underline, v2 spec) ────────────────────────────────
-function TabBar({ tabs, active, onChange }: {
-  tabs: Array<{ value: string; label: string }>;
-  active: string;
-  onChange: (v: string) => void;
-}) {
+// ─── Campaign Report — expandable rows ────────────────────────────────────────
+const CAMPAIGN_ROWS: Array<{
+  id: string;
+  label: string;
+  icon: React.ElementType;
+  color: string;
+  bg: string;
+  asanaGid: string;
+  kpiLabel: string;
+  kpiNote?: string;
+  statusBadge: string;
+  goal?: string;
+  insight?: string;
+}> = [
+  {
+    id: "trial_conversion",
+    label: "Trial Conversion",
+    icon: Target,
+    color: "#72B84A",
+    bg: "#E6F0DC",
+    asanaGid: "1212077269419925",
+    kpiLabel: "Trial Sessions",
+    statusBadge: "Active · On Track",
+    goal: "20% trial-to-member conversion",
+    insight: "Sunday Clinic is the strongest conversion channel (~31%). Drive Day launch Mar 29 should accelerate this.",
+  },
+  {
+    id: "membership_acquisition",
+    label: "Membership Acquisition",
+    icon: UserCheck,
+    color: "#4E8DF4",
+    bg: "#EAF2FF",
+    asanaGid: "1212077289242708",
+    kpiLabel: "Members",
+    kpiNote: "127 / 300 (42.3%)",
+    statusBadge: "Active · On Track",
+    goal: "300 members by Dec 2026",
+    insight: "Annual Membership Giveaway (deadline Apr 4) and Meta Ads (588% ROI) driving Q2 opportunity.",
+  },
+  {
+    id: "member_retention",
+    label: "Member Retention",
+    icon: Users,
+    color: "#A87FBE",
+    bg: "#F3EDF8",
+    asanaGid: "1212080057605434",
+    kpiLabel: "Retention",
+    kpiNote: "92.3%",
+    statusBadge: "Exceeding Goal",
+    goal: "90% retention",
+    insight: "Above target. Drive Day, Sunday Clinic, and Google Review program are the primary drivers.",
+  },
+  {
+    id: "corporate_events",
+    label: "B2B & Events",
+    icon: Flag,
+    color: "#D89A3C",
+    bg: "#F6E5CF",
+    asanaGid: "1212077289242724",
+    kpiLabel: "Events/mo",
+    kpiNote: "~2/mo est.",
+    statusBadge: "Below Target",
+    goal: "4 corporate events/month",
+    insight: "50% of target. CHA Fundraiser Night (May 2) and private bay watch party model are near-term levers.",
+  },
+];
+
+function CampaignReportRow({ row, snapshot, acuity }: { row: typeof CAMPAIGN_ROWS[0]; snapshot: any; acuity: any }) {
+  const [expanded, setExpanded] = useState(false);
+  const Icon = row.icon;
+
+  const { data: taskData, isLoading: tasksLoading } = trpc.asana.getProjectTasks.useQuery(
+    { projectGid: row.asanaGid },
+    { enabled: expanded, staleTime: 5 * 60 * 1000 }
+  );
+
+  // Live KPI overrides
+  const liveKpi = (() => {
+    if (row.id === "membership_acquisition") {
+      const total = snapshot?.members?.total ?? 0;
+      return total > 0 ? `${total} / 300 (${Math.round((total / 300) * 100)}%)` : null;
+    }
+    if (row.id === "trial_conversion") {
+      const bookings = (acuity?.byType as any[] | undefined)?.find((t: any) =>
+        (t.appointmentType ?? "").toLowerCase().includes("trial"))?.bookingCount;
+      return bookings != null ? String(bookings) : null;
+    }
+    return null;
+  })();
+
+  const kpiDisplay = liveKpi ?? row.kpiNote ?? "—";
+  const asanaUrl   = `https://app.asana.com/0/${row.asanaGid}/list`;
+  const tasks      = (taskData?.tasks ?? []) as any[];
+  const openTasks  = tasks.filter((t: any) => !t.completed);
+
+  const badgeStyle = (() => {
+    if (row.statusBadge === "Exceeding Goal") return { background: `${GRN_TXT}20`, color: GRN_TXT };
+    if (row.statusBadge === "Below Target")   return { background: `${ORG_TXT}20`, color: ORG_TXT };
+    return { background: `${YELLOW}40`, color: "#8A7A00" };
+  })();
+
   return (
-    <div className="h-11 flex overflow-x-auto" style={{ borderBottom: `1px solid ${BORDER}` }}>
-      {tabs.map(t => (
-        <button
-          key={t.value}
-          onClick={() => onChange(t.value)}
-          className="px-4 h-full shrink-0 text-sm transition-all duration-200"
-          style={
-            active === t.value
-              ? { fontWeight: 600, color: TEXT_P, borderBottom: `2px solid ${YELLOW}` }
-              : { fontWeight: 400, color: TEXT_S }
-          }
-        >
-          {t.label}
-        </button>
-      ))}
+    <div style={{ borderBottom: `1px solid ${BORDER}` }}>
+      <button
+        onClick={() => setExpanded(v => !v)}
+        className="w-full px-5 py-3.5 flex items-center gap-3 text-left transition-colors hover:bg-[#F6F6F4]"
+      >
+        <div className="h-6 w-6 rounded-md flex items-center justify-center shrink-0" style={{ background: row.bg }}>
+          <Icon size={12} style={{ color: row.color }} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <span className="text-[13px] font-semibold" style={{ color: TEXT_P }}>{row.label}</span>
+          <span className="ml-2 text-[11px]" style={{ color: TEXT_M }}>
+            {row.kpiLabel}: <span style={{ color: row.color }}>{kpiDisplay}</span>
+          </span>
+        </div>
+        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={badgeStyle}>
+          {row.statusBadge}
+        </span>
+        {expanded
+          ? <ChevronDown size={13} style={{ color: TEXT_M, flexShrink: 0 }} />
+          : <ChevronRight size={13} style={{ color: TEXT_M, flexShrink: 0 }} />
+        }
+      </button>
+
+      {expanded && (
+        <div className="px-5 pb-4 pt-3" style={{ borderTop: `1px solid ${BORDER}`, background: "#FAFAF9" }}>
+          {/* Insight box */}
+          {row.insight && (
+            <div className="mb-3 rounded-lg px-3 py-2 text-[12px]" style={{ background: `${row.color}12`, color: TEXT_P }}>
+              <span className="font-semibold">Insight: </span>{row.insight}
+            </div>
+          )}
+
+          {/* Goal */}
+          {row.goal && (
+            <div className="mb-3 text-[12px]" style={{ color: TEXT_S }}>
+              <span className="font-semibold" style={{ color: TEXT_P }}>Goal: </span>{row.goal}
+            </div>
+          )}
+
+          {/* Asana tasks */}
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: TEXT_M }}>Asana Tasks</span>
+            <a
+              href={asanaUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-[11px] transition-colors hover:underline"
+              style={{ color: "#4E8DF4" }}
+              onClick={e => e.stopPropagation()}
+            >
+              Open in Asana <ExternalLink size={10} />
+            </a>
+          </div>
+
+          {tasksLoading ? (
+            <div className="flex items-center gap-2 py-2">
+              <Loader2 size={13} className="animate-spin" style={{ color: TEXT_M }} />
+              <span className="text-[12px]" style={{ color: TEXT_M }}>Loading tasks…</span>
+            </div>
+          ) : openTasks.length === 0 ? (
+            <p className="text-[13px]" style={{ color: TEXT_M }}>
+              No open tasks · <span style={{ color: "#4E8DF4" }}>view in Asana</span>
+            </p>
+          ) : (
+            <div className="space-y-1.5">
+              {openTasks.slice(0, 6).map((t: any) => (
+                <div key={t.gid} className="flex items-start gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: row.color }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px]" style={{ color: TEXT_P }}>{t.name}</p>
+                    {t.due_on && <p className="text-[10px]" style={{ color: TEXT_M }}>Due {t.due_on}</p>}
+                  </div>
+                </div>
+              ))}
+              {openTasks.length > 6 && (
+                <p className="text-[11px]" style={{ color: TEXT_M }}>+{openTasks.length - 6} more tasks in Asana</p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
-// ─── Weekly Summary Tab ────────────────────────────────────────────────────────
-function WeeklySummaryTab({ snapshot, toastDaily, toastSummary }: {
-  snapshot: any; toastDaily: any; toastSummary: any;
-}) {
-  const lastWeek = useMemo(() => {
-    if (!Array.isArray(toastDaily)) return { bay: 0, fnb: 0, total: 0 };
-    const last7 = (toastDaily as any[]).slice(-7);
-    return {
-      bay:   last7.reduce((s: number, d: any) => s + parseFloat(d.bayRevenue || 0), 0),
-      fnb:   last7.reduce((s: number, d: any) => s + parseFloat(d.foodBevRevenue || 0), 0),
-      total: last7.reduce((s: number, d: any) => s + parseFloat(d.totalRevenue || 0), 0),
-    };
-  }, [toastDaily]);
+// ─── Studio Soo Execution ─────────────────────────────────────────────────────
+function StudioSooExecution() {
+  const [open, setOpen] = useState(false);
 
-  // If bayRevenue is 0 but total > fnb, bay = total - fnb (Toast sync gap)
-  const bayDisplay = lastWeek.bay > 0 ? lastWeek.bay : Math.max(0, lastWeek.total - lastWeek.fnb);
+  const executionTiles = [
+    {
+      icon: LayoutDashboard,
+      label: "Infrastructure & Reporting",
+      items: [
+        "Custom dashboard build + reporting system",
+        "Public website (ah.playgolfvx.com)",
+        "Landing pages & funnel setup",
+      ],
+    },
+    {
+      icon: Megaphone,
+      label: "Campaigns & Promotions",
+      items: [
+        "Annual Membership Giveaway · Gift Card Promo",
+        "Trial Session · Drive Day · Junior Summer Camp ads",
+        "Black Friday Swing Saver · PBGA Winter Clinic",
+      ],
+    },
+    {
+      icon: MapPin,
+      label: "Venue & In-Store",
+      items: [
+        "Monthly Happenings flyers (11×17, each bay)",
+        "OptiSign / in-venue display updates",
+        "Tournament & league poster production",
+      ],
+    },
+    {
+      icon: ImageIcon,
+      label: "Content & Creative",
+      items: [
+        "Member testimonial ads",
+        "Social reels & content calendar",
+        "Event visuals · seasonal promotions",
+      ],
+    },
+    {
+      icon: Users,
+      label: "Programs & Strategic Support",
+      items: [
+        "PBGA Winter Clinic · Sunday Clinic · Summer Camp",
+        "Coach coordination & copy review",
+        "COO / HQ coordination & strategic alignment",
+      ],
+    },
+  ];
 
-  const ts           = toastSummary as any;
-  const lastMonthTotal = parseFloat(ts?.lastMonthRevenue || 0);
-  const mrr          = snapshot?.members?.mrr || 0;
-  const newMembers   = snapshot?.members?.newThisMonth || 0;
-
-  const rows = [
-    { label: "Bay Rental Revenue",  week: fmt(bayDisplay),          month: "—",               note: bayDisplay > 0 && lastWeek.bay === 0 ? "calc." : "" },
-    { label: "F&B Revenue",         week: fmt(lastWeek.fnb),        month: "—" },
-    { label: "Toast Total",         week: fmt(lastWeek.total),      month: fmt(lastMonthTotal), highlight: true },
-    { label: "MRR (memberships)",   week: mrr ? fmt(mrr) : "—",     month: "monthly recurring" },
-    { label: "Meta Ad Spend",       week: "—",                      month: "$1,648 (Feb–Mar snapshot)" },
-    { label: "New Members",         week: "—",                      month: `+${newMembers} this month` },
+  const collateralCards = [
+    { title: "February Happenings", sub: "11×17 Print · Feb 2026" },
+    { title: "February Fairways Tournament", sub: "11×17 Print · Feb 2026" },
+    { title: "Season of Giving — Gift Card", sub: "Print + Digital · Dec 2025" },
+    { title: "Year-End Membership Special", sub: "Print + Digital · Dec 2025" },
+    { title: "Go Bears Watch Party", sub: "16:9 Digital · Jan 2026" },
+    { title: "Club Distance Chart", sub: "Print · Ongoing" },
   ];
 
   return (
-    <div className="space-y-4">
-      <div
-        className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs"
-        style={{ background: BG_S, border: `1px solid ${BORDER}`, color: TEXT_S }}
+    <div className="rounded-xl border overflow-hidden" style={{ background: "white", borderColor: BORDER }}>
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="w-full px-5 py-4 flex items-center justify-between hover:bg-[#F6F6F4] transition-colors"
       >
-        <Activity size={12} />
-        <span>Last 7 days vs prior full month — live Toast POS where available</span>
-      </div>
-      <Card>
-        <table className="w-full text-sm">
-          <thead>
-            <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
-              <th className="text-left px-4 py-3 text-xs font-normal" style={{ color: TEXT_M }}>Metric</th>
-              <th className="text-right px-4 py-3 text-xs font-semibold" style={{ color: YELLOW }}>Last 7 Days</th>
-              <th className="text-right px-4 py-3 text-xs font-normal" style={{ color: TEXT_M }}>Last Month</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr key={r.label} style={{ borderBottom: `1px solid ${BORDER}`, background: r.highlight ? BG_S : undefined }}>
-                <td className="px-4 py-3 text-sm font-semibold" style={{ color: TEXT_P }}>
-                  {r.label}
-                  {r.note && <span className="ml-1 text-[10px]" style={{ color: TEXT_M }}>({r.note})</span>}
-                </td>
-                <td className="px-4 py-3 text-right font-bold" style={{ color: TEXT_P }}>{r.week}</td>
-                <td className="px-4 py-3 text-right text-xs" style={{ color: TEXT_S }}>{r.month}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
-    </div>
-  );
-}
-
-// ─── Revenue Tab ───────────────────────────────────────────────────────────────
-function RevenueTab() {
-  const { data: toastDaily, isLoading } = trpc.revenue.getToastDaily.useQuery({ startDate: undefined, endDate: undefined });
-  const { data: toastSummary }           = trpc.revenue.getToastSummary.useQuery();
-  const { data: acuityRevenue }          = trpc.revenue.getAcuityRevenue.useQuery({ minDate: undefined, maxDate: undefined });
-
-  const weeklyChart = useMemo(() => {
-    if (!Array.isArray(toastDaily) || !(toastDaily as any[]).length) return [];
-    const days = (toastDaily as any[]).slice(-28);
-    return [0, 1, 2, 3].map(w => {
-      const chunk = days.slice(w * 7, (w + 1) * 7);
-      if (!chunk.length) return null;
-      const fnb  = chunk.reduce((s: number, d: any) => s + parseFloat(d.foodBevRevenue || 0), 0);
-      const total = chunk.reduce((s: number, d: any) => s + parseFloat(d.totalRevenue || 0), 0);
-      const rawBay = chunk.reduce((s: number, d: any) => s + parseFloat(d.bayRevenue || 0), 0);
-      const bay = rawBay > 0 ? rawBay : Math.max(0, total - fnb);
-      return { week: w === 3 ? "Last 7d" : `Week ${w + 1}`, bay, fnb };
-    }).filter(Boolean) as Array<{ week: string; bay: number; fnb: number }>;
-  }, [toastDaily]);
-
-  const ts     = toastSummary as any;
-  const acuity = acuityRevenue as any;
-  const trial  = acuity?.grouped?.trial || { totalRevenue: 0, bookingCount: 0 };
-
-  return (
-    <div className="space-y-4">
-      {/* MTD Summary */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-        {[
-          { icon: ShoppingBag, label: "Toast POS · MTD", value: ts ? fmt(ts.thisMonthRevenue) : "—", sub: `${ts?.thisMonthOrders || 0} orders` },
-          { icon: TrendingUp,  label: "Toast · Last Month", value: ts ? fmt(ts.lastMonthRevenue) : "—", sub: "full month total" },
-          { icon: CreditCard,  label: "Acuity · All Programs", value: acuity ? fmt(acuity.total) : "—", sub: `${acuity?.totalBookings || 0} bookings` },
-        ].map(c => (
-          <Card key={c.label} className="p-4">
-            <div className="text-xs mb-1 flex items-center gap-1" style={{ color: TEXT_S }}><c.icon size={11} /> {c.label}</div>
-            <div className="text-2xl font-bold" style={{ color: TEXT_P }}>{c.value}</div>
-            <div className="text-xs mt-1" style={{ color: TEXT_S }}>{c.sub}</div>
-          </Card>
-        ))}
-      </div>
-
-      {/* Weekly Bay vs F&B chart */}
-      <Card className="p-4">
-        <div className="text-sm font-semibold mb-3" style={{ color: TEXT_P }}>Weekly Revenue · Bay Rental vs F&B (Last 4 Weeks)</div>
-        {weeklyChart.length > 0 ? (
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={weeklyChart} margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
-              <XAxis dataKey="week" tick={{ fontSize: 11, fill: TEXT_S }} />
-              <YAxis tick={{ fontSize: 10, fill: TEXT_S }} tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
-              <Tooltip formatter={(v: any, name: string) => [fmt(v), name === "bay" ? "Bay Rental" : "Food & Beverage"]} />
-              <Legend formatter={v => v === "bay" ? "Bay Rental" : "Food & Beverage"} />
-              <Bar dataKey="bay" fill={YELLOW} name="bay" radius={[3, 3, 0, 0]} />
-              <Bar dataKey="fnb" fill={TEXT_P}  name="fnb" radius={[3, 3, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        ) : (
-          <div className="text-center py-8 text-sm" style={{ color: TEXT_S }}>
-            {isLoading ? "Loading revenue data…" : "No Toast POS data available"}
-          </div>
-        )}
-      </Card>
-
-      {/* Daily Toast table */}
-      <Card>
-        <div className="px-4 py-3 text-sm font-semibold" style={{ borderBottom: `1px solid ${BORDER}`, color: TEXT_P }}>
-          Daily Toast Revenue (Last 14 Days)
+        <div>
+          <h2 className="text-[15px] font-semibold text-left" style={{ color: TEXT_P }}>Studio Soo Execution</h2>
+          <p className="text-xs mt-0.5 text-left" style={{ color: TEXT_S }}>
+            14 campaigns/promotions · 3 programs · 6 venue assets · 1 website · 1 dashboard
+          </p>
         </div>
-        {isLoading ? (
-          <div className="space-y-2 p-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-10 rounded-xl animate-pulse" style={{ background: BG_S }} />
-            ))}
-          </div>
-        ) : Array.isArray(toastDaily) && (toastDaily as any[]).length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
-                  {["Date", "Total", "Bay Rental", "F&B", "Orders"].map((h, i) => (
-                    <th key={h} className={`px-4 py-2 text-xs font-normal ${i > 0 ? "text-right" : "text-left"}`} style={{ color: TEXT_M }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {(toastDaily as any[]).slice(-14).reverse().map((row: any) => {
-                  const bay = parseFloat(row.bayRevenue || 0);
-                  const fnb = parseFloat(row.foodBevRevenue || 0);
-                  const total = parseFloat(row.totalRevenue || 0);
-                  const bayDisplay = bay > 0 ? bay : Math.max(0, total - fnb);
-                  return (
-                    <tr key={row.date} className="hover:bg-[#F6F6F4]" style={{ borderBottom: `1px solid ${BORDER}` }}>
-                      <td className="px-4 py-2 text-sm" style={{ color: TEXT_P }}>{fmtDate(row.date)}</td>
-                      <td className="px-4 py-2 text-right font-semibold text-sm" style={{ color: TEXT_P }}>{fmt(total)}</td>
-                      <td className="px-4 py-2 text-right text-sm" style={{ color: TEXT_S }}>
-                        {fmt(bayDisplay)}{bay === 0 && total > fnb && <span className="text-[10px] ml-0.5" style={{ color: TEXT_M }}>*</span>}
-                      </td>
-                      <td className="px-4 py-2 text-right text-sm" style={{ color: TEXT_S }}>{fmt(fnb)}</td>
-                      <td className="px-4 py-2 text-right text-sm" style={{ color: TEXT_S }}>{row.totalOrders}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-            <div className="px-4 py-2 text-[10px]" style={{ borderTop: `1px solid ${BORDER}`, color: TEXT_M }}>
-              * Bay Rental calculated as Total − F&B (raw bay_revenue column not yet populated in Toast sync)
-            </div>
-          </div>
-        ) : (
-          <div className="text-center py-8 text-sm" style={{ color: TEXT_S }}>No Toast POS data available</div>
-        )}
-      </Card>
+        {open
+          ? <ChevronDown size={16} style={{ color: TEXT_M }} />
+          : <ChevronRight size={16} style={{ color: TEXT_M }} />
+        }
+      </button>
 
-      {/* Trial Sessions */}
-      {trial.bookingCount > 0 && (
-        <Card className="p-4" accent>
-          <div className="text-sm font-semibold mb-3" style={{ color: TEXT_P }}>
-            Trial Bay Sessions
-            <span className="text-[10px] font-normal ml-2" style={{ color: TEXT_S }}>(all trial types combined)</span>
+      {open && (
+        <div className="p-5 space-y-6" style={{ borderTop: `1px solid ${BORDER}` }}>
+          {/* Execution tiles */}
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {executionTiles.map(tile => {
+              const TileIcon = tile.icon;
+              return (
+                <div
+                  key={tile.label}
+                  className="rounded-xl border p-4"
+                  style={{ borderColor: BORDER, background: BG_S }}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <TileIcon size={14} style={{ color: TEXT_S }} />
+                    <span className="text-[12px] font-semibold" style={{ color: TEXT_P }}>{tile.label}</span>
+                  </div>
+                  <ul className="space-y-1">
+                    {tile.items.map((item, i) => (
+                      <li key={i} className="text-[12px]" style={{ color: TEXT_S }}>· {item}</li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            {[
-              { label: "Total Sessions", value: trial.bookingCount },
-              { label: "Revenue", value: fmt(trial.totalRevenue), sub: `avg ${fmt(trial.totalRevenue / trial.bookingCount)}/session` },
-            ].map(c => (
-              <div key={c.label} className="p-4 rounded-xl" style={{ background: `${YELLOW}18`, border: `1px solid ${YELLOW}40` }}>
-                <div className="text-xs mb-1" style={{ color: TEXT_S }}>{c.label}</div>
-                <div className="text-3xl font-black" style={{ color: TEXT_P }}>{c.value}</div>
-                {"sub" in c && c.sub && <div className="text-xs mt-1" style={{ color: TEXT_S }}>{c.sub}</div>}
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
 
-      {/* Acuity by type */}
-      {acuity?.byType?.length > 0 && (
-        <Card>
-          <div className="px-4 py-3 text-sm font-semibold" style={{ borderBottom: `1px solid ${BORDER}`, color: TEXT_P }}>
-            Program Revenue by Type (Acuity)
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr style={{ borderBottom: `1px solid ${BORDER}`, background: BG_S }}>
-                  {["Appointment Type", "Bookings", "Revenue"].map((h, i) => (
-                    <th key={h} className={`p-3 text-xs font-normal ${i > 0 ? "text-right" : "text-left"}`} style={{ color: TEXT_M }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {(acuity.byType as any[]).map((row: any) => (
-                  <tr key={row.appointmentType} className="hover:bg-[#F6F6F4]" style={{ borderBottom: `1px solid ${BORDER}` }}>
-                    <td className="p-3 text-xs" style={{ color: TEXT_P }}>{row.appointmentType}</td>
-                    <td className="p-3 text-right text-xs" style={{ color: TEXT_S }}>{row.bookingCount}</td>
-                    <td className="p-3 text-right font-semibold text-xs" style={{ color: TEXT_P }}>{fmt(row.totalRevenue)}</td>
-                  </tr>
+          {/* Monthly production timeline */}
+          <div>
+            <h3 className="text-[12px] font-semibold uppercase tracking-widest mb-3" style={{ color: TEXT_M }}>
+              Monthly Production Timeline
+            </h3>
+            <div className="overflow-x-auto">
+              <div className="flex gap-4 min-w-max pb-2">
+                {PRODUCTION_TIMELINE.map(month => (
+                  <div key={month.month} className="min-w-[160px]">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ background: YELLOW }} />
+                      <span className="text-[12px] font-semibold" style={{ color: TEXT_P }}>{month.month}</span>
+                    </div>
+                    {month.items.map((item, i) => (
+                      <p key={i} className="text-[12px] mb-1" style={{ color: TEXT_S }}>· {item}</p>
+                    ))}
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            </div>
           </div>
-        </Card>
+
+          {/* Collateral placeholder cards */}
+          <div>
+            <h3 className="text-[12px] font-semibold uppercase tracking-widest mb-3" style={{ color: TEXT_M }}>
+              Sample Collateral
+            </h3>
+            <div className="grid grid-cols-3 gap-3">
+              {collateralCards.map(card => (
+                <div
+                  key={card.title}
+                  className="rounded-lg border p-3"
+                  style={{ borderColor: BORDER, background: "#F6F6F4" }}
+                >
+                  <p className="text-[12px] font-semibold" style={{ color: TEXT_P }}>{card.title}</p>
+                  <p className="text-[11px] mt-0.5" style={{ color: TEXT_M }}>{card.sub}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
 }
 
-// ─── Programs Tab ──────────────────────────────────────────────────────────────
-type ProgramEntry = {
-  name: string; type: string; status: "active" | "completed" | "planned";
-  metricType: "ROAS" | "ROI" | "KPI"; metricValue: string;
-  kpiLabel: string; kpi: string;
-  revenue: number; revenueTarget: number; adSpend: number;
-  goalCompletionPct: number; attendancePct: number; revenuePct: number;
-  leadCapturePct: number; socialPct: number; notes: string;
-};
+// ─── Performance Interpretation ───────────────────────────────────────────────
+function PerformanceInterpretation() {
+  const [open, setOpen] = useState(false);
 
-const FUNNEL_DATA = [
-  { step: "Entry Page Views", value: 875 },
-  { step: "Opt-ins",          value: 187 },
-  { step: "Applications",     value: 88 },
-  { step: "Offer Views",      value: 118 },
-];
-
-function ProgramsTab({ winterMetrics }: { winterMetrics: any }) {
-  const programs = useMemo((): ProgramEntry[] => [
+  const lenses = [
     {
-      name: "Drive Day", type: "Member Appreciation + Prospect", status: "active",
-      metricType: "KPI", metricValue: "87% attendance",
-      kpiLabel: "Attendance", kpi: "52 / 60 attendees",
-      revenue: 1040, revenueTarget: 1200, adSpend: 55,
-      goalCompletionPct: 87, attendancePct: 87, revenuePct: 70, leadCapturePct: 60, socialPct: 50,
-      notes: "2 dates remaining (Mar 22 + Mar 29). $55 Meta boost.",
+      label: "Revenue",
+      color: "#F2DD48",
+      text: "Winter demand materially increased top-line performance. Bay Usage dominates tracked operating revenue. F&B contributes meaningfully and should remain a core category — not a side note.",
     },
     {
-      name: "Winter Clinic", type: "Instruction Program", status: "active",
-      metricType: "KPI",
-      metricValue: winterMetrics ? `${winterMetrics.totalRegistrations} enrolled` : "tracking",
-      kpiLabel: "Class Fill Rate",
-      kpi: winterMetrics
-        ? `${winterMetrics.totalRegistrations} registrations · ${fmt(Math.round(winterMetrics.totalRevenue))} revenue`
-        : "tracking",
-      revenue: winterMetrics ? Math.round(winterMetrics.totalRevenue) : 0,
-      revenueTarget: 15000, adSpend: 0,
-      goalCompletionPct: 55, attendancePct: 55,
-      revenuePct: winterMetrics ? Math.min(100, Math.round((winterMetrics.totalRevenue / 15000) * 100)) : 55,
-      leadCapturePct: 40, socialPct: 30,
-      notes: "Bogey Jrs & Par Shooters performing well; other levels need promotion",
+      label: "Marketing",
+      color: "#72B84A",
+      text: "Studio Soo is managing a hybrid system: digital campaigns, physical displays, landing pages, and booking flows simultaneously. Member testimonial assets are being reused effectively across digital and print. Attribution is improving, but integration gaps still limit full channel-level ROI analysis.",
     },
     {
-      name: "Annual Giveaway", type: "Acquisition Campaign", status: "active",
-      metricType: "KPI", metricValue: "88 / 250 applications",
-      kpiLabel: "Lead Capture", kpi: "88 / 250 applications · 875 / 1,000 entries",
-      revenue: 0, revenueTarget: 52720, adSpend: 1225,
-      goalCompletionPct: 9, attendancePct: 0, revenuePct: 0, leadCapturePct: 35, socialPct: 70,
-      notes: "875 views → 187 opt-ins → 88 applications (35% of 250 target). Winner Mar 31.",
+      label: "Operations",
+      color: "#4E8DF4",
+      text: "The branch now has a centralized reporting structure that did not exist five months ago. The dashboard is becoming the operating layer for reviewing campaigns, programs, and production work. Stripe access would materially improve decision speed at every future meeting.",
     },
     {
-      name: "Junior Summer Camp", type: "Revenue Program", status: "planned",
-      metricType: "ROAS", metricValue: "pending enrollment",
-      kpiLabel: "Enrollment", kpi: "0 / 120 enrolled",
-      revenue: 0, revenueTarget: 66000, adSpend: 293.16,
-      goalCompletionPct: 0, attendancePct: 0, revenuePct: 0, leadCapturePct: 0, socialPct: 20,
-      notes: "Early Bird deadline Mar 31. $293.16 on Meta Ads (82K impressions, 1.82% CTR). Email campaign needed.",
+      label: "Data Confidence",
+      color: "#D89A3C",
+      text: "Current reporting supports strategic decisions on Bay Usage, F&B trends, and campaign spend. Stripe integration is the most important missing link for recurring revenue analysis. Pro member revenue and 188 untiered members must remain excluded from calculations until billing source is mapped.",
     },
-    {
-      name: "Superbowl Watch Party", type: "Brand Awareness", status: "completed",
-      metricType: "ROI", metricValue: "4x ($300 / $75)",
-      kpiLabel: "Awareness + Revenue", kpi: "4,167 impressions · $300 revenue",
-      revenue: 300, revenueTarget: 300, adSpend: 75,
-      goalCompletionPct: 30, attendancePct: 10, revenuePct: 100, leadCapturePct: 10, socialPct: 40,
-      notes: "1 bay booking ($300). 4,167 ad impressions.",
-    },
-  ], [winterMetrics]);
-
-  // Status pill styles — v2: active=yellow, completed=orange (ended), planned=gray
-  const statusStyle: Record<string, { bg: string; color: string }> = {
-    active:    { bg: `${YELLOW}25`, color: "#9a7a00" },
-    completed: { bg: ORG_BG,        color: ORG_TXT },
-    planned:   { bg: BG_S,          color: TEXT_S },
-  };
+  ];
 
   return (
-    <div className="space-y-4">
-      <div
-        className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3 py-2 rounded-xl text-xs"
-        style={{ background: BG_S, border: `1px solid ${BORDER}`, color: TEXT_S }}
+    <div className="rounded-xl border overflow-hidden" style={{ background: "white", borderColor: BORDER }}>
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="w-full px-5 py-4 flex items-center justify-between hover:bg-[#F6F6F4] transition-colors"
       >
-        <span className="font-semibold" style={{ color: TEXT_P }}>Metric types:</span>
-        <span><span className="font-semibold" style={{ color: GRN_TXT }}>ROAS</span> = Revenue ÷ Ad Spend</span>
-        <span>·</span>
-        <span><span className="font-semibold" style={{ color: "#4E8DF4" }}>ROI</span> = (Revenue − Cost) ÷ Cost</span>
-        <span>·</span>
-        <span><span className="font-semibold" style={{ color: "#b8900a" }}>KPI</span> = Program Goal Metric</span>
-      </div>
-
-      {programs.map(p => {
-        const healthScore = calcHealthScore(p);
-        const pct = p.revenueTarget > 0 ? Math.min(100, (p.revenue / p.revenueTarget) * 100) : 0;
-        const st  = statusStyle[p.status];
-        return (
-          <Card key={p.name} className="p-5">
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <h3 className="font-semibold" style={{ color: TEXT_P }}>{p.name}</h3>
-                  <Badge
-                    variant="secondary"
-                    className="text-xs capitalize border-0"
-                    style={{ background: st.bg, color: st.color }}
-                  >
-                    {p.status}
-                  </Badge>
-                  <MetricTag type={p.metricType} value={p.metricValue} />
-                  {p.adSpend > 0 && <span className="text-[10px]" style={{ color: TEXT_S }}>Ad spend: {fmt(p.adSpend)}</span>}
-                </div>
-                <p className="text-xs" style={{ color: TEXT_S }}>{p.type}</p>
-              </div>
-              <HealthDots score={healthScore} />
-            </div>
-
-            {p.revenueTarget > 0 && (
-              <div className="mb-3">
-                <div className="flex justify-between text-xs mb-1">
-                  <span style={{ color: TEXT_S }}>Revenue vs Target</span>
-                  <span className="font-semibold" style={{ color: TEXT_P }}>{fmt(p.revenue)} / {fmt(p.revenueTarget)}</span>
-                </div>
-                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: BG_S }}>
-                  <div className="h-full rounded-full" style={{ width: `${pct}%`, background: YELLOW }} />
-                </div>
-              </div>
-            )}
-
-            <div className="flex items-start justify-between pt-3 gap-4" style={{ borderTop: `1px solid ${BORDER}` }}>
-              <div className="shrink-0">
-                <span className="text-xs" style={{ color: TEXT_S }}>{p.kpiLabel}: </span>
-                <span className="text-xs font-semibold" style={{ color: TEXT_P }}>{p.kpi}</span>
-              </div>
-              <div className="text-xs text-right" style={{ color: TEXT_S }}>{p.notes}</div>
-            </div>
-          </Card>
-        );
-      })}
-
-      {/* Annual Giveaway Funnel */}
-      <Card className="p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <Award size={14} style={{ color: YELLOW }} />
-          <span className="text-sm font-semibold" style={{ color: TEXT_P }}>Annual Giveaway Funnel · Feb 2 – Mar 3</span>
+        <div>
+          <h2 className="text-[15px] font-semibold text-left" style={{ color: TEXT_P }}>Performance Analysis · 4 Lenses</h2>
+          <p className="text-xs mt-0.5 text-left" style={{ color: TEXT_S }}>Revenue · Marketing · Operations · Data Confidence</p>
         </div>
-        <div className="space-y-2 mb-3">
-          {FUNNEL_DATA.map((step, i) => (
-            <div key={step.step}>
-              <div className="flex justify-between text-xs mb-1">
-                <span className="font-semibold" style={{ color: TEXT_P }}>{step.step}</span>
-                <span style={{ color: TEXT_S }}>{step.value.toLocaleString()}</span>
+        {open
+          ? <ChevronDown size={16} style={{ color: TEXT_M }} />
+          : <ChevronRight size={16} style={{ color: TEXT_M }} />
+        }
+      </button>
+
+      {open && (
+        <div className="p-5" style={{ borderTop: `1px solid ${BORDER}` }}>
+          <div className="grid grid-cols-2 gap-3">
+            {lenses.map(lens => (
+              <div key={lens.label} className="rounded-[10px] border border-[#DEDEDA] p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-2 h-6 rounded-full" style={{ background: lens.color }} />
+                  <span className="text-[13px] font-semibold" style={{ color: TEXT_P }}>{lens.label}</span>
+                </div>
+                <p className="text-[13px]" style={{ color: TEXT_S }}>{lens.text}</p>
               </div>
-              <div
-                className="h-7 rounded flex items-center px-3 text-xs font-bold"
-                style={{
-                  background: `${YELLOW}${Math.round((1 - i * 0.2) * 255).toString(16).padStart(2, "0")}`,
-                  width: `${(step.value / FUNNEL_DATA[0].value) * 100}%`,
-                  minWidth: "100px",
-                  color: TEXT_P,
-                }}
-              >
-                {i > 0 ? `${((step.value / FUNNEL_DATA[i - 1].value) * 100).toFixed(0)}% from prev` : "Top of funnel"}
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Forward Look ─────────────────────────────────────────────────────────────
+function ForwardLook() {
+  const [open, setOpen] = useState(true);
+
+  const revenueTargets = [
+    { horizon: "Next 30 days (April)", target: "$95K–$110K", notes: "Spring transition — protect winter-level revenue" },
+    { horizon: "Next quarter (Q2)",    target: "$300K–$360K", notes: "Seasonality + conversion performance" },
+    { horizon: "Next 6 months (H2 2026)", target: "Improve reporting quality", notes: "Stripe + cleaner attribution" },
+    { horizon: "Budget recommendation",   target: "Increase selectively", notes: "Only where revenue path is clear" },
+  ];
+
+  const priorities = [
+    {
+      title: "Protect Spring Revenue",
+      priority: "HIGH",
+      color: "#F2DD48",
+      rationale: "Winter demand will soften March–April. Revenue floor depends on memberships, repeat visits, and program enrollments.",
+      action: "Push Drive Day (Mar 29 launch), Junior Summer Camp, Trial Session, and membership offers hard in April. Keep Bay + F&B bundled in all promotional offers.",
+      timeline: "Immediate — April 2026",
+    },
+    {
+      title: "Improve Recurring Revenue Visibility",
+      priority: "HIGH",
+      color: "#F2DD48",
+      rationale: "$24,975/month is a defensible floor, but the true picture includes 188 untiered members and 4 Pro members whose billing is unmapped. Stripe access turns estimates into facts.",
+      action: "Grant Studio Soo read-only Stripe API access. Estimated implementation: 1–2 days after credentials are shared. This is the highest-ROI integration decision on the table.",
+      timeline: "Decision at this meeting",
+    },
+    {
+      title: "Strengthen Attribution",
+      priority: "MEDIUM",
+      color: "#4E8DF4",
+      rationale: "Physical displays, QR codes, and digital campaigns are running in parallel but not yet connected in a single tracking view.",
+      action: "Connect promotions to landing pages and QR flows consistently. Track which marketing activities produce visits and conversions.",
+      timeline: "April–May 2026",
+    },
+  ];
+
+  return (
+    <div className="rounded-xl border overflow-hidden" style={{ background: "white", borderColor: BORDER }}>
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="w-full px-5 py-4 flex items-center justify-between hover:bg-[#F6F6F4] transition-colors"
+      >
+        <div>
+          <h2 className="text-[15px] font-semibold text-left" style={{ color: TEXT_P }}>Forward Look · Revenue Targets &amp; Priorities</h2>
+          <p className="text-xs mt-0.5 text-left" style={{ color: TEXT_S }}>April targets · six-month outlook · three priority actions</p>
+        </div>
+        {open
+          ? <ChevronDown size={16} style={{ color: TEXT_M }} />
+          : <ChevronRight size={16} style={{ color: TEXT_M }} />
+        }
+      </button>
+
+      {open && (
+        <div className="p-5 space-y-6" style={{ borderTop: `1px solid ${BORDER}` }}>
+          {/* Revenue Target Table */}
+          <div>
+            <h3 className="text-[13px] font-semibold mb-3" style={{ color: TEXT_P }}>Revenue Targets</h3>
+            <div className="rounded-xl border overflow-hidden" style={{ borderColor: BORDER }}>
+              <table className="w-full">
+                <thead>
+                  <tr style={{ borderBottom: `1px solid ${BORDER}`, background: BG_S }}>
+                    <th className="text-left px-5 py-2.5 text-[11px] font-normal" style={{ color: TEXT_M }}>Horizon</th>
+                    <th className="text-left px-5 py-2.5 text-[11px] font-normal" style={{ color: TEXT_M }}>Target</th>
+                    <th className="text-left px-5 py-2.5 text-[11px] font-normal" style={{ color: TEXT_M }}>Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {revenueTargets.map((row, i) => (
+                    <tr
+                      key={row.horizon}
+                      style={{ borderBottom: i < revenueTargets.length - 1 ? `1px solid ${BORDER}` : undefined }}
+                    >
+                      <td className="px-5 py-3 text-[13px]" style={{ color: TEXT_P }}>{row.horizon}</td>
+                      <td className="px-5 py-3 text-[13px] font-semibold" style={{ color: TEXT_P }}>{row.target}</td>
+                      <td className="px-5 py-3 text-[12px]" style={{ color: TEXT_S }}>{row.notes}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="text-[13px] mt-3" style={{ color: TEXT_S }}>
+              Targets assume continued Bay + F&B pacing plus better conversion of existing demand. They do not assume a dramatic increase in new member acquisition without stronger recurring revenue visibility.
+            </p>
+          </div>
+
+          {/* Three Priority Cards */}
+          <div>
+            <h3 className="text-[13px] font-semibold mb-3" style={{ color: TEXT_P }}>Priority Actions</h3>
+            <div className="flex gap-3">
+              {priorities.map(p => (
+                <div
+                  key={p.title}
+                  className="rounded-[10px] border bg-white py-5 px-6 flex-1"
+                  style={{
+                    borderColor: BORDER,
+                    borderLeft: `4px solid ${p.color}`,
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[14px] font-semibold" style={{ color: TEXT_P }}>{p.title}</span>
+                    <span
+                      className="text-[11px] font-medium px-2 py-0.5 rounded-full shrink-0 ml-2"
+                      style={{ background: `${p.color}18`, color: p.priority === "MEDIUM" ? p.color : "#8A7A00" }}
+                    >
+                      {p.priority}
+                    </span>
+                  </div>
+                  <p className="text-[12px] mb-2" style={{ color: TEXT_S }}>
+                    <span className="font-semibold" style={{ color: TEXT_P }}>Why: </span>{p.rationale}
+                  </p>
+                  <p className="text-[12px] mb-2" style={{ color: TEXT_S }}>
+                    <span className="font-semibold" style={{ color: TEXT_P }}>Action: </span>{p.action}
+                  </p>
+                  <p className="text-[11px]" style={{ color: TEXT_M }}>Timeline: {p.timeline}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Local SEO Block ──────────────────────────────────────────────────────────
+function LocalSEOBlock() {
+  const [open, setOpen] = useState(false);
+
+  const metrics = [
+    { label: "GBP Rating",                  value: "—", source: "Google Business Profile" },
+    { label: "Total Reviews",               value: "—", source: "Google Business Profile" },
+    { label: "Monthly Search Impressions",  value: "—", source: "Google Search Console" },
+    { label: "Top Queries",                 value: "—", source: "Google Search Console" },
+    { label: "Maps Ranking",                value: "—", source: "Google Maps local pack" },
+    { label: "Review Incentive Status",     value: "Active", source: "\"Fries on Us\" campaign" },
+  ];
+
+  return (
+    <div
+      className="rounded-xl border overflow-hidden"
+      style={{ background: "white", borderColor: BORDER, boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}
+    >
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="w-full px-5 py-4 flex items-center justify-between hover:bg-[#F6F6F4] transition-colors"
+      >
+        <div>
+          <h2 className="text-[15px] font-semibold text-left" style={{ color: TEXT_P }}>Local SEO</h2>
+          <p className="text-xs mt-0.5 text-left" style={{ color: TEXT_S }}>
+            Google Business Profile · Reviews · Search Rankings
+          </p>
+        </div>
+        {open
+          ? <ChevronDown size={16} style={{ color: TEXT_M }} />
+          : <ChevronRight size={16} style={{ color: TEXT_M }} />
+        }
+      </button>
+
+      {!open && (
+        <div className="px-5 py-3 flex gap-8" style={{ borderTop: `1px solid ${BORDER}` }}>
+          {[
+            { label: "GBP Rating", value: "—" },
+            { label: "Total Reviews", value: "—" },
+            { label: "Maps Ranking", value: "—" },
+          ].map(m => (
+            <div key={m.label}>
+              <div style={{ fontSize: "10px", textTransform: "uppercase" as const, letterSpacing: "0.06em", color: TEXT_M, marginBottom: "2px" }}>
+                {m.label}
               </div>
+              <div style={{ fontSize: "18px", fontWeight: 700, color: TEXT_P }}>{m.value}</div>
             </div>
           ))}
         </div>
-        <div className="p-3 rounded-xl text-xs" style={{ background: BG_S, border: `1px solid ${BORDER}`, color: TEXT_S }}>
-          Target: 1,000 entries · 250 applications by Apr 29. Current: 875 entries (87.5%) · 88 applications (35%).
-          <span className="font-semibold" style={{ color: TEXT_P }}> Action:</span> Increase Meta Ads budget for Giveaway A2.
+      )}
+
+      {open && (
+        <div className="p-5 space-y-5" style={{ borderTop: `1px solid ${BORDER}` }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }}>
+            {metrics.map(m => (
+              <div key={m.label} style={{ background: BG_S, borderRadius: "8px", padding: "12px 14px" }}>
+                <div style={{ fontSize: "11px", color: TEXT_M, marginBottom: "4px" }}>{m.label}</div>
+                <div style={{ fontSize: "18px", fontWeight: 700, color: TEXT_P, lineHeight: 1 }}>{m.value}</div>
+                <div style={{ fontSize: "10px", color: "#A8A8A3", marginTop: "4px" }}>{m.source}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ background: BG_S, border: `1px solid ${BORDER}`, borderRadius: "8px", padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div>
+              <div style={{ fontSize: "13px", fontWeight: 500, color: TEXT_P }}>Share Your Experience / Fries on Us</div>
+              <div style={{ fontSize: "12px", color: TEXT_S, marginTop: "2px" }}>
+                Leave a Google review → receive a complimentary Fries on Us reward
+              </div>
+            </div>
+            <span style={{ fontSize: "11px", fontWeight: 500, color: GRN_TXT, background: "rgba(114,184,74,0.15)", padding: "3px 9px", borderRadius: "4px", flexShrink: 0 }}>
+              Active
+            </span>
+          </div>
+
+          <p style={{ fontSize: "12px", color: TEXT_M }}>
+            Full Google Search Console + GBP API integration planned for Prompt F.
+          </p>
         </div>
-      </Card>
+      )}
     </div>
   );
 }
 
-// ─── Advertising Tab ───────────────────────────────────────────────────────────
-const META_CAMPAIGNS = [
-  { name: "Annual Giveaway A1",    spend: 803,    impressions: 80947, ctr: 0.90, program: "Annual Giveaway" },
-  { name: "Junior Summer Camp",    spend: 293.16, impressions: 82307, ctr: 1.82, program: "Junior Summer Camp" },
-  { name: "Annual Giveaway A2",    spend: 379,    impressions: 26434, ctr: 2.80, program: "Annual Giveaway" },
-  { name: "Superbowl Watch Party", spend: 75,     impressions: 4167,  ctr: 1.37, program: "Superbowl Watch Party" },
-  { name: "Drive Day Boost",       spend: 55,     impressions: 4633,  ctr: 4.21, program: "Drive Day" },
-  { name: "IG Giveaway",           spend: 43,     impressions: 15528, ctr: 0.30, program: "Annual Giveaway" },
-];
+// ─── Marketing Performance Highlights ─────────────────────────────────────────
+function MarketingPerformanceHighlights() {
+  const [open, setOpen] = useState(true);
 
-function AdvertisingTab() {
-  const totalSpend       = META_CAMPAIGNS.reduce((s, c) => s + c.spend, 0);
-  const totalImpressions = META_CAMPAIGNS.reduce((s, c) => s + c.impressions, 0);
-  const avgCtr           = META_CAMPAIGNS.reduce((s, c) => s + c.ctr, 0) / META_CAMPAIGNS.length;
+  type CardStatus = "active" | "completed" | "planned";
+
+  const cards: {
+    id: string;
+    name: string;
+    type: string;
+    status: CardStatus;
+    period: string;
+    kpis: { label: string; value: string; estimated?: boolean; awaiting?: boolean }[];
+    progress?: number;
+    phase?: string;
+    note?: string;
+  }[] = [
+    {
+      id:     "pbga-winter-clinic",
+      name:   "PBGA Winter Clinic",
+      type:   "Program",
+      status: "completed",
+      period: "Jan–Mar 2026",
+      kpis:   [
+        { label: "Participants", value: "—", awaiting: true },
+        { label: "Revenue",      value: "—", awaiting: true },
+      ],
+      note: "Acuity integration in progress",
+    },
+    {
+      id:     "swing-saver-promo",
+      name:   "Annual SwingSaver Promotion",
+      type:   "Promotion",
+      status: "completed",
+      period: "Nov 2025–Feb 2026",
+      kpis:   [
+        { label: "Units Sold",    value: "3",      estimated: true },
+        { label: "Revenue",       value: "$4,500",  estimated: true },
+        { label: "Avg Discount",  value: "44% off" },
+      ],
+      note: "Self-reported · Pending verification",
+    },
+    {
+      id:       "annual-giveaway",
+      name:     "Annual Membership Giveaway",
+      type:     "Promotion",
+      status:   "active",
+      period:   "Jan–Mar 2026",
+      kpis:     [{ label: "Applicants", value: "~90", estimated: true }],
+      progress: 60,
+    },
+    {
+      id:     "junior-summer-camp",
+      name:   "PBGA Junior Summer Camp",
+      type:   "Program",
+      status: "active",
+      period: "Jun–Aug 2026",
+      kpis:   [],
+      phase:  "Planning & Enrollment",
+      note:   "Session 1 starts June 9 · Pre-registration open",
+    },
+    {
+      id:     "trial-sessions",
+      name:   "Trial Sessions",
+      type:   "Program",
+      status: "active",
+      period: "Ongoing",
+      kpis:   [
+        { label: "Offers Active",          value: "2" },
+        { label: "Chicago Golf Show",      value: "30", estimated: true },
+      ],
+      note: "No seasonal end date · rolling intake",
+    },
+    {
+      id:       "sunday-clinic",
+      name:     "Sunday Clinic · Drive Day",
+      type:     "Program",
+      status:   "active",
+      period:   "Year-round",
+      kpis:     [{ label: "Participants", value: "~50", estimated: true }],
+      progress: 83,
+      note:     "Next: Mar 29 Drive Day launch",
+    },
+  ];
+
+  const statusStyle = (s: CardStatus) => {
+    if (s === "completed") return { bg: "rgba(216,154,60,0.12)", color: ORG_TXT, label: "Completed" };
+    if (s === "active")    return { bg: "rgba(114,184,74,0.12)", color: GRN_TXT, label: "Active"    };
+    return { bg: BG_S, color: TEXT_M, label: "Planned" };
+  };
 
   return (
-    <div className="space-y-4">
-      <div
-        className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs"
-        style={{ background: BG_S, border: `1px solid ${BORDER}`, color: TEXT_S }}
+    <div
+      className="rounded-xl border overflow-hidden"
+      style={{ background: "white", borderColor: BORDER, boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}
+    >
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="w-full px-5 py-4 flex items-center justify-between hover:bg-[#F6F6F4] transition-colors"
       >
-        <Info size={12} />
-        <span>Manually tracked snapshot · Feb 2 – Mar 3, 2026. For live data, open Operations → Campaigns → Paid Ads tab.</span>
-      </div>
-
-      <div className="grid grid-cols-3 gap-3">
-        {[
-          { label: "Total Spend",        value: fmt(totalSpend),                   sub: `${META_CAMPAIGNS.length} campaigns` },
-          { label: "Total Impressions",  value: `${(totalImpressions/1000).toFixed(0)}K`, sub: "Feb 2 – Mar 3" },
-          { label: "Avg CTR",            value: `${avgCtr.toFixed(2)}%`,            sub: "across all campaigns" },
-        ].map(c => (
-          <Card key={c.label} className="p-4">
-            <div className="text-xs mb-1" style={{ color: TEXT_S }}>{c.label}</div>
-            <div className="text-2xl font-bold" style={{ color: TEXT_P }}>{c.value}</div>
-            <div className="text-xs mt-1" style={{ color: TEXT_S }}>{c.sub}</div>
-          </Card>
-        ))}
-      </div>
-
-      <Card>
-        <div className="px-4 py-3 text-sm font-semibold" style={{ borderBottom: `1px solid ${BORDER}`, color: TEXT_P }}>Campaign Performance</div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr style={{ borderBottom: `1px solid ${BORDER}`, background: BG_S }}>
-                {["Campaign", "Program", "Spend", "Impressions", "CTR", "CPM"].map((h, i) => (
-                  <th key={h} className={`p-3 text-xs font-normal ${i < 2 ? "text-left" : "text-right"}`} style={{ color: TEXT_M }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {META_CAMPAIGNS.map(c => (
-                <tr key={c.name} className="hover:bg-[#F6F6F4] h-14" style={{ borderBottom: `1px solid ${BORDER}` }}>
-                  <td className="p-3 font-semibold text-sm" style={{ color: TEXT_P }}>{c.name}</td>
-                  <td className="p-3 text-xs" style={{ color: TEXT_S }}>{c.program}</td>
-                  <td className="p-3 text-right font-semibold" style={{ color: TEXT_P }}>{fmt(c.spend)}</td>
-                  <td className="p-3 text-right" style={{ color: TEXT_S }}>{c.impressions.toLocaleString()}</td>
-                  <td className="p-3 text-right" style={{ color: TEXT_S }}>{c.ctr.toFixed(2)}%</td>
-                  <td className="p-3 text-right" style={{ color: TEXT_S }}>{fmt((c.spend / c.impressions) * 1000)}</td>
-                </tr>
-              ))}
-              <tr className="h-14 font-semibold" style={{ background: BG_S }}>
-                <td className="p-3" style={{ color: TEXT_P }} colSpan={2}>Total</td>
-                <td className="p-3 text-right" style={{ color: TEXT_P }}>{fmt(totalSpend)}</td>
-                <td className="p-3 text-right" style={{ color: TEXT_P }}>{totalImpressions.toLocaleString()}</td>
-                <td className="p-3 text-right" style={{ color: TEXT_S }}>—</td>
-                <td className="p-3 text-right" style={{ color: TEXT_S }}>{fmt((totalSpend / totalImpressions) * 1000)}</td>
-              </tr>
-            </tbody>
-          </table>
+        <div>
+          <h2 className="text-[15px] font-semibold text-left" style={{ color: TEXT_P }}>
+            Marketing Performance Highlights · Jan–Mar 2026
+          </h2>
+          <p className="text-xs mt-0.5 text-left" style={{ color: TEXT_S }}>
+            6 active programs and promotions — status, KPIs, and data quality flags
+          </p>
         </div>
-      </Card>
+        {open
+          ? <ChevronDown size={16} style={{ color: TEXT_M }} />
+          : <ChevronRight size={16} style={{ color: TEXT_M }} />
+        }
+      </button>
+
+      {open && (
+        <div className="p-5" style={{ borderTop: `1px solid ${BORDER}` }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+            {cards.map(card => {
+              const ss = statusStyle(card.status);
+              return (
+                <div
+                  key={card.id}
+                  className="rounded-xl border p-4"
+                  style={{ borderColor: BORDER, background: "#FAFAF9" }}
+                >
+                  {/* Header row */}
+                  <div className="flex items-start justify-between mb-3 gap-2">
+                    <div className="min-w-0">
+                      <div className="text-[13px] font-semibold leading-snug" style={{ color: TEXT_P }}>{card.name}</div>
+                      <div className="text-[11px] mt-0.5" style={{ color: TEXT_M }}>{card.type} · {card.period}</div>
+                    </div>
+                    <span
+                      className="text-[11px] font-medium px-2 py-0.5 rounded-full shrink-0"
+                      style={{ background: ss.bg, color: ss.color }}
+                    >
+                      {ss.label}
+                    </span>
+                  </div>
+
+                  {/* Phase label */}
+                  {card.phase && (
+                    <div
+                      className="text-[11px] font-medium px-2 py-1 rounded mb-2 inline-block"
+                      style={{ background: "rgba(78,141,244,0.10)", color: "#4E8DF4" }}
+                    >
+                      {card.phase}
+                    </div>
+                  )}
+
+                  {/* KPI row */}
+                  {card.kpis.length > 0 && (
+                    <div className="flex flex-wrap gap-x-4 gap-y-1.5 mb-2">
+                      {card.kpis.map(kpi => (
+                        <div key={kpi.label}>
+                          <div className="text-[10px]" style={{ color: TEXT_M }}>{kpi.label}</div>
+                          <div className="flex items-center gap-1">
+                            <span className="text-[14px] font-semibold" style={{ color: TEXT_P }}>{kpi.value}</span>
+                            {kpi.estimated && (
+                              <span
+                                className="text-[10px] font-medium px-1.5 py-0.5 rounded"
+                                style={{ background: "rgba(216,154,60,0.12)", color: "#C47A20" }}
+                              >
+                                EST
+                              </span>
+                            )}
+                            {kpi.awaiting && (
+                              <span className="text-[10px]" style={{ color: TEXT_M }}>
+                                [AWAITING INTEGRATION]
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Progress bar */}
+                  {card.progress !== undefined && (
+                    <div className="mb-2">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-[10px]" style={{ color: TEXT_M }}>Progress toward goal</span>
+                        <span className="text-[10px] font-medium" style={{ color: TEXT_P }}>{card.progress}%</span>
+                      </div>
+                      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: BORDER }}>
+                        <div
+                          className="h-full rounded-full"
+                          style={{ width: `${card.progress}%`, background: "#F2DD48" }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Note */}
+                  {card.note && (
+                    <p className="text-[11px] mt-1" style={{ color: TEXT_M }}>{card.note}</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-// ─── Main ──────────────────────────────────────────────────────────────────────
-const TABS = [
-  { value: "weekly",      label: "Weekly Summary" },
-  { value: "revenue",     label: "Revenue" },
-  { value: "programs",    label: "Programs" },
-  { value: "advertising", label: "Advertising" },
-];
-
+// ─── Main ─────────────────────────────────────────────────────────────────────
 export default function Reports() {
-  const [activeTab, setActiveTab] = useState("weekly");
+  const now        = new Date();
+  const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
 
-  const { data: snapshot }      = trpc.preview.getSnapshot.useQuery();
-  const { data: toastDaily }    = trpc.revenue.getToastDaily.useQuery({ startDate: undefined, endDate: undefined });
-  const { data: toastSummary }  = trpc.revenue.getToastSummary.useQuery();
-  const { data: winterMetrics } = trpc.campaigns.getWinterClinicMetrics.useQuery(
-    { minDate: "2026-01-01", maxDate: "2026-03-31" },
+  const { data: snapshot }     = trpc.preview.getSnapshot.useQuery(undefined, { staleTime: 5 * 60 * 1000 });
+  const { data: toastSummary } = trpc.revenue.getToastSummary.useQuery(undefined, { staleTime: 5 * 60 * 1000 });
+  const { data: acuity }       = trpc.revenue.getAcuityRevenue.useQuery(
+    { minDate: monthStart, maxDate: undefined },
     { staleTime: 5 * 60 * 1000 }
   );
 
   return (
-    <div className="space-y-6">
+    <div className="p-8 space-y-4">
+      {/* Header */}
       <div>
-        <h1 className="text-2xl font-semibold" style={{ color: TEXT_P }}>Reports</h1>
-        <p className="text-sm mt-1" style={{ color: TEXT_S }}>Performance across all programs, campaigns, and revenue streams</p>
+        <h1 style={{ fontSize: "20px", fontWeight: 600, color: TEXT_P, marginBottom: 0 }}>Reports</h1>
+        <p style={{ fontSize: "13px", color: TEXT_S, marginTop: "4px", marginBottom: 0 }}>
+          Campaign performance · program progress · strategic intelligence
+        </p>
       </div>
 
-      <div
-        className="bg-white rounded-2xl shadow-[0_1px_2px_rgba(0,0,0,0.04)] overflow-hidden"
-        style={{ border: `1px solid ${BORDER}` }}
-      >
-        <TabBar tabs={TABS} active={activeTab} onChange={setActiveTab} />
-        <div className="p-4">
-          {activeTab === "weekly"      && <WeeklySummaryTab snapshot={snapshot} toastDaily={toastDaily} toastSummary={toastSummary} />}
-          {activeTab === "revenue"     && <RevenueTab />}
-          {activeTab === "programs"    && <ProgramsTab winterMetrics={winterMetrics} />}
-          {activeTab === "advertising" && <AdvertisingTab />}
+      {/* 1 — Executive Summary (expanded) */}
+      <ExecutiveSummary />
+
+      {/* 2 — Revenue & Operations (expanded) */}
+      <RevenueOperations snapshot={snapshot} toastSummary={toastSummary} />
+
+      {/* 3 — Marketing Performance Highlights · Jan–Mar 2026 */}
+      <MarketingPerformanceHighlights />
+
+      {/* D — Marketing Timeline */}
+      <div className="bg-white rounded-xl border border-[#DEDEDA] overflow-hidden">
+        <div className="px-5 py-4" style={{ borderBottom: `1px solid ${BORDER}` }}>
+          <h2 className="text-[15px] font-semibold" style={{ color: TEXT_P }}>Marketing Timeline</h2>
+          <p className="text-xs mt-0.5" style={{ color: TEXT_S }}>
+            Programs, promotions, and paid campaigns across the last five months, color-coded by strategic campaign group.
+          </p>
+        </div>
+        <div className="px-5 py-4">
+          <ReportTimeline />
         </div>
       </div>
+
+      {/* E — Campaign Performance */}
+      <div
+        className="rounded-xl border overflow-hidden"
+        style={{ background: "white", borderColor: BORDER, boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}
+      >
+        <div className="px-5 py-4" style={{ borderBottom: `1px solid ${BORDER}` }}>
+          <h2 className="text-[15px] font-semibold" style={{ color: TEXT_P }}>Campaign Performance · 4 Active Campaigns</h2>
+          <p className="text-xs mt-0.5" style={{ color: TEXT_S }}>Status · goal · current · 1-line insight — expand for Asana tasks</p>
+        </div>
+        {CAMPAIGN_ROWS.map(row => (
+          <CampaignReportRow key={row.id} row={row} snapshot={snapshot} acuity={acuity} />
+        ))}
+      </div>
+
+      {/* F — Studio Soo Execution (collapsed) */}
+      <StudioSooExecution />
+
+      {/* G — Performance Analysis (collapsed) */}
+      <PerformanceInterpretation />
+
+      {/* H — Forward Look (expanded) */}
+      <ForwardLook />
+
+      {/* I — Local SEO (collapsed) */}
+      <LocalSEOBlock />
     </div>
   );
 }

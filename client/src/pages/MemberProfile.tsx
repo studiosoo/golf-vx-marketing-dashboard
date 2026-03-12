@@ -34,7 +34,7 @@ export default function MemberProfile() {
   if (isLoading) {
     return (
       <div className="container py-8">
-        <div className="text-center text-muted-foreground">Loading member...</div>
+        <div className="text-center text-[#6F6F6B]">Loading member...</div>
       </div>
     );
   }
@@ -44,7 +44,7 @@ export default function MemberProfile() {
       <div className="container py-8">
         <div className="text-center">
           <h2 className="text-2xl font-bold">Member Not Found</h2>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-[#6F6F6B] mt-2">
             The member you're looking for doesn't exist.
           </p>
           <Link href="/members">
@@ -106,18 +106,18 @@ export default function MemberProfile() {
               <div className="space-y-3">
                 {member.email && (
                   <div className="flex items-center gap-2 text-sm">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <Mail className="h-4 w-4 text-[#6F6F6B]" />
                     <span>{member.email}</span>
                   </div>
                 )}
                 {member.phone && (
                   <div className="flex items-center gap-2 text-sm">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <Phone className="h-4 w-4 text-[#6F6F6B]" />
                     <span>{member.phone}</span>
                   </div>
                 )}
                 <div className="flex items-center gap-2 text-sm">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <Calendar className="h-4 w-4 text-[#6F6F6B]" />
                   <span>Joined {format(new Date(member.joinDate), "MMM d, yyyy")}</span>
                 </div>
               </div>
@@ -126,12 +126,12 @@ export default function MemberProfile() {
 
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Membership</span>
+                  <span className="text-[#6F6F6B]">Membership</span>
                   <span className="font-medium">{getTierLabel(member.membershipTier)}</span>
                 </div>
                 {member.renewalDate && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Renewal</span>
+                    <span className="text-[#6F6F6B]">Renewal</span>
                     <span className="font-medium">
                       {format(new Date(member.renewalDate), "MMM d, yyyy")}
                     </span>
@@ -149,8 +149,8 @@ export default function MemberProfile() {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">Lifetime Value</span>
+                  <DollarSign className="h-4 w-4 text-[#6F6F6B]" />
+                  <span className="text-sm text-[#6F6F6B]">Lifetime Value</span>
                 </div>
                 <span className="font-bold text-lg">
                   ${parseFloat(member.lifetimeValue).toLocaleString()}
@@ -161,8 +161,8 @@ export default function MemberProfile() {
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">Total Visits</span>
+                  <TrendingUp className="h-4 w-4 text-[#6F6F6B]" />
+                  <span className="text-sm text-[#6F6F6B]">Total Visits</span>
                 </div>
                 <span className="font-bold text-lg">{member.totalVisits}</span>
               </div>
@@ -171,8 +171,8 @@ export default function MemberProfile() {
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <BookOpen className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">Total Lessons</span>
+                  <BookOpen className="h-4 w-4 text-[#6F6F6B]" />
+                  <span className="text-sm text-[#6F6F6B]">Total Lessons</span>
                 </div>
                 <span className="font-bold text-lg">{member.totalLessons}</span>
               </div>
@@ -192,10 +192,10 @@ export default function MemberProfile() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex items-center gap-3">
-                    <Award className="h-5 w-5 text-muted-foreground" />
+                    <Award className="h-5 w-5 text-[#6F6F6B]" />
                     <div>
                       <div className="font-medium">Boomerangme</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-sm text-[#6F6F6B]">
                         {member.loyaltyPoints} points
                       </div>
                     </div>
@@ -207,10 +207,10 @@ export default function MemberProfile() {
 
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex items-center gap-3">
-                    <MessageSquare className="h-5 w-5 text-muted-foreground" />
+                    <MessageSquare className="h-5 w-5 text-[#6F6F6B]" />
                     <div>
                       <div className="font-medium">Email Subscription</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-sm text-[#6F6F6B]">
                         {member.emailSubscribed ? (
                           <span>Subscribed • Score: {member.emailEngagementScore}</span>
                         ) : (
@@ -226,10 +226,10 @@ export default function MemberProfile() {
 
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex items-center gap-3">
-                    <CreditCard className="h-5 w-5 text-muted-foreground" />
+                    <CreditCard className="h-5 w-5 text-[#6F6F6B]" />
                     <div>
                       <div className="font-medium">Toast POS</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-sm text-[#6F6F6B]">
                         ${parseFloat(member.totalPurchases).toLocaleString()} spent
                       </div>
                     </div>
@@ -241,10 +241,10 @@ export default function MemberProfile() {
 
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex items-center gap-3">
-                    <BookOpen className="h-5 w-5 text-muted-foreground" />
+                    <BookOpen className="h-5 w-5 text-[#6F6F6B]" />
                     <div>
                       <div className="font-medium">Acuity</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-sm text-[#6F6F6B]">
                         {member.totalLessons} lessons
                       </div>
                     </div>
@@ -265,21 +265,21 @@ export default function MemberProfile() {
             </CardHeader>
             <CardContent>
               {appointmentsLoading ? (
-                <div className="text-center py-4 text-muted-foreground">Loading appointments...</div>
+                <div className="text-center py-4 text-[#6F6F6B]">Loading appointments...</div>
               ) : !appointments || appointments.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="text-center py-8 text-[#6F6F6B]">
                   No appointments recorded
                 </div>
               ) : (
                 <div className="space-y-4">
                   {appointments.map((apt: any) => (
                     <div key={apt.id} className="flex gap-4 p-4 border rounded-lg">
-                      <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-primary" />
+                      <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-[#F2DD48]" />
                       <div className="flex-1">
                         <div className="flex items-start justify-between">
                           <div>
                             <div className="font-medium">{apt.appointmentType}</div>
-                            <div className="text-sm text-muted-foreground">
+                            <div className="text-sm text-[#6F6F6B]">
                               {format(new Date(apt.appointmentDate), "MMM d, yyyy 'at' h:mm a")}
                             </div>
                             {apt.category && (
@@ -300,12 +300,12 @@ export default function MemberProfile() {
                           </div>
                         </div>
                         {apt.notes && (
-                          <div className="mt-2 text-sm text-muted-foreground">
+                          <div className="mt-2 text-sm text-[#6F6F6B]">
                             {apt.notes}
                           </div>
                         )}
                         {apt.location && (
-                          <div className="mt-1 text-xs text-muted-foreground">
+                          <div className="mt-1 text-xs text-[#6F6F6B]">
                             Location: {apt.location}
                           </div>
                         )}
@@ -327,10 +327,10 @@ export default function MemberProfile() {
               <div className="space-y-4">
                 {member.lastVisitDate && (
                   <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-primary" />
+                    <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-[#F2DD48]" />
                     <div className="flex-1">
                       <div className="font-medium">Last Visit</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-sm text-[#6F6F6B]">
                         {format(new Date(member.lastVisitDate), "MMM d, yyyy 'at' h:mm a")}
                       </div>
                     </div>
@@ -342,7 +342,7 @@ export default function MemberProfile() {
                     <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-green-500" />
                     <div className="flex-1">
                       <div className="font-medium">Last Purchase</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-sm text-[#6F6F6B]">
                         {format(new Date(member.lastPurchaseDate), "MMM d, yyyy 'at' h:mm a")}
                       </div>
                     </div>
@@ -351,10 +351,10 @@ export default function MemberProfile() {
 
                 {member.lastEmailOpen && (
                   <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-[#888888]/100" />
+                    <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-[#6F6F6B]/100" />
                     <div className="flex-1">
                       <div className="font-medium">Email Opened</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-sm text-[#6F6F6B]">
                         {format(new Date(member.lastEmailOpen), "MMM d, yyyy 'at' h:mm a")}
                       </div>
                     </div>
@@ -363,10 +363,10 @@ export default function MemberProfile() {
 
                 {member.lastLessonDate && (
                   <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-[#888888]/100" />
+                    <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-[#6F6F6B]/100" />
                     <div className="flex-1">
                       <div className="font-medium">Last Lesson</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-sm text-[#6F6F6B]">
                         {format(new Date(member.lastLessonDate), "MMM d, yyyy 'at' h:mm a")}
                       </div>
                     </div>
@@ -377,7 +377,7 @@ export default function MemberProfile() {
                   !member.lastPurchaseDate &&
                   !member.lastEmailOpen &&
                   !member.lastLessonDate && (
-                    <div className="text-center py-8 text-muted-foreground">
+                    <div className="text-center py-8 text-[#6F6F6B]">
                       No activity recorded yet
                     </div>
                   )}

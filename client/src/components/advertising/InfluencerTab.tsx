@@ -31,7 +31,7 @@ export function InfluencerTab() {
     { label: "Total Reach", value: fmtNum(totalReach), icon: <Eye size={16} />, color: "text-blue-400" },
     { label: "Engagements", value: fmtNum(totalEngagements), icon: <Heart size={16} />, color: "text-pink-400" },
     { label: "Bookings Generated", value: fmtNum(totalBookings), icon: <Target size={16} />, color: "text-green-400" },
-    { label: "Cost Per Engagement", value: avgCPE > 0 ? `$${avgCPE.toFixed(3)}` : "—", icon: <TrendingUp size={16} />, color: "text-[#F5C72C]" },
+    { label: "Cost Per Engagement", value: avgCPE > 0 ? `$${avgCPE.toFixed(3)}` : "—", icon: <TrendingUp size={16} />, color: "text-[#F2DD48]" },
   ];
 
   return (
@@ -154,7 +154,7 @@ export function InfluencerTab() {
                   <div className="mt-4 grid grid-cols-3 sm:grid-cols-6 gap-3 pt-3 border-t border-border">
                     {metrics.map(m => (
                       <div key={m.label} className="text-center">
-                        <div className={`text-sm font-semibold ${m.highlight ? "text-[#F5C72C]" : "text-foreground"}`}>
+                        <div className={`text-sm font-semibold ${m.highlight ? "text-[#F2DD48]" : "text-foreground"}`}>
                           {m.value}
                         </div>
                         <div className="text-xs text-muted-foreground">{m.label}</div>

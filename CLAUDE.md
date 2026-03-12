@@ -640,3 +640,60 @@ Yellow bar 사용 금지 — yellow는 MAX callout에만
 | GolfVX_App_Design_System.md | Studio Soo 프로젝트 | 앱 디자인 언어 원본 레퍼런스 (v1.0) |
 | GolfVXBrandGuidelines202601201TK.pdf | 프로젝트 파일 | 2026 공식 브랜드 가이드 (Layer 1) |
 | GolfVX_App_Design_System.docx | Studio Soo 프로젝트 | 위 md의 Word 버전 |
+
+---
+
+## Layout Grid (Layer 2)
+
+### 페이지 기본 구조
+
+```
+사이드바 너비: 220px (fixed)
+메인 콘텐츠 시작 X: 220px + 24px margin = 244px
+메인 콘텐츠 최대 너비: calc(100vw - 244px)
+내부 패딩: 32px (top), 32px (right), 32px (bottom), 32px (left)
+Tailwind: p-8
+```
+
+### 페이지 헤더
+
+```
+"Good morning, {name}": 28px / bold / --gvx-text-primary (#222222)
+  → margin-top: 0 (페이지 콘텐츠 최상단 기준)
+  → margin-bottom: 4px
+
+서브타이틀 (날짜/설명): 13px / regular / --gvx-text-secondary (#6F6F6B)
+  → margin-bottom: 32px
+
+페이지 제목 (h1, e.g. "Overview", "Activities"):
+  → font-size: var(--gvx-text-xl) = 20px
+  → font-weight: 600 (semibold)
+  → margin-bottom: 24px
+```
+
+공통 컴포넌트: `client/src/components/layout/PageHeader.tsx`, `client/src/components/layout/PageTitle.tsx`
+
+### 카드 박스
+
+```
+카드 padding: 20px 24px
+카드 border-radius: 10px
+카드 border: 1px solid var(--gvx-border, #DEDEDA)
+카드 background: #FFFFFF
+```
+
+### 카드 간격 (gap)
+
+```
+row gap: 16px
+column gap: 16px
+섹션 간 gap: 32px
+```
+
+### 내부 텍스트 여백
+
+```
+카드 내 섹션 제목 → margin-bottom: 8px
+카드 내 항목 간 → gap: 12px
+카드 내 stat → gap: 24px (좌우)
+```

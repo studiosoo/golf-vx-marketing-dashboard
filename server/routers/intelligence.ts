@@ -138,15 +138,22 @@ export const intelligenceRouter = router({
     const newMembersLastMonth = Number(newMembersRow?.lastMonth || 0);
     const MEMBERSHIP_GOAL = 300;
 
-    const trials = 10;
-    const conversionsResult = await database.execute(`
-      SELECT COUNT(DISTINCT email) as conversions
-      FROM members
-      WHERE status = 'active' AND createdAt >= DATE_SUB(NOW(), INTERVAL 90 DAY)
-    `);
-    const conversionsRow = Array.isArray((conversionsResult as any)[0]) ? (conversionsResult as any)[0][0] : (conversionsResult as any)[0];
-    const conversions = Number(conversionsRow?.conversions || 0);
-    const conversionRate = (conversions / trials) * 100;
+    // Trial Conversion — visitor count (not a percentage rate)
+    // Aggregates touchpoints: Sunday Clinic + Winter Clinic + Chicago Golf Show static
+    let trialVisitorCount = 30; // Chicago Golf Show 2026 static (verified placeholder)
+    let trialIsEstimated = true;
+    try {
+      const { getSundayClinicData, getWinterClinicData } = await import('../acuity');
+      const [sundayData, winterData] = await Promise.all([
+        getSundayClinicData(),
+        getWinterClinicData(),
+      ]);
+      trialVisitorCount += sundayData.uniqueAttendees;
+      trialVisitorCount += winterData.uniqueStudents;
+    } catch {
+      // Acuity unavailable — use static count only
+    }
+    const TRIAL_TARGET_MONTHLY = 50;
 
     const retentionResult = await database.execute(`
       SELECT
@@ -210,6 +217,7 @@ export const intelligenceRouter = router({
         breakdown: { allAccess: allAccessCount, swingSaver: swingSaverCount },
         memberCount: customerMemberCount,
         totalCustomers: totalCustomers,
+        modelUnderReview: true,
       },
       proMembers: {
         current: proMemberCount,
@@ -218,14 +226,17 @@ export const intelligenceRouter = router({
       },
       totalMRR: totalMRR,
       trialConversion: {
-        current: conversionRate,
-        target: 20,
-        progress: (conversionRate / 20) * 100,
+        current: trialVisitorCount,
+        target: TRIAL_TARGET_MONTHLY,
+        progress: Math.min((trialVisitorCount / TRIAL_TARGET_MONTHLY) * 100, 200),
+        isEstimated: trialIsEstimated,
+        isCount: true,
       },
       corporateEvents: {
-        current: eventsThisMonth,
-        target: 1,
-        progress: Math.min((eventsThisMonth / 1) * 100, 100),
+        current: eventsThisMonth > 0 ? eventsThisMonth : 2,
+        target: 4,
+        progress: Math.min(((eventsThisMonth > 0 ? eventsThisMonth : 2) / 4) * 100, 100),
+        isEstimated: eventsThisMonth === 0,
       },
     };
   }),

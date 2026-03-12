@@ -26,7 +26,7 @@ export default function SummerCamp() {
           {/* Logo */}
           <div className="mb-8">
             <h1 className="text-5xl md:text-7xl font-black tracking-tight">
-              GOLF<span className="text-[#F5C72C]">VX</span>
+              GOLF<span className="text-[#F2DD48]">VX</span>
             </h1>
             <p className="text-xl font-medium tracking-wide">{VENUE_CONFIG.shortName}</p>
           </div>
@@ -40,7 +40,7 @@ export default function SummerCamp() {
 
           {/* PBGA Badge */}
           <div className="mb-6">
-            <div className="inline-block bg-[#F5C72C] text-black px-8 py-2 rounded-full">
+            <div className="inline-block bg-[#F2DD48] text-black px-8 py-2 rounded-full">
               <p className="text-2xl font-bold">with PBGA</p>
             </div>
             <p className="text-xl mt-2">Play Better Golf Academy</p>
@@ -57,7 +57,7 @@ export default function SummerCamp() {
           <Button 
             onClick={scrollToBooking}
             size="lg"
-            className="bg-[#F5C72C] hover:bg-yellow-500 text-black font-bold text-lg px-12 py-6 rounded-full"
+            className="bg-[#F2DD48] hover:bg-yellow-500 text-black font-bold text-lg px-12 py-6 rounded-full"
           >
             LEARN MORE ABOUT SUMMER CAMP
           </Button>
@@ -85,7 +85,7 @@ export default function SummerCamp() {
             {/* Elite Coaching */}
             <Card className="text-center">
               <CardHeader>
-                <div className="mx-auto mb-4 w-16 h-16 bg-[#F5C72C] rounded-full flex items-center justify-center">
+                <div className="mx-auto mb-4 w-16 h-16 bg-[#F2DD48] rounded-full flex items-center justify-center">
                   <Trophy className="w-8 h-8 text-black" />
                 </div>
                 <CardTitle className="text-2xl">ELITE COACHING</CardTitle>
@@ -95,19 +95,19 @@ export default function SummerCamp() {
               </CardHeader>
               <CardContent className="text-left space-y-2">
                 <div className="flex items-start gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-[#F5C72C] flex-shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-5 h-5 text-[#F2DD48] flex-shrink-0 mt-0.5" />
                   <p>40+ years of PGA teaching experience</p>
                 </div>
                 <div className="flex items-start gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-[#F5C72C] flex-shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-5 h-5 text-[#F2DD48] flex-shrink-0 mt-0.5" />
                   <p>18-time Illinois PGA Teacher of the Year nominee</p>
                 </div>
                 <div className="flex items-start gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-[#F5C72C] flex-shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-5 h-5 text-[#F2DD48] flex-shrink-0 mt-0.5" />
                   <p>2006 Illinois PGA Teacher of the Year</p>
                 </div>
                 <div className="flex items-start gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-[#F5C72C] flex-shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-5 h-5 text-[#F2DD48] flex-shrink-0 mt-0.5" />
                   <p>Former Golf Digest Top 10 Teacher in Illinois</p>
                 </div>
               </CardContent>
@@ -116,7 +116,7 @@ export default function SummerCamp() {
             {/* Technology + Safety */}
             <Card className="text-center">
               <CardHeader>
-                <div className="mx-auto mb-4 w-16 h-16 bg-[#F5C72C] rounded-full flex items-center justify-center">
+                <div className="mx-auto mb-4 w-16 h-16 bg-[#F2DD48] rounded-full flex items-center justify-center">
                   <TrendingUp className="w-8 h-8 text-black" />
                 </div>
                 <CardTitle className="text-2xl">TECHNOLOGY + SAFETY</CardTitle>
@@ -126,19 +126,19 @@ export default function SummerCamp() {
               </CardHeader>
               <CardContent className="text-left space-y-2">
                 <div className="flex items-start gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-[#F5C72C] flex-shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-5 h-5 text-[#F2DD48] flex-shrink-0 mt-0.5" />
                   <p>Real-time swing feedback and performance tracking</p>
                 </div>
                 <div className="flex items-start gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-[#F5C72C] flex-shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-5 h-5 text-[#F2DD48] flex-shrink-0 mt-0.5" />
                   <p>Data-driven instruction for faster improvement</p>
                 </div>
                 <div className="flex items-start gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-[#F5C72C] flex-shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-5 h-5 text-[#F2DD48] flex-shrink-0 mt-0.5" />
                   <p>Climate-controlled, weather-proof setting</p>
                 </div>
                 <div className="flex items-start gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-[#F5C72C] flex-shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-5 h-5 text-[#F2DD48] flex-shrink-0 mt-0.5" />
                   <p>Safe, comfortable environment for juniors</p>
                 </div>
               </CardContent>
@@ -147,7 +147,7 @@ export default function SummerCamp() {
             {/* Real On-Course Experience */}
             <Card className="text-center">
               <CardHeader>
-                <div className="mx-auto mb-4 w-16 h-16 bg-[#F5C72C] rounded-full flex items-center justify-center">
+                <div className="mx-auto mb-4 w-16 h-16 bg-[#F2DD48] rounded-full flex items-center justify-center">
                   <Users className="w-8 h-8 text-black" />
                 </div>
                 <CardTitle className="text-2xl">REAL ON-COURSE EXPERIENCE</CardTitle>
@@ -157,19 +157,19 @@ export default function SummerCamp() {
               </CardHeader>
               <CardContent className="text-left space-y-2">
                 <div className="flex items-start gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-[#F5C72C] flex-shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-5 h-5 text-[#F2DD48] flex-shrink-0 mt-0.5" />
                   <p>Apply training to real golf situations every Friday</p>
                 </div>
                 <div className="flex items-start gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-[#F5C72C] flex-shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-5 h-5 text-[#F2DD48] flex-shrink-0 mt-0.5" />
                   <p>Build course management and competitive skills</p>
                 </div>
                 <div className="flex items-start gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-[#F5C72C] flex-shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-5 h-5 text-[#F2DD48] flex-shrink-0 mt-0.5" />
                   <p>Included for both Half-Day and Full-Day campers</p>
                 </div>
                 <div className="flex items-start gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-[#F5C72C] flex-shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-5 h-5 text-[#F2DD48] flex-shrink-0 mt-0.5" />
                   <p>On-course play at Twin Lakes Golf Course</p>
                 </div>
               </CardContent>
@@ -202,18 +202,18 @@ export default function SummerCamp() {
       </section>
 
       {/* Limited Time Offers */}
-      <section className="py-12 px-4 bg-[#F5C72C]">
+      <section className="py-12 px-4 bg-[#F2DD48]">
         <div className="container max-w-4xl">
           <h3 className="text-3xl font-black text-center mb-6">LIMITED TIME OFFERS</h3>
           <div className="space-y-3 text-center text-lg">
             <p>
               <strong>Early Bird:</strong> $50 OFF Full-Day Camp — use code{" "}
-              <Badge className="bg-black text-[#F5C72C] font-mono text-base">EARLYBIRD50</Badge>{" "}
+              <Badge className="bg-black text-[#F2DD48] font-mono text-base">EARLYBIRD50</Badge>{" "}
               (through March 31)
             </p>
             <p>
               <strong>Sibling Discount:</strong> $100 OFF Full-Day Camp for families enrolling 2+ children — use code{" "}
-              <Badge className="bg-black text-[#F5C72C] font-mono text-base">SIBLING100</Badge>
+              <Badge className="bg-black text-[#F2DD48] font-mono text-base">SIBLING100</Badge>
             </p>
           </div>
         </div>
@@ -240,15 +240,15 @@ export default function SummerCamp() {
                 </p>
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-[#F5C72C] flex-shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-4 h-4 text-[#F2DD48] flex-shrink-0 mt-0.5" />
                     <span>Games-based learning and motor skill development</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-[#F5C72C] flex-shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-4 h-4 text-[#F2DD48] flex-shrink-0 mt-0.5" />
                     <span>Putting, chipping, balance, and coordination</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-[#F5C72C] flex-shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-4 h-4 text-[#F2DD48] flex-shrink-0 mt-0.5" />
                     <span>Designed specifically for first-time golfers</span>
                   </li>
                 </ul>
@@ -260,7 +260,7 @@ export default function SummerCamp() {
               <CardFooter>
                 <Button 
                   onClick={scrollToBooking}
-                  className="w-full bg-[#F5C72C] hover:bg-yellow-500 text-black font-bold"
+                  className="w-full bg-[#F2DD48] hover:bg-yellow-500 text-black font-bold"
                 >
                   REGISTER NOW
                 </Button>
@@ -268,7 +268,7 @@ export default function SummerCamp() {
             </Card>
 
             {/* Half-Day Camp */}
-            <Card className="border-2 border-[#F5C72C]">
+            <Card className="border-2 border-[#F2DD48]">
               <CardHeader className="text-center">
                 <CardTitle className="text-2xl">HALF-DAY CAMP</CardTitle>
                 <CardDescription className="text-base">
@@ -282,19 +282,19 @@ export default function SummerCamp() {
                 </p>
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-[#F5C72C] flex-shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-4 h-4 text-[#F2DD48] flex-shrink-0 mt-0.5" />
                     <span>Putting, chipping, pitching, and swing fundamentals</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-[#F5C72C] flex-shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-4 h-4 text-[#F2DD48] flex-shrink-0 mt-0.5" />
                     <span>Small-group, skill-based training</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-[#F5C72C] flex-shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-4 h-4 text-[#F2DD48] flex-shrink-0 mt-0.5" />
                     <span>Friday on-course Field Day at Twin Lakes Golf Course</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-[#F5C72C] flex-shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-4 h-4 text-[#F2DD48] flex-shrink-0 mt-0.5" />
                     <span>Snack and drink included</span>
                   </li>
                 </ul>
@@ -306,7 +306,7 @@ export default function SummerCamp() {
               <CardFooter>
                 <Button 
                   onClick={scrollToBooking}
-                  className="w-full bg-[#F5C72C] hover:bg-yellow-500 text-black font-bold"
+                  className="w-full bg-[#F2DD48] hover:bg-yellow-500 text-black font-bold"
                 >
                   REGISTER NOW
                 </Button>
@@ -328,19 +328,19 @@ export default function SummerCamp() {
                 </p>
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-[#F5C72C] flex-shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-4 h-4 text-[#F2DD48] flex-shrink-0 mt-0.5" />
                     <span>Morning PGA-led instruction</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-[#F5C72C] flex-shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-4 h-4 text-[#F2DD48] flex-shrink-0 mt-0.5" />
                     <span>Afternoon guided practice & simulator play</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-[#F5C72C] flex-shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-4 h-4 text-[#F2DD48] flex-shrink-0 mt-0.5" />
                     <span>Friday on-course Field Day at Twin Lakes Golf Course</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-[#F5C72C] flex-shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-4 h-4 text-[#F2DD48] flex-shrink-0 mt-0.5" />
                     <span>Lunch, snack, and drink included</span>
                   </li>
                 </ul>
@@ -352,7 +352,7 @@ export default function SummerCamp() {
               <CardFooter>
                 <Button 
                   onClick={scrollToBooking}
-                  className="w-full bg-[#F5C72C] hover:bg-yellow-500 text-black font-bold"
+                  className="w-full bg-[#F2DD48] hover:bg-yellow-500 text-black font-bold"
                 >
                   REGISTER NOW
                 </Button>
@@ -402,7 +402,7 @@ export default function SummerCamp() {
             <Button 
               onClick={scrollToBooking}
               size="lg"
-              className="bg-[#F5C72C] hover:bg-yellow-500 text-black font-bold text-lg px-12 py-6"
+              className="bg-[#F2DD48] hover:bg-yellow-500 text-black font-bold text-lg px-12 py-6"
             >
               CHECK AVAILABILITY & BOOK
             </Button>
@@ -441,7 +441,7 @@ export default function SummerCamp() {
       </section>
 
       {/* Final CTA */}
-      <section id="booking" className="py-20 px-4 bg-[#F5C72C]">
+      <section id="booking" className="py-20 px-4 bg-[#F2DD48]">
         <div className="container max-w-4xl text-center">
           <h2 className="text-4xl font-black mb-6">
             BOOK EARLY TO SECURE YOUR PREFERRED WEEK
@@ -451,13 +451,13 @@ export default function SummerCamp() {
           </p>
           <p className="text-lg mb-8">
             Early Bird and sibling discounts available.<br />
-            Use <Badge className="bg-black text-[#F5C72C] font-mono">EARLYBIRD50</Badge> or{" "}
-            <Badge className="bg-black text-[#F5C72C] font-mono">SIBLING100</Badge> at checkout.
+            Use <Badge className="bg-black text-[#F2DD48] font-mono">EARLYBIRD50</Badge> or{" "}
+            <Badge className="bg-black text-[#F2DD48] font-mono">SIBLING100</Badge> at checkout.
           </p>
 
           <Button 
             size="lg"
-            className="bg-black hover:bg-gray-900 text-[#F5C72C] font-bold text-xl px-16 py-8 rounded-full"
+            className="bg-black hover:bg-gray-900 text-[#F2DD48] font-bold text-xl px-16 py-8 rounded-full"
             onClick={() => window.open("https://acuityscheduling.com/schedule.php?owner=33868387", "_blank")}
           >
             BOOK SUMMER CAMP

@@ -49,20 +49,20 @@ function SubmissionsModal({
 
   return (
     <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-      <div className="bg-card border border-border rounded-xl w-full max-w-3xl max-h-[80vh] flex flex-col">
+      <div className="bg-white border border-[#DEDEDA] rounded-xl w-full max-w-3xl max-h-[80vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-border">
+        <div className="flex items-center justify-between p-5 border-b border-[#DEDEDA]">
           <div>
             <h2 className="font-bold text-lg" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
               {funnelName}
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-[#6F6F6B]">
               {isLoading ? "Loading..." : `${submissions.length} contacts`}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
+            className="p-2 text-[#6F6F6B] hover:text-[#222222] hover:bg-[#F1F1EF] rounded-md transition-colors"
           >
             <X size={18} />
           </button>
@@ -72,10 +72,10 @@ function SubmissionsModal({
         <div className="flex-1 overflow-y-auto p-5">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 size={24} className="animate-spin text-primary" />
+              <Loader2 size={24} className="animate-spin text-[#F2DD48]" />
             </div>
           ) : submissions.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
+            <div className="text-center py-12 text-[#6F6F6B]">
               No submissions found for this funnel
             </div>
           ) : (
@@ -83,10 +83,10 @@ function SubmissionsModal({
               {submissions.map((sub: Submission) => (
                 <div
                   key={sub.id}
-                  className="flex items-start gap-4 p-3 bg-background border border-border rounded-lg"
+                  className="flex items-start gap-4 p-3 bg-white border border-[#DEDEDA] rounded-lg"
                 >
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <span className="text-xs font-bold text-primary">
+                  <div className="w-8 h-8 rounded-full bg-[#F2DD48]/10 flex items-center justify-center shrink-0">
+                    <span className="text-xs font-bold text-[#F2DD48]">
                       {((sub.firstName || sub.email || "?")[0]).toUpperCase()}
                     </span>
                   </div>
@@ -96,32 +96,32 @@ function SubmissionsModal({
                     </div>
                     <div className="flex flex-wrap gap-3 mt-1">
                       {sub.email && (
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1 text-xs text-[#6F6F6B]">
                           <Mail size={10} />
                           {sub.email}
                         </span>
                       )}
                       {sub.phone && (
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1 text-xs text-[#6F6F6B]">
                           <Phone size={10} />
                           {sub.phone}
                         </span>
                       )}
                       {(sub.city || sub.state) && (
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1 text-xs text-[#6F6F6B]">
                           <MapPin size={10} />
                           {[sub.city, sub.state].filter(Boolean).join(", ")}
                         </span>
                       )}
                       {sub.golfLevel && (
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1 text-xs text-[#6F6F6B]">
                           <Trophy size={10} />
                           {sub.golfLevel}
                         </span>
                       )}
                     </div>
                   </div>
-                  <div className="text-xs text-muted-foreground shrink-0">
+                  <div className="text-xs text-[#6F6F6B] shrink-0">
                     {sub.submittedAt ? new Date(sub.submittedAt).toLocaleDateString("en-US", {
                       month: "short",
                       day: "numeric",
@@ -188,33 +188,33 @@ function UvPvEditModal({
 
   return (
     <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-      <div className="bg-card border border-border rounded-xl w-full max-w-sm">
-        <div className="flex items-center justify-between p-5 border-b border-border">
+      <div className="bg-white border border-[#DEDEDA] rounded-xl w-full max-w-sm">
+        <div className="flex items-center justify-between p-5 border-b border-[#DEDEDA]">
           <div>
             <h2 className="font-bold text-base" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
               Edit UV/PV Stats
             </h2>
-            <p className="text-xs text-muted-foreground mt-0.5 max-w-[220px] truncate">
+            <p className="text-xs text-[#6F6F6B] mt-0.5 max-w-[220px] truncate">
               {funnel.funnelName}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
+            className="p-2 text-[#6F6F6B] hover:text-[#222222] hover:bg-[#F1F1EF] rounded-md transition-colors"
           >
             <X size={16} />
           </button>
         </div>
 
         <div className="p-5 space-y-4">
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-[#6F6F6B]">
             ClickFunnels API does not expose visit counts. Enter the values manually from your ClickFunnels dashboard.
           </p>
 
           <div className="space-y-3">
             <div>
-              <label className="text-xs font-medium text-foreground mb-1.5 flex items-center gap-1.5">
-                <Eye size={12} className="text-primary" />
+              <label className="text-xs font-medium text-[#222222] mb-1.5 flex items-center gap-1.5">
+                <Eye size={12} className="text-[#F2DD48]" />
                 Unique Visitors (UV)
               </label>
               <input
@@ -223,12 +223,12 @@ function UvPvEditModal({
                 value={uv}
                 onChange={(e) => setUv(e.target.value)}
                 placeholder="e.g. 176"
-                className="w-full px-3 py-2 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                className="w-full px-3 py-2 text-sm bg-white border border-[#DEDEDA] rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-foreground mb-1.5 flex items-center gap-1.5">
-                <BarChart2 size={12} className="text-primary" />
+              <label className="text-xs font-medium text-[#222222] mb-1.5 flex items-center gap-1.5">
+                <BarChart2 size={12} className="text-[#F2DD48]" />
                 Page Views (PV)
               </label>
               <input
@@ -237,18 +237,18 @@ function UvPvEditModal({
                 value={pv}
                 onChange={(e) => setPv(e.target.value)}
                 placeholder="e.g. 312"
-                className="w-full px-3 py-2 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                className="w-full px-3 py-2 text-sm bg-white border border-[#DEDEDA] rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
               />
             </div>
           </div>
 
           {/* Conversion rate preview */}
           {parseInt(uv) > 0 && funnel.optInCount > 0 && (
-            <div className="bg-primary/5 border border-primary/20 rounded-md p-3">
-              <p className="text-xs text-muted-foreground">Conversion Rate Preview</p>
-              <p className="text-sm font-semibold text-primary mt-0.5">
+            <div className="bg-[#FDF9E3] border border-[#F2DD48]/20 rounded-md p-3">
+              <p className="text-xs text-[#6F6F6B]">Conversion Rate Preview</p>
+              <p className="text-sm font-semibold text-[#F2DD48] mt-0.5">
                 {((funnel.optInCount / parseInt(uv)) * 100).toFixed(1)}% opt-in rate
-                <span className="text-xs font-normal text-muted-foreground ml-1">
+                <span className="text-xs font-normal text-[#6F6F6B] ml-1">
                   ({funnel.optInCount} opt-ins / {parseInt(uv).toLocaleString()} UV)
                 </span>
               </p>
@@ -258,14 +258,14 @@ function UvPvEditModal({
           <div className="flex gap-2 pt-1">
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-2 text-sm border border-border rounded-md hover:bg-muted transition-colors"
+              className="flex-1 px-4 py-2 text-sm border border-[#DEDEDA] rounded-md hover:bg-[#F1F1EF] transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={updateMutation.isPending}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm bg-[#F2DD48] text-[#222222] rounded-md hover:brightness-95 transition-colors disabled:opacity-50"
             >
               {updateMutation.isPending ? (
                 <Loader2 size={14} className="animate-spin" />
@@ -291,49 +291,49 @@ function FunnelCard({ funnel, onRefetch }: { funnel: FunnelSummary; onRefetch: (
 
   return (
     <>
-      <div className="bg-card border border-border rounded-lg p-5">
+      <div className="bg-white border border-[#DEDEDA] rounded-lg p-5">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-foreground truncate">{funnel.funnelName}</h3>
+            <h3 className="font-semibold text-[#222222] truncate">{funnel.funnelName}</h3>
             <div className="flex items-center gap-2 mt-1">
               <span className={`text-xs px-2 py-0.5 rounded-full ${
                 funnel.archived
-                  ? "bg-muted text-muted-foreground"
-                  : "bg-green-500/10 text-[#3DB855]"
+                  ? "bg-[#F1F1EF] text-[#6F6F6B]"
+                  : "bg-green-500/10 text-[#72B84A]"
               }`}>
                 {funnel.archived ? "Archived" : "Active"}
               </span>
               {conversionRate && (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-[#F2DD48]/10 text-[#F2DD48] font-medium">
                   {conversionRate}% CVR
                 </span>
               )}
             </div>
           </div>
-          <Target size={18} className="text-muted-foreground shrink-0" />
+          <Target size={18} className="text-[#6F6F6B] shrink-0" />
         </div>
 
         {/* UV / PV row */}
-        <div className="flex items-center justify-between mb-3 p-2.5 bg-muted/40 rounded-md">
+        <div className="flex items-center justify-between mb-3 p-2.5 bg-[#F6F6F4] rounded-md">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5">
-              <Eye size={12} className="text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">UV</span>
-              <span className="text-sm font-semibold text-foreground">
+              <Eye size={12} className="text-[#6F6F6B]" />
+              <span className="text-xs text-[#6F6F6B]">UV</span>
+              <span className="text-sm font-semibold text-[#222222]">
                 {funnel.uniqueVisitors > 0 ? funnel.uniqueVisitors.toLocaleString() : "—"}
               </span>
             </div>
             <div className="flex items-center gap-1.5">
-              <BarChart2 size={12} className="text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">PV</span>
-              <span className="text-sm font-semibold text-foreground">
+              <BarChart2 size={12} className="text-[#6F6F6B]" />
+              <span className="text-xs text-[#6F6F6B]">PV</span>
+              <span className="text-sm font-semibold text-[#222222]">
                 {funnel.pageViews > 0 ? funnel.pageViews.toLocaleString() : "—"}
               </span>
             </div>
           </div>
           <button
             onClick={() => setShowUvPvModal(true)}
-            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+            className="flex items-center gap-1 text-xs text-[#6F6F6B] hover:text-[#F2DD48] transition-colors"
             title="Edit UV/PV stats"
           >
             <Pencil size={11} />
@@ -343,27 +343,27 @@ function FunnelCard({ funnel, onRefetch }: { funnel: FunnelSummary; onRefetch: (
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <div className="text-xs text-muted-foreground mb-1">Opt-In Count</div>
+            <div className="text-xs text-[#6F6F6B] mb-1">Opt-In Count</div>
             <button
               onClick={() => setShowModal(true)}
-              className="text-2xl font-bold text-primary hover:text-primary/80 transition-colors cursor-pointer"
+              className="text-2xl font-bold text-[#F2DD48] hover:text-[#F2DD48]/80 transition-colors cursor-pointer"
               title="Click to view contacts"
             >
               {funnel.optInCount.toLocaleString()}
             </button>
-            <div className="text-xs text-muted-foreground">total opt-ins</div>
+            <div className="text-xs text-[#6F6F6B]">total opt-ins</div>
           </div>
           <div>
-            <div className="text-xs text-muted-foreground mb-1">Submissions</div>
-            <div className="text-2xl font-bold text-foreground">
+            <div className="text-xs text-[#6F6F6B] mb-1">Submissions</div>
+            <div className="text-2xl font-bold text-[#222222]">
               {funnel.submissionCount.toLocaleString()}
             </div>
-            <div className="text-xs text-muted-foreground">form submissions</div>
+            <div className="text-xs text-[#6F6F6B]">form submissions</div>
           </div>
         </div>
 
         {funnel.lastSubmission && (
-          <div className="mt-4 pt-4 border-t border-border flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="mt-4 pt-4 border-t border-[#DEDEDA] flex items-center gap-2 text-xs text-[#6F6F6B]">
             <Calendar size={12} />
             Last submission: {new Date(funnel.lastSubmission).toLocaleDateString("en-US", {
               month: "short",
@@ -375,7 +375,7 @@ function FunnelCard({ funnel, onRefetch }: { funnel: FunnelSummary; onRefetch: (
 
         <button
           onClick={() => setShowModal(true)}
-          className="mt-3 w-full flex items-center justify-center gap-2 py-2 text-xs text-muted-foreground hover:text-foreground border border-border hover:border-primary/50 rounded-md transition-colors"
+          className="mt-3 w-full flex items-center justify-center gap-2 py-2 text-xs text-[#6F6F6B] hover:text-[#222222] border border-[#DEDEDA] hover:border-[#F2DD48]/50 rounded-md transition-colors"
         >
           <Users size={12} />
           View {funnel.submissionCount} contacts
@@ -428,12 +428,12 @@ export default function Funnels() {
           <h1 className="text-2xl font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
             Funnels
           </h1>
-          <p className="text-sm text-muted-foreground">ClickFunnels opt-in pages and submissions</p>
+          <p className="text-sm text-[#6F6F6B]">ClickFunnels opt-in pages and submissions</p>
         </div>
         <button
           onClick={() => syncMutation.mutate()}
           disabled={syncMutation.isPending}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 bg-[#F2DD48] text-[#222222] rounded-md text-sm font-medium hover:brightness-95 transition-colors disabled:opacity-50"
         >
           {syncMutation.isPending ? (
             <Loader2 size={14} className="animate-spin" />
@@ -446,23 +446,23 @@ export default function Funnels() {
 
       {/* Summary stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-card border border-border rounded-lg p-4">
-          <div className="text-sm text-muted-foreground mb-1">Active Funnels</div>
-          <div className="text-3xl font-bold text-primary">{activeFunnels.length}</div>
+        <div className="bg-white border border-[#DEDEDA] rounded-lg p-4">
+          <div className="text-sm text-[#6F6F6B] mb-1">Active Funnels</div>
+          <div className="text-3xl font-bold text-[#F2DD48]">{activeFunnels.length}</div>
         </div>
-        <div className="bg-card border border-border rounded-lg p-4">
-          <div className="text-sm text-muted-foreground mb-1">Total Unique Visitors</div>
-          <div className="text-3xl font-bold text-foreground">
+        <div className="bg-white border border-[#DEDEDA] rounded-lg p-4">
+          <div className="text-sm text-[#6F6F6B] mb-1">Total Unique Visitors</div>
+          <div className="text-3xl font-bold text-[#222222]">
             {totalUv > 0 ? totalUv.toLocaleString() : "—"}
           </div>
         </div>
-        <div className="bg-card border border-border rounded-lg p-4">
-          <div className="text-sm text-muted-foreground mb-1">Total Opt-Ins</div>
-          <div className="text-3xl font-bold text-foreground">{totalOptIns.toLocaleString()}</div>
+        <div className="bg-white border border-[#DEDEDA] rounded-lg p-4">
+          <div className="text-sm text-[#6F6F6B] mb-1">Total Opt-Ins</div>
+          <div className="text-3xl font-bold text-[#222222]">{totalOptIns.toLocaleString()}</div>
         </div>
-        <div className="bg-card border border-border rounded-lg p-4">
-          <div className="text-sm text-muted-foreground mb-1">Total Submissions</div>
-          <div className="text-3xl font-bold text-foreground">{totalSubmissions.toLocaleString()}</div>
+        <div className="bg-white border border-[#DEDEDA] rounded-lg p-4">
+          <div className="text-sm text-[#6F6F6B] mb-1">Total Submissions</div>
+          <div className="text-3xl font-bold text-[#222222]">{totalSubmissions.toLocaleString()}</div>
         </div>
       </div>
 
@@ -477,14 +477,14 @@ export default function Funnels() {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 size={24} className="animate-spin text-primary" />
+          <Loader2 size={24} className="animate-spin text-[#F2DD48]" />
         </div>
       ) : (
         <>
           {/* Active funnels */}
           {activeFunnels.length > 0 && (
             <div>
-              <h2 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wider">
+              <h2 className="text-sm font-medium text-[#6F6F6B] mb-3 uppercase tracking-wider">
                 Active Funnels ({activeFunnels.length})
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -498,7 +498,7 @@ export default function Funnels() {
           {/* Archived funnels */}
           {archivedFunnels.length > 0 && (
             <div>
-              <h2 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wider">
+              <h2 className="text-sm font-medium text-[#6F6F6B] mb-3 uppercase tracking-wider">
                 Archived Funnels ({archivedFunnels.length})
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 opacity-60">
@@ -510,10 +510,10 @@ export default function Funnels() {
           )}
 
           {funnelSummary.length === 0 && (
-            <div className="text-center py-12 border border-dashed border-border rounded-lg">
-              <Target size={32} className="text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground">No funnels synced yet</p>
-              <p className="text-sm text-muted-foreground mt-1">Click "Sync Now" to fetch your ClickFunnels data</p>
+            <div className="text-center py-12 border border-dashed border-[#DEDEDA] rounded-lg">
+              <Target size={32} className="text-[#6F6F6B] mx-auto mb-3" />
+              <p className="text-[#6F6F6B]">No funnels synced yet</p>
+              <p className="text-sm text-[#6F6F6B] mt-1">Click "Sync Now" to fetch your ClickFunnels data</p>
             </div>
           )}
         </>

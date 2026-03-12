@@ -23,22 +23,22 @@ export default function Advertising() {
     <div className="p-6 space-y-6">
       {/* Page header */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Advertising</h1>
-        <p className="text-muted-foreground text-sm mt-1">
+        <h1 className="text-2xl font-bold text-[#222222]">Advertising</h1>
+        <p className="text-[#6F6F6B] text-sm mt-1">
           Meta Ads, influencer collabs, community giving, print, and trade shows
         </p>
       </div>
 
       {/* Tab navigation */}
-      <div className="flex flex-wrap gap-1 bg-muted/30 rounded-lg p-1 w-full sm:w-fit">
+      <div className="flex flex-wrap gap-1 bg-[#F6F6F4] rounded-lg p-1 w-full sm:w-fit">
         {TABS.map(t => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap ${
               tab === t.id
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+                ? "bg-white text-[#222222] shadow-sm"
+                : "text-[#6F6F6B] hover:text-[#222222]"
             }`}
           >
             {t.icon} {t.label}

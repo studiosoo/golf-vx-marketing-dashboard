@@ -35,17 +35,17 @@ interface LocalActivity {
 }
 
 const TYPE_META: Record<ActivityType, { label: string; icon: React.ElementType; color: string; bg: string }> = {
-  print:       { label: "Print Ad",    icon: Printer,     color: "#111111", bg: "#F5F5F5" },
-  event:       { label: "Event",       icon: CalendarDays, color: "#007AFF", bg: "#EBF4FF" },
+  print:       { label: "Print Ad",    icon: Printer,     color: "#222222", bg: "#F1F1EF" },
+  event:       { label: "Event",       icon: CalendarDays, color: "#1A56DB", bg: "#EBF4FF" },
   fundraising: { label: "Fundraising", icon: Heart,       color: "#FF3B30", bg: "#FFF0EF" },
-  sponsorship: { label: "Sponsorship", icon: Handshake,   color: "#3DB855", bg: "#F0FAF3" },
-  other:       { label: "Other",       icon: MapPin,      color: "#888888", bg: "#F5F5F5" },
+  sponsorship: { label: "Sponsorship", icon: Handshake,   color: "#72B84A", bg: "#E6F0DC" },
+  other:       { label: "Other",       icon: MapPin,      color: "#6F6F6B", bg: "#F1F1EF" },
 };
 
 const STATUS_STYLE: Record<LocalActivity["status"], string> = {
-  planned:   "bg-[#F5C72C]/10 text-[#B8900A]",
-  active:    "bg-[#3DB855]/10 text-[#2A9040]",
-  completed: "bg-[#F5F5F5] text-[#888888]",
+  planned:   "bg-[#F2DD48]/10 text-[#B8900A]",
+  active:    "bg-[#72B84A]/10 text-[#4D7A30]",
+  completed: "bg-[#F1F1EF] text-[#6F6F6B]",
 };
 
 // Static seed data — replace with tRPC query once a localMarketing router is added
@@ -132,10 +132,10 @@ export default function LocalMarketing() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#111111]">Local Marketing</h1>
-          <p className="text-sm text-[#888888] mt-0.5">Print ads, community events, fundraising & sponsorships</p>
+          <h1 className="text-2xl font-bold text-[#222222]">Local Marketing</h1>
+          <p className="text-sm text-[#6F6F6B] mt-0.5">Print ads, community events, fundraising & sponsorships</p>
         </div>
-        <button className="flex items-center gap-1.5 text-sm font-medium text-[#111111] border border-[#E0E0E0] rounded-lg px-3 py-2 hover:bg-[#F5F5F5] transition-colors">
+        <button className="flex items-center gap-1.5 text-sm font-medium text-[#222222] border border-[#DEDEDA] rounded-lg px-3 py-2 hover:bg-[#F1F1EF] transition-colors">
           <PlusCircle className="h-4 w-4" />
           Add Activity
         </button>
@@ -144,18 +144,18 @@ export default function LocalMarketing() {
       {/* KPI row */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Total Spend (YTD)", value: fmtCurrency(totalSpend), icon: DollarSign, color: "#F5C72C" },
-          { label: "Completed", value: String(completedCount), icon: FileText, color: "#3DB855" },
-          { label: "Planned", value: String(plannedCount), icon: CalendarDays, color: "#007AFF" },
+          { label: "Total Spend (YTD)", value: fmtCurrency(totalSpend), icon: DollarSign, color: "#F2DD48" },
+          { label: "Completed", value: String(completedCount), icon: FileText, color: "#72B84A" },
+          { label: "Planned", value: String(plannedCount), icon: CalendarDays, color: "#1A56DB" },
         ].map(({ label, value, icon: Icon, color }) => (
-          <Card key={label} className="bg-white border-[#E0E0E0] shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+          <Card key={label} className="bg-white border-[#DEDEDA] shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
             <CardContent className="p-4 flex items-center gap-3">
               <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${color}18` }}>
                 <Icon className="h-4 w-4" style={{ color }} />
               </div>
               <div>
-                <p className="text-xs text-[#AAAAAA]">{label}</p>
-                <p className="text-lg font-bold text-[#111111] leading-tight">{value}</p>
+                <p className="text-xs text-[#A8A8A3]">{label}</p>
+                <p className="text-lg font-bold text-[#222222] leading-tight">{value}</p>
               </div>
             </CardContent>
           </Card>
@@ -170,8 +170,8 @@ export default function LocalMarketing() {
             onClick={() => setFilter(key)}
             className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
               filter === key
-                ? "bg-[#111111] text-white"
-                : "bg-[#F5F5F5] text-[#888888] hover:bg-[#E8E8E8]"
+                ? "bg-[#222222] text-white"
+                : "bg-[#F1F1EF] text-[#6F6F6B] hover:bg-[#E8E8E8]"
             }`}
           >
             {label}
@@ -185,7 +185,7 @@ export default function LocalMarketing() {
           const meta = TYPE_META[a.type];
           const Icon = meta.icon;
           return (
-            <Card key={a.id} className="bg-white border-[#E0E0E0] hover:shadow-md transition-shadow">
+            <Card key={a.id} className="bg-white border-[#DEDEDA] hover:shadow-md transition-shadow">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -197,7 +197,7 @@ export default function LocalMarketing() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <span className="font-semibold text-[#111111] text-sm">{a.name}</span>
+                        <span className="font-semibold text-[#222222] text-sm">{a.name}</span>
                         <Badge variant="outline" className="text-[10px] px-1.5 py-0" style={{ color: meta.color, borderColor: `${meta.color}30` }}>
                           {meta.label}
                         </Badge>
@@ -205,13 +205,13 @@ export default function LocalMarketing() {
                           {a.status.charAt(0).toUpperCase() + a.status.slice(1)}
                         </span>
                       </div>
-                      <p className="text-xs text-[#888888] mb-2">{a.description}</p>
+                      <p className="text-xs text-[#6F6F6B] mb-2">{a.description}</p>
                       {a.notes && (
-                        <p className="text-xs text-[#AAAAAA] italic">{a.notes}</p>
+                        <p className="text-xs text-[#A8A8A3] italic">{a.notes}</p>
                       )}
-                      <div className="flex gap-4 mt-2 text-xs text-[#AAAAAA]">
+                      <div className="flex gap-4 mt-2 text-xs text-[#A8A8A3]">
                         <span>{fmtDate(a.date)}</span>
-                        <span>Spend: <span className="font-medium text-[#111111]">{fmtCurrency(a.spend)}</span></span>
+                        <span>Spend: <span className="font-medium text-[#222222]">{fmtCurrency(a.spend)}</span></span>
                         {a.reach && <span>Reach: ~{a.reach.toLocaleString()}</span>}
                       </div>
                     </div>
@@ -222,12 +222,12 @@ export default function LocalMarketing() {
           );
         })}
         {activities.length === 0 && (
-          <div className="text-center py-12 text-[#AAAAAA] text-sm">No activities in this category yet</div>
+          <div className="text-center py-12 text-[#A8A8A3] text-sm">No activities in this category yet</div>
         )}
       </div>
 
       {/* Note */}
-      <p className="text-xs text-[#AAAAAA] text-center">
+      <p className="text-xs text-[#A8A8A3] text-center">
         Local marketing activities are currently tracked manually. Database-backed CRUD coming soon.
       </p>
     </div>

@@ -27,17 +27,17 @@ function KpiCard({
   label: string; value: string; sub?: string; icon: React.ReactNode; highlight?: boolean;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-[#E0E0E0] p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+    <div className="bg-white rounded-xl border border-[#DEDEDA] p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
       <div className="flex items-start justify-between mb-2">
-        <p className="text-[11px] text-[#AAAAAA] uppercase tracking-wide">{label}</p>
-        <div className="h-7 w-7 rounded-lg bg-[#F5F5F5] flex items-center justify-center text-[#888888]">
+        <p className="text-[11px] text-[#A8A8A3] uppercase tracking-wide">{label}</p>
+        <div className="h-7 w-7 rounded-lg bg-[#F1F1EF] flex items-center justify-center text-[#6F6F6B]">
           {icon}
         </div>
       </div>
-      <p className={cn("text-[24px] font-bold leading-none tracking-tight", highlight ? "text-[#F5C72C]" : "text-[#111111]")}>
+      <p className={cn("text-[24px] font-bold leading-none tracking-tight", highlight ? "text-[#F2DD48]" : "text-[#222222]")}>
         {value}
       </p>
-      {sub && <p className="text-[11px] text-[#888888] mt-1">{sub}</p>}
+      {sub && <p className="text-[11px] text-[#6F6F6B] mt-1">{sub}</p>}
     </div>
   );
 }
@@ -63,8 +63,8 @@ function CategoryBar({ segments }: { segments: Array<{ label: string; value: num
           <div key={seg.label} className="flex items-center gap-1.5">
             <div className="h-2 w-2 rounded-full" style={{ background: seg.color }} />
             <span className="text-[11px] text-[#555555]">{seg.label}</span>
-            <span className="text-[11px] font-semibold text-[#111111]">{fmtCurrency(seg.value)}</span>
-            <span className="text-[10px] text-[#AAAAAA]">({pct(seg.value, total)})</span>
+            <span className="text-[11px] font-semibold text-[#222222]">{fmtCurrency(seg.value)}</span>
+            <span className="text-[10px] text-[#A8A8A3]">({pct(seg.value, total)})</span>
           </div>
         ))}
       </div>
@@ -121,48 +121,48 @@ export default function Revenue() {
   const last30 = dailyRows.slice(-30);
 
   const revenueSegments = [
-    { label: "Bay", value: bayMTD, color: "#F5C72C" },
-    { label: "Golf", value: golfMTD, color: "#F5C72C99" },
-    { label: "F&B", value: fbMTD, color: "#3DB855" },
+    { label: "Bay", value: bayMTD, color: "#F2DD48" },
+    { label: "Golf", value: golfMTD, color: "#F2DD4899" },
+    { label: "F&B", value: fbMTD, color: "#72B84A" },
   ].filter((s) => s.value > 0);
 
   const paymentSegments = [
-    { label: "Credit Card", value: creditMTD, color: "#111111" },
-    { label: "Cash", value: cashMTD, color: "#888888" },
+    { label: "Credit Card", value: creditMTD, color: "#222222" },
+    { label: "Cash", value: cashMTD, color: "#6F6F6B" },
   ].filter((s) => s.value > 0);
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <DollarSign className="h-5 w-5 text-[#F5C72C]" />
+        <DollarSign className="h-5 w-5 text-[#F2DD48]" />
         <div>
-          <h1 className="text-lg font-semibold text-[#111111]">Revenue</h1>
-          <p className="text-xs text-[#888888]">All revenue channels · {now.toLocaleDateString("en-US", { month: "long", year: "numeric" })}</p>
+          <h1 className="text-lg font-semibold text-[#222222]">Revenue</h1>
+          <p className="text-xs text-[#6F6F6B]">All revenue channels · {now.toLocaleDateString("en-US", { month: "long", year: "numeric" })}</p>
         </div>
       </div>
 
       {/* ── Annual Goal Progress ─────────────────────────────────────────────── */}
-      <div className="bg-white rounded-xl border border-[#E0E0E0] p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+      <div className="bg-white rounded-xl border border-[#DEDEDA] p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-[#111111]" />
-            <h2 className="text-[14px] font-bold text-[#111111]">Annual Revenue Goal — 2026</h2>
+            <TrendingUp className="h-4 w-4 text-[#222222]" />
+            <h2 className="text-[14px] font-bold text-[#222222]">Annual Revenue Goal — 2026</h2>
           </div>
           <div className="text-right">
-            <span className="text-[22px] font-bold text-[#F5C72C]">{annualPct.toFixed(1)}%</span>
-            <span className="text-[11px] text-[#AAAAAA] ml-1">run rate</span>
+            <span className="text-[22px] font-bold text-[#F2DD48]">{annualPct.toFixed(1)}%</span>
+            <span className="text-[11px] text-[#A8A8A3] ml-1">run rate</span>
           </div>
         </div>
-        <div className="h-3 bg-[#F2F2F7] rounded-full overflow-hidden mb-2">
-          <div className="h-full rounded-full bg-[#F5C72C] transition-all duration-700" style={{ width: `${annualPct}%` }} />
+        <div className="h-3 bg-[#E9E9E6] rounded-full overflow-hidden mb-2">
+          <div className="h-full rounded-full bg-[#F2DD48] transition-all duration-700" style={{ width: `${annualPct}%` }} />
         </div>
-        <div className="flex justify-between text-[11px] text-[#AAAAAA]">
+        <div className="flex justify-between text-[11px] text-[#A8A8A3]">
           <span>{fmtCurrency(annualRunRate)} projected / {fmtCurrency(ANNUAL_GOAL)} goal</span>
           {annualRunRate < ANNUAL_GOAL && <span>{fmtCurrency(ANNUAL_GOAL - annualRunRate)} gap to close</span>}
         </div>
         {!hasRevenue && (
-          <p className="text-[11px] text-[#AAAAAA] mt-3 p-2 rounded-lg bg-[#FAFAFA] border border-dashed border-[#E0E0E0]">
+          <p className="text-[11px] text-[#A8A8A3] mt-3 p-2 rounded-lg bg-[#F6F6F4] border border-dashed border-[#DEDEDA]">
             Revenue APIs pending connection (Toast POS, Acuity). Progress will populate once data syncs.
           </p>
         )}
@@ -180,22 +180,22 @@ export default function Revenue() {
 
       {/* ── Toast POS MTD Breakdown ──────────────────────────────────────────── */}
       {(bayMTD > 0 || fbMTD > 0 || golfMTD > 0) && (
-        <div className="bg-white rounded-xl border border-[#E0E0E0] p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06)] space-y-5">
-          <h2 className="text-[13px] font-semibold text-[#111111]">In-Store Revenue Breakdown — MTD</h2>
+        <div className="bg-white rounded-xl border border-[#DEDEDA] p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06)] space-y-5">
+          <h2 className="text-[13px] font-semibold text-[#222222]">In-Store Revenue Breakdown — MTD</h2>
 
           {/* Revenue by category */}
           <div>
-            <p className="text-[11px] font-semibold text-[#AAAAAA] uppercase tracking-wide mb-3">By Category</p>
+            <p className="text-[11px] font-semibold text-[#A8A8A3] uppercase tracking-wide mb-3">By Category</p>
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-4">
               {[
-                { label: "Bay Time", value: bayMTD, color: "text-[#F5C72C]" },
-                { label: "Golf / Lessons", value: golfMTD, color: "text-[#111111]" },
-                { label: "Food & Bev", value: fbMTD, color: "text-[#3DB855]" },
-                { label: "Tips", value: tipsMTD, color: "text-[#888888]" },
-                { label: "Discounts", value: discountMTD, color: "text-[#E8453C]", negative: true },
+                { label: "Bay Time", value: bayMTD, color: "text-[#F2DD48]" },
+                { label: "Golf / Lessons", value: golfMTD, color: "text-[#222222]" },
+                { label: "Food & Bev", value: fbMTD, color: "text-[#72B84A]" },
+                { label: "Tips", value: tipsMTD, color: "text-[#6F6F6B]" },
+                { label: "Discounts", value: discountMTD, color: "text-[#FF3B30]", negative: true },
               ].map(({ label, value, color, negative }: any) => (
-                <div key={label} className="bg-[#FAFAFA] rounded-lg border border-[#F0F0F0] p-3">
-                  <p className="text-[10px] text-[#AAAAAA] uppercase tracking-wide mb-1">{label}</p>
+                <div key={label} className="bg-[#F6F6F4] rounded-lg border border-[#F0F0F0] p-3">
+                  <p className="text-[10px] text-[#A8A8A3] uppercase tracking-wide mb-1">{label}</p>
                   <p className={cn("text-[15px] font-bold", color)}>
                     {value > 0 ? `${negative ? "-" : ""}${fmtCurrency(value)}` : "—"}
                   </p>
@@ -208,16 +208,16 @@ export default function Revenue() {
           {/* Payment method breakdown */}
           {(cashMTD > 0 || creditMTD > 0) && (
             <div>
-              <p className="text-[11px] font-semibold text-[#AAAAAA] uppercase tracking-wide mb-3">By Payment Method</p>
+              <p className="text-[11px] font-semibold text-[#A8A8A3] uppercase tracking-wide mb-3">By Payment Method</p>
               <div className="grid grid-cols-2 gap-3 mb-3">
                 {[
                   { label: "Credit / Card", value: creditMTD },
                   { label: "Cash", value: cashMTD },
                 ].map(({ label, value }) => (
-                  <div key={label} className="bg-[#FAFAFA] rounded-lg border border-[#F0F0F0] p-3">
-                    <p className="text-[10px] text-[#AAAAAA] uppercase tracking-wide mb-1">{label}</p>
-                    <p className="text-[15px] font-bold text-[#111111]">{value > 0 ? fmtCurrency(value) : "—"}</p>
-                    <p className="text-[10px] text-[#AAAAAA] mt-0.5">{pct(value, creditMTD + cashMTD)}</p>
+                  <div key={label} className="bg-[#F6F6F4] rounded-lg border border-[#F0F0F0] p-3">
+                    <p className="text-[10px] text-[#A8A8A3] uppercase tracking-wide mb-1">{label}</p>
+                    <p className="text-[15px] font-bold text-[#222222]">{value > 0 ? fmtCurrency(value) : "—"}</p>
+                    <p className="text-[10px] text-[#A8A8A3] mt-0.5">{pct(value, creditMTD + cashMTD)}</p>
                   </div>
                 ))}
               </div>
@@ -227,11 +227,11 @@ export default function Revenue() {
 
           {/* Guests */}
           {guestsMTD > 0 && (
-            <div className="flex items-center gap-2 text-[12px] text-[#888888] pt-1 border-t border-[#F0F0F0]">
+            <div className="flex items-center gap-2 text-[12px] text-[#6F6F6B] pt-1 border-t border-[#F0F0F0]">
               <Users size={13} />
-              <span><strong className="text-[#111111]">{fmt(guestsMTD)}</strong> guests served MTD</span>
+              <span><strong className="text-[#222222]">{fmt(guestsMTD)}</strong> guests served MTD</span>
               {toastMTD > 0 && guestsMTD > 0 && (
-                <span className="ml-auto text-[#AAAAAA]">{fmtCurrency(toastMTD / guestsMTD)} / guest avg</span>
+                <span className="ml-auto text-[#A8A8A3]">{fmtCurrency(toastMTD / guestsMTD)} / guest avg</span>
               )}
             </div>
           )}
@@ -239,34 +239,34 @@ export default function Revenue() {
       )}
 
       {/* ── Toast POS Daily Table ────────────────────────────────────────────── */}
-      <div className="bg-white rounded-xl border border-[#E0E0E0] shadow-[0_1px_4px_rgba(0,0,0,0.06)] overflow-hidden">
-        <div className="px-4 py-3 border-b border-[#E0E0E0] flex items-center justify-between">
+      <div className="bg-white rounded-xl border border-[#DEDEDA] shadow-[0_1px_4px_rgba(0,0,0,0.06)] overflow-hidden">
+        <div className="px-4 py-3 border-b border-[#DEDEDA] flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ShoppingBag className="h-4 w-4 text-[#AAAAAA]" />
-            <h2 className="text-[13px] font-semibold text-[#111111]">Toast POS — Daily Detail</h2>
+            <ShoppingBag className="h-4 w-4 text-[#A8A8A3]" />
+            <h2 className="text-[13px] font-semibold text-[#222222]">Toast POS — Daily Detail</h2>
           </div>
-          <span className="text-[11px] text-[#AAAAAA]">Last 30 days</span>
+          <span className="text-[11px] text-[#A8A8A3]">Last 30 days</span>
         </div>
 
         {dailyLoading ? (
           <div className="p-4 space-y-2">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-10 bg-[#F5F5F5] rounded animate-pulse" />
+              <div key={i} className="h-10 bg-[#F1F1EF] rounded animate-pulse" />
             ))}
           </div>
         ) : last30.length === 0 ? (
           <div className="py-12 text-center">
-            <ShoppingBag className="h-8 w-8 text-[#E0E0E0] mx-auto mb-2" />
-            <p className="text-[13px] text-[#888888]">No Toast POS data available</p>
-            <p className="text-[11px] text-[#AAAAAA] mt-1">Data will appear once the Toast API connection is active.</p>
+            <ShoppingBag className="h-8 w-8 text-[#DEDEDA] mx-auto mb-2" />
+            <p className="text-[13px] text-[#6F6F6B]">No Toast POS data available</p>
+            <p className="text-[11px] text-[#A8A8A3] mt-1">Data will appear once the Toast API connection is active.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-[#E0E0E0]">
+                <tr className="border-b border-[#DEDEDA]">
                   {["Date", "Total", "Bay", "Golf", "F&B", "Tips", "Guests", "Orders"].map((h, i) => (
-                    <th key={h} className={cn("text-[11px] text-[#AAAAAA] font-normal py-2 px-3", i > 0 ? "text-right" : "text-left")}>
+                    <th key={h} className={cn("text-[11px] text-[#A8A8A3] font-normal py-2 px-3", i > 0 ? "text-right" : "text-left")}>
                       {h}
                     </th>
                   ))}
@@ -282,15 +282,15 @@ export default function Revenue() {
                   const guests   = parseInt(String(row.totalGuests ?? 0));
                   const orders   = parseInt(String(row.totalOrders ?? 0));
                   return (
-                    <tr key={row.date} className="h-10 border-b border-[#F0F0F0] last:border-0 hover:bg-[#FAFAFA]">
-                      <td className="px-3 text-[12px] text-[#888888]">{isoToDisplay(String(row.date ?? ""))}</td>
-                      <td className="px-3 text-right text-[12px] font-semibold text-[#111111]">{total > 0 ? fmtCurrency(total) : "—"}</td>
+                    <tr key={row.date} className="h-10 border-b border-[#F0F0F0] last:border-0 hover:bg-[#F6F6F4]">
+                      <td className="px-3 text-[12px] text-[#6F6F6B]">{isoToDisplay(String(row.date ?? ""))}</td>
+                      <td className="px-3 text-right text-[12px] font-semibold text-[#222222]">{total > 0 ? fmtCurrency(total) : "—"}</td>
                       <td className="px-3 text-right text-[11px] text-[#F5A500]">{bay > 0 ? fmtCurrency(bay) : "—"}</td>
-                      <td className="px-3 text-right text-[11px] text-[#888888]">{golf > 0 ? fmtCurrency(golf) : "—"}</td>
-                      <td className="px-3 text-right text-[11px] text-[#3DB855]">{fb > 0 ? fmtCurrency(fb) : "—"}</td>
-                      <td className="px-3 text-right text-[11px] text-[#AAAAAA]">{tips > 0 ? fmtCurrency(tips) : "—"}</td>
-                      <td className="px-3 text-right text-[11px] text-[#AAAAAA]">{guests > 0 ? fmt(guests) : "—"}</td>
-                      <td className="px-3 text-right text-[11px] text-[#AAAAAA]">{orders > 0 ? fmt(orders) : "—"}</td>
+                      <td className="px-3 text-right text-[11px] text-[#6F6F6B]">{golf > 0 ? fmtCurrency(golf) : "—"}</td>
+                      <td className="px-3 text-right text-[11px] text-[#72B84A]">{fb > 0 ? fmtCurrency(fb) : "—"}</td>
+                      <td className="px-3 text-right text-[11px] text-[#A8A8A3]">{tips > 0 ? fmtCurrency(tips) : "—"}</td>
+                      <td className="px-3 text-right text-[11px] text-[#A8A8A3]">{guests > 0 ? fmt(guests) : "—"}</td>
+                      <td className="px-3 text-right text-[11px] text-[#A8A8A3]">{orders > 0 ? fmt(orders) : "—"}</td>
                     </tr>
                   );
                 })}
@@ -301,59 +301,59 @@ export default function Revenue() {
       </div>
 
       {/* ── Acuity Programs ─────────────────────────────────────────────────── */}
-      <div className="bg-white rounded-xl border border-[#E0E0E0] p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+      <div className="bg-white rounded-xl border border-[#DEDEDA] p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
         <div className="flex items-center gap-2 mb-4">
-          <CreditCard className="h-4 w-4 text-[#AAAAAA]" />
-          <h2 className="text-[13px] font-semibold text-[#111111]">Acuity Program Bookings</h2>
+          <CreditCard className="h-4 w-4 text-[#A8A8A3]" />
+          <h2 className="text-[13px] font-semibold text-[#222222]">Acuity Program Bookings</h2>
         </div>
         {acuityTotal > 0 ? (
           <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 rounded-xl bg-[#FAFAFA] border border-[#F0F0F0]">
-              <p className="text-[11px] text-[#AAAAAA] mb-1">Total Revenue</p>
-              <p className="text-[24px] font-bold text-[#111111]">{fmtCurrency(acuityTotal)}</p>
+            <div className="p-4 rounded-xl bg-[#F6F6F4] border border-[#F0F0F0]">
+              <p className="text-[11px] text-[#A8A8A3] mb-1">Total Revenue</p>
+              <p className="text-[24px] font-bold text-[#222222]">{fmtCurrency(acuityTotal)}</p>
             </div>
-            <div className="p-4 rounded-xl bg-[#FAFAFA] border border-[#F0F0F0]">
-              <p className="text-[11px] text-[#AAAAAA] mb-1">Total Bookings</p>
-              <p className="text-[24px] font-bold text-[#111111]">{fmt(acuityCount)}</p>
+            <div className="p-4 rounded-xl bg-[#F6F6F4] border border-[#F0F0F0]">
+              <p className="text-[11px] text-[#A8A8A3] mb-1">Total Bookings</p>
+              <p className="text-[24px] font-bold text-[#222222]">{fmt(acuityCount)}</p>
               {acuityCount > 0 && acuityTotal > 0 && (
-                <p className="text-[11px] text-[#888888] mt-0.5">{fmtCurrency(acuityTotal / acuityCount)} avg/booking</p>
+                <p className="text-[11px] text-[#6F6F6B] mt-0.5">{fmtCurrency(acuityTotal / acuityCount)} avg/booking</p>
               )}
             </div>
           </div>
         ) : (
           <div className="py-8 text-center">
-            <CreditCard className="h-7 w-7 text-[#E0E0E0] mx-auto mb-2" />
-            <p className="text-[13px] text-[#888888]">Acuity API connection pending</p>
-            <p className="text-[11px] text-[#AAAAAA] mt-1">Program booking revenue will appear here once connected.</p>
+            <CreditCard className="h-7 w-7 text-[#DEDEDA] mx-auto mb-2" />
+            <p className="text-[13px] text-[#6F6F6B]">Acuity API connection pending</p>
+            <p className="text-[11px] text-[#A8A8A3] mt-1">Program booking revenue will appear here once connected.</p>
           </div>
         )}
       </div>
 
       {/* ── Membership MRR ──────────────────────────────────────────────────── */}
-      <div className="bg-white rounded-xl border border-[#E0E0E0] p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+      <div className="bg-white rounded-xl border border-[#DEDEDA] p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
         <div className="flex items-center gap-2 mb-4">
-          <DollarSign className="h-4 w-4 text-[#AAAAAA]" />
-          <h2 className="text-[13px] font-semibold text-[#111111]">Membership MRR</h2>
+          <DollarSign className="h-4 w-4 text-[#A8A8A3]" />
+          <h2 className="text-[13px] font-semibold text-[#222222]">Membership MRR</h2>
         </div>
         {mrr > 0 ? (
           <div className="grid grid-cols-3 gap-4">
-            <div className="p-4 rounded-xl bg-[#FAFAFA] border border-[#F0F0F0]">
-              <p className="text-[11px] text-[#AAAAAA] mb-1">MRR</p>
-              <p className="text-[24px] font-bold text-[#F5C72C]">{fmtCurrency(mrr)}</p>
+            <div className="p-4 rounded-xl bg-[#F6F6F4] border border-[#F0F0F0]">
+              <p className="text-[11px] text-[#A8A8A3] mb-1">MRR</p>
+              <p className="text-[24px] font-bold text-[#F2DD48]">{fmtCurrency(mrr)}</p>
             </div>
-            <div className="p-4 rounded-xl bg-[#FAFAFA] border border-[#F0F0F0]">
-              <p className="text-[11px] text-[#AAAAAA] mb-1">Annual Run Rate</p>
-              <p className="text-[24px] font-bold text-[#111111]">{fmtCurrency(mrr * 12)}</p>
-              <p className="text-[11px] text-[#AAAAAA] mt-0.5">membership only</p>
+            <div className="p-4 rounded-xl bg-[#F6F6F4] border border-[#F0F0F0]">
+              <p className="text-[11px] text-[#A8A8A3] mb-1">Annual Run Rate</p>
+              <p className="text-[24px] font-bold text-[#222222]">{fmtCurrency(mrr * 12)}</p>
+              <p className="text-[11px] text-[#A8A8A3] mt-0.5">membership only</p>
             </div>
-            <div className="p-4 rounded-xl bg-[#FAFAFA] border border-[#F0F0F0]">
-              <p className="text-[11px] text-[#AAAAAA] mb-1">% of Annual Goal</p>
-              <p className="text-[24px] font-bold text-[#111111]">{pct(mrr * 12, ANNUAL_GOAL)}</p>
-              <p className="text-[11px] text-[#AAAAAA] mt-0.5">of {fmtCurrency(ANNUAL_GOAL)}</p>
+            <div className="p-4 rounded-xl bg-[#F6F6F4] border border-[#F0F0F0]">
+              <p className="text-[11px] text-[#A8A8A3] mb-1">% of Annual Goal</p>
+              <p className="text-[24px] font-bold text-[#222222]">{pct(mrr * 12, ANNUAL_GOAL)}</p>
+              <p className="text-[11px] text-[#A8A8A3] mt-0.5">of {fmtCurrency(ANNUAL_GOAL)}</p>
             </div>
           </div>
         ) : (
-          <p className="text-[13px] text-[#888888] py-6 text-center">
+          <p className="text-[13px] text-[#6F6F6B] py-6 text-center">
             Membership revenue sourced from Boomerang POS — syncs with the Members section.
           </p>
         )}

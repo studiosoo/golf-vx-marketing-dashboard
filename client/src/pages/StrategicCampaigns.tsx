@@ -1,44 +1,93 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { TrendingUp, Target, DollarSign, BarChart3, ChevronRight, TrendingDown, CalendarRange, LayoutGrid } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
-import { useLocation } from "wouter";
-import AsanaTimeline from "@/components/AsanaTimeline";
-import MetaAds from "./MetaAds";
+import { TrendingUp, Target, DollarSign, Layers } from "lucide-react";
+import { CAMPAIGN_ITEMS } from "@/data/reportCampaignData";
+import { CampaignCard } from "@/components/campaigns/CampaignCard";
 
-const CAMPAIGN_COLORS: Record<string, string> = {
-  trial_conversion: "emerald",
-  membership_acquisition: "pink",
-  member_retention: "blue",
-  corporate_events: "amber",
-};
+const CAMPAIGN_ORDER = [
+  "trial_conversion",
+  "membership_acquisition",
+  "member_retention",
+  "corporate_events",
+];
 
-const CAMPAIGN_BG_COLORS: Record<string, string> = {
-  emerald: "bg-[#3DB855]/10 text-[#3DB855]",
-  pink: "bg-[#E8453C]/10 text-[#E8453C]",
-  blue: "bg-[#888888]/10 text-[#888888]",
-  amber: "bg-[#F5C72C]/10 text-[#111111]",
-};
+type Period = "mtd" | "alltime";
+
+function fmt(v: number) {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(v);
+}
+
+function PeriodToggle({ value, onChange }: { value: Period; onChange: (p: Period) => void }) {
+  return (
+    <div className="flex items-center gap-1 mt-1">
+      {(["mtd", "alltime"] as Period[]).map(p => (
+        <button
+          key={p}
+          onClick={() => onChange(p)}
+          className="text-[10px] px-1.5 py-0.5 rounded font-medium transition-colors"
+          style={value === p ? { background: "#222222", color: "white" } : { background: "#F1F1EF", color: "#6F6F6B" }}
+        >
+          {p === "mtd" ? "MTD" : "All-Time"}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export default function StrategicCampaigns() {
-  const [, setLocation] = useLocation();
   const { data: campaigns, isLoading } = trpc.strategicCampaigns.getOverview.useQuery();
-  const { data: kpiData } = trpc.intelligence.getStrategicKPIs.useQuery();
-  const [activeTab, setActiveTab] = useState<"campaigns" | "timeline" | "paid-ads">("campaigns");
+  const { data: kpiData }              = trpc.intelligence.getStrategicKPIs.useQuery();
+
+  const [spendPeriod, setSpendPeriod] = useState<Period>("mtd");
+  const [revPeriod,   setRevPeriod]   = useState<Period>("mtd");
+
+  const now        = new Date();
+  const minDateMTD = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+
+  const { data: metaInsightsMTD } = trpc.metaAds.getAllCampaignsWithInsights.useQuery(
+    { datePreset: "this_month" },
+    { staleTime: 10 * 60 * 1000 }
+  );
+  const { data: toastSummary } = trpc.revenue.getToastSummary.useQuery(
+    undefined, { staleTime: 5 * 60 * 1000 }
+  );
+  const { data: acuity } = trpc.revenue.getAcuityRevenue.useQuery(
+    { minDate: minDateMTD },
+    { staleTime: 5 * 60 * 1000 }
+  );
+
+  // Deduplicated item counts across all campaigns
+  const itemCounts = useMemo(() => {
+    const seen = new Set<string>();
+    let programs = 0, promotions = 0, paidAds = 0;
+    for (const id of CAMPAIGN_ORDER) {
+      const data = CAMPAIGN_ITEMS[id];
+      if (!data) continue;
+      data.programs.forEach(i   => { if (!seen.has(i.id)) { seen.add(i.id); programs++;   } });
+      data.promotions.forEach(i => { if (!seen.has(i.id)) { seen.add(i.id); promotions++; } });
+      data.paidAds.forEach(i    => { if (!seen.has(i.id)) { seen.add(i.id); paidAds++;    } });
+    }
+    return { programs, promotions, paidAds, total: programs + promotions + paidAds };
+  }, []);
+
+  const metaMTDSpend = (metaInsightsMTD as any[] | undefined)
+    ?.reduce((sum: number, c: any) => sum + parseFloat(String(c.spend ?? c.insights?.spend ?? "0")), 0) ?? 0;
+  const allTimeSpend = campaigns?.reduce((sum, c) => sum + c.totalSpend,   0) ?? 0;
+  const mtdRevenue   = (toastSummary?.thisMonthRevenue ?? 0) + ((acuity as any)?.total ?? 0);
+  const allTimeRev   = campaigns?.reduce((sum, c) => sum + c.totalRevenue, 0) ?? 0;
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div>
-          <Skeleton className="h-10 w-96 mb-2" />
-          <Skeleton className="h-5 w-full max-w-2xl" />
-        </div>
-        <div className="grid gap-6 md:grid-cols-2">
+      <div className="space-y-5">
+        <div className="h-7 w-64 bg-[#E9E9E6] rounded-lg animate-pulse" />
+        <div className="grid gap-3 md:grid-cols-4">
           {[1, 2, 3, 4].map(i => (
-            <Skeleton key={i} className="h-96" />
+            <div key={i} className="h-24 bg-[#E9E9E6] rounded-xl animate-pulse border border-[#DEDEDA]" />
+          ))}
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="h-80 bg-[#E9E9E6] rounded-xl animate-pulse border border-[#DEDEDA]" />
           ))}
         </div>
       </div>
@@ -46,292 +95,92 @@ export default function StrategicCampaigns() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Strategic Campaigns</h1>
-          <p className="text-muted-foreground mt-2">
-            High-level strategic objectives with aggregated program performance
-          </p>
-        </div>
-        <div className="flex items-center gap-1 p-1 bg-[#F5F5F5] rounded-xl border border-[#E0E0E0] self-start sm:self-auto">
-          <button
-            onClick={() => setActiveTab("campaigns")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeTab === "campaigns" ? "bg-white text-[#111] shadow-sm" : "text-[#666] hover:text-[#333]"}`}
-          >
-            <LayoutGrid className="w-3.5 h-3.5" />Campaigns
-          </button>
-          <button
-            onClick={() => setActiveTab("timeline")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeTab === "timeline" ? "bg-white text-[#111] shadow-sm" : "text-[#666] hover:text-[#333]"}`}
-          >
-            <CalendarRange className="w-3.5 h-3.5" />Asana Timeline
-          </button>
-          <button
-            onClick={() => setActiveTab("paid-ads")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeTab === "paid-ads" ? "bg-white text-[#111] shadow-sm" : "text-[#666] hover:text-[#333]"}`}
-          >
-            <BarChart3 className="w-3.5 h-3.5" />Paid Ads
-          </button>
-        </div>
+    <div className="p-8 space-y-5">
+      {/* Header */}
+      <div>
+        <h1 style={{ fontSize: "20px", fontWeight: 600, color: "#222222" }}>Strategic Campaigns</h1>
+        <p style={{ fontSize: "13px", color: "#6F6F6B", marginTop: "4px" }}>
+          High-level strategic objectives with aggregated program performance
+        </p>
       </div>
 
-      {activeTab === "timeline" && <AsanaTimeline />}
+      {/* Summary KPI Bar */}
+      <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
+        {/* Total Campaigns */}
+        <div className="bg-white border border-[#DEDEDA] rounded-xl p-4" style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs text-[#A8A8A3]">Total Campaigns</p>
+            <Target className="h-4 w-4 text-[#A8A8A3]" />
+          </div>
+          <p className="text-2xl font-bold text-[#222222]">4</p>
+          <p className="text-[10px] text-[#A8A8A3] mt-0.5">Trial · Membership · Retention · B2B</p>
+        </div>
 
-      {activeTab === "paid-ads" && <MetaAds />}
+        {/* Items */}
+        <div className="bg-white border border-[#DEDEDA] rounded-xl p-4" style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs text-[#A8A8A3]">Items</p>
+            <Layers className="h-4 w-4 text-[#A8A8A3]" />
+          </div>
+          <p className="text-2xl font-bold text-[#222222]">{itemCounts.total}</p>
+          <p className="text-[10px] text-[#A8A8A3] mt-0.5">
+            {itemCounts.programs} prg · {itemCounts.promotions} promo · {itemCounts.paidAds} ads
+          </p>
+        </div>
 
-      {activeTab === "campaigns" && (<>
+        {/* Total Spend */}
+        <div className="bg-white border border-[#DEDEDA] rounded-xl p-4" style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs text-[#A8A8A3]">Total Spend</p>
+            <DollarSign className="h-4 w-4 text-[#A8A8A3]" />
+          </div>
+          <p className="text-2xl font-bold text-[#222222]">
+            {spendPeriod === "mtd" ? fmt(metaMTDSpend) : fmt(allTimeSpend)}
+          </p>
+          <PeriodToggle value={spendPeriod} onChange={setSpendPeriod} />
+          <p className="text-[10px] text-[#A8A8A3] mt-0.5">
+            {spendPeriod === "mtd" ? "Meta Ads this month" : "All-time (DB)"}
+          </p>
+        </div>
 
-      {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Campaigns</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{campaigns?.length || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Strategic objectives
+        {/* Total Revenue */}
+        <div className="bg-white border border-[#DEDEDA] rounded-xl p-4" style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs text-[#A8A8A3]">Total Revenue</p>
+            <TrendingUp className="h-4 w-4 text-[#A8A8A3]" />
+          </div>
+          <div className="flex items-baseline gap-2">
+            <p className="text-2xl font-bold text-[#222222]">
+              {revPeriod === "mtd" ? fmt(mtdRevenue) : fmt(allTimeRev)}
             </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Programs</CardTitle>
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {campaigns?.reduce((sum, c) => sum + c.totalPrograms, 0) || 0}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Tactical programs
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Spend</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              ${campaigns?.reduce((sum, c) => sum + c.totalSpend, 0).toFixed(2) || "0.00"}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Across all programs
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              ${campaigns?.reduce((sum, c) => sum + c.totalRevenue, 0).toFixed(2) || "0.00"}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Generated revenue
-            </p>
-          </CardContent>
-        </Card>
+            {revPeriod === "alltime" && (
+              <span
+                title="Full historical data pending complete Toast + Acuity sync. All-Time reads from campaign DB records which are not fully populated."
+                className="text-[10px] font-medium px-1.5 py-0.5 rounded cursor-help"
+                style={{ background: "rgba(216,154,60,0.12)", color: "#C47A20" }}
+              >
+                ESTIMATED
+              </span>
+            )}
+          </div>
+          <PeriodToggle value={revPeriod} onChange={setRevPeriod} />
+          <p className="text-[10px] text-[#A8A8A3] mt-0.5">
+            {revPeriod === "mtd" ? "Toast + Acuity MTD" : "All-time (DB · incomplete)"}
+          </p>
+        </div>
       </div>
 
       {/* Campaign Cards */}
-      <div className="grid gap-6 md:grid-cols-2">
-        {campaigns?.map(campaign => {
-          const colorClass = CAMPAIGN_BG_COLORS[campaign.color] || CAMPAIGN_BG_COLORS.blue;
-          
-          return (
-            <Card key={campaign.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1 flex-1">
-                    <CardTitle className="text-xl">{campaign.name}</CardTitle>
-                    <CardDescription>{campaign.description}</CardDescription>
-                  </div>
-                  <Badge className={colorClass}>
-                    {campaign.totalPrograms} {campaign.totalPrograms === 1 ? "program" : "programs"}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* PRIMARY KPI — headline metric */}
-                {campaign.id === 'membership_acquisition' && kpiData && (
-                  <div className="p-4 rounded-lg border-2 border-primary/20 bg-primary/5">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Primary KPI — Membership Goal</p>
-                    <div className="flex items-end justify-between mb-2">
-                      <span className="text-4xl font-black">{kpiData.membershipAcquisition.current}</span>
-                      <span className="text-sm text-muted-foreground mb-1">/ {kpiData.membershipAcquisition.target} members</span>
-                    </div>
-                    <Progress value={kpiData.membershipAcquisition.progress} className="h-2.5" />
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {kpiData.membershipAcquisition.progress.toFixed(1)}% to year-end target • Need{' '}
-                      {kpiData.membershipAcquisition.target - kpiData.membershipAcquisition.current} more members
-                    </p>
-                  </div>
-                )}
-                {campaign.id === 'trial_conversion' && kpiData && (
-                  <div className="p-4 rounded-lg border-2 border-primary/20 bg-primary/5">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Primary KPI — Trial Conversion Rate</p>
-                    <div className="flex items-end justify-between mb-2">
-                      <span className={`text-4xl font-black ${
-                        kpiData.trialConversion.current >= kpiData.trialConversion.target
-                          ? 'text-[#3DB855]'
-                          : kpiData.trialConversion.current > 0 ? 'text-[#F5C72C]' : 'text-muted-foreground'
-                      }`}>
-                        {kpiData.trialConversion.current.toFixed(1)}%
-                      </span>
-                      <span className="text-sm text-muted-foreground mb-1">target: {kpiData.trialConversion.target}%</span>
-                    </div>
-                    <Progress value={kpiData.trialConversion.progress} className="h-2.5" />
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {kpiData.trialConversion.current < kpiData.trialConversion.target
-                        ? `${(kpiData.trialConversion.target - kpiData.trialConversion.current).toFixed(1)}% below target`
-                        : `${(kpiData.trialConversion.current - kpiData.trialConversion.target).toFixed(1)}% above target`}
-                    </p>
-                  </div>
-                )}
-                {campaign.id === 'member_retention' && kpiData && (
-                  <div className="p-4 rounded-lg border-2 border-primary/20 bg-primary/5">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Primary KPI — Retention Rate</p>
-                    <div className="flex items-end justify-between mb-2">
-                      <span className={`text-4xl font-black ${
-                        kpiData.memberRetention.current >= kpiData.memberRetention.target
-                          ? 'text-[#3DB855]'
-                          : kpiData.memberRetention.current > 0 ? 'text-[#F5C72C]' : 'text-muted-foreground'
-                      }`}>
-                        {kpiData.memberRetention.current.toFixed(1)}%
-                      </span>
-                      <span className="text-sm text-muted-foreground mb-1">target: {kpiData.memberRetention.target}%</span>
-                    </div>
-                    <Progress value={kpiData.memberRetention.progress} className="h-2.5" />
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {kpiData.memberRetention.current >= kpiData.memberRetention.target
-                        ? `Exceeding goal by ${(kpiData.memberRetention.current - kpiData.memberRetention.target).toFixed(1)}%`
-                        : `${(kpiData.memberRetention.target - kpiData.memberRetention.current).toFixed(1)}% below target`}
-                    </p>
-                  </div>
-                )}
-                {campaign.id === 'corporate_events' && kpiData && (
-                  <div className="p-4 rounded-lg border-2 border-primary/20 bg-primary/5">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Primary KPI — B2B Events This Month</p>
-                    <div className="flex items-end justify-between mb-2">
-                      <span className="text-4xl font-black">{kpiData.corporateEvents.current}</span>
-                      <span className="text-sm text-muted-foreground mb-1">/ {kpiData.corporateEvents.target} events</span>
-                    </div>
-                    <Progress value={kpiData.corporateEvents.progress} className="h-2.5" />
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Target: 1 event/week •{' '}
-                      {kpiData.corporateEvents.current >= kpiData.corporateEvents.target
-                        ? 'On track'
-                        : `Need ${kpiData.corporateEvents.target - kpiData.corporateEvents.current} more events`}
-                    </p>
-                  </div>
-                )}
-
-                {/* Metrics Grid — Spend / Revenue */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-                  <div className="p-3 rounded-lg bg-muted/40">
-                    <p className="text-xs text-muted-foreground">Budget</p>
-                    <p className="text-base font-bold mt-0.5">${campaign.totalBudget.toFixed(0)}</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-muted/40">
-                    <p className="text-xs text-muted-foreground">Spend</p>
-                    <p className="text-base font-bold mt-0.5">${campaign.totalSpend.toFixed(0)}</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-muted/40">
-                    <p className="text-xs text-muted-foreground">Revenue</p>
-                    <p className="text-base font-bold mt-0.5">${campaign.totalRevenue.toFixed(0)}</p>
-                  </div>
-                </div>
-
-                {/* KPI Secondary Metrics */}
-                <div className="grid grid-cols-2 gap-3">
-                  {/* Cost per Acquisition / Efficiency KPI */}
-                  <div className="p-3 rounded-lg bg-muted/40">
-                    <p className="text-xs text-muted-foreground">Cost per Acquisition</p>
-                    <p className="text-base font-bold mt-0.5">
-                      {campaign.totalSpend > 0 && campaign.totalRevenue > 0
-                        ? `$${(campaign.totalSpend / Math.max(1, campaign.programs.reduce((s, p) => s + (p.revenue > 0 ? 1 : 0), 0))).toFixed(0)}`
-                        : campaign.totalSpend > 0 ? `$${campaign.totalSpend.toFixed(0)} total` : '—'}
-                    </p>
-                  </div>
-                  {/* ROI — kept as supplementary */}
-                  <div className="p-3 rounded-lg bg-muted/40">
-                    <p className="text-xs text-muted-foreground">Financial ROI</p>
-                    <p className={`text-base font-bold mt-0.5 ${campaign.roi >= 0 ? 'text-[#3DB855]' : 'text-[#E8453C]'}`}>
-                      {campaign.roi >= 0 ? '+' : ''}{campaign.roi.toFixed(1)}%
-                    </p>
-                  </div>
-                </div>
-
-                {/* View Landing Page Button */}
-                {campaign.landingPageUrl && (
-                  <div className="pt-4">
-                    <a
-                      href={campaign.landingPageUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors"
-                    >
-                      View Landing Page
-                    </a>
-                  </div>
-                )}
-
-                {/* Programs List */}
-                {campaign.programs.length > 0 && (
-                  <div className="pt-4 border-t space-y-2">
-                    <p className="text-sm font-medium text-muted-foreground mb-3">Supporting Programs</p>
-                    {campaign.programs.map(program => {
-                      const programRoi = program.spend > 0 
-                        ? ((program.revenue - program.spend) / program.spend) * 100 
-                        : 0;
-                      
-                      return (
-                        <button
-                          key={program.id}
-                          onClick={() => setLocation("/programs")}
-                          className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-accent transition-colors text-left group"
-                        >
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium truncate">{program.name}</p>
-                            <div className="flex items-center gap-3 mt-1">
-                              <span className="text-xs text-muted-foreground">
-                                ${program.spend.toFixed(2)} spend
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                ${program.revenue.toFixed(2)} revenue
-                              </span>
-                              <Badge variant="outline" className="text-xs">
-                                {program.status}
-                              </Badge>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 ml-4">
-                            <span className={`text-sm font-semibold ${programRoi >= 0 ? "text-[#3DB855]" : "text-[#E8453C]"}`}>
-                              {programRoi >= 0 ? "+" : ""}{programRoi.toFixed(0)}%
-                            </span>
-                            <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          );
-        })}
+      <div className="grid gap-4 md:grid-cols-2">
+        {CAMPAIGN_ORDER.map(id => (
+          <CampaignCard
+            key={id}
+            campaignId={id}
+            campaign={campaigns?.find(c => c.id === id)}
+            kpiData={kpiData}
+          />
+        ))}
       </div>
-      </>)}
     </div>
   );
 }

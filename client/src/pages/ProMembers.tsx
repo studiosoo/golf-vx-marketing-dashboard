@@ -37,11 +37,11 @@ export default function ProMembers() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-[#222222] flex items-center gap-2">
             <Trophy className="h-6 w-6 text-yellow-500" />
             Pro Members
           </h1>
-          <p className="text-muted-foreground text-sm mt-1">Golf VX Pro coaches — tracked separately from the 300-member goal</p>
+          <p className="text-[#6F6F6B] text-sm mt-1">Golf VX Pro coaches — tracked separately from the 300-member goal</p>
         </div>
         <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
           <RefreshCw size={14} className={isRefreshing ? "animate-spin mr-2" : "mr-2"} />
@@ -51,44 +51,44 @@ export default function ProMembers() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="bg-card border-border">
+        <Card className="bg-white border-[#DEDEDA]">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-muted-foreground">Pro Members</span>
+              <span className="text-xs text-[#6F6F6B]">Pro Members</span>
               <Trophy size={16} className="text-yellow-500" />
             </div>
-            <div className="text-3xl font-black text-foreground">
+            <div className="text-3xl font-black text-[#222222]">
               {kpiLoading ? "—" : proKpi?.current ?? proMembers.length}
             </div>
-            <div className="text-xs text-muted-foreground mt-1">Active coaches</div>
+            <div className="text-xs text-[#6F6F6B] mt-1">Active coaches</div>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border">
+        <Card className="bg-white border-[#DEDEDA]">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-muted-foreground">Monthly Revenue</span>
-              <DollarSign size={16} className="text-[#3DB855]" />
+              <span className="text-xs text-[#6F6F6B]">Monthly Revenue</span>
+              <DollarSign size={16} className="text-[#72B84A]" />
             </div>
-            <div className="text-3xl font-black text-foreground">
+            <div className="text-3xl font-black text-[#222222]">
               {kpiLoading ? "—" : formatCurrency(proKpi?.mrr ?? 0)}
             </div>
-            <div className="text-xs text-muted-foreground mt-1">$500/mo base + session credits</div>
+            <div className="text-xs text-[#6F6F6B] mt-1">$500/mo base + session credits</div>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border">
+        <Card className="bg-white border-[#DEDEDA]">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-muted-foreground">Billing Model</span>
+              <span className="text-xs text-[#6F6F6B]">Billing Model</span>
               <Zap size={16} className="text-blue-500" />
             </div>
-            <div className="text-lg font-bold text-foreground">$500/mo base</div>
-            <div className="text-xs text-muted-foreground mt-1">$25/session bay credit • $25/hr overage after 20 sessions</div>
+            <div className="text-lg font-bold text-[#222222]">$500/mo base</div>
+            <div className="text-xs text-[#6F6F6B] mt-1">$25/session bay credit • $25/hr overage after 20 sessions</div>
           </CardContent>
         </Card>
       </div>
 
       {/* Pro Member Billing Info */}
-      <Card className="bg-card border-border">
+      <Card className="bg-white border-[#DEDEDA]">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
             <TrendingUp size={15} className="text-yellow-500" />
@@ -98,24 +98,24 @@ export default function ProMembers() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-muted/30 rounded-lg p-4 space-y-1">
-              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Base Fee</div>
-              <div className="text-2xl font-bold text-foreground">$500</div>
-              <div className="text-xs text-muted-foreground">per month</div>
+            <div className="bg-[#F6F6F4] rounded-lg p-4 space-y-1">
+              <div className="text-xs font-semibold text-[#6F6F6B] uppercase tracking-wide">Base Fee</div>
+              <div className="text-2xl font-bold text-[#222222]">$500</div>
+              <div className="text-xs text-[#6F6F6B]">per month</div>
             </div>
-            <div className="bg-muted/30 rounded-lg p-4 space-y-1">
-              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Bay Credit</div>
-              <div className="text-2xl font-bold text-foreground">$25</div>
-              <div className="text-xs text-muted-foreground">per session (up to 20/mo)</div>
+            <div className="bg-[#F6F6F4] rounded-lg p-4 space-y-1">
+              <div className="text-xs font-semibold text-[#6F6F6B] uppercase tracking-wide">Bay Credit</div>
+              <div className="text-2xl font-bold text-[#222222]">$25</div>
+              <div className="text-xs text-[#6F6F6B]">per session (up to 20/mo)</div>
             </div>
-            <div className="bg-muted/30 rounded-lg p-4 space-y-1">
-              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Overage Rate</div>
-              <div className="text-2xl font-bold text-foreground">$25/hr</div>
-              <div className="text-xs text-muted-foreground">after 20 sessions per month</div>
+            <div className="bg-[#F6F6F4] rounded-lg p-4 space-y-1">
+              <div className="text-xs font-semibold text-[#6F6F6B] uppercase tracking-wide">Overage Rate</div>
+              <div className="text-2xl font-bold text-[#222222]">$25/hr</div>
+              <div className="text-xs text-[#6F6F6B]">after 20 sessions per month</div>
             </div>
           </div>
           <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-            <p className="text-xs text-yellow-700 dark:text-[#F5C72C] font-medium">
+            <p className="text-xs text-yellow-700 dark:text-[#F2DD48] font-medium">
               Note: Chuck Lynch (PBGA Lead Coach) has a customized arrangement. Toast POS = non-member/overage bay usage. Stripe = membership fees.
             </p>
           </div>
@@ -123,7 +123,7 @@ export default function ProMembers() {
       </Card>
 
       {/* Pro Members List */}
-      <Card className="bg-card border-border">
+      <Card className="bg-white border-[#DEDEDA]">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
             <User size={15} className="text-yellow-500" />
@@ -134,17 +134,17 @@ export default function ProMembers() {
           {membersLoading ? (
             <div className="space-y-3">
               {[1, 2, 3].map(i => (
-                <div key={i} className="h-14 bg-muted/30 rounded-lg animate-pulse" />
+                <div key={i} className="h-14 bg-[#F6F6F4] rounded-lg animate-pulse" />
               ))}
             </div>
           ) : proMembers.length === 0 ? (
-            <div className="text-center py-10 text-muted-foreground text-sm">
-              No Golf VX Pro members found. Members with tier <code className="bg-muted px-1 rounded">golf_vx_pro</code> will appear here.
+            <div className="text-center py-10 text-[#6F6F6B] text-sm">
+              No Golf VX Pro members found. Members with tier <code className="bg-[#F1F1EF] px-1 rounded">golf_vx_pro</code> will appear here.
             </div>
           ) : (
             <div className="space-y-2">
               {proMembers.map((m: any) => (
-                <div key={m.id} className="flex items-center justify-between p-3 bg-muted/20 rounded-lg border border-border hover:bg-muted/40 transition-colors">
+                <div key={m.id} className="flex items-center justify-between p-3 bg-[#F1F1EF]/20 rounded-lg border border-[#DEDEDA] hover:bg-[#F6F6F4] transition-colors">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center">
                       <span className="text-xs font-bold text-yellow-600">
@@ -152,15 +152,15 @@ export default function ProMembers() {
                       </span>
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-foreground">
+                      <div className="text-sm font-medium text-[#222222]">
                         {m.firstName && m.lastName ? `${m.firstName} ${m.lastName}` : m.name || "Unknown"}
                         {(m.firstName === "Chuck" || m.name?.includes("Chuck")) && (
                           <Badge className="ml-2 text-xs bg-yellow-500/20 text-yellow-600 border-yellow-500/30">PBGA Lead</Badge>
                         )}
                       </div>
-                      <div className="text-xs text-muted-foreground">{m.email}</div>
+                      <div className="text-xs text-[#6F6F6B]">{m.email}</div>
                       {m.boomerangEmail && (
-                        <div className="text-xs text-muted-foreground/60 flex items-center gap-1 mt-0.5">
+                        <div className="text-xs text-[#6F6F6B]/60 flex items-center gap-1 mt-0.5">
                           <span className="inline-block w-1.5 h-1.5 rounded-full bg-yellow-500/60 flex-shrink-0" />
                           <span title="Boomerang-issued email">{m.boomerangEmail}</span>
                         </div>
@@ -169,17 +169,17 @@ export default function ProMembers() {
                   </div>
                   <div className="flex items-center gap-3 text-right">
                     <div>
-                      <div className="text-xs font-semibold text-foreground">
+                      <div className="text-xs font-semibold text-[#222222]">
                         {m.monthlyAmount ? formatCurrency(parseFloat(m.monthlyAmount)) : "$500"}
-                        <span className="text-muted-foreground font-normal">/mo</span>
+                        <span className="text-[#6F6F6B] font-normal">/mo</span>
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-xs text-[#6F6F6B]">
                         {m.joinDate ? new Date(m.joinDate).toLocaleDateString() : "—"}
                       </div>
                     </div>
                     <Badge
                       variant={m.status === "active" ? "default" : "secondary"}
-                      className={`text-xs ${m.status === "active" ? "bg-[#3DB855]/20 text-[#3DB855] border-[#3DB855]/30" : ""}`}
+                      className={`text-xs ${m.status === "active" ? "bg-[#72B84A]/20 text-[#72B84A] border-[#72B84A]/30" : ""}`}
                     >
                       {m.status || "unknown"}
                     </Badge>
@@ -192,7 +192,7 @@ export default function ProMembers() {
       </Card>
 
       {/* Session Tracking Placeholder */}
-      <Card className="bg-card border-border">
+      <Card className="bg-white border-[#DEDEDA]">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
             <Calendar size={15} className="text-blue-500" />
@@ -201,7 +201,7 @@ export default function ProMembers() {
           <CardDescription className="text-xs">Monthly session log and billing calculation</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
+          <div className="text-center py-8 text-[#6F6F6B]">
             <Calendar className="h-10 w-10 mx-auto mb-3 opacity-30" />
             <p className="text-sm font-medium">Session logging coming soon</p>
             <p className="text-xs mt-1">Track bay sessions, calculate monthly bills, and manage overage charges per coach</p>

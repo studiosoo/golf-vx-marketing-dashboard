@@ -197,13 +197,13 @@ export default function CommunicationsHub() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Communications Hub</h1>
-            <p className="text-muted-foreground mt-1">
+            <p className="text-[#6F6F6B] mt-1">
               Send emails and SMS to your members and contacts
             </p>
           </div>
           <div className="flex items-center gap-2">
             {selectedIds.size > 0 && (
-              <Badge className="bg-[#ffcb00] text-black font-semibold px-3 py-1">
+              <Badge className="bg-[#F2DD48] text-black font-semibold px-3 py-1">
                 {selectedIds.size} selected
               </Badge>
             )}
@@ -217,7 +217,7 @@ export default function CommunicationsHub() {
             <Button
               onClick={() => openCompose("email")}
               disabled={selectedIds.size === 0}
-              className="bg-[#ffcb00] text-black hover:bg-[#e6b800]"
+              className="bg-[#F2DD48] text-black hover:bg-[#D4C83A]"
             >
               <Mail className="h-4 w-4 mr-2" /> Email
             </Button>
@@ -229,10 +229,10 @@ export default function CommunicationsHub() {
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <Users className="h-8 w-8 text-[#ffcb00]" />
+                <Users className="h-8 w-8 text-[#F2DD48]" />
                 <div>
                   <p className="text-2xl font-bold">{members.length}</p>
-                  <p className="text-sm text-muted-foreground">Total Members</p>
+                  <p className="text-sm text-[#6F6F6B]">Total Members</p>
                 </div>
               </div>
             </CardContent>
@@ -243,7 +243,7 @@ export default function CommunicationsHub() {
                 <Mail className="h-8 w-8 text-blue-500" />
                 <div>
                   <p className="text-2xl font-bold">{members.filter(m => m.email).length}</p>
-                  <p className="text-sm text-muted-foreground">With Email</p>
+                  <p className="text-sm text-[#6F6F6B]">With Email</p>
                 </div>
               </div>
             </CardContent>
@@ -251,10 +251,10 @@ export default function CommunicationsHub() {
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <Phone className="h-8 w-8 text-[#3DB855]" />
+                <Phone className="h-8 w-8 text-[#72B84A]" />
                 <div>
                   <p className="text-2xl font-bold">{members.filter(m => m.phone).length}</p>
-                  <p className="text-sm text-muted-foreground">With Phone</p>
+                  <p className="text-sm text-[#6F6F6B]">With Phone</p>
                 </div>
               </div>
             </CardContent>
@@ -281,7 +281,7 @@ export default function CommunicationsHub() {
               </div>
             </div>
             <div className="relative mt-2">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6F6F6B]" />
               <Input
                 placeholder="Search by name, email, or phone..."
                 value={search}
@@ -293,10 +293,10 @@ export default function CommunicationsHub() {
           <CardContent>
             {isLoading ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-[#ffcb00]" />
+                <Loader2 className="h-8 w-8 animate-spin text-[#F2DD48]" />
               </div>
             ) : filteredMembers.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
+              <div className="text-center py-12 text-[#6F6F6B]">
                 <Users className="h-12 w-12 mx-auto mb-3 opacity-30" />
                 <p>No contacts found</p>
               </div>
@@ -308,8 +308,8 @@ export default function CommunicationsHub() {
                     onClick={() => toggleSelect(member.id)}
                     className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
                       selectedIds.has(member.id)
-                        ? 'bg-[#ffcb00]/10 border border-[#ffcb00]/30'
-                        : 'hover:bg-muted/50 border border-transparent'
+                        ? 'bg-[#F2DD48]/10 border border-[#F2DD48]/30'
+                        : 'hover:bg-[#F1F1EF] border border-transparent'
                     }`}
                   >
                     <Checkbox
@@ -324,17 +324,17 @@ export default function CommunicationsHub() {
                         </span>
                         {getTierBadge(member.membershipTier)}
                         {member.membershipStatus === 'active' && (
-                          <UserCheck className="h-3 w-3 text-[#3DB855]" />
+                          <UserCheck className="h-3 w-3 text-[#72B84A]" />
                         )}
                       </div>
                       <div className="flex items-center gap-3 mt-0.5">
                         {member.email && (
-                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <span className="text-xs text-[#6F6F6B] flex items-center gap-1">
                             <Mail className="h-3 w-3" /> {member.email}
                           </span>
                         )}
                         {member.phone && (
-                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <span className="text-xs text-[#6F6F6B] flex items-center gap-1">
                             <Phone className="h-3 w-3" /> {member.phone}
                           </span>
                         )}
@@ -354,12 +354,12 @@ export default function CommunicationsHub() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {composeType === "email" ? (
-                <Mail className="h-5 w-5 text-[#ffcb00]" />
+                <Mail className="h-5 w-5 text-[#F2DD48]" />
               ) : (
-                <MessageSquare className="h-5 w-5 text-[#3DB855]" />
+                <MessageSquare className="h-5 w-5 text-[#72B84A]" />
               )}
               {composeType === "email" ? "Compose Email" : "Compose SMS"}
-              <Badge className="ml-2 bg-[#ffcb00]/20 text-[#b8960a] border-[#ffcb00]/30">
+              <Badge className="ml-2 bg-[#F2DD48]/20 text-[#b8960a] border-[#F2DD48]/30">
                 {selectedMembers.length} recipients
               </Badge>
             </DialogTitle>
@@ -367,8 +367,8 @@ export default function CommunicationsHub() {
 
           <div className="space-y-4">
             {/* Recipients preview */}
-            <div className="rounded-lg border p-3 bg-muted/20">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Recipients</p>
+            <div className="rounded-lg border p-3 bg-[#F1F1EF]/20">
+              <p className="text-xs font-semibold text-[#6F6F6B] uppercase tracking-wide mb-2">Recipients</p>
               <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
                 {selectedMembers.slice(0, 20).map(m => (
                   <Badge key={m.id} variant="secondary" className="text-xs">
@@ -401,7 +401,7 @@ export default function CommunicationsHub() {
                   size="sm"
                   onClick={handleAiDraft}
                   disabled={aiDraftLoading}
-                  className="text-xs h-7 text-[#ffcb00] hover:text-[#e6b800]"
+                  className="text-xs h-7 text-[#F2DD48] hover:text-[#D4C83A]"
                 >
                   {aiDraftLoading ? (
                     <Loader2 className="h-3 w-3 mr-1 animate-spin" />
@@ -419,13 +419,13 @@ export default function CommunicationsHub() {
                 rows={composeType === "sms" ? 4 : 8}
               />
               {composeType === "sms" && (
-                <p className="text-xs text-muted-foreground text-right">{body.length} chars</p>
+                <p className="text-xs text-[#6F6F6B] text-right">{body.length} chars</p>
               )}
             </div>
 
             {/* Note about SMS */}
             {composeType === "sms" && (
-              <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 text-xs text-[#F5C72C]">
+              <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 text-xs text-[#F2DD48]">
                 <strong>Note:</strong> SMS sending requires Twilio credentials to be configured in Settings → Secrets. Once set up, messages will be delivered immediately.
               </div>
             )}
@@ -435,7 +435,7 @@ export default function CommunicationsHub() {
               <Button
                 onClick={handleSend}
                 disabled={isSending || !body.trim() || (composeType === "email" && !subject.trim())}
-                className={composeType === "email" ? "bg-[#ffcb00] text-black hover:bg-[#e6b800]" : ""}
+                className={composeType === "email" ? "bg-[#F2DD48] text-black hover:bg-[#D4C83A]" : ""}
               >
                 {isSending ? (
                   <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Sending...</>

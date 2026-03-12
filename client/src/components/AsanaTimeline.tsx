@@ -14,9 +14,9 @@ interface AsanaTask {
 }
 
 const CAMPAIGN_COLORS: Record<string, { bg: string; bar: string; text: string }> = {
-  "Trial Conversion Campaign":             { bg: "bg-green-50",  bar: "bg-green-500",  text: "text-[#3DB855]" },
+  "Trial Conversion Campaign":             { bg: "bg-green-50",  bar: "bg-green-500",  text: "text-[#72B84A]" },
   "Membership Acquisition campaign":        { bg: "bg-red-50",    bar: "bg-red-400",    text: "text-red-700" },
-  "Member Retention + Community Flywheel": { bg: "bg-[#888888]/10",   bar: "bg-[#888888]/100",   text: "text-[#888888]" },
+  "Member Retention + Community Flywheel": { bg: "bg-[#6F6F6B]/10",   bar: "bg-[#6F6F6B]/100",   text: "text-[#6F6F6B]" },
   "Venue Display / Local Media":           { bg: "bg-yellow-50", bar: "bg-yellow-500", text: "text-yellow-700" },
 };
 
@@ -37,11 +37,12 @@ function formatDate(s: string | null): string {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-export default function AsanaTimeline() {
+export default function AsanaTimeline({ enabled = true }: { enabled?: boolean }) {
   const [expandedCampaigns, setExpandedCampaigns] = useState<Set<string>>(
     new Set(Object.keys(CAMPAIGN_COLORS))
   );
   const { data, isLoading, error, refetch, isFetching } = trpc.asana.getTimeline.useQuery(undefined, {
+    enabled,
     staleTime: 5 * 60 * 1000,
     retry: 1,
   });
@@ -116,8 +117,8 @@ export default function AsanaTimeline() {
 
   if (isLoading) return (
     <div className="flex items-center justify-center py-20">
-      <Loader2 className="w-6 h-6 animate-spin text-[#F5C72C]" />
-      <span className="ml-2 text-sm text-[#666]">Loading Asana timeline…</span>
+      <Loader2 className="w-6 h-6 animate-spin text-[#F2DD48]" />
+      <span className="ml-2 text-sm text-[#6F6F6B]">Loading Asana timeline…</span>
     </div>
   );
 
@@ -133,8 +134,8 @@ export default function AsanaTimeline() {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h3 className="text-base font-semibold text-[#111]">Marketing Master Timeline</h3>
-          <p className="text-xs text-[#888]">Live from Asana · {data?.tasks.length || 0} tasks</p>
+          <h3 className="text-base font-semibold text-[#222222]">Marketing Master Timeline</h3>
+          <p className="text-xs text-[#6F6F6B]">Live from Asana · {data?.tasks.length || 0} tasks</p>
         </div>
         <div className="flex items-center gap-2">
           <a href={data?.projectUrl || "#"} target="_blank" rel="noopener noreferrer"
@@ -142,7 +143,7 @@ export default function AsanaTimeline() {
             <ExternalLink className="w-3.5 h-3.5" />Open in Asana
           </a>
           <button onClick={() => refetch()} disabled={isFetching}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#666] bg-white border border-[#E0E0E0] rounded-lg hover:bg-[#F5F5F5] transition-colors disabled:opacity-50">
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#6F6F6B] bg-white border border-[#E9E9E6] rounded-lg hover:bg-[#F1F1EF] transition-colors disabled:opacity-50">
             <RefreshCw className={`w-3.5 h-3.5 ${isFetching ? "animate-spin" : ""}`} />Refresh
           </button>
         </div>
@@ -152,25 +153,25 @@ export default function AsanaTimeline() {
         {Object.entries(CAMPAIGN_COLORS).map(([name, c]) => (
           <div key={name} className="flex items-center gap-1.5">
             <div className={`w-3 h-3 rounded-sm ${c.bar}`} />
-            <span className="text-xs text-[#555]">{name.split(" ").slice(0, 2).join(" ")}</span>
+            <span className="text-xs text-[#6F6F6B]">{name.split(" ").slice(0, 2).join(" ")}</span>
           </div>
         ))}
         <div className="flex items-center gap-1.5">
-          <div className="w-0.5 h-4 bg-[#888888]/100" />
-          <span className="text-xs text-[#555]">Today</span>
+          <div className="w-0.5 h-4 bg-[#6F6F6B]/100" />
+          <span className="text-xs text-[#6F6F6B]">Today</span>
         </div>
       </div>
 
-      <div className="bg-white border border-[#E0E0E0] rounded-xl overflow-hidden overflow-x-auto">
+      <div className="bg-white border border-[#E9E9E6] rounded-xl overflow-hidden overflow-x-auto">
         <div className="min-w-[700px]">
-          <div className="flex border-b border-[#E0E0E0] bg-[#FAFAFA]">
-            <div className="w-56 flex-shrink-0 px-4 py-2 text-xs font-medium text-[#888] border-r border-[#E0E0E0]">Task</div>
+          <div className="flex border-b border-[#E9E9E6] bg-[#F6F6F4]">
+            <div className="w-56 flex-shrink-0 px-4 py-2 text-xs font-medium text-[#6F6F6B] border-r border-[#E9E9E6]">Task</div>
             <div className="flex-1 relative h-8 overflow-hidden">
               {monthLabels.map(m => (
                 <div key={`${m.year}-${m.month}`}
                   className="absolute top-0 h-full flex items-center border-r border-[#E8E8E8]"
                   style={{ left: `${m.left}%`, width: `${m.width}%` }}>
-                  <span className="text-xs text-[#888] px-1 truncate">{m.label}</span>
+                  <span className="text-xs text-[#6F6F6B] px-1 truncate">{m.label}</span>
                 </div>
               ))}
             </div>
@@ -181,13 +182,13 @@ export default function AsanaTimeline() {
             const expanded = expandedCampaigns.has(campaign);
             const completed = tasks.filter(t => t.completed).length;
             return (
-              <div key={campaign} className="border-b border-[#E0E0E0] last:border-b-0">
+              <div key={campaign} className="border-b border-[#E9E9E6] last:border-b-0">
                 <button onClick={() => toggleCampaign(campaign)}
                   className={`w-full flex items-center ${color.bg} hover:brightness-95 transition-all`}>
-                  <div className="w-56 flex-shrink-0 flex items-center gap-2 px-4 py-2.5 border-r border-[#E0E0E0]">
+                  <div className="w-56 flex-shrink-0 flex items-center gap-2 px-4 py-2.5 border-r border-[#E9E9E6]">
                     {expanded
-                      ? <ChevronDown className="w-3.5 h-3.5 text-[#666] flex-shrink-0" />
-                      : <ChevronRight className="w-3.5 h-3.5 text-[#666] flex-shrink-0" />}
+                      ? <ChevronDown className="w-3.5 h-3.5 text-[#6F6F6B] flex-shrink-0" />
+                      : <ChevronRight className="w-3.5 h-3.5 text-[#6F6F6B] flex-shrink-0" />}
                     <span className={`text-xs font-semibold ${color.text} truncate`}>{campaign}</span>
                     <span className="text-xs text-[#999] ml-auto flex-shrink-0">{completed}/{tasks.length}</span>
                   </div>
@@ -202,7 +203,7 @@ export default function AsanaTimeline() {
                       return <div className={`absolute top-2 h-4 rounded-sm opacity-25 ${color.bar}`}
                         style={{ left: `${left}%`, width: `${Math.min(width, 100 - left)}%` }} />;
                     })()}
-                    <div className="absolute top-0 bottom-0 w-px bg-[#888888]/100 opacity-40" style={{ left: `${todayLeft}%` }} />
+                    <div className="absolute top-0 bottom-0 w-px bg-[#6F6F6B]/100 opacity-40" style={{ left: `${todayLeft}%` }} />
                   </div>
                 </button>
 
@@ -211,10 +212,10 @@ export default function AsanaTimeline() {
                   const barStyle = isMilestone ? null : getBarStyle(task);
                   const milestoneStyle = isMilestone ? getMilestoneStyle(task) : null;
                   return (
-                    <div key={task.gid} className="flex items-center border-t border-[#F0F0F0] hover:bg-[#FAFAFA] transition-colors">
+                    <div key={task.gid} className="flex items-center border-t border-[#F0F0F0] hover:bg-[#F6F6F4] transition-colors">
                       <div className="w-56 flex-shrink-0 flex items-center gap-2 px-4 py-2 border-r border-[#F0F0F0]">
                         {task.completed
-                          ? <CheckCircle2 className="w-3.5 h-3.5 text-[#3DB855] flex-shrink-0" />
+                          ? <CheckCircle2 className="w-3.5 h-3.5 text-[#72B84A] flex-shrink-0" />
                           : isMilestone
                             ? <Diamond className="w-3.5 h-3.5 text-[#999] flex-shrink-0" />
                             : <Circle className="w-3.5 h-3.5 text-[#CCC] flex-shrink-0" />}
@@ -242,7 +243,7 @@ export default function AsanaTimeline() {
                         )}
                         {milestoneStyle && (
                           <div className="absolute top-2 transform -translate-x-1/2" style={milestoneStyle}>
-                            <Diamond className={`w-5 h-5 ${task.completed ? "text-[#3DB855]" : "text-[#F5C72C]"}`} fill="currentColor" />
+                            <Diamond className={`w-5 h-5 ${task.completed ? "text-[#72B84A]" : "text-[#F2DD48]"}`} fill="currentColor" />
                           </div>
                         )}
                       </div>
