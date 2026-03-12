@@ -126,11 +126,13 @@
     "overrides": {
       "tailwindcss>nanoid": "3.3.7"
     },
-    "onlyBuiltDependencies": [],
     "peerDependencyRules": {
       "ignoreMissing": [
         "better-sqlite3"
       ]
-    }
+    },
+    "neverBuiltDependencies": [
+      "better-sqlite3"
+    ]
   }
 }
