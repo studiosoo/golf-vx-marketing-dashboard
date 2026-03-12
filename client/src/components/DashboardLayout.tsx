@@ -8,11 +8,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LogOut, PanelLeft, Settings } from "lucide-react";
+import { Lock, LogOut, PanelLeft, Settings } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
 import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 import { cn } from "@/lib/utils";
 import { SidebarNav } from "./layout/SidebarNav";
 import { getActiveLabel } from "./layout/navConfig";
@@ -48,6 +49,34 @@ export default function DashboardLayout({
   const resizeRef = useRef<number>(sidebarWidth);
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // Password login state
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
+
+  const handlePasswordLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginLoading(true);
+    setLoginError("");
+    try {
+      const res = await fetch("/api/auth/password-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: loginPassword }),
+      });
+      if (res.ok) {
+        window.location.reload();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setLoginError((data as any).error || "Invalid password");
+      }
+    } catch {
+      setLoginError("Connection error. Please try again.");
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!isResizing) return;
     const onMove = (e: MouseEvent) => {
@@ -76,21 +105,46 @@ export default function DashboardLayout({
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA]">
-        <div className="text-center space-y-5">
+        <div className="text-center space-y-5 max-w-sm w-full px-6">
           <img
             src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663329642625/LwjZZbOogTHBMDfo.png"
             alt="Golf VX"
             className="h-10 w-auto mx-auto"
           />
           <p className="text-[#888888] text-sm">Sign in to access the dashboard</p>
-          <Button
-            className="bg-[#F5C72C] text-[#111111] font-semibold hover:brightness-95 active:scale-95 transition-all px-8"
-            onClick={() => {
-              window.location.href = getLoginUrl();
-            }}
-          >
-            Sign In
-          </Button>
+          <form onSubmit={handlePasswordLogin} className="space-y-3">
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#888888]" />
+              <Input
+                type="password"
+                placeholder="Enter dashboard password"
+                value={loginPassword}
+                onChange={e => setLoginPassword(e.target.value)}
+                className="pl-9 border-[#E0E0E0] focus:border-[#F5C72C] focus:ring-[#F5C72C] bg-white"
+                autoFocus
+              />
+            </div>
+            {loginError && (
+              <p className="text-sm text-red-500">{loginError}</p>
+            )}
+            <Button
+              type="submit"
+              disabled={loginLoading || !loginPassword}
+              className="bg-[#F5C72C] text-[#111111] font-semibold hover:brightness-95 active:scale-95 transition-all w-full"
+            >
+              {loginLoading ? "Signing in..." : "Sign In"}
+            </Button>
+          </form>
+          <p className="text-xs text-[#BBBBBB]">
+            Or{" "}
+            <button
+              type="button"
+              className="underline hover:text-[#888888] transition-colors"
+              onClick={() => { window.location.href = getLoginUrl(); }}
+            >
+              sign in with Manus
+            </button>
+          </p>
         </div>
       </div>
     );
