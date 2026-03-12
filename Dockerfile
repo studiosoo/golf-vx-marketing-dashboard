@@ -1,6 +1,6 @@
 FROM node:22-slim
 
-# Install build tools needed for native modules (but we'll prevent better-sqlite3 from compiling)
+# Install build tools needed for native modules
 RUN apt-get update && apt-get install -y python3 make g++ --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 # Install pnpm
@@ -8,16 +8,17 @@ RUN npm install -g pnpm@10.4.1
 
 WORKDIR /app
 
-# Copy package files
+# Copy package files and scripts needed for postinstall
 COPY package.json pnpm-lock.yaml ./
 COPY patches/ ./patches/
+COPY scripts/ ./scripts/
 
-# Install dependencies with full scripts enabled so platform-specific binaries
-# (rollup, esbuild, etc.) are properly downloaded/compiled.
-# better-sqlite3 is NOT in onlyBuiltDependencies so it won't run its install script.
+# Install dependencies
+# better-sqlite3 is excluded via neverBuiltDependencies in package.json
+# All other platform-specific binaries (rollup, esbuild) will compile/download normally
 RUN pnpm install --frozen-lockfile
 
-# Copy source code
+# Copy remaining source code
 COPY . .
 
 # Build the application
