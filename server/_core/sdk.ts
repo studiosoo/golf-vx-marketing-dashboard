@@ -270,7 +270,7 @@ class SDKServer {
     const signedInAt = new Date();
     let user = await db.getUserByOpenId(sessionUserId);
 
-    // If user not in DB, sync from OAuth server automatically
+    // If user not in DB, try to sync from OAuth server
     if (!user) {
       try {
         const userInfo = await this.getUserInfoWithJwt(sessionCookie ?? "");
@@ -283,9 +283,20 @@ class SDKServer {
         });
         user = await db.getUserByOpenId(userInfo.openId);
       } catch (error) {
-        console.error("[Auth] Failed to sync user from OAuth:", error);
-        throw ForbiddenError("Failed to sync user info");
+        console.warn("[Auth] Could not sync user from OAuth (expected in bypass mode):", String(error));
       }
+    }
+
+    // Bypass mode: if no DB is available but JWT is valid, return a synthetic user
+    if (!user && ENV.bypassPassword) {
+      return {
+        openId: sessionUserId,
+        name: session.name || "Admin",
+        email: null,
+        loginMethod: "password",
+        createdAt: signedInAt,
+        lastSignedIn: signedInAt,
+      } as User;
     }
 
     if (!user) {
