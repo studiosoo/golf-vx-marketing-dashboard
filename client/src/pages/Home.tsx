@@ -3,6 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
 import { getLoginUrl } from "@/const";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Users,
   DollarSign,
@@ -22,6 +23,7 @@ import {
   Instagram,
   Mail,
   Activity,
+  Lock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useMemo } from "react";
@@ -185,6 +187,10 @@ export default function Home() {
 
   const [refreshing, setRefreshing] = useState(false);
   const [memberListOpen, setMemberListOpen] = useState(false);
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
+
   const handleRefresh = async () => {
     setRefreshing(true);
     await refetch();
@@ -199,10 +205,33 @@ export default function Home() {
     );
   }
 
+  const handlePasswordLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginLoading(true);
+    setLoginError("");
+    try {
+      const res = await fetch("/api/auth/password-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: loginPassword }),
+      });
+      if (res.ok) {
+        window.location.reload();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setLoginError((data as any).error || "Invalid password");
+      }
+    } catch {
+      setLoginError("Connection error. Please try again.");
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-center space-y-5 max-w-sm px-6">
+        <div className="text-center space-y-5 max-w-sm px-6 w-full">
           <div className="h-14 w-14 bg-[#F5C72C]/20 rounded-2xl flex items-center justify-center mx-auto">
             <BarChart3 className="h-7 w-7 text-[#111111]" />
           </div>
@@ -210,12 +239,38 @@ export default function Home() {
             <h1 className="text-xl font-bold text-[#111111]">Golf VX Dashboard</h1>
             <p className="text-sm text-[#888888] mt-1">Arlington Heights — Marketing Dashboard</p>
           </div>
-          <Button
-            className="bg-[#F5C72C] text-[#111111] font-semibold hover:brightness-95 active:scale-95 transition-all w-full"
-            onClick={() => { window.location.href = getLoginUrl(); }}
-          >
-            Sign In
-          </Button>
+          <form onSubmit={handlePasswordLogin} className="space-y-3">
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#888888]" />
+              <Input
+                type="password"
+                placeholder="Enter dashboard password"
+                value={loginPassword}
+                onChange={e => setLoginPassword(e.target.value)}
+                className="pl-9 border-[#E0E0E0] focus:border-[#F5C72C] focus:ring-[#F5C72C]"
+                autoFocus
+              />
+            </div>
+            {loginError && (
+              <p className="text-sm text-red-500">{loginError}</p>
+            )}
+            <Button
+              type="submit"
+              disabled={loginLoading || !loginPassword}
+              className="bg-[#F5C72C] text-[#111111] font-semibold hover:brightness-95 active:scale-95 transition-all w-full"
+            >
+              {loginLoading ? "Signing in..." : "Sign In"}
+            </Button>
+          </form>
+          <p className="text-xs text-[#BBBBBB]">
+            Or{" "}
+            <button
+              className="underline hover:text-[#888888] transition-colors"
+              onClick={() => { window.location.href = getLoginUrl(); }}
+            >
+              sign in with Manus
+            </button>
+          </p>
         </div>
       </div>
     );

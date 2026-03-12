@@ -3,6 +3,7 @@ import type { Express, Request, Response } from "express";
 import * as db from "../db";
 import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";
+import { ENV } from "./env";
 
 function getQueryParam(req: Request, key: string): string | undefined {
   const value = req.query[key];
@@ -10,6 +11,46 @@ function getQueryParam(req: Request, key: string): string | undefined {
 }
 
 export function registerOAuthRoutes(app: Express) {
+  // Password bypass login — only active when BYPASS_PASSWORD env var is set
+  app.post("/api/auth/password-login", async (req: Request, res: Response) => {
+    if (!ENV.bypassPassword) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
+
+    const { password } = req.body as { password?: string };
+
+    if (!password || password !== ENV.bypassPassword) {
+      res.status(401).json({ error: "Invalid password" });
+      return;
+    }
+
+    try {
+      // Upsert the owner user so they exist in the DB
+      const openId = ENV.ownerOpenId || "bypass-owner";
+      await db.upsertUser({
+        openId,
+        name: "Studio Soo",
+        email: "support@studiosoo.com",
+        loginMethod: "password",
+        lastSignedIn: new Date(),
+      });
+
+      const sessionToken = await sdk.createSessionToken(openId, {
+        name: "Studio Soo",
+        expiresInMs: ONE_YEAR_MS,
+      });
+
+      const cookieOptions = getSessionCookieOptions(req);
+      res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("[Auth] Password login failed", error);
+      res.status(500).json({ error: "Login failed" });
+    }
+  });
+
   app.get("/api/oauth/callback", async (req: Request, res: Response) => {
     const code = getQueryParam(req, "code");
     const state = getQueryParam(req, "state");
