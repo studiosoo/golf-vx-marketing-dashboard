@@ -45,7 +45,10 @@ ENV VITE_ANALYTICS_WEBSITE_ID=$VITE_ANALYTICS_WEBSITE_ID
 RUN pnpm build
 
 # Expose port
-EXPOSE 3002
+EXPOSE 3000
+
+ENV NODE_ENV=production
+ENV PORT=3000
 
 # Start the application
 CMD ["node", "dist/index.js"]
