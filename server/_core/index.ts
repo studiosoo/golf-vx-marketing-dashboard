@@ -52,7 +52,66 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
   throw new Error(`No available port found starting from ${startPort}`);
 }
 
+async function runStartupMigrations() {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    console.log('[Migration] No DATABASE_URL, skipping migrations');
+    return;
+  }
+  try {
+    const mysql = await import('mysql2/promise');
+    const fs = await import('fs');
+    const path = await import('path');
+    const connection = await mysql.default.createConnection(databaseUrl);
+    console.log('[Migration] Connected to database');
+    await connection.execute(`CREATE TABLE IF NOT EXISTS \`__drizzle_migrations\` (id INT AUTO_INCREMENT PRIMARY KEY, hash VARCHAR(255) NOT NULL UNIQUE, created_at BIGINT)`);
+    const migrationsDir = path.default.join(process.cwd(), 'drizzle');
+    const journalPath = path.default.join(migrationsDir, 'meta', '_journal.json');
+    if (!fs.default.existsSync(journalPath)) { await connection.end(); return; }
+    const journal = JSON.parse(fs.default.readFileSync(journalPath, 'utf-8'));
+    const entries = journal.entries || [];
+    console.log(`[Migration] Found ${entries.length} migration(s)`);
+    for (const entry of entries) {
+      const { tag, when } = entry;
+      const [rows] = await connection.execute('SELECT id FROM `__drizzle_migrations` WHERE hash = ?', [tag]) as any;
+      if (rows.length > 0) continue;
+      const sqlFile = fs.default.readdirSync(migrationsDir).find((f: string) => f.endsWith('.sql') && f.replace('.sql', '') === tag);
+      if (!sqlFile) continue;
+      const sql = fs.default.readFileSync(path.default.join(migrationsDir, sqlFile), 'utf-8');
+      const statements = sql.split('--> statement-breakpoint').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+      console.log(`[Migration] Applying ${tag} (${statements.length} statements)...`);
+      for (const stmt of statements) {
+        try { await connection.execute(stmt); }
+        catch (e: any) { if (!['ER_TABLE_EXISTS_ERROR','ER_DUP_KEYNAME','ER_DUP_ENTRY'].includes(e.code)) console.warn(`[Migration] Warning:`, e.message); }
+      }
+      await connection.execute('INSERT INTO `__drizzle_migrations` (hash, created_at) VALUES (?, ?)', [tag, when || Date.now()]);
+      console.log(`[Migration] Applied ${tag}`);
+    }
+    await connection.end();
+    console.log('[Migration] All migrations complete');
+  } catch (err: any) {
+    console.error('[Migration] Error:', err.message);
+  }
+}
+
+async function copyMetaAdsCache() {
+  try {
+    const fs = await import('fs');
+    const path = await import('path');
+    const srcPath = path.default.join(process.cwd(), '.meta-ads-cache', 'insights.json');
+    const destPath = '/tmp/golf-vx-meta-ads-insights.json';
+    if (fs.default.existsSync(srcPath) && !fs.default.existsSync(destPath)) {
+      fs.default.copyFileSync(srcPath, destPath);
+      console.log('[Startup] Meta Ads cache copied from bundle to /tmp');
+    }
+  } catch (e: any) {
+    console.warn('[Startup] Could not copy Meta Ads cache:', e.message);
+  }
+}
+
 async function startServer() {
+  await copyMetaAdsCache();
+  await runStartupMigrations();
   const app = express();
   const server = createServer(app);
   // Configure body parser with larger size limit for file uploads
