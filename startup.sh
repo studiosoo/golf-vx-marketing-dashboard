@@ -14,15 +14,17 @@ fi
 
 # Run database migrations if DATABASE_URL is set
 if [ -n "$DATABASE_URL" ]; then
-  echo "[Startup] Running database migrations..."
+  echo "[Startup] DATABASE_URL detected, running migrations..."
+  
   # Wait for MySQL to be ready (up to 60 seconds)
   MAX_TRIES=12
   TRIES=0
   until node -e "
-    const mysql = require('mysql2/promise');
-    mysql.createConnection(process.env.DATABASE_URL)
-      .then(c => { c.end(); process.exit(0); })
-      .catch(() => process.exit(1));
+    import('mysql2/promise').then(m => 
+      m.default.createConnection(process.env.DATABASE_URL)
+        .then(c => { c.end(); process.exit(0); })
+        .catch(() => process.exit(1))
+    );
   " 2>/dev/null; do
     TRIES=$((TRIES + 1))
     if [ $TRIES -ge $MAX_TRIES ]; then
@@ -35,8 +37,7 @@ if [ -n "$DATABASE_URL" ]; then
 
   if [ $TRIES -lt $MAX_TRIES ]; then
     echo "[Startup] Database is ready. Running migrations..."
-    cd /app && node_modules/.bin/drizzle-kit migrate --config drizzle.config.ts 2>&1 || echo "[Startup] Migration warning (may already be up to date)"
-    echo "[Startup] Migrations complete."
+    node /app/scripts/run-migrations.mjs && echo "[Startup] Migrations complete." || echo "[Startup] Migration error (continuing anyway)"
   fi
 else
   echo "[Startup] No DATABASE_URL set, skipping migrations"
