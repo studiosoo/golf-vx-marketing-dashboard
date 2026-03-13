@@ -28,11 +28,14 @@ ENV VITE_APP_TITLE="Golf VX Arlington Heights"
 # Build the application (Vite will bake VITE_ env vars into the bundle)
 RUN pnpm build
 
+# Make startup script executable
+RUN chmod +x /app/startup.sh
+
 # Expose port
 EXPOSE 3000
 
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# Start the application
-CMD ["node", "dist/index.js"]
+# Use startup script to run migrations and start server
+CMD ["/app/startup.sh"]
