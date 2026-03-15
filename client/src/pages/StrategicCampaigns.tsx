@@ -7,6 +7,7 @@ import { TrendingUp, Target, DollarSign, BarChart3, ChevronRight, TrendingDown, 
 import { Progress } from "@/components/ui/progress";
 import { useLocation } from "wouter";
 import AsanaTimeline from "@/components/AsanaTimeline";
+import { MetaAdsStatusBadge } from "@/components/MetaAdsStatusBadge";
 
 const CAMPAIGN_COLORS: Record<string, string> = {
   trial_conversion: "emerald",
@@ -50,9 +51,12 @@ export default function StrategicCampaigns() {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Strategic Campaigns</h1>
-          <p className="text-muted-foreground mt-2">
-            High-level strategic objectives with aggregated program performance
-          </p>
+          <div className="flex items-center gap-2 mt-2">
+            <p className="text-muted-foreground">
+              High-level strategic objectives with aggregated program performance
+            </p>
+            <MetaAdsStatusBadge />
+          </div>
         </div>
         <div className="flex items-center gap-1 p-1 bg-[#F5F5F5] rounded-xl border border-[#E0E0E0] self-start sm:self-auto">
           <button

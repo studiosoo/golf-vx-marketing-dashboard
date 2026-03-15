@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useMemo } from "react";
+import { MetaAdsStatusBadge } from "@/components/MetaAdsStatusBadge";
 
 function fmt(n: number, opts?: Intl.NumberFormatOptions) {
   return n.toLocaleString("en-US", opts);
@@ -184,6 +185,11 @@ export default function Home() {
     enabled: isAuthenticated && tokenValid,
     staleTime: 30 * 60 * 1000,
   });
+  const { data: metaAdsCampaigns, isLoading: metaAdsLoading, isError: metaAdsError } =
+    trpc.metaAds.getAllCampaignsWithInsights.useQuery(
+      { datePreset: "last_7d" },
+      { enabled: isAuthenticated, staleTime: 5 * 60 * 1000, retry: 1 }
+    );
 
   const [refreshing, setRefreshing] = useState(false);
   const [memberListOpen, setMemberListOpen] = useState(false);
@@ -475,6 +481,17 @@ export default function Home() {
         ? `${fmt(emailSubscribers)} AHTIL contacts`
         : "Connecting to Encharge…",
     },
+    {
+      label: "Meta Ads",
+      status: metaAdsLoading ? "loading" : metaAdsError ? "error" : (metaAdsCampaigns && metaAdsCampaigns.length > 0) ? "live" : "offline",
+      detail: metaAdsLoading
+        ? "Connecting…"
+        : metaAdsError
+        ? "API connection failed — check META_ADS_ACCESS_TOKEN"
+        : metaAdsCampaigns && metaAdsCampaigns.length > 0
+        ? `${metaAdsCampaigns.length} campaigns live`
+        : "No campaigns returned",
+    },
   ];
 
   return (
@@ -483,9 +500,12 @@ export default function Home() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-[22px] font-bold text-[#111111] leading-tight">{greeting}, {firstName}</h1>
-          <p className="text-[13px] text-[#888888] mt-0.5">
-            Golf VX Arlington Heights · {now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
-          </p>
+          <div className="flex items-center gap-2 mt-0.5">
+            <p className="text-[13px] text-[#888888]">
+              Golf VX Arlington Heights · {now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+            </p>
+            <MetaAdsStatusBadge />
+          </div>
         </div>
         <button
           onClick={handleRefresh}

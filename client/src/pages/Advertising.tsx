@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { BarChart3, Instagram, HandHeart, Newspaper, Ticket } from "lucide-react";
 import MetaAds from "./MetaAds";
+import { MetaAdsStatusBadge } from "@/components/MetaAdsStatusBadge";
 import { InfluencerTab } from "@/components/advertising/InfluencerTab";
 import { OutreachTab } from "@/components/advertising/OutreachTab";
 import { PrintTab } from "@/components/advertising/PrintTab";
@@ -24,9 +25,12 @@ export default function Advertising() {
       {/* Page header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Advertising</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Meta Ads, influencer collabs, community giving, print, and trade shows
-        </p>
+        <div className="flex items-center gap-2 mt-1">
+          <p className="text-muted-foreground text-sm">
+            Meta Ads, influencer collabs, community giving, print, and trade shows
+          </p>
+          <MetaAdsStatusBadge />
+        </div>
       </div>
 
       {/* Tab navigation */}
