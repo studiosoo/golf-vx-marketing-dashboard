@@ -457,10 +457,10 @@ export default function Home() {
           <h2 className="text-[13px] font-semibold text-[#A8A8A3] uppercase tracking-widest">Branch Snapshot · Arlington Heights</h2>
           <span className="text-[11px] text-[#A8A8A3]">Nov 2025 – Mar 2026</span>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
 
           {/* Card 1 — Revenue Trend */}
-          <div className="bg-white rounded-xl border border-[#DEDEDA] p-3">
+          <div className="bg-white rounded-xl border border-[#DEDEDA] p-4">
             <p className="text-[10px] font-semibold uppercase tracking-wide text-[#A8A8A3] mb-1.5">Revenue Trend</p>
             <div className="relative w-full">
               <svg viewBox="0 0 200 54" className="w-full" preserveAspectRatio="none">
@@ -500,7 +500,7 @@ export default function Home() {
           </div>
 
           {/* Card 2 — Revenue MTD */}
-          <div className="bg-white rounded-xl border border-[#DEDEDA] p-3">
+          <div className="bg-white rounded-xl border border-[#DEDEDA] p-4">
             <p className="text-[10px] font-semibold uppercase tracking-wide text-[#A8A8A3] mb-1.5">Revenue MTD</p>
             <p className="text-[24px] font-bold text-[#222222] leading-none tracking-tight mb-1">$29,983</p>
             <p className="text-[11px] text-[#6F6F6B] mb-1.5">Mar 1–9 only</p>
@@ -508,7 +508,7 @@ export default function Home() {
           </div>
 
           {/* Card 3 — Known MRR Floor */}
-          <div className="bg-white rounded-xl border border-[#DEDEDA] p-3">
+          <div className="bg-white rounded-xl border border-[#DEDEDA] p-4">
             <p className="text-[10px] font-semibold uppercase tracking-wide text-[#A8A8A3] mb-1.5">Known MRR Floor</p>
             <p className="text-[24px] font-bold text-[#222222] leading-none tracking-tight mb-1">$24,975/mo</p>
             <p className="text-[11px] text-[#6F6F6B] mb-1.5">87 named-tier members · Stripe pending</p>
@@ -516,7 +516,7 @@ export default function Home() {
           </div>
 
           {/* Card 4 — Membership Visibility */}
-          <div className="bg-white rounded-xl border border-[#DEDEDA] p-3">
+          <div className="bg-white rounded-xl border border-[#DEDEDA] p-4">
             <p className="text-[10px] font-semibold uppercase tracking-wide text-[#A8A8A3] mb-1.5">Membership Visibility</p>
             <div className="space-y-0.5 mb-2">
               <p className="text-[13px] text-[#222222]">54 Aces</p>
@@ -528,7 +528,7 @@ export default function Home() {
           </div>
 
           {/* Card 5 — Active Marketing Scope */}
-          <div className="bg-white rounded-xl border border-[#DEDEDA] p-3">
+          <div className="bg-white rounded-xl border border-[#DEDEDA] p-4">
             <p className="text-[10px] font-semibold uppercase tracking-wide text-[#A8A8A3] mb-1.5">Active Marketing Scope</p>
             <div className="space-y-0.5 mb-2">
               <p className="text-[13px] font-semibold text-[#222222]">4 Campaigns</p>
@@ -539,7 +539,7 @@ export default function Home() {
           </div>
 
           {/* Card 6 — Data Confidence */}
-          <div className="bg-white rounded-xl border border-[#DEDEDA] p-3">
+          <div className="bg-white rounded-xl border border-[#DEDEDA] p-4">
             <p className="text-[10px] font-semibold uppercase tracking-wide text-[#A8A8A3] mb-1.5">Data Confidence</p>
             <p className="text-[22px] font-bold leading-none tracking-tight mb-1" style={{ color: "#D89A3C" }}>◑ Partial</p>
             <p className="text-[11px] text-[#6F6F6B]">Toast POS verified · Stripe pending</p>
