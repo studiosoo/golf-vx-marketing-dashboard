@@ -6,9 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { RefreshCw, TrendingUp, DollarSign, Eye, MousePointer, Sparkles, ChevronRight, ExternalLink, ChevronDown, Archive, RotateCcw } from "lucide-react";
+import { RefreshCw, TrendingUp, DollarSign, Eye, MousePointer, Sparkles, ChevronRight, ExternalLink, ChevronDown, Archive, RotateCcw, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { MetaAdsStatusBadge } from "@/components/MetaAdsStatusBadge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 type DatePreset = "today" | "yesterday" | "last_7d" | "last_14d" | "last_30d" | "last_90d" | "lifetime";
 
@@ -312,15 +313,23 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Active Spend", value: isLoading ? "—" : campaigns == null ? "N/A" : formatCurrency(totalSpend), icon: <DollarSign size={18} />, color: "text-[#E8453C]" },
-          { label: "Total Reach", value: isLoading ? "—" : campaigns == null ? "N/A" : formatNum(totalReach), icon: <Eye size={18} />, color: "text-[#888888]" },
-          { label: "Impressions", value: isLoading ? "—" : campaigns == null ? "N/A" : formatNum(totalImpressions), icon: <TrendingUp size={18} />, color: "text-[#3DB855]" },
-          { label: "Clicks", value: isLoading ? "—" : campaigns == null ? "N/A" : formatNum(totalClicks), icon: <MousePointer size={18} />, color: "text-[#F5C72C]" },
+          { label: "Active Spend", value: isLoading ? "—" : campaigns == null ? "N/A" : formatCurrency(totalSpend), icon: <DollarSign size={18} />, color: "text-[#E8453C]", tooltip: "Total amount spent across all active campaigns in the selected date range." },
+          { label: "Total Reach", value: isLoading ? "—" : campaigns == null ? "N/A" : formatNum(totalReach), icon: <Eye size={18} />, color: "text-[#888888]", tooltip: "Number of unique people who saw at least one ad from your active campaigns." },
+          { label: "Impressions", value: isLoading ? "—" : campaigns == null ? "N/A" : formatNum(totalImpressions), icon: <TrendingUp size={18} />, color: "text-[#3DB855]", tooltip: "Total times your ads were displayed, including multiple views by the same person." },
+          { label: "Clicks", value: isLoading ? "—" : campaigns == null ? "N/A" : formatNum(totalClicks), icon: <MousePointer size={18} />, color: "text-[#F5C72C]", tooltip: "Total clicks on your ads, including link clicks, button clicks, and profile visits." },
         ].map((kpi) => (
           <Card key={kpi.label} className="bg-card border-border">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-muted-foreground">{kpi.label}</span>
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-muted-foreground">{kpi.label}</span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info size={12} className="text-muted-foreground/50 cursor-help hover:text-muted-foreground transition-colors" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-[200px]">{kpi.tooltip}</TooltipContent>
+                  </Tooltip>
+                </div>
                 <span className={kpi.color}>{kpi.icon}</span>
               </div>
               <div className="text-xl font-bold text-foreground">{kpi.value}</div>

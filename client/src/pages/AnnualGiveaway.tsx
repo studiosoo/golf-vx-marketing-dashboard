@@ -216,7 +216,10 @@ export default function AnnualGiveaway() {
 
       {/* AI Intelligence scroll anchor */}
       <div className="flex items-center justify-between">
-        <div className="text-sm font-semibold text-[#111111]">Campaign Analysis</div>
+        <div className="flex items-center gap-2">
+          <div className="text-sm font-semibold text-[#111111]">Campaign Analysis</div>
+          <MetaAdsStatusBadge />
+        </div>
         <button
           onClick={() => {
             const el = document.getElementById("giveaway-ai-section");

@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, Mail, FileText, UserCheck } from "lucide-react";
+import { Loader2, Mail, FileText, UserCheck, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { EmailDraftModal } from "./EmailDraftModal";
 import { VisitHistoryModal } from "./VisitHistoryModal";
@@ -17,7 +17,9 @@ interface Application {
   email: string;
   city?: string | null;
   ageRange?: string | null;
+  gender?: string | null;
   golfExperienceLevel?: string | null;
+  submittedAt?: string | Date | null;
   status?: string | null;
 }
 
@@ -60,6 +62,29 @@ export function ApplicationsTab({ applications, totalApplications, onStatusChang
     { enabled: visitHistoryModal.open && visitHistoryModal.applicantId !== null }
   );
 
+  const handleExportCSV = () => {
+    const headers = ["Name", "Email", "City", "Age Range", "Gender", "Golf Experience", "Submission Date"];
+    const rows = filteredApplications.map((app) => [
+      app.name,
+      app.email,
+      app.city || "",
+      app.ageRange || "",
+      app.gender || "",
+      app.golfExperienceLevel || "",
+      app.submittedAt ? new Date(app.submittedAt).toLocaleDateString("en-US") : "",
+    ]);
+    const csv = [headers, ...rows]
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `giveaway-applications-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   const filteredApplications = (applications || []).filter(app => {
     const matchesStatus = statusFilter === "all" || app.status === statusFilter;
     const matchesSearch = !searchQuery ||
@@ -88,6 +113,16 @@ export function ApplicationsTab({ applications, totalApplications, onStatusChang
               <CardDescription className="text-[#AAAAAA]">Manage and track all giveaway submissions</CardDescription>
             </div>
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 text-xs border-[#E0E0E0] text-[#545A60] hover:text-[#111111]"
+                onClick={handleExportCSV}
+                disabled={filteredApplications.length === 0}
+              >
+                <Download className="h-3.5 w-3.5 mr-1" />
+                Export CSV
+              </Button>
               <Input
                 placeholder="Search name, email, city..."
                 value={searchQuery}
