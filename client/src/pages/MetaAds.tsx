@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { RefreshCw, TrendingUp, DollarSign, Eye, MousePointer, Sparkles, ChevronRight, ExternalLink, ChevronDown, Archive, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { MetaAdsStatusBadge } from "@/components/MetaAdsStatusBadge";
 
 type DatePreset = "today" | "yesterday" | "last_7d" | "last_14d" | "last_30d" | "last_90d" | "lifetime";
 
@@ -276,7 +277,10 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         {!embedded && <div>
           <h1 className="text-2xl font-bold text-foreground">Meta Ads</h1>
-          <p className="text-muted-foreground text-sm mt-1">Facebook & Instagram campaign performance</p>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-muted-foreground text-sm">Facebook & Instagram campaign performance</p>
+            <MetaAdsStatusBadge />
+          </div>
         </div>}
         {embedded && <div />}
         <div className="flex items-center gap-3">

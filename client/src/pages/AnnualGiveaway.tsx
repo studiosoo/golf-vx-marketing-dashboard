@@ -11,11 +11,12 @@ import { BottomFunnelConversion } from "@/components/giveaway/BottomFunnelConver
 import { DemographicsTab } from "@/components/giveaway/DemographicsTab";
 import { AIIntelligenceTab } from "@/components/giveaway/AIIntelligenceTab";
 import { ApplicationsTab } from "@/components/giveaway/ApplicationsTab";
+import { MetaAdsStatusBadge } from "@/components/MetaAdsStatusBadge";
 
 const ENTRY_GOAL = 1500;
 const LONG_FORM_GOAL = 250;
-const TOTAL_AD_SPEND = 467.59;
-const ENTRY_PAGE_UV = 875;
+// Campaign IDs for Annual Giveaway (A1 + A2)
+const GIVEAWAY_CAMPAIGN_IDS = ["120239570172470217", "120239627905950217"];
 
 export default function AnnualGiveaway() {
   const { toast } = useToast();
@@ -31,6 +32,12 @@ export default function AnnualGiveaway() {
   const { data: lastSyncInfo } = trpc.giveaway.getLastSyncInfo.useQuery(undefined, { refetchInterval: 30000 });
   const { data: conversions } = trpc.giveaway.getConversions.useQuery(undefined, { refetchInterval: 60000 });
 
+  // Pull live Meta Ads data for giveaway campaigns (lifetime spend + impressions)
+  const { data: metaCampaigns } = trpc.metaAds.getAllCampaignsWithInsights.useQuery(
+    { datePreset: "maximum" },
+    { refetchInterval: 300000 } // refresh every 5 min
+  );
+
   const syncMutation = trpc.giveaway.sync.useMutation({
     onSuccess: () => {
       refetchApps();
@@ -43,13 +50,29 @@ export default function AnnualGiveaway() {
     onSuccess: () => refetchApps(),
   });
 
+  // Derive live ad spend and reach from Meta Ads data
+  const giveawayCampaigns = metaCampaigns?.filter((c: any) =>
+    GIVEAWAY_CAMPAIGN_IDS.includes(c.id)
+  ) ?? [];
+  const liveAdSpend = giveawayCampaigns.reduce(
+    (sum: number, c: any) => sum + parseFloat(c.spend || c.totalSpend || "0"),
+    0
+  );
+  const liveReach = giveawayCampaigns.reduce(
+    (sum: number, c: any) => sum + parseInt(c.reach || "0", 10),
+    0
+  );
+  // Fall back to last known values if Meta Ads not yet loaded
+  const TOTAL_AD_SPEND = liveAdSpend > 0 ? liveAdSpend : 467.59;
+  const ENTRY_PAGE_UV = liveReach > 0 ? liveReach : 875;
+
   const totalApplications = stats?.totalApplications || 0;
   const costPerSubmission = totalApplications > 0
     ? (TOTAL_AD_SPEND / totalApplications).toFixed(2)
-    : "0.00";
+    : "—";
   const funnelConversionRate = ENTRY_PAGE_UV > 0
     ? ((totalApplications / ENTRY_PAGE_UV) * 100).toFixed(1)
-    : "0.0";
+    : "—";
 
   const entryProgress = (ENTRY_PAGE_UV / ENTRY_GOAL) * 100;
   const healthStatus = entryProgress >= 80 ? "on_track" : entryProgress >= 40 ? "behind" : "critical";
@@ -81,6 +104,7 @@ export default function AnnualGiveaway() {
           <p className="text-sm text-[#888888] mt-1">
             2026 Lead Generation Campaign
             {lastSyncInfo && <span className="ml-2 text-xs text-[#AAAAAA]">• Syncs 3× daily</span>}
+            <span className="ml-2"><MetaAdsStatusBadge /></span>
           </p>
         </div>
         <Button
