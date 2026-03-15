@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { SidebarNav } from "./layout/SidebarNav";
 import { getActiveLabel } from "./layout/navConfig";
 import { appRoutes, DEFAULT_VENUE_SLUG, getVenueSlugFromPath } from "@/lib/routes";
+import { MetaAdsStatusBadge } from "./MetaAdsStatusBadge";
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width-v2";
 const DEFAULT_WIDTH = 240;
@@ -196,6 +197,12 @@ export default function DashboardLayout({
             location={location}
             setLocation={setLocation}
           />
+
+          {!isCollapsed && (
+            <div className="px-3 py-2 border-t border-[#E0E0E0] shrink-0">
+              <MetaAdsStatusBadge />
+            </div>
+          )}
 
           <div className="border-t border-[#E0E0E0] p-2 space-y-0.5 shrink-0">
             <button

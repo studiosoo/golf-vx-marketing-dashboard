@@ -93,8 +93,49 @@ export const giveawayRouter = router({
 
   getLastSyncInfo: protectedProcedure.query(async () => {
     const { getGiveawayCount } = await import('../googleSheetsSync');
+    const database = await db.getDb();
     const count = await getGiveawayCount();
-    return { count, lastChecked: new Date().toISOString(), source: 'database' };
+    let lastSyncedAt: string | null = null;
+    if (database) {
+      const { giveawayApplications: appsTable } = await import('../../drizzle/schema');
+      const { desc: descOp, isNotNull: isNotNullOp } = await import('drizzle-orm');
+      const [latest] = await database
+        .select({ lastSyncedAt: appsTable.lastSyncedAt })
+        .from(appsTable)
+        .where(isNotNullOp(appsTable.lastSyncedAt))
+        .orderBy(descOp(appsTable.lastSyncedAt))
+        .limit(1);
+      lastSyncedAt = latest?.lastSyncedAt ? new Date(latest.lastSyncedAt as any).toISOString() : null;
+    }
+    return { count, lastChecked: new Date().toISOString(), lastSyncedAt, source: 'database' };
+  }),
+
+  getTimeline: protectedProcedure.query(async () => {
+    const database = await db.getDb();
+    if (!database) return [];
+    const { giveawayApplications: appsTable } = await import('../../drizzle/schema');
+    const { eq: eqOp, isNotNull: isNotNullOp, asc: ascOp } = await import('drizzle-orm');
+    const rows = await database
+      .select({ submissionTimestamp: appsTable.submissionTimestamp })
+      .from(appsTable)
+      .where(eqOp(appsTable.isTestEntry, false))
+      .orderBy(ascOp(appsTable.submissionTimestamp));
+    // Group by date (YYYY-MM-DD)
+    const counts: Record<string, number> = {};
+    for (const row of rows) {
+      if (!row.submissionTimestamp) continue;
+      const d = new Date(row.submissionTimestamp as any);
+      if (isNaN(d.getTime())) continue;
+      const key = d.toISOString().slice(0, 10); // YYYY-MM-DD
+      counts[key] = (counts[key] || 0) + 1;
+    }
+    // Return sorted array with running total
+    const sorted = Object.entries(counts).sort(([a], [b]) => a.localeCompare(b));
+    let cumulative = 0;
+    return sorted.map(([date, count]) => {
+      cumulative += count;
+      return { date, count, cumulative };
+    });
   }),
 
   getConversions: protectedProcedure.query(async () => {

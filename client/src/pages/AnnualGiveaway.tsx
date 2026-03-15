@@ -1,8 +1,8 @@
 import { trpc } from "@/lib/trpc";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, RefreshCw, TrendingUp, Users, DollarSign, Target, Sparkles } from "lucide-react";
+import { Loader2, RefreshCw, TrendingUp, Users, DollarSign, Target, Sparkles, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { StatCard } from "@/components/giveaway/StatCard";
 import { ProgressBar } from "@/components/giveaway/ProgressBar";
@@ -12,6 +12,7 @@ import { DemographicsTab } from "@/components/giveaway/DemographicsTab";
 import { AIIntelligenceTab } from "@/components/giveaway/AIIntelligenceTab";
 import { ApplicationsTab } from "@/components/giveaway/ApplicationsTab";
 import { MetaAdsStatusBadge } from "@/components/MetaAdsStatusBadge";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const ENTRY_GOAL = 1500;
 const LONG_FORM_GOAL = 250;
@@ -30,6 +31,7 @@ export default function AnnualGiveaway() {
     { refetchInterval: 30000 }
   );
   const { data: lastSyncInfo } = trpc.giveaway.getLastSyncInfo.useQuery(undefined, { refetchInterval: 30000 });
+  const { data: timeline } = trpc.giveaway.getTimeline.useQuery(undefined, { refetchInterval: 60000 });
   const { data: conversions } = trpc.giveaway.getConversions.useQuery(undefined, { refetchInterval: 60000 });
 
   // Pull live Meta Ads data for giveaway campaigns (lifetime spend + impressions)
@@ -103,7 +105,10 @@ export default function AnnualGiveaway() {
           </div>
           <p className="text-sm text-[#888888] mt-1">
             2026 Lead Generation Campaign
-            {lastSyncInfo && <span className="ml-2 text-xs text-[#AAAAAA]">• Syncs 3× daily</span>}
+            {lastSyncInfo?.lastSyncedAt
+              ? <span className="ml-2 text-xs text-[#AAAAAA]">• Last synced {new Date(lastSyncInfo.lastSyncedAt).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</span>
+              : <span className="ml-2 text-xs text-[#AAAAAA]">• Syncs 3× daily</span>
+            }
             <span className="ml-2"><MetaAdsStatusBadge /></span>
           </p>
         </div>
@@ -134,7 +139,7 @@ export default function AnnualGiveaway() {
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Applications (Long-Form)"
-          value={totalApplications}
+          value={stats == null ? "N/A" : totalApplications}
           sub={`Goal: ${LONG_FORM_GOAL} • ${Math.max(0, LONG_FORM_GOAL - totalApplications)} remaining`}
           icon={Users}
         />
@@ -147,7 +152,7 @@ export default function AnnualGiveaway() {
         />
         <StatCard
           title="Funnel Conversion"
-          value={`${funnelConversionRate}%`}
+          value={stats == null ? "N/A" : `${funnelConversionRate}%`}
           sub={`${totalApplications} long-form / ${ENTRY_PAGE_UV} entry UV`}
           icon={TrendingUp}
         />
@@ -158,6 +163,50 @@ export default function AnnualGiveaway() {
           icon={DollarSign}
         />
       </div>
+
+      {/* Applicant Timeline Chart */}
+      {timeline && timeline.length > 0 && (
+        <Card className="border border-[#E0E0E0] shadow-none">
+          <CardHeader className="pb-2 pt-4 px-4">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-[#AAAAAA]" />
+              <CardTitle className="text-sm font-semibold text-[#111111]">Applications Over Time</CardTitle>
+              <span className="text-xs text-[#AAAAAA] ml-1">— Cumulative applicant count</span>
+            </div>
+          </CardHeader>
+          <CardContent className="px-2 pb-4">
+            <ResponsiveContainer width="100%" height={180}>
+              <AreaChart data={timeline} margin={{ left: 0, right: 8, top: 4, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="timelineGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#F5C72C" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#F5C72C" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" vertical={false} />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fontSize: 10, fill: "#AAAAAA" }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(d: string) => {
+                    const dt = new Date(d + "T00:00:00");
+                    return dt.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                  }}
+                  interval="preserveStartEnd"
+                />
+                <YAxis tick={{ fontSize: 10, fill: "#AAAAAA" }} axisLine={false} tickLine={false} width={32} />
+                <Tooltip
+                  formatter={(value: number, name: string) => [value, name === "cumulative" ? "Total applicants" : "New today"]}
+                  labelFormatter={(d: string) => new Date(d + "T00:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                  contentStyle={{ fontSize: 12, border: "1px solid #E0E0E0", borderRadius: 8, boxShadow: "none" }}
+                />
+                <Area type="monotone" dataKey="cumulative" stroke="#F5C72C" strokeWidth={2} fill="url(#timelineGradient)" dot={false} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Bottom Funnel Conversion */}
       <BottomFunnelConversion conversions={conversions} totalApplications={totalApplications} />

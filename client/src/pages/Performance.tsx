@@ -10,7 +10,7 @@ export default function Performance() {
 
   const { data: campaigns, isLoading: campaignsLoading } = trpc.campaigns.getByStatus.useQuery({ status: "active" });
   const { data: channelSummary } = trpc.campaigns.getCategorySummary.useQuery();
-  const { data: revSummary } = trpc.revenue.getSummary.useQuery(undefined);
+  const { data: revSummary, isLoading: revLoading } = trpc.revenue.getSummary.useQuery(undefined);
 
   const formatCurrency = (val: number | string) =>
     `$${parseFloat(String(val || 0)).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -26,6 +26,7 @@ export default function Performance() {
   const totalSpend = campaignList.reduce((s: number, c: any) => s + parseFloat(String(c.actualSpend || 0)), 0);
   const totalRevenue = parseFloat(String(revSummary?.total || 0));
   const roas = totalSpend > 0 ? totalRevenue / totalSpend : null;
+  const kpiLoading = campaignsLoading || revLoading;
 
   return (
     <div className="p-6 space-y-6">
@@ -41,28 +42,28 @@ export default function Performance() {
         {[
           {
             label: "Revenue (MTD)",
-            value: formatCurrency(totalRevenue),
+            value: revLoading ? "—" : revSummary == null ? "N/A" : formatCurrency(totalRevenue),
             icon: DollarSign,
             color: "text-[#3DB855]",
             bg: "bg-[#3DB855]/10",
           },
           {
             label: "Ad Spend",
-            value: formatCurrency(totalSpend),
+            value: campaignsLoading ? "—" : campaigns == null ? "N/A" : formatCurrency(totalSpend),
             icon: TrendingUp,
             color: "text-[#F5C72C]",
             bg: "bg-[#F5C72C]/10",
           },
           {
             label: "Active Campaigns",
-            value: String(campaignList.length),
+            value: campaignsLoading ? "—" : String(campaignList.length),
             icon: Activity,
             color: "text-[#888888]",
             bg: "bg-[#888888]/10",
           },
           {
             label: "Avg ROAS",
-            value: roas !== null ? `${roas.toFixed(2)}×` : "—",
+            value: kpiLoading ? "—" : (roas !== null ? `${roas.toFixed(2)}×` : "—"),
             icon: BarChart3,
             color: "text-[#888888]",
             bg: "bg-[#F5F5F5]",

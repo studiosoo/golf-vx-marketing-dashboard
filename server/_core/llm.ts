@@ -210,8 +210,15 @@ const normalizeToolChoice = (
   return toolChoice;
 };
 
-// Resolve API endpoint: Gemini direct > custom forge URL > Manus Forge
+// Resolve API endpoint: OpenAI > Gemini direct > custom forge URL > Manus Forge
 const resolveApiConfig = (): { url: string; apiKey: string; isDirect: boolean } => {
+  if (ENV.openaiApiKey) {
+    return {
+      url: "https://api.openai.com/v1/chat/completions",
+      apiKey: ENV.openaiApiKey,
+      isDirect: true,
+    };
+  }
   if (ENV.geminiApiKey) {
     return {
       url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
@@ -226,8 +233,8 @@ const resolveApiConfig = (): { url: string; apiKey: string; isDirect: boolean } 
 };
 
 const assertApiKey = () => {
-  if (!ENV.geminiApiKey && !ENV.forgeApiKey) {
-    throw new Error("No LLM API key configured. Set GEMINI_API_KEY or BUILT_IN_FORGE_API_KEY.");
+  if (!ENV.openaiApiKey && !ENV.geminiApiKey && !ENV.forgeApiKey) {
+    throw new Error("No LLM API key configured. Set OPENAI_API_KEY, GEMINI_API_KEY, or BUILT_IN_FORGE_API_KEY.");
   }
 };
 
@@ -276,11 +283,12 @@ const normalizeResponseFormat = ({
   };
 };
 
-// Models resolved from env vars (Manus-configurable) with hardcoded fallbacks
+// Models resolved from env vars with hardcoded fallbacks.
+// When OPENAI_API_KEY is set, default to GPT-4o family; otherwise Gemini.
 export const LLM_MODELS = {
-  get chat()       { return ENV.llmModelChat       || "gemini-2.0-flash-lite"; },
-  get analysis()   { return ENV.llmModelAnalysis   || "gemini-2.5-pro"; },
-  get structured() { return ENV.llmModelStructured || "gemini-2.5-flash"; },
+  get chat()       { return ENV.llmModelChat       || (ENV.openaiApiKey ? "gpt-4o-mini"  : "gemini-2.0-flash-lite"); },
+  get analysis()   { return ENV.llmModelAnalysis   || (ENV.openaiApiKey ? "gpt-4o"       : "gemini-2.5-pro"); },
+  get structured() { return ENV.llmModelStructured || (ENV.openaiApiKey ? "gpt-4o"       : "gemini-2.5-flash"); },
 };
 
 export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {

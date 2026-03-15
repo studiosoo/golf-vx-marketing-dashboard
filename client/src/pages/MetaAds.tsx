@@ -312,10 +312,10 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Active Spend", value: formatCurrency(totalSpend), icon: <DollarSign size={18} />, color: "text-[#E8453C]" },
-          { label: "Total Reach", value: formatNum(totalReach), icon: <Eye size={18} />, color: "text-[#888888]" },
-          { label: "Impressions", value: formatNum(totalImpressions), icon: <TrendingUp size={18} />, color: "text-[#3DB855]" },
-          { label: "Clicks", value: formatNum(totalClicks), icon: <MousePointer size={18} />, color: "text-[#F5C72C]" },
+          { label: "Active Spend", value: isLoading ? "—" : campaigns == null ? "N/A" : formatCurrency(totalSpend), icon: <DollarSign size={18} />, color: "text-[#E8453C]" },
+          { label: "Total Reach", value: isLoading ? "—" : campaigns == null ? "N/A" : formatNum(totalReach), icon: <Eye size={18} />, color: "text-[#888888]" },
+          { label: "Impressions", value: isLoading ? "—" : campaigns == null ? "N/A" : formatNum(totalImpressions), icon: <TrendingUp size={18} />, color: "text-[#3DB855]" },
+          { label: "Clicks", value: isLoading ? "—" : campaigns == null ? "N/A" : formatNum(totalClicks), icon: <MousePointer size={18} />, color: "text-[#F5C72C]" },
         ].map((kpi) => (
           <Card key={kpi.label} className="bg-card border-border">
             <CardContent className="p-4">

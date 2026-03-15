@@ -9,6 +9,7 @@ export const ENV = {
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
   geminiApiKey: process.env.GEMINI_API_KEY ?? "",
   anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? "",
+  openaiApiKey: process.env.OPENAI_API_KEY ?? "",
   // LLM model overrides — set these in Manus env to change models without code deploy
   llmModelChat:       process.env.LLM_MODEL_CHAT       ?? "",   // default: gemini-2.0-flash-lite
   llmModelAnalysis:   process.env.LLM_MODEL_ANALYSIS   ?? "",   // default: gemini-2.5-pro
