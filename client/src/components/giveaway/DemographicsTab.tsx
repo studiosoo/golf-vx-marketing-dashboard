@@ -35,6 +35,7 @@ interface StatsData {
   howDidTheyHearDistribution?: Record<string, number>;
   indoorGolfFamiliarityDistribution?: Record<string, number>;
   bestTimeToCallDistribution?: Record<string, number>;
+  applicationsByDate?: { date: string; count: number }[];
 }
 
 interface DemographicsTabProps {
@@ -89,9 +90,55 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
       .sort((a, b) => b.value - a.value),
     [stats]
   );
+  const timelineData = useMemo(() =>
+    (stats?.applicationsByDate || []).map(d => ({
+      date: d.date,
+      count: d.count,
+      label: new Date(d.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    })),
+    [stats]
+  );
+  const sourceData = useMemo(() =>
+    Object.entries(stats?.howDidTheyHearDistribution || {})
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 8),
+    [stats]
+  );
 
   return (
     <div className="space-y-4">
+      {/* Timeline: Applications Per Day */}
+      {timelineData.length > 0 && (
+        <Card className="border border-[#E0E0E0] shadow-none">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-semibold text-[#111111]">Applications Per Day</CardTitle>
+            <CardDescription className="text-xs text-[#AAAAAA]">Daily submission count over the campaign period</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={timelineData} margin={{ left: 4, right: 16, top: 4, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" vertical={false} />
+                <XAxis
+                  dataKey="label"
+                  tick={{ fontSize: 10, fill: "#AAAAAA" }}
+                  axisLine={false}
+                  tickLine={false}
+                  interval="preserveStartEnd"
+                />
+                <YAxis tick={{ fontSize: 11, fill: "#AAAAAA" }} axisLine={false} tickLine={false} />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                  {timelineData.map((_, i) => (
+                    <Cell key={i} fill={i % 2 === 0 ? "#545A60" : "#888888"} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Row 1: Age + Gender */}
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="border border-[#E0E0E0] shadow-none">
@@ -287,29 +334,23 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="border border-[#E0E0E0] shadow-none">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-[#111111]">How Did They Hear</CardTitle>
-            <CardDescription className="text-xs text-[#AAAAAA]">Acquisition source breakdown</CardDescription>
+            <CardTitle className="text-sm font-semibold text-[#111111]">Source Breakdown</CardTitle>
+            <CardDescription className="text-xs text-[#AAAAAA]">How applicants heard about the giveaway (top 8)</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2.5 pt-2">
-              {hearData.slice(0, 8).map((d, i) => (
-                <div key={i} className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-[#545A60] font-medium truncate max-w-[65%]">{d.name}</span>
-                    <span className="text-[#AAAAAA]">{d.value}</span>
-                  </div>
-                  <div className="h-1.5 bg-[#F2F2F7] rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full"
-                      style={{
-                        width: `${(d.value / (stats?.totalApplications || 1)) * 100}%`,
-                        backgroundColor: i === 0 ? "#F5C72C" : i === 1 ? "#545A60" : i === 2 ? "#888888" : "#AAAAAA"
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={sourceData} layout="vertical" margin={{ left: 8, right: 16 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" horizontal={false} />
+                <XAxis type="number" tick={{ fontSize: 11, fill: "#AAAAAA" }} axisLine={false} tickLine={false} />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: "#545A60" }} axisLine={false} tickLine={false} width={80} />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                  {sourceData.map((_, i) => (
+                    <Cell key={i} fill={i === 0 ? "#F5C72C" : i === 1 ? "#545A60" : i < 4 ? "#888888" : "#AAAAAA"} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
 

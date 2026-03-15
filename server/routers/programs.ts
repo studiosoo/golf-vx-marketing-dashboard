@@ -388,6 +388,45 @@ Provide a comprehensive marketing intelligence report. Respond in JSON:
       return { insights, stats: { total, entryGoal, longFormGoal, progressPct: parseFloat(progressPct) } };
     }),
 
+  generateGiveawaySummary: protectedProcedure
+    .mutation(async () => {
+      try {
+        const stats = await giveawaySync.getGiveawayStats();
+        const { invokeLLM } = await import('../_core/llm');
+        const total = stats.totalApplications || 0;
+        const ageBreakdown = Object.entries(stats.ageRangeDistribution || {}).map(([k, v]) => `${k}: ${v}`).join(', ') || 'No data';
+        const genderBreakdown = Object.entries(stats.genderDistribution || {}).map(([k, v]) => `${k}: ${v}`).join(', ') || 'No data';
+        const hearBreakdown = Object.entries(stats.howDidTheyHearDistribution || {}).map(([k, v]) => `${k}: ${v}`).join(', ') || 'No data';
+        const dateBreakdown = (stats.applicationsByDate || []).map((d: { date: string; count: number }) => `${d.date}: ${d.count}`).join(', ') || 'No data';
+        const prompt = `You are a marketing analyst for Golf VX Arlington Heights, an indoor golf simulator facility.
+
+ANNUAL MEMBERSHIP GIVEAWAY 2026 DATA:
+Total applications: ${total}
+Age distribution: ${ageBreakdown}
+Gender: ${genderBreakdown}
+How they heard about us: ${hearBreakdown}
+Applications by date: ${dateBreakdown}
+
+Please analyze this data and answer two questions:
+(a) What patterns do you observe that would inform winner selection? Consider demographics, acquisition channels, and any notable trends.
+(b) Based on the application rate over time, should the application period be extended? Provide a clear recommendation with reasoning.
+
+Provide a concise, actionable summary in 3-4 paragraphs.`;
+        const response = await invokeLLM({
+          model: 'gpt-4.1',
+          messages: [
+            { role: 'system', content: 'You are a marketing analyst. Provide clear, concise analysis.' },
+            { role: 'user', content: prompt },
+          ],
+        });
+        const raw = response?.choices?.[0]?.message?.content;
+        const summary = typeof raw === 'string' ? raw : 'Unable to generate summary.';
+        return { summary };
+      } catch {
+        return { summary: 'Unable to generate summary.' };
+      }
+    }),
+
   getApplicationsFiltered: protectedProcedure
     .input(z.object({
       search: z.string().optional(),

@@ -120,6 +120,19 @@ export async function getGiveawayStats(): Promise<any> {
     indoorGolfFamiliarityCount[familiarity] = (indoorGolfFamiliarityCount[familiarity] || 0) + 1;
   }
   
+  // Group applications by submission date (YYYY-MM-DD)
+  const dateCount: Record<string, number> = {};
+  for (const app of applications) {
+    if (!app.submissionTimestamp) continue;
+    const d = new Date(app.submissionTimestamp as any);
+    if (isNaN(d.getTime())) continue;
+    const key = d.toISOString().slice(0, 10);
+    dateCount[key] = (dateCount[key] || 0) + 1;
+  }
+  const applicationsByDate = Object.entries(dateCount)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, count]) => ({ date, count }));
+
   return {
     totalApplications: applications.length,
     ageRangeDistribution: ageRangeCount,
@@ -130,6 +143,7 @@ export async function getGiveawayStats(): Promise<any> {
     howDidTheyHearDistribution: howDidTheyHearCount,
     bestTimeToCallDistribution: bestTimeToCallCount,
     indoorGolfFamiliarityDistribution: indoorGolfFamiliarityCount,
+    applicationsByDate,
     test: 0, // Test entries are already excluded
   };
 }

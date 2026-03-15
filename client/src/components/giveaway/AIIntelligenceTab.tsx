@@ -31,6 +31,7 @@ function channelIcon(ch: string): string {
 
 export function AIIntelligenceTab({ programId }: AIIntelligenceTabProps) {
   const [insights, setInsights] = useState<any>(null);
+  const [giveawaySummary, setGiveawaySummary] = useState<string | null>(null);
   const [expandedSection, setExpandedSection] = useState<string | null>("keyInsights");
   const { toast } = useToast();
 
@@ -44,34 +45,74 @@ export function AIIntelligenceTab({ programId }: AIIntelligenceTabProps) {
     },
   });
 
+  const summarizeMutation = trpc.giveaway.generateGiveawaySummary.useMutation({
+    onSuccess: (data) => {
+      setGiveawaySummary(data.summary);
+      toast({ title: "Summary Generated", description: "AI summary is ready." });
+    },
+    onError: () => {
+      setGiveawaySummary("Unable to generate summary. Please try again.");
+    },
+  });
+
   const toggle = (key: string) => setExpandedSection(prev => prev === key ? null : key);
+
+  const summarySection = (
+    <div className="mb-4 space-y-3">
+      <Button
+        onClick={() => summarizeMutation.mutate()}
+        disabled={summarizeMutation.isPending}
+        className="bg-[#F5C72C] hover:bg-[#e6b820] text-[#111111] font-semibold"
+        size="sm"
+      >
+        {summarizeMutation.isPending ? (
+          <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generating Summary...</>
+        ) : (
+          <><Sparkles className="mr-2 h-4 w-4" />Generate AI Summary</>
+        )}
+      </Button>
+      {giveawaySummary && (
+        <Card className="border border-[#E0E0E0] shadow-none">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-semibold text-[#111111]">AI Summary</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <p className="text-sm text-[#545A60] leading-relaxed whitespace-pre-wrap">{giveawaySummary}</p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
 
   if (!insights) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 space-y-4">
-        <div className="w-14 h-14 rounded-full bg-[#F2F2F7] flex items-center justify-center">
-          <Sparkles className="h-7 w-7 text-[#AAAAAA]" />
-        </div>
-        <div className="text-center space-y-1">
-          <p className="font-semibold text-[#111111]">AI Marketing Intelligence</p>
-          <p className="text-sm text-[#888888] max-w-sm">
-            Analyze your applicant demographics and generate a comprehensive multi-channel marketing strategy.
-          </p>
-        </div>
-        <Button
-          onClick={() => generateMutation.mutate({ programId })}
-          disabled={generateMutation.isPending}
-          className="bg-[#F5C72C] hover:bg-[#e6b820] text-[#111111] font-semibold"
-        >
-          {generateMutation.isPending ? (
-            <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Analyzing...</>
-          ) : (
-            <><Sparkles className="mr-2 h-4 w-4" />Generate Marketing Intelligence</>
+      <div className="space-y-0">
+        {summarySection}
+        <div className="flex flex-col items-center justify-center py-16 space-y-4">
+          <div className="w-14 h-14 rounded-full bg-[#F2F2F7] flex items-center justify-center">
+            <Sparkles className="h-7 w-7 text-[#AAAAAA]" />
+          </div>
+          <div className="text-center space-y-1">
+            <p className="font-semibold text-[#111111]">AI Marketing Intelligence</p>
+            <p className="text-sm text-[#888888] max-w-sm">
+              Analyze your applicant demographics and generate a comprehensive multi-channel marketing strategy.
+            </p>
+          </div>
+          <Button
+            onClick={() => generateMutation.mutate({ programId })}
+            disabled={generateMutation.isPending}
+            className="bg-[#F5C72C] hover:bg-[#e6b820] text-[#111111] font-semibold"
+          >
+            {generateMutation.isPending ? (
+              <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Analyzing...</>
+            ) : (
+              <><Sparkles className="mr-2 h-4 w-4" />Generate Marketing Intelligence</>
+            )}
+          </Button>
+          {generateMutation.isPending && (
+            <p className="text-xs text-[#AAAAAA]">This may take 15–30 seconds...</p>
           )}
-        </Button>
-        {generateMutation.isPending && (
-          <p className="text-xs text-[#AAAAAA]">This may take 15–30 seconds...</p>
-        )}
+        </div>
       </div>
     );
   }
@@ -80,6 +121,7 @@ export function AIIntelligenceTab({ programId }: AIIntelligenceTabProps) {
 
   return (
     <div className="space-y-4">
+      {summarySection}
       {/* Header + Regenerate */}
       <div className="flex items-start justify-between gap-3">
         <div>
