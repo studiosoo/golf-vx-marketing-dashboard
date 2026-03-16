@@ -109,6 +109,12 @@ function DashboardAppRoutes() {
         <Route path="/app/:venueSlug/operations/communications" component={OperationsCommunicationsWrapper} />
         <Route path="/app/:venueSlug/operations/content" component={OperationsContentWrapper} />
 
+        {/* Studio Soo routes — map to existing working components */}
+        <Route path="/app/:venueSlug/studio-soo">{params => <Redirect to={appRoutes.venue(params.venueSlug).studioSoo.autopilot} />}</Route>
+        <Route path="/app/:venueSlug/studio-soo/autopilot" component={InsightsRecommendationsWrapper} />
+        <Route path="/app/:venueSlug/studio-soo/campaigns" component={OperationsCampaignsWrapper} />
+        <Route path="/app/:venueSlug/studio-soo/campaigns/:id" component={CampaignDetail} />
+
         <Route path="/app/:venueSlug/audience">{params => <Redirect to={appRoutes.venue(params.venueSlug).audience.people} />}</Route>
         <Route path="/app/:venueSlug/audience/people" component={AudiencePeopleWrapper} />
         <Route path="/app/:venueSlug/audience/segments" component={AudienceSegmentsPlaceholder} />

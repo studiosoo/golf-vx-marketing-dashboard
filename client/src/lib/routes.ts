@@ -3,6 +3,7 @@ export const DEFAULT_VENUE_SLUG = "arlington-heights";
 export type VenueScopedSection =
   | "dashboard"
   | "reports"
+  | "studioSoo"
   | "performance"
   | "operations"
   | "audience"
@@ -60,6 +61,13 @@ export const appRoutes = {
         communications: `${base}/operations/communications`,
         communicationDetail: (communicationId: string | number) => `${base}/operations/communications/${communicationId}`,
         content: `${base}/operations/content`,
+        localMarketing: `${base}/operations/local-marketing`,
+      },
+      studioSoo: {
+        home: `${base}/studio-soo`,
+        autopilot: `${base}/studio-soo/autopilot`,
+        campaigns: `${base}/studio-soo/campaigns`,
+        campaignDetail: (id: string | number) => `${base}/studio-soo/campaigns/${id}`,
       },
       audience: {
         home: `${base}/audience`,
@@ -109,6 +117,8 @@ export function getDefaultVenueRoute(section: VenueScopedSection = "dashboard"):
   switch (section) {
     case "reports":
       return venue.reports.home;
+    case "studioSoo":
+      return venue.studioSoo.autopilot;
     case "performance":
       return venue.performance;
     case "operations":
