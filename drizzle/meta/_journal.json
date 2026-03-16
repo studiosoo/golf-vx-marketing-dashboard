@@ -176,6 +176,13 @@
       "when": 1741219200000,
       "tag": "0024_add_venue_id_to_members",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1773646040180,
+      "tag": "0025_create_autonomous_tables",
+      "breakpoints": true
     }
   ]
 }
