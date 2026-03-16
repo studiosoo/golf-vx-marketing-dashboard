@@ -66,7 +66,7 @@ function WinterClinicAttendeeModal({
       <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-primary" />
+            <Users className="h-5 w-5 text-[#F2DD48]" />
             {clinicDisplayName} — Registrations
             {attendees && <Badge variant="secondary" className="ml-2">{attendees.length}</Badge>}
           </DialogTitle>
@@ -75,40 +75,40 @@ function WinterClinicAttendeeModal({
         <div className="overflow-y-auto flex-1 mt-2">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              <Loader2 className="h-6 w-6 animate-spin text-[#F2DD48]" />
             </div>
           ) : !attendees?.length ? (
-            <div className="text-center py-12 text-muted-foreground">
+            <div className="text-center py-12 text-[#6F6F6B]">
               No registrations found for this clinic.
             </div>
           ) : (
             <div className="space-y-2">
               {attendees.map((a, idx) => (
-                <div key={`${a.email}-${idx}`} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                <div key={`${a.email}-${idx}`} className="flex items-center justify-between p-3 rounded-lg bg-[#F6F6F4] hover:bg-[#F1F1EF] transition-colors">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                      <span className="text-xs font-bold text-primary">{(a.firstName?.[0] || "?").toUpperCase()}</span>
+                    <div className="w-8 h-8 rounded-full bg-[#F2DD48]/10 flex items-center justify-center shrink-0">
+                      <span className="text-xs font-bold text-[#F2DD48]">{(a.firstName?.[0] || "?").toUpperCase()}</span>
                     </div>
                     <div className="min-w-0">
-                      <p className="font-medium text-sm text-foreground truncate">{a.firstName} {a.lastName}</p>
-                      <p className="text-xs text-muted-foreground truncate">{a.type}</p>
+                      <p className="font-medium text-sm text-[#222222] truncate">{a.firstName} {a.lastName}</p>
+                      <p className="text-xs text-[#6F6F6B] truncate">{a.type}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 shrink-0 ml-4">
                     {a.email && (
-                      <button onClick={() => sendEmail.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, email: a.email, subject: `Golf VX Winter Clinic - Follow Up`, htmlBody: `<p>Hi ${a.firstName}, thanks for registering for Golf VX Winter Clinic!</p>` })} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors" title="Send email">
+                      <button onClick={() => sendEmail.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, email: a.email, subject: `Golf VX Winter Clinic - Follow Up`, htmlBody: `<p>Hi ${a.firstName}, thanks for registering for Golf VX Winter Clinic!</p>` })} className="flex items-center gap-1 text-xs text-[#6F6F6B] hover:text-[#F2DD48] transition-colors" title="Send email">
                         <Mail className="h-3 w-3" />
                         <span className="hidden sm:inline truncate max-w-[140px]">{a.email}</span>
                       </button>
                     )}
                     {a.phone && (
-                      <button onClick={() => sendSms.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, phone: a.phone, body: `Hi ${a.firstName}! Thanks for registering for Golf VX Winter Clinic. See you on the course!` })} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors" title="Send SMS">
+                      <button onClick={() => sendSms.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, phone: a.phone, body: `Hi ${a.firstName}! Thanks for registering for Golf VX Winter Clinic. See you on the course!` })} className="flex items-center gap-1 text-xs text-[#6F6F6B] hover:text-[#F2DD48] transition-colors" title="Send SMS">
                         <Phone className="h-3 w-3" />
                         <span className="hidden sm:inline">{a.phone}</span>
                       </button>
                     )}
                     {parseFloat(a.amountPaid || '0') > 0 && (
-                      <span className="text-xs font-medium text-[#3DB855]">${parseFloat(a.amountPaid || '0').toFixed(0)}</span>
+                      <span className="text-xs font-medium text-[#72B84A]">${parseFloat(a.amountPaid || '0').toFixed(0)}</span>
                     )}
                   </div>
                 </div>
@@ -116,7 +116,7 @@ function WinterClinicAttendeeModal({
             </div>
           )}
         </div>
-        <div className="pt-3 border-t border-border flex items-center justify-between">
+        <div className="pt-3 border-t border-[#DEDEDA] flex items-center justify-between">
           {attendees && attendees.length > 0 ? (
             <div className="flex gap-2">
               <Button size="sm" variant="outline" onClick={() => attendees.forEach(a => a.email && sendEmail.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, email: a.email, subject: `Golf VX Winter Clinic - Follow Up`, htmlBody: `<p>Hi ${a.firstName}, thanks for registering for Golf VX Winter Clinic!</p>` }))} disabled={sendEmail.isPending}>
@@ -136,7 +136,7 @@ function WinterClinicAttendeeModal({
   );
 }
 
-export default function WinterClinicDetail() {
+export default function WinterClinicDetail({ embedded = false }: { embedded?: boolean }) {
   const [, setLocation] = useLocation();
   const [selectedClinic, setSelectedClinic] = useState<{ shortName: string; displayName: string; category?: 'kids' | 'adults' | 'family' } | null>(null);
 
@@ -150,23 +150,25 @@ export default function WinterClinicDetail() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setLocation("/programs")}
-            className="p-2 rounded-lg hover:bg-muted transition-colors"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-          <div>
-            <h1 className="text-2xl font-bold">PBGA Winter Clinics</h1>
-            <p className="text-muted-foreground">Loading clinic data from Acuity...</p>
+        {!embedded && (
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setLocation("/programs")}
+              className="p-2 rounded-lg hover:bg-[#F1F1EF] transition-colors"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold">PBGA Winter Clinics</h1>
+              <p className="text-[#6F6F6B]">Loading clinic data from Acuity...</p>
+            </div>
           </div>
-        </div>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-card border border-border rounded-xl p-5 animate-pulse">
-              <div className="h-4 bg-primary/20 rounded w-2/3 mb-3" />
-              <div className="h-8 bg-primary/20 rounded w-1/2" />
+            <div key={i} className="bg-white border border-[#DEDEDA] rounded-xl p-5 animate-pulse">
+              <div className="h-4 bg-[#F2DD48]/20 rounded w-2/3 mb-3" />
+              <div className="h-8 bg-[#F2DD48]/20 rounded w-1/2" />
             </div>
           ))}
         </div>
@@ -177,18 +179,20 @@ export default function WinterClinicDetail() {
   if (error) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setLocation("/programs")}
-            className="p-2 rounded-lg hover:bg-muted transition-colors"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-          <div>
-            <h1 className="text-2xl font-bold">PBGA Winter Clinics</h1>
-            <p className="text-[#E8453C]">Error loading data: {error.message}</p>
+        {!embedded && (
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setLocation("/programs")}
+              className="p-2 rounded-lg hover:bg-[#F1F1EF] transition-colors"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold">PBGA Winter Clinics</h1>
+              <p className="text-[#FF3B30]">Error loading data: {error.message}</p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     );
   }
@@ -209,23 +213,23 @@ export default function WinterClinicDetail() {
 
   // Source colors — Golf VX palette
   const sourceColors: Record<string, string> = {
-    "PBGA Links & Tees": "bg-[#F5C72C]",
-    "Social Media": "bg-[#111111]",
-    "Golf VX": "bg-primary",
-    "Google Search": "bg-[#888888]",
-    "Friend / Family": "bg-[#888888]",
-    "Flyer / Signage": "bg-[#AAAAAA]",
-    "Unknown": "bg-[#CCCCCC]",
+    "PBGA Links & Tees": "bg-[#F2DD48]",
+    "Social Media": "bg-[#222222]",
+    "Golf VX": "bg-[#F2DD48]",
+    "Google Search": "bg-[#6F6F6B]",
+    "Friend / Family": "bg-[#6F6F6B]",
+    "Flyer / Signage": "bg-[#A8A8A3]",
+    "Unknown": "bg-[#A8A8A3]",
   };
 
   // Experience colors — Golf VX palette
   const experienceColors: Record<string, string> = {
-    "Beginner": "bg-[#3DB855]",
-    "Intermediate": "bg-[#F5C72C]",
-    "Advanced": "bg-[#111111]",
-    "beginner": "bg-[#3DB855]",
-    "intermediate": "bg-[#F5C72C]",
-    "advanced": "bg-[#111111]",
+    "Beginner": "bg-[#72B84A]",
+    "Intermediate": "bg-[#F2DD48]",
+    "Advanced": "bg-[#222222]",
+    "beginner": "bg-[#72B84A]",
+    "intermediate": "bg-[#F2DD48]",
+    "advanced": "bg-[#222222]",
   };
 
   const getCategoryIcon = (category: string) => {
@@ -239,101 +243,103 @@ export default function WinterClinicDetail() {
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'kids': return 'bg-[#FFFBEA] text-[#111111] border-[#F5C72C]/40';
-      case 'adults': return 'bg-[#F5F5F5] text-[#111111] border-[#E0E0E0]';
-      case 'family': return 'bg-[#F5F5F5] text-[#888888] border-[#E0E0E0]';
-      default: return 'bg-[#F5F5F5] text-[#888888] border-[#E0E0E0]';
+      case 'kids': return 'bg-[#FFFBEA] text-[#222222] border-[#F2DD48]/40';
+      case 'adults': return 'bg-[#F1F1EF] text-[#222222] border-[#DEDEDA]';
+      case 'family': return 'bg-[#F1F1EF] text-[#6F6F6B] border-[#DEDEDA]';
+      default: return 'bg-[#F1F1EF] text-[#6F6F6B] border-[#DEDEDA]';
     }
   };
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={() => setLocation("/programs")}
-          className="p-2 rounded-lg hover:bg-muted transition-colors"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold">PBGA Winter Clinics</h1>
-          <p className="text-muted-foreground">
-            4-Week Golf Clinic Programs — Jan to Mar 2026
-          </p>
+      {!embedded && (
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setLocation("/programs")}
+            className="p-2 rounded-lg hover:bg-[#F1F1EF] transition-colors"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold">PBGA Winter Clinics</h1>
+            <p className="text-[#6F6F6B]">
+              4-Week Golf Clinic Programs — Jan to Mar 2026
+            </p>
+          </div>
+          <span className="px-3 py-1 text-xs font-medium bg-[#E6F0DC] text-[#72B84A] rounded-full border border-[#72B84A]/30">
+            Active
+          </span>
         </div>
-        <span className="px-3 py-1 text-xs font-medium bg-[#F0FAF3] text-[#3DB855] rounded-full border border-[#3DB855]/30">
-          Active
-        </span>
-      </div>
+      )}
 
       {/* Overview KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-card border border-border rounded-xl p-5">
+        <div className="bg-white border border-[#DEDEDA] rounded-xl p-5">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">Total Registrations</span>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm text-[#6F6F6B]">Total Registrations</span>
+            <Users className="h-4 w-4 text-[#6F6F6B]" />
           </div>
           <p className="text-2xl font-bold">{totalRegistrations}</p>
-          <p className="text-xs text-muted-foreground mt-1">{uniqueStudents} unique students</p>
+          <p className="text-xs text-[#6F6F6B] mt-1">{uniqueStudents} unique students</p>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-5">
+        <div className="bg-white border border-[#DEDEDA] rounded-xl p-5">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">Total Revenue</span>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm text-[#6F6F6B]">Total Revenue</span>
+            <DollarSign className="h-4 w-4 text-[#6F6F6B]" />
           </div>
-          <p className="text-2xl font-bold text-[#3DB855]">${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-2xl font-bold text-[#72B84A]">${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+          <p className="text-xs text-[#6F6F6B] mt-1">
             ${uniqueStudents > 0 ? (totalRevenue / uniqueStudents).toFixed(2) : '0'} avg/student
           </p>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-5">
+        <div className="bg-white border border-[#DEDEDA] rounded-xl p-5">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">Clinic Types</span>
-            <GraduationCap className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm text-[#6F6F6B]">Clinic Types</span>
+            <GraduationCap className="h-4 w-4 text-[#6F6F6B]" />
           </div>
           <p className="text-2xl font-bold">{clinics.length}</p>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-xs text-[#6F6F6B] mt-1">
             {categorySummary.kids.length} kids · {categorySummary.adults.length} adults · {categorySummary.family.length} family
           </p>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-5">
+        <div className="bg-white border border-[#DEDEDA] rounded-xl p-5">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">Fill Rate</span>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm text-[#6F6F6B]">Fill Rate</span>
+            <TrendingUp className="h-4 w-4 text-[#6F6F6B]" />
           </div>
           <p className="text-2xl font-bold">
             {clinics.length > 0 ? (totalRegistrations / clinics.length).toFixed(1) : 0}
           </p>
-          <p className="text-xs text-muted-foreground mt-1">avg registrations/clinic</p>
+          <p className="text-xs text-[#6F6F6B] mt-1">avg registrations/clinic</p>
         </div>
       </div>
 
       {/* Acquisition Sources & Experience Level */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Acquisition Sources */}
-        <div className="bg-card border border-border rounded-xl p-5">
+        <div className="bg-white border border-[#DEDEDA] rounded-xl p-5">
           <div className="flex items-center gap-2 mb-4">
-            <Megaphone className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-semibold">Acquisition Sources</h2>
+            <Megaphone className="h-5 w-5 text-[#F2DD48]" />
+            <h2 className="text-sm font-semibold">Acquisition Sources</h2>
           </div>
-          <p className="text-sm text-muted-foreground mb-4">How students found PBGA Winter Clinics</p>
+          <p className="text-sm text-[#6F6F6B] mb-4">How students found PBGA Winter Clinics</p>
 
           {/* Source bar chart */}
           <div className="space-y-3">
             {sortedSources.map(([source, count]) => {
               const pct = totalSourced > 0 ? (count / totalSourced) * 100 : 0;
-              const color = sourceColors[source] || 'bg-[#CCCCCC]';
+              const color = sourceColors[source] || 'bg-[#A8A8A3]';
               return (
                 <div key={source}>
                   <div className="flex items-center justify-between text-sm mb-1">
                     <span className="font-medium">{source}</span>
-                    <span className="text-muted-foreground">{count} ({pct.toFixed(1)}%)</span>
+                    <span className="text-[#6F6F6B]">{count} ({pct.toFixed(1)}%)</span>
                   </div>
-                  <div className="h-2.5 bg-muted rounded-full overflow-hidden">
+                  <div className="h-2.5 bg-[#F1F1EF] rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full ${color} transition-all`}
                       style={{ width: `${pct}%` }}
@@ -345,29 +351,29 @@ export default function WinterClinicDetail() {
           </div>
 
           {sortedSources.length === 0 && (
-            <p className="text-sm text-muted-foreground italic">No acquisition source data available</p>
+            <p className="text-sm text-[#6F6F6B] italic">No acquisition source data available</p>
           )}
         </div>
 
         {/* Experience Level Distribution */}
-        <div className="bg-card border border-border rounded-xl p-5">
+        <div className="bg-white border border-[#DEDEDA] rounded-xl p-5">
           <div className="flex items-center gap-2 mb-4">
-            <BarChart3 className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-semibold">Experience Level</h2>
+            <BarChart3 className="h-5 w-5 text-[#F2DD48]" />
+            <h2 className="text-sm font-semibold">Experience Level</h2>
           </div>
-          <p className="text-sm text-muted-foreground mb-4">Golf experience distribution across all clinics</p>
+          <p className="text-sm text-[#6F6F6B] mb-4">Golf experience distribution across all clinics</p>
 
           <div className="space-y-3">
             {sortedExperience.map(([level, count]) => {
               const pct = totalExperience > 0 ? (count / totalExperience) * 100 : 0;
-              const color = experienceColors[level] || experienceColors[level.toLowerCase()] || 'bg-[#CCCCCC]';
+              const color = experienceColors[level] || experienceColors[level.toLowerCase()] || 'bg-[#A8A8A3]';
               return (
                 <div key={level}>
                   <div className="flex items-center justify-between text-sm mb-1">
                     <span className="font-medium capitalize">{level}</span>
-                    <span className="text-muted-foreground">{count} ({pct.toFixed(1)}%)</span>
+                    <span className="text-[#6F6F6B]">{count} ({pct.toFixed(1)}%)</span>
                   </div>
-                  <div className="h-2.5 bg-muted rounded-full overflow-hidden">
+                  <div className="h-2.5 bg-[#F1F1EF] rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full ${color} transition-all`}
                       style={{ width: `${pct}%` }}
@@ -379,15 +385,15 @@ export default function WinterClinicDetail() {
           </div>
 
           {sortedExperience.length === 0 && (
-            <p className="text-sm text-muted-foreground italic">No experience level data available</p>
+            <p className="text-sm text-[#6F6F6B] italic">No experience level data available</p>
           )}
         </div>
       </div>
 
       {/* Category Summary Cards */}
       <div>
-        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-primary" />
+        <h2 className="text-sm font-semibold mb-4 flex items-center gap-2">
+          <Calendar className="h-5 w-5 text-[#F2DD48]" />
           Programs by Category
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -403,31 +409,31 @@ export default function WinterClinicDetail() {
             // Use the first clinic shortName as a representative filter (modal accepts partial match)
             const representativeShortName = items[0]?.shortName || key;
             return (
-              <div key={key} className="bg-card border border-border rounded-xl p-5">
+              <div key={key} className="bg-white border border-[#DEDEDA] rounded-xl p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <div className={`p-2 rounded-lg ${getCategoryColor(key)}`}>
                     {icon}
                   </div>
                   <div>
                     <h3 className="font-semibold">{label}</h3>
-                    <p className="text-xs text-muted-foreground">{items.length} clinic types</p>
+                    <p className="text-xs text-[#6F6F6B]">{items.length} clinic types</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3 mt-3">
                   <div>
-                    <p className="text-xs text-muted-foreground">Registrations</p>
+                    <p className="text-xs text-[#6F6F6B]">Registrations</p>
                     <button
                       onClick={() => setSelectedClinic({ shortName: '', displayName: categoryDisplayName, category: key as 'kids' | 'adults' | 'family' })}
-                      className="text-lg font-bold text-primary hover:underline cursor-pointer transition-colors block"
+                      className="text-lg font-bold text-[#F2DD48] hover:underline cursor-pointer transition-colors block"
                       title="Click to view participant list"
                     >
                       {totalReg}
                     </button>
-                    <p className="text-xs text-muted-foreground">click to view list</p>
+                    <p className="text-xs text-[#6F6F6B]">click to view list</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Revenue</p>
-                    <p className="text-lg font-bold text-[#3DB855]">${totalRev.toLocaleString('en-US', { minimumFractionDigits: 0 })}</p>
+                    <p className="text-xs text-[#6F6F6B]">Revenue</p>
+                    <p className="text-lg font-bold text-[#72B84A]">${totalRev.toLocaleString('en-US', { minimumFractionDigits: 0 })}</p>
                   </div>
                 </div>
               </div>
@@ -438,8 +444,8 @@ export default function WinterClinicDetail() {
 
       {/* Lesson-by-Lesson Breakdown */}
       <div>
-        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <GraduationCap className="h-5 w-5 text-primary" />
+        <h2 className="text-sm font-semibold mb-4 flex items-center gap-2">
+          <GraduationCap className="h-5 w-5 text-[#F2DD48]" />
           Lesson-by-Lesson Breakdown
         </h2>
         <div className="space-y-4">
@@ -452,7 +458,7 @@ export default function WinterClinicDetail() {
             return (
               <div
                 key={clinic.shortName}
-                className="bg-card border border-border rounded-xl p-5"
+                className="bg-white border border-[#DEDEDA] rounded-xl p-5"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
@@ -461,7 +467,7 @@ export default function WinterClinicDetail() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-base">{clinic.shortName}</h3>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-[#6F6F6B]">
                         {clinic.ageGroup} · {clinic.dayOfWeek}s · 4-Week Program
                       </p>
                     </div>
@@ -473,35 +479,35 @@ export default function WinterClinicDetail() {
 
                 {/* Clinic KPIs */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                  <div className="bg-muted/50 rounded-lg p-3">
-                    <p className="text-xs text-muted-foreground">Registrations</p>
+                  <div className="bg-[#F1F1EF] rounded-lg p-3">
+                    <p className="text-xs text-[#6F6F6B]">Registrations</p>
                     <button
                       onClick={() => setSelectedClinic({ shortName: clinic.shortName, displayName: clinic.shortName })}
-                      className="text-lg font-bold text-primary hover:underline cursor-pointer transition-colors block"
+                      className="text-lg font-bold text-[#F2DD48] hover:underline cursor-pointer transition-colors block"
                       title="Click to view contact list"
                     >
                       {clinic.registrations}
                     </button>
-                    <p className="text-xs text-muted-foreground">{clinic.uniqueStudents} unique · click to view</p>
+                    <p className="text-xs text-[#6F6F6B]">{clinic.uniqueStudents} unique · click to view</p>
                   </div>
-                  <div className="bg-muted/50 rounded-lg p-3">
-                    <p className="text-xs text-muted-foreground">Revenue</p>
-                    <p className="text-lg font-bold text-[#3DB855]">${clinic.totalRevenue.toFixed(0)}</p>
-                    <p className="text-xs text-muted-foreground">${clinic.avgRevenuePerStudent.toFixed(0)} avg</p>
+                  <div className="bg-[#F1F1EF] rounded-lg p-3">
+                    <p className="text-xs text-[#6F6F6B]">Revenue</p>
+                    <p className="text-lg font-bold text-[#72B84A]">${clinic.totalRevenue.toFixed(0)}</p>
+                    <p className="text-xs text-[#6F6F6B]">${clinic.avgRevenuePerStudent.toFixed(0)} avg</p>
                   </div>
-                  <div className="bg-muted/50 rounded-lg p-3">
-                    <p className="text-xs text-muted-foreground">Avg Age</p>
+                  <div className="bg-[#F1F1EF] rounded-lg p-3">
+                    <p className="text-xs text-[#6F6F6B]">Avg Age</p>
                     <p className="text-lg font-bold">
                       {clinic.avgStudentAge ? clinic.avgStudentAge.toFixed(1) : 'N/A'}
                     </p>
-                    <p className="text-xs text-muted-foreground">{clinic.ageGroup}</p>
+                    <p className="text-xs text-[#6F6F6B]">{clinic.ageGroup}</p>
                   </div>
-                  <div className="bg-muted/50 rounded-lg p-3">
-                    <p className="text-xs text-muted-foreground">Rev/Student</p>
-                    <p className="text-lg font-bold text-[#3DB855]">
+                  <div className="bg-[#F1F1EF] rounded-lg p-3">
+                    <p className="text-xs text-[#6F6F6B]">Rev/Student</p>
+                    <p className="text-lg font-bold text-[#72B84A]">
                       ${clinic.uniqueStudents > 0 ? (clinic.totalRevenue / clinic.uniqueStudents).toFixed(0) : '0'}
                     </p>
-                    <p className="text-xs text-muted-foreground">per unique</p>
+                    <p className="text-xs text-[#6F6F6B]">per unique</p>
                   </div>
                 </div>
 
@@ -510,14 +516,14 @@ export default function WinterClinicDetail() {
                   {/* Sources */}
                   {clinicSourcesSorted.length > 0 && (
                     <div>
-                      <p className="text-xs font-medium text-muted-foreground mb-2">Acquisition Sources</p>
+                      <p className="text-xs font-medium text-[#6F6F6B] mb-2">Acquisition Sources</p>
                       <div className="flex flex-wrap gap-1.5">
                         {clinicSourcesSorted.map(([source, count]) => (
                           <span
                             key={source}
-                            className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-muted border border-border"
+                            className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-[#F1F1EF] border border-[#DEDEDA]"
                           >
-                            <span className={`w-2 h-2 rounded-full ${sourceColors[source] || 'bg-[#CCCCCC]'}`} />
+                            <span className={`w-2 h-2 rounded-full ${sourceColors[source] || 'bg-[#A8A8A3]'}`} />
                             {source}: {count}
                           </span>
                         ))}
@@ -528,14 +534,14 @@ export default function WinterClinicDetail() {
                   {/* Experience */}
                   {clinicExpSorted.length > 0 && (
                     <div>
-                      <p className="text-xs font-medium text-muted-foreground mb-2">Experience Levels</p>
+                      <p className="text-xs font-medium text-[#6F6F6B] mb-2">Experience Levels</p>
                       <div className="flex flex-wrap gap-1.5">
                         {clinicExpSorted.map(([level, count]) => (
                           <span
                             key={level}
-                            className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-muted border border-border"
+                            className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-[#F1F1EF] border border-[#DEDEDA]"
                           >
-                            <span className={`w-2 h-2 rounded-full ${experienceColors[level] || experienceColors[level.toLowerCase()] || 'bg-[#CCCCCC]'}`} />
+                            <span className={`w-2 h-2 rounded-full ${experienceColors[level] || experienceColors[level.toLowerCase()] || 'bg-[#A8A8A3]'}`} />
                             {level}: {count}
                           </span>
                         ))}
@@ -548,9 +554,9 @@ export default function WinterClinicDetail() {
           })}
 
           {clinics.length === 0 && (
-            <div className="bg-card border border-border rounded-xl p-8 text-center">
-              <GraduationCap className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground">No Winter Clinic registrations found for this period.</p>
+            <div className="bg-white border border-[#DEDEDA] rounded-xl p-8 text-center">
+              <GraduationCap className="h-12 w-12 text-[#6F6F6B] mx-auto mb-3" />
+              <p className="text-[#6F6F6B]">No Winter Clinic registrations found for this period.</p>
             </div>
           )}
         </div>
@@ -559,8 +565,8 @@ export default function WinterClinicDetail() {
       {/* ── Marketing Intelligence ── */}
       <div className="space-y-4">
         <div>
-          <h2 className="text-lg font-semibold">Marketing Intelligence</h2>
-          <p className="text-sm text-muted-foreground mt-1">Meta Ads, Instagram, and newsletter efforts for PBGA Winter Clinics.</p>
+          <h2 className="text-sm font-semibold">Marketing Intelligence</h2>
+          <p className="text-sm text-[#6F6F6B] mt-1">Meta Ads, Instagram, and newsletter efforts for PBGA Winter Clinics.</p>
         </div>
         <ProgramMarketingPanel
           programName="PBGA Winter Clinic"
@@ -570,10 +576,10 @@ export default function WinterClinicDetail() {
       {/* AI Marketing Intelligence */}
       <div className="space-y-4">
         <div>
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <span className="text-[#F5C72C]">✦</span> AI Marketing Intelligence
+          <h2 className="text-sm font-semibold flex items-center gap-2">
+            <span className="text-[#F2DD48]">✦</span> AI Marketing Intelligence
           </h2>
-          <p className="text-sm text-muted-foreground mt-1">AI-generated multi-channel marketing strategy based on program performance data.</p>
+          <p className="text-sm text-[#6F6F6B] mt-1">AI-generated multi-channel marketing strategy based on program performance data.</p>
         </div>
         <ProgramAIIntelligence campaignId={3} programName="PBGA Winter Clinics" />
       </div>

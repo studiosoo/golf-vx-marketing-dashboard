@@ -13,15 +13,18 @@ import { ArrowLeft } from "lucide-react";
 import WinterClinicDetail from "./WinterClinicDetail";
 import SundayClinicDetail from "./SundayClinicDetail";
 import Leagues from "./Leagues";
+import AnnualGiveaway from "./AnnualGiveaway";
 import { appRoutes, DEFAULT_VENUE_SLUG } from "@/lib/routes";
 
 // Slug aliases for known detail pages
-const SLUG_MAP: Record<string, "winter" | "sunday" | "leagues"> = {
-  "winter-clinics":   "winter",
-  "winter-clinic":    "winter",
-  "drive-day":        "sunday",   // Drive Day sessions run via Sunday Clinic Acuity calendar
-  "sunday-clinic":    "sunday",
-  "sunday-clinics":   "sunday",
+const SLUG_MAP: Record<string, "winter" | "sunday" | "leagues" | "giveaway"> = {
+  "winter-clinics":               "winter",
+  "winter-clinic":                "winter",
+  "drive-day":                    "sunday",   // Drive Day sessions run via Sunday Clinic Acuity calendar
+  "sunday-clinic":                "sunday",
+  "sunday-clinics":               "sunday",
+  "annual-giveaway":              "giveaway", // Annual Membership Giveaway — Google Sheets-backed
+  "annual-membership-giveaway":   "giveaway",
 };
 
 function BackToProgramsButton() {
@@ -29,11 +32,20 @@ function BackToProgramsButton() {
   return (
     <button
       onClick={() => setLocation(appRoutes.venue(DEFAULT_VENUE_SLUG).operations.programs)}
-      className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+      className="flex items-center gap-1.5 text-sm text-[#6F6F6B] hover:text-[#222222] transition-colors mb-4"
     >
       <ArrowLeft size={14} />
       Back to Programs
     </button>
+  );
+}
+
+function GiveawayProgramDetail() {
+  return (
+    <div>
+      <BackToProgramsButton />
+      <AnnualGiveaway />
+    </div>
   );
 }
 
@@ -45,6 +57,31 @@ function GenericProgramDetail({ slug }: { slug: string }) {
     { enabled: numericId !== undefined }
   );
 
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-4 max-w-3xl">
+        <BackToProgramsButton />
+        <div className="space-y-3">
+          <div className="h-6 bg-[#F1F1EF] animate-pulse rounded w-48" />
+          <div className="h-4 bg-[#F1F1EF] animate-pulse rounded w-32" />
+        </div>
+      </div>
+    );
+  }
+
+  // Numeric ID that doesn't exist in the DB
+  if (numericId !== undefined && !program) {
+    return (
+      <div className="p-6 space-y-4 max-w-3xl">
+        <BackToProgramsButton />
+        <div className="rounded-lg border border-[#DEDEDA] bg-[#F1F1EF]/20 p-6 text-center space-y-1">
+          <p className="text-sm font-semibold text-[#222222]">Program not found</p>
+          <p className="text-xs text-[#6F6F6B]">No program with ID {numericId} exists. It may have been deleted or the link is incorrect.</p>
+        </div>
+      </div>
+    );
+  }
+
   const programName = program
     ? (program as any).name
     : slug.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
@@ -53,17 +90,15 @@ function GenericProgramDetail({ slug }: { slug: string }) {
     <div className="p-6 space-y-4 max-w-3xl">
       <BackToProgramsButton />
       <div className="space-y-1">
-        <h1 className="text-xl font-semibold text-foreground">
-          {isLoading ? "Loading…" : programName}
-        </h1>
+        <h1 className="text-xl font-semibold text-[#222222]">{programName}</h1>
         {program && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-[#6F6F6B]">
             {(program as any).description || (program as any).category || "Program"}
           </p>
         )}
       </div>
 
-      {!isLoading && program && (
+      {program && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {[
             { label: "Status", value: (program as any).status },
@@ -73,16 +108,16 @@ function GenericProgramDetail({ slug }: { slug: string }) {
             { label: "Budget", value: (program as any).budget ? `$${parseFloat(String((program as any).budget)).toLocaleString()}` : "—" },
             { label: "Actual Spend", value: (program as any).actualSpend ? `$${parseFloat(String((program as any).actualSpend)).toLocaleString()}` : "—" },
           ].map(({ label, value }) => (
-            <div key={label} className="rounded-lg border border-border bg-card p-3">
-              <p className="text-[11px] text-muted-foreground mb-1">{label}</p>
-              <p className="text-sm font-semibold text-foreground capitalize">{value || "—"}</p>
+            <div key={label} className="rounded-lg border border-[#DEDEDA] bg-white p-3">
+              <p className="text-[11px] text-[#6F6F6B] mb-1">{label}</p>
+              <p className="text-sm font-semibold text-[#222222] capitalize">{value || "—"}</p>
             </div>
           ))}
         </div>
       )}
 
-      <div className="rounded-lg border border-border bg-muted/20 p-4 text-sm text-muted-foreground space-y-1">
-        <p className="font-medium text-foreground text-xs uppercase tracking-wide mb-2">Performance Data</p>
+      <div className="rounded-lg border border-[#DEDEDA] bg-[#F1F1EF]/20 p-4 text-sm text-[#6F6F6B] space-y-1">
+        <p className="font-medium text-[#222222] text-xs uppercase tracking-wide mb-2">Performance Data</p>
         <p>Awaiting source data — attendance, revenue, and lead metrics will appear here once connected to Acuity or a manual data sheet.</p>
       </div>
     </div>
@@ -97,6 +132,7 @@ export default function ProgramDetailRouter() {
 
   if (knownType === "winter") return <WinterClinicDetail />;
   if (knownType === "sunday") return <SundayClinicDetail />;
+  if (knownType === "giveaway") return <GiveawayProgramDetail />;
   if (slug === "leagues") return <Leagues />;
 
   return <GenericProgramDetail slug={slug} />;

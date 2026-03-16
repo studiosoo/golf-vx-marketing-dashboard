@@ -5,7 +5,18 @@ import {
   BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer
 } from "recharts";
-import { CHART_PALETTE } from "./constants";
+
+// Softer muted palette for demographics charts — avoids brand yellow as data series
+const DEMO_COLORS = [
+  "#4ECDC4", // dusty teal
+  "#A78BFA", // muted lavender
+  "#FF6B6B", // soft coral
+  "#6BA3D6", // muted blue
+  "#72B84A", // muted green
+  "#D89A3C", // warm amber
+  "#9CA3AF", // cool gray
+  "#F06B8A", // soft rose
+];
 
 interface TooltipProps {
   active?: boolean;
@@ -16,9 +27,9 @@ interface TooltipProps {
 function CustomTooltip({ active, payload, label }: TooltipProps) {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white border border-[#E0E0E0] rounded-lg shadow-sm p-2 text-xs">
-        <p className="font-semibold text-[#111111]">{label}</p>
-        <p className="text-[#888888]">{payload[0].value} applicants</p>
+      <div className="bg-white border border-[#E9E9E6] rounded-lg shadow-sm p-2 text-xs">
+        <p className="font-semibold text-[#222222]">{label}</p>
+        <p className="text-[#6F6F6B]">{payload[0].value} applicants</p>
       </div>
     );
   }
@@ -35,7 +46,6 @@ interface StatsData {
   howDidTheyHearDistribution?: Record<string, number>;
   indoorGolfFamiliarityDistribution?: Record<string, number>;
   bestTimeToCallDistribution?: Record<string, number>;
-  applicationsByDate?: { date: string; count: number }[];
 }
 
 interface DemographicsTabProps {
@@ -90,72 +100,26 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
       .sort((a, b) => b.value - a.value),
     [stats]
   );
-  const timelineData = useMemo(() =>
-    (stats?.applicationsByDate || []).map(d => ({
-      date: d.date,
-      count: d.count,
-      label: new Date(d.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-    })),
-    [stats]
-  );
-  const sourceData = useMemo(() =>
-    Object.entries(stats?.howDidTheyHearDistribution || {})
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 8),
-    [stats]
-  );
 
   return (
     <div className="space-y-4">
-      {/* Timeline: Applications Per Day */}
-      {timelineData.length > 0 && (
-        <Card className="border border-[#E0E0E0] shadow-none">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-[#111111]">Applications Per Day</CardTitle>
-            <CardDescription className="text-xs text-[#AAAAAA]">Daily submission count over the campaign period</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={timelineData} margin={{ left: 4, right: 16, top: 4, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" vertical={false} />
-                <XAxis
-                  dataKey="label"
-                  tick={{ fontSize: 10, fill: "#AAAAAA" }}
-                  axisLine={false}
-                  tickLine={false}
-                  interval="preserveStartEnd"
-                />
-                <YAxis tick={{ fontSize: 11, fill: "#AAAAAA" }} axisLine={false} tickLine={false} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-                  {timelineData.map((_, i) => (
-                    <Cell key={i} fill={i % 2 === 0 ? "#545A60" : "#888888"} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Row 1: Age + Gender */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="border border-[#E0E0E0] shadow-none">
+        <Card className="border border-[#E9E9E6] shadow-none">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-[#111111]">Age Distribution</CardTitle>
+            <CardTitle className="text-sm font-semibold text-[#222222]">Age Distribution</CardTitle>
             <CardDescription className="text-xs text-[#AAAAAA]">Applicants by age group</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={ageData} layout="vertical" margin={{ left: 8, right: 16 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" horizontal={false} />
+                <CartesianGrid strokeDasharray="4 4" strokeWidth={0.5} stroke="#F0F0F0" horizontal={false} />
                 <XAxis type="number" tick={{ fontSize: 11, fill: "#AAAAAA" }} axisLine={false} tickLine={false} />
                 <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: "#545A60" }} axisLine={false} tickLine={false} width={55} />
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                   {ageData.map((_, i) => (
-                    <Cell key={i} fill={i === 0 ? "#F5C72C" : i === 1 ? "#545A60" : CHART_PALETTE[i % CHART_PALETTE.length]} />
+                    <Cell key={i} fill={DEMO_COLORS[i % DEMO_COLORS.length]} />
                   ))}
                 </Bar>
               </BarChart>
@@ -163,9 +127,9 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
           </CardContent>
         </Card>
 
-        <Card className="border border-[#E0E0E0] shadow-none">
+        <Card className="border border-[#E9E9E6] shadow-none">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-[#111111]">Gender Distribution</CardTitle>
+            <CardTitle className="text-sm font-semibold text-[#222222]">Gender Distribution</CardTitle>
             <CardDescription className="text-xs text-[#AAAAAA]">Applicants by gender</CardDescription>
           </CardHeader>
           <CardContent>
@@ -183,7 +147,7 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
                   labelLine={false}
                 >
                   {genderData.map((_, i) => (
-                    <Cell key={i} fill={i === 0 ? "#545A60" : i === 1 ? "#F5C72C" : CHART_PALETTE[i]} />
+                    <Cell key={i} fill={DEMO_COLORS[i % DEMO_COLORS.length]} />
                   ))}
                 </Pie>
                 <Tooltip formatter={(v: number) => [`${v} applicants`]} />
@@ -192,7 +156,7 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
             <div className="flex justify-center gap-4 mt-1">
               {genderData.map((d, i) => (
                 <div key={i} className="flex items-center gap-1.5 text-xs text-[#545A60]">
-                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: i === 0 ? "#545A60" : i === 1 ? "#F5C72C" : CHART_PALETTE[i] }} />
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: DEMO_COLORS[i % DEMO_COLORS.length] }} />
                   {d.name}: {d.value}
                 </div>
               ))}
@@ -203,9 +167,9 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
 
       {/* Row 2: City + Visited Before */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="border border-[#E0E0E0] shadow-none">
+        <Card className="border border-[#E9E9E6] shadow-none">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-[#111111] flex items-center gap-1.5">
+            <CardTitle className="text-sm font-semibold text-[#222222] flex items-center gap-1.5">
               <MapPin className="h-3.5 w-3.5 text-[#AAAAAA]" /> City Distribution
             </CardTitle>
             <CardDescription className="text-xs text-[#AAAAAA]">Top 10 cities</CardDescription>
@@ -213,13 +177,13 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
           <CardContent>
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={cityData} layout="vertical" margin={{ left: 8, right: 16 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" horizontal={false} />
+                <CartesianGrid strokeDasharray="4 4" strokeWidth={0.5} stroke="#F0F0F0" horizontal={false} />
                 <XAxis type="number" tick={{ fontSize: 11, fill: "#AAAAAA" }} axisLine={false} tickLine={false} />
                 <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: "#545A60" }} axisLine={false} tickLine={false} width={90} />
                 <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="value" fill="#545A60" radius={[0, 4, 4, 0]}>
+                <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                   {cityData.map((_, i) => (
-                    <Cell key={i} fill={i === 0 ? "#F5C72C" : i < 3 ? "#545A60" : "#888888"} />
+                    <Cell key={i} fill={DEMO_COLORS[i % DEMO_COLORS.length]} />
                   ))}
                 </Bar>
               </BarChart>
@@ -227,9 +191,9 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
           </CardContent>
         </Card>
 
-        <Card className="border border-[#E0E0E0] shadow-none">
+        <Card className="border border-[#E9E9E6] shadow-none">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-[#111111] flex items-center gap-1.5">
+            <CardTitle className="text-sm font-semibold text-[#222222] flex items-center gap-1.5">
               <UserCheck className="h-3.5 w-3.5 text-[#AAAAAA]" /> Visited Golf VX Before
             </CardTitle>
             <CardDescription className="text-xs text-[#AAAAAA]">Prior venue experience</CardDescription>
@@ -250,9 +214,9 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
                 >
                   {visitedData.map((entry, i) => {
                     const v = entry.name.toLowerCase();
-                    const color = v === "yes" || v === "existing" ? "#3DB855"
-                      : v === "no" || v === "new" ? "#545A60"
-                      : "#AAAAAA";
+                    const color = v === "yes" || v === "existing" ? "#4ECDC4"
+                      : v === "no" || v === "new" ? "#A78BFA"
+                      : "#9CA3AF";
                     return <Cell key={i} fill={color} />;
                   })}
                 </Pie>
@@ -262,7 +226,7 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
             <div className="flex flex-wrap justify-center gap-3 mt-1">
               {visitedData.map((d, i) => {
                 const v = d.name.toLowerCase();
-                const color = v === "yes" || v === "existing" ? "#3DB855" : v === "no" || v === "new" ? "#545A60" : "#AAAAAA";
+                const color = v === "yes" || v === "existing" ? "#4ECDC4" : v === "no" || v === "new" ? "#A78BFA" : "#9CA3AF";
                 return (
                   <div key={i} className="flex items-center gap-1.5 text-xs text-[#545A60]">
                     <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
@@ -277,9 +241,9 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
 
       {/* Row 3: Golf Experience + Indoor Golf Familiarity */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="border border-[#E0E0E0] shadow-none">
+        <Card className="border border-[#E9E9E6] shadow-none">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-[#111111] flex items-center gap-1.5">
+            <CardTitle className="text-sm font-semibold text-[#222222] flex items-center gap-1.5">
               <Star className="h-3.5 w-3.5 text-[#AAAAAA]" /> Golf Experience Level
             </CardTitle>
             <CardDescription className="text-xs text-[#AAAAAA]">Self-reported skill level</CardDescription>
@@ -287,13 +251,13 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
           <CardContent>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={experienceData} margin={{ left: 4, right: 16 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" vertical={false} />
+                <CartesianGrid strokeDasharray="4 4" strokeWidth={0.5} stroke="#F0F0F0" vertical={false} />
                 <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#545A60" }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: "#AAAAAA" }} axisLine={false} tickLine={false} />
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                   {experienceData.map((_, i) => (
-                    <Cell key={i} fill={i === 0 ? "#545A60" : i === 1 ? "#888888" : i === 2 ? "#F5C72C" : "#AAAAAA"} />
+                    <Cell key={i} fill={DEMO_COLORS[i % DEMO_COLORS.length]} />
                   ))}
                 </Bar>
               </BarChart>
@@ -301,9 +265,9 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
           </CardContent>
         </Card>
 
-        <Card className="border border-[#E0E0E0] shadow-none">
+        <Card className="border border-[#E9E9E6] shadow-none">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-[#111111]">Indoor Golf Familiarity</CardTitle>
+            <CardTitle className="text-sm font-semibold text-[#222222]">Indoor Golf Familiarity</CardTitle>
             <CardDescription className="text-xs text-[#AAAAAA]">Experience with indoor simulators</CardDescription>
           </CardHeader>
           <CardContent>
@@ -314,12 +278,12 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
                     <span className="text-[#545A60] font-medium truncate max-w-[60%]">{d.name}</span>
                     <span className="text-[#AAAAAA]">{d.value}</span>
                   </div>
-                  <div className="h-1.5 bg-[#F2F2F7] rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-[#F1F1EF] rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full"
                       style={{
                         width: `${(d.value / (stats?.totalApplications || 1)) * 100}%`,
-                        backgroundColor: i === 0 ? "#545A60" : i === 1 ? "#888888" : i === 2 ? "#F5C72C" : "#AAAAAA"
+                        backgroundColor: DEMO_COLORS[i % DEMO_COLORS.length]
                       }}
                     />
                   </div>
@@ -332,43 +296,49 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
 
       {/* Row 4: How Did They Hear + Best Time to Call */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="border border-[#E0E0E0] shadow-none">
+        <Card className="border border-[#E9E9E6] shadow-none">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-[#111111]">Source Breakdown</CardTitle>
-            <CardDescription className="text-xs text-[#AAAAAA]">How applicants heard about the giveaway (top 8)</CardDescription>
+            <CardTitle className="text-sm font-semibold text-[#222222]">How Did They Hear</CardTitle>
+            <CardDescription className="text-xs text-[#AAAAAA]">Acquisition source breakdown</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={sourceData} layout="vertical" margin={{ left: 8, right: 16 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" horizontal={false} />
-                <XAxis type="number" tick={{ fontSize: 11, fill: "#AAAAAA" }} axisLine={false} tickLine={false} />
-                <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: "#545A60" }} axisLine={false} tickLine={false} width={80} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                  {sourceData.map((_, i) => (
-                    <Cell key={i} fill={i === 0 ? "#F5C72C" : i === 1 ? "#545A60" : i < 4 ? "#888888" : "#AAAAAA"} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="space-y-2.5 pt-2">
+              {hearData.slice(0, 8).map((d, i) => (
+                <div key={i} className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-[#545A60] font-medium truncate max-w-[65%]">{d.name}</span>
+                    <span className="text-[#AAAAAA]">{d.value}</span>
+                  </div>
+                  <div className="h-1.5 bg-[#F1F1EF] rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full"
+                      style={{
+                        width: `${(d.value / (stats?.totalApplications || 1)) * 100}%`,
+                        backgroundColor: DEMO_COLORS[i % DEMO_COLORS.length]
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="border border-[#E0E0E0] shadow-none">
+        <Card className="border border-[#E9E9E6] shadow-none">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-[#111111]">Best Time to Call</CardTitle>
+            <CardTitle className="text-sm font-semibold text-[#222222]">Best Time to Call</CardTitle>
             <CardDescription className="text-xs text-[#AAAAAA]">Preferred contact window</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={callTimeData} margin={{ left: 4, right: 16 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" vertical={false} />
+                <CartesianGrid strokeDasharray="4 4" strokeWidth={0.5} stroke="#F0F0F0" vertical={false} />
                 <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#545A60" }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: "#AAAAAA" }} axisLine={false} tickLine={false} />
                 <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="value" fill="#888888" radius={[4, 4, 0, 0]}>
+                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                   {callTimeData.map((_, i) => (
-                    <Cell key={i} fill={i === 0 ? "#545A60" : "#888888"} />
+                    <Cell key={i} fill={DEMO_COLORS[i % DEMO_COLORS.length]} />
                   ))}
                 </Bar>
               </BarChart>

@@ -3,7 +3,7 @@ export const DEFAULT_VENUE_SLUG = "arlington-heights";
 export type VenueScopedSection =
   | "dashboard"
   | "reports"
-  | "performance"
+  | "studioSoo"
   | "operations"
   | "audience"
   | "insights";
@@ -60,6 +60,7 @@ export const appRoutes = {
         communications: `${base}/operations/communications`,
         communicationDetail: (communicationId: string | number) => `${base}/operations/communications/${communicationId}`,
         content: `${base}/operations/content`,
+        localMarketing: `${base}/operations/local-marketing`,
       },
       audience: {
         home: `${base}/audience`,
@@ -67,6 +68,25 @@ export const appRoutes = {
         segments: `${base}/audience/segments`,
         duplicates: `${base}/audience/duplicates`,
         profile: (profileId: string | number) => `${base}/audience/${profileId}`,
+      },
+      studioSoo: {
+        home: `${base}/studio-soo`,
+        autopilot: `${base}/studio-soo/autopilot`,
+        campaigns: `${base}/studio-soo/campaigns`,
+        campaignDetail: (id: string | number) => `${base}/studio-soo/campaigns/${id}`,
+        programs: `${base}/studio-soo/programs`,
+        programDetail: (id: string | number) => `${base}/studio-soo/programs/${id}`,
+        promotions: `${base}/studio-soo/promotions`,
+        localMarketing: `${base}/studio-soo/local-marketing`,
+        content: `${base}/studio-soo/content`,
+        production: `${base}/studio-soo/production`,
+        activities: `${base}/studio-soo/activities`,
+        activityPrograms: `${base}/studio-soo/activities/programs`,
+        activityPromotions: `${base}/studio-soo/activities/promotions`,
+        activityLocal: `${base}/studio-soo/activities/local`,
+        activityProgramDetail: (id: string) => `${base}/studio-soo/activities/programs/${id}`,
+        activityPromotionDetail: (id: string) => `${base}/studio-soo/activities/promotions/${id}`,
+        activityLocalDetail: (id: string) => `${base}/studio-soo/activities/local/${id}`,
       },
       insights: {
         home: `${base}/insights`,
@@ -109,8 +129,8 @@ export function getDefaultVenueRoute(section: VenueScopedSection = "dashboard"):
   switch (section) {
     case "reports":
       return venue.reports.home;
-    case "performance":
-      return venue.performance;
+    case "studioSoo":
+      return venue.studioSoo.autopilot;
     case "operations":
       return venue.operations.thisWeek;
     case "audience":

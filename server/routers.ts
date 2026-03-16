@@ -47,6 +47,7 @@ import {
 } from "./routers/advertising";
 import { asanaRouter } from "./routers/asana";
 import { promosRouter } from "./routers/promos";
+import { activitiesRouter } from "./routers/activities";
 
 export const appRouter = router({
   system: systemRouter,
@@ -94,6 +95,7 @@ export const appRouter = router({
   asana: asanaRouter,
   promos: promosRouter,
   revenue: revenueRouter,
+  activities: activitiesRouter,
 });
 
 export type AppRouter = typeof appRouter;

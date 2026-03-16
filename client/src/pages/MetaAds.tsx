@@ -16,7 +16,7 @@ type DatePreset = "today" | "yesterday" | "last_7d" | "last_14d" | "last_30d" | 
 const COMPLETED_DAYS_THRESHOLD = 7;
 
 // Extract the program/campaign group name from a Meta campaign name.
-// "Golf VX Annual Giveaway - A2 Social/Family" → "Annual Giveaway"
+// "Golf VX Annual Giveaway - A2 Social/Family" → "Annual Membership Giveaway"
 // "[BOOSTED] Instagram post: Drive Day"         → "Drive Day (Boosted)"
 // "Junior Golf Summer Camp - Ad Set 1"          → "Junior Golf Summer Camp"
 function parseProgramGroup(name: string): string {
@@ -59,11 +59,11 @@ function getEffectiveStatus(campaign: any, overrideMap: Record<string, string>):
 
 function statusBadgeClass(status: string) {
   switch (status) {
-    case "ACTIVE": return "bg-[#3DB855]/20 text-[#3DB855] border-[#3DB855]/30";
-    case "PAUSED": return "bg-[#F5C72C]/20 text-[#111111] border-[#F5C72C]/50";
-    case "COMPLETED": return "bg-[#888888]/20 text-[#888888] border-[#888888]/30";
+    case "ACTIVE": return "bg-[#72B84A]/20 text-[#72B84A] border-[#72B84A]/30";
+    case "PAUSED": return "bg-[#F2DD48]/20 text-[#222222] border-[#F2DD48]/50";
+    case "COMPLETED": return "bg-[#6F6F6B]/20 text-[#6F6F6B] border-[#6F6F6B]/30";
     case "ARCHIVED": return "bg-gray-500/20 text-gray-500 border-gray-500/30";
-    default: return "bg-muted text-muted-foreground";
+    default: return "bg-[#F1F1EF] text-[#6F6F6B]";
   }
 }
 
@@ -158,25 +158,25 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
     const autoClassified = isAutoCompleted(c) && !overrideMap[c.id];
     return (
       <Card
-        className={`border-border hover:shadow-md transition-all cursor-pointer group ${isArchived ? "opacity-70 hover:opacity-100 bg-muted/20" : "bg-card hover:border-primary/30"}`}
+        className={`border-[#DEDEDA] hover:shadow-md transition-all cursor-pointer group ${isArchived ? "opacity-70 hover:opacity-100 bg-[#F1F1EF]/20" : "bg-white hover:border-[#F2DD48]/30"}`}
         onClick={() => handleCardClick(c)}
       >
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
             <div className="flex-1 min-w-0">
-              <div className="font-medium text-foreground text-sm flex items-center gap-1">
+              <div className="font-medium text-[#222222] text-sm flex items-center gap-1">
                 <span className="truncate">{c.name}</span>
-                <ChevronRight size={13} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                <ChevronRight size={13} className="text-[#6F6F6B] opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
               </div>
               <div className="flex items-center gap-2 mt-1 flex-wrap">
                 <Badge className={`text-xs border ${statusBadgeClass(effStatus)}`} variant="outline">
                   {effStatus}
                 </Badge>
                 {autoClassified && (
-                  <span className="text-xs text-muted-foreground italic">auto-classified by date</span>
+                  <span className="text-xs text-[#6F6F6B] italic">auto-classified by date</span>
                 )}
                 {c.objective && (
-                  <span className="text-xs text-muted-foreground">{c.objective}</span>
+                  <span className="text-xs text-[#6F6F6B]">{c.objective}</span>
                 )}
               </div>
             </div>
@@ -186,7 +186,7 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-xs h-7 px-2 gap-1 border-primary/40 text-primary hover:bg-primary/10"
+                    className="text-xs h-7 px-2 gap-1 border-primary/40 text-[#F2DD48] hover:bg-[#F2DD48]/10"
                     onClick={(e) => handleAiClick(e, c)}
                   >
                     <Sparkles size={11} />
@@ -195,7 +195,7 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-xs h-7 px-2 gap-1 text-muted-foreground hover:text-foreground"
+                    className="text-xs h-7 px-2 gap-1 text-[#6F6F6B] hover:text-[#222222]"
                     onClick={(e) => { e.stopPropagation(); handleCardClick(c); }}
                   >
                     <ExternalLink size={11} />
@@ -204,7 +204,7 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-xs h-7 px-2 gap-1 text-muted-foreground hover:text-[#E8453C]"
+                    className="text-xs h-7 px-2 gap-1 text-[#6F6F6B] hover:text-[#FF3B30]"
                     onClick={(e) => handleMarkCompleted(e, c)}
                     title="Mark as Completed"
                   >
@@ -217,7 +217,7 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-xs h-7 px-2 gap-1 text-muted-foreground hover:text-[#3DB855]"
+                    className="text-xs h-7 px-2 gap-1 text-[#6F6F6B] hover:text-[#72B84A]"
                     onClick={(e) => handleRestoreActive(e, c)}
                     title="Restore to Active"
                   >
@@ -227,7 +227,7 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-xs h-7 px-2 gap-1 text-muted-foreground hover:text-foreground"
+                    className="text-xs h-7 px-2 gap-1 text-[#6F6F6B] hover:text-[#222222]"
                     onClick={(e) => { e.stopPropagation(); handleCardClick(c); }}
                   >
                     <ExternalLink size={11} />
@@ -257,16 +257,16 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
               return (
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                   {metrics.map((m) => (
-                    <div key={m.label} className="bg-muted/30 rounded-lg p-2 text-center">
-                      <div className={`text-sm font-semibold ${m.highlight ? "text-[#3DB855]" : "text-foreground"}`}>{m.value}</div>
-                      <div className="text-xs text-muted-foreground">{m.label}</div>
+                    <div key={m.label} className="bg-[#F6F6F4] rounded-lg p-2 text-center">
+                      <div className={`text-sm font-semibold ${m.highlight ? "text-[#72B84A]" : "text-[#222222]"}`}>{m.value}</div>
+                      <div className="text-xs text-[#6F6F6B]">{m.label}</div>
                     </div>
                   ))}
                 </div>
               );
             })()
           ) : (
-            <div className="text-xs text-muted-foreground">No insights data for this period</div>
+            <div className="text-xs text-[#6F6F6B]">No insights data for this period</div>
           )}
         </CardContent>
       </Card>
@@ -277,9 +277,9 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
     <div className={embedded ? "space-y-6" : "p-6 space-y-6"}>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         {!embedded && <div>
-          <h1 className="text-2xl font-bold text-foreground">Meta Ads</h1>
+          <h1 className="text-2xl font-bold text-[#222222]">Meta Ads</h1>
           <div className="flex items-center gap-2 mt-1">
-            <p className="text-muted-foreground text-sm">Facebook & Instagram campaign performance</p>
+            <p className="text-[#6F6F6B] text-sm">Facebook & Instagram campaign performance</p>
             <MetaAdsStatusBadge />
           </div>
         </div>}
@@ -313,26 +313,28 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Active Spend", value: isLoading ? "—" : campaigns == null ? "N/A" : formatCurrency(totalSpend), icon: <DollarSign size={18} />, color: "text-[#E8453C]", tooltip: "Total amount spent across all active campaigns in the selected date range." },
-          { label: "Total Reach", value: isLoading ? "—" : campaigns == null ? "N/A" : formatNum(totalReach), icon: <Eye size={18} />, color: "text-[#888888]", tooltip: "Number of unique people who saw at least one ad from your active campaigns." },
-          { label: "Impressions", value: isLoading ? "—" : campaigns == null ? "N/A" : formatNum(totalImpressions), icon: <TrendingUp size={18} />, color: "text-[#3DB855]", tooltip: "Total times your ads were displayed, including multiple views by the same person." },
-          { label: "Clicks", value: isLoading ? "—" : campaigns == null ? "N/A" : formatNum(totalClicks), icon: <MousePointer size={18} />, color: "text-[#F5C72C]", tooltip: "Total clicks on your ads, including link clicks, button clicks, and profile visits." },
+          { label: "Active Spend", value: isLoading ? "—" : campaigns == null ? "N/A" : formatCurrency(totalSpend), icon: <DollarSign size={18} />, color: "text-[#FF3B30]", tooltip: "Total amount spent across all active campaigns in the selected date range." },
+          { label: "Total Reach", value: isLoading ? "—" : campaigns == null ? "N/A" : formatNum(totalReach), icon: <Eye size={18} />, color: "text-[#6F6F6B]", tooltip: "Number of unique people who saw at least one ad from your active campaigns." },
+          { label: "Impressions", value: isLoading ? "—" : campaigns == null ? "N/A" : formatNum(totalImpressions), icon: <TrendingUp size={18} />, color: "text-[#72B84A]", tooltip: "Total times your ads were displayed, including multiple views by the same person." },
+          { label: "Clicks", value: isLoading ? "—" : campaigns == null ? "N/A" : formatNum(totalClicks), icon: <MousePointer size={18} />, color: "text-[#F2DD48]", tooltip: "Total clicks on your ads, including link clicks, button clicks, and profile visits." },
         ].map((kpi) => (
-          <Card key={kpi.label} className="bg-card border-border">
+          <Card key={kpi.label} className="bg-white border-[#DEDEDA]">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-1">
-                  <span className="text-xs text-muted-foreground">{kpi.label}</span>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info size={12} className="text-muted-foreground/50 cursor-help hover:text-muted-foreground transition-colors" />
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-[200px]">{kpi.tooltip}</TooltipContent>
-                  </Tooltip>
+                  <span className="text-xs text-[#6F6F6B]">{kpi.label}</span>
+                  {kpi.tooltip && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info size={12} className="text-[#6F6F6B]/50 cursor-help hover:text-[#6F6F6B] transition-colors" />
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-[200px]">{kpi.tooltip}</TooltipContent>
+                    </Tooltip>
+                  )}
                 </div>
                 <span className={kpi.color}>{kpi.icon}</span>
               </div>
-              <div className="text-xl font-bold text-foreground">{kpi.value}</div>
+              <div className="text-xl font-bold text-[#222222]">{kpi.value}</div>
             </CardContent>
           </Card>
         ))}
@@ -341,15 +343,15 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
       {isLoading ? (
         <div className="space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-28 bg-card rounded-xl animate-pulse border border-border" />
+            <div key={i} className="h-28 bg-white rounded-xl animate-pulse border border-[#DEDEDA]" />
           ))}
         </div>
       ) : (
         <div className="space-y-6">
           <div className="space-y-5">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-foreground">Active Campaigns</span>
-              <Badge className="bg-[#3DB855]/20 text-[#3DB855] border-[#3DB855]/30 text-xs border" variant="outline">
+              <span className="text-sm font-semibold text-[#222222]">Active Campaigns</span>
+              <Badge className="bg-[#72B84A]/20 text-[#72B84A] border-[#72B84A]/30 text-xs border" variant="outline">
                 {activeCampaigns.length}
               </Badge>
             </div>
@@ -375,15 +377,15 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
               return sortedGroups.map(([group, cList]) => (
                 <div key={group} className="space-y-2">
                   <div className="flex items-center gap-2 px-1">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{group}</span>
+                    <span className="text-xs font-semibold text-[#6F6F6B] uppercase tracking-wide">{group}</span>
                     <div className="flex-1 h-px bg-border" />
-                    <span className="text-xs text-muted-foreground">{cList.length} ad{cList.length !== 1 ? "s" : ""}</span>
+                    <span className="text-xs text-[#6F6F6B]">{cList.length} ad{cList.length !== 1 ? "s" : ""}</span>
                   </div>
                   {cList.map((c: any) => <CampaignCard key={c.id} c={c} isArchived={false} />)}
                 </div>
               ));
             })() : (
-              <div className="text-center py-10 text-muted-foreground border border-dashed border-border rounded-xl">
+              <div className="text-center py-10 text-[#6F6F6B] border border-dashed border-[#DEDEDA] rounded-xl">
                 <TrendingUp size={32} className="mx-auto mb-2 opacity-30" />
                 <p className="text-sm">No active campaigns</p>
               </div>
@@ -393,7 +395,7 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
           {archivedCampaigns.length > 0 && (
             <div className="space-y-3">
               <button
-                className="flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors w-full text-left"
+                className="flex items-center gap-2 text-sm font-semibold text-[#6F6F6B] hover:text-[#222222] transition-colors w-full text-left"
                 onClick={() => setShowArchived(!showArchived)}
               >
                 <Archive size={14} />
@@ -410,7 +412,7 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
           )}
 
           {allCampaigns.length === 0 && (
-            <div className="text-center py-16 text-muted-foreground">
+            <div className="text-center py-16 text-[#6F6F6B]">
               <TrendingUp size={40} className="mx-auto mb-3 opacity-30" />
               <p>No Meta Ads campaigns found</p>
             </div>
@@ -422,12 +424,12 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Sparkles size={18} className="text-primary" />
+              <Sparkles size={18} className="text-[#F2DD48]" />
               AI Intelligence — {aiCampaign?.name}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 text-sm text-[#6F6F6B]">
               <Badge className={`text-xs border ${statusBadgeClass(getEffectiveStatus(aiCampaign || {}, overrideMap))}`} variant="outline">
                 {getEffectiveStatus(aiCampaign || {}, overrideMap)}
               </Badge>
@@ -441,26 +443,26 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
                   { label: "Impressions", value: formatNum(aiCampaign.insights.impressions || 0) },
                   { label: "Clicks", value: formatNum(aiCampaign.insights.clicks || 0) },
                 ].map((m) => (
-                  <div key={m.label} className="bg-muted/30 rounded-lg p-3 text-center">
-                    <div className="text-base font-bold text-foreground">{m.value}</div>
-                    <div className="text-xs text-muted-foreground">{m.label}</div>
+                  <div key={m.label} className="bg-[#F6F6F4] rounded-lg p-3 text-center">
+                    <div className="text-base font-bold text-[#222222]">{m.value}</div>
+                    <div className="text-xs text-[#6F6F6B]">{m.label}</div>
                   </div>
                 ))}
               </div>
             )}
-            <div className="border rounded-lg p-4 bg-primary/5 border-primary/20">
+            <div className="border rounded-lg p-4 bg-[#FDF9E3] border-[#F2DD48]/20">
               <div className="flex items-center gap-2 mb-3">
-                <Sparkles size={14} className="text-primary" />
-                <span className="text-sm font-semibold text-primary">AI Analysis & Recommendations</span>
+                <Sparkles size={14} className="text-[#F2DD48]" />
+                <span className="text-sm font-semibold text-[#F2DD48]">AI Analysis & Recommendations</span>
               </div>
               {aiLoading ? (
                 <div className="space-y-2">
                   {["w-full", "w-4/5", "w-3/4", "w-full", "w-2/3"].map((w, i) => (
-                    <div key={i} className={`h-3 bg-muted rounded animate-pulse ${w}`} />
+                    <div key={i} className={`h-3 bg-[#F1F1EF] rounded animate-pulse ${w}`} />
                   ))}
                 </div>
               ) : (
-                <div className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{aiInsight}</div>
+                <div className="text-sm text-[#222222] whitespace-pre-wrap leading-relaxed">{aiInsight}</div>
               )}
             </div>
             <div className="flex justify-end">

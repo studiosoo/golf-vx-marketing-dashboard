@@ -183,6 +183,13 @@
       "when": 1773646040180,
       "tag": "0025_create_autonomous_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1773679090215,
+      "tag": "0026_create_activity_assets",
+      "breakpoints": true
     }
   ]
 }

@@ -6,6 +6,14 @@
 
 export const MARKETING_TIMELINE_PROJECT_ID = "1212717697638611";
 
+// Asana campaign project GIDs → dashboard campaign IDs
+export const CAMPAIGN_PROJECT_MAP: Record<string, string> = {
+  "1212077269419925": "trial_conversion",
+  "1212077289242708": "membership_acquisition",
+  "1212080057605434": "member_retention",
+  "1212077289242724": "corporate_events",
+};
+
 export const CAMPAIGN_SECTIONS: Record<string, string> = {
   "Trial Conversion Campaign": "1212717697638612",
   "Membership Acquisition campaign": "1212717697638616",
@@ -40,6 +48,19 @@ async function asanaGet(path: string): Promise<unknown> {
   });
   if (!res.ok) throw new Error(`Asana API error ${res.status}: ${await res.text()}`);
   return res.json();
+}
+
+async function retryGet(path: string, retries = 3): Promise<unknown> {
+  for (let attempt = 0; attempt < retries; attempt++) {
+    try {
+      return await asanaGet(path);
+    } catch (err) {
+      const isRateLimit = err instanceof Error && err.message.includes("429");
+      if (!isRateLimit || attempt === retries - 1) throw err;
+      await new Promise(r => setTimeout(r, 100 * Math.pow(2, attempt)));
+    }
+  }
+  throw new Error("Asana retryGet: unreachable");
 }
 
 async function asanaPost(path: string, body: unknown): Promise<unknown> {
@@ -125,4 +146,132 @@ export async function createAsanaTask(params: {
 
 export function getProjectUrl(): string {
   return `https://app.asana.com/0/${MARKETING_TIMELINE_PROJECT_ID}/timeline`;
+}
+
+export interface AsanaProjectTask {
+  gid: string;
+  name: string;
+  assignee: string | null;
+  due_on: string | null;
+  completed: boolean;
+}
+
+export async function getProjectTasks(projectGid: string): Promise<AsanaProjectTask[]> {
+  const optFields = "name,assignee.name,due_on,completed";
+  const data = await retryGet(
+    `/projects/${projectGid}/tasks?opt_fields=${optFields}&limit=100`
+  ) as { data: Array<{ gid: string; name: string; assignee?: { name: string } | null; due_on?: string | null; completed?: boolean }> };
+  return (data.data || []).map(t => ({
+    gid: t.gid,
+    name: t.name,
+    assignee: t.assignee?.name ?? null,
+    due_on: t.due_on ?? null,
+    completed: t.completed ?? false,
+  }));
+}
+
+const BUDGET_FIELD_GID = "1212082575127819";
+const SPEND_FIELD_GID  = "1212082575127824";
+
+export async function getProjectBudget(projectGid: string): Promise<{ budget: number | null; spend: number | null }> {
+  const data = await retryGet(
+    `/projects/${projectGid}?opt_fields=custom_fields.gid,custom_fields.number_value`
+  ) as { data: { custom_fields?: Array<{ gid: string; number_value: number | null }> } };
+  const fields = data.data?.custom_fields ?? [];
+  const budget = fields.find(f => f.gid === BUDGET_FIELD_GID)?.number_value ?? null;
+  const spend  = fields.find(f => f.gid === SPEND_FIELD_GID)?.number_value  ?? null;
+  return { budget, spend };
+}
+
+export interface AsanaMasterTimelineItem {
+  id: string;
+  name: string;
+  category: "program" | "promotion" | "paid_ads";
+  campaigns: string[];
+  start: string;
+  end: string;
+  datesConfirmed: boolean;
+  status: "active" | "planned" | "completed" | "archived" | "pending";
+  kpiHint?: string;
+  asanaTaskId: string;
+  asanaProjectId?: string;
+}
+
+interface AsanaApiTaskFull extends AsanaApiTask {
+  memberships?: Array<{
+    section?: { gid: string; name: string };
+    project?: { gid: string; name: string };
+  }>;
+  notes?: string;
+}
+
+export async function getMasterTimelineTasks(): Promise<AsanaMasterTimelineItem[]> {
+  const optFields = [
+    "name", "gid", "start_on", "due_on", "completed",
+    "resource_subtype", "notes",
+    "memberships.project.gid", "memberships.project.name",
+    "memberships.section.gid", "memberships.section.name",
+  ].join(",");
+
+  const data = await retryGet(
+    `/tasks?project=${MARKETING_TIMELINE_PROJECT_ID}&opt_fields=${optFields}&limit=100`
+  ) as { data: AsanaApiTaskFull[] };
+
+  const today = new Date().toISOString().slice(0, 10);
+
+  return (data.data || []).map(t => {
+    // Derive campaign IDs from project memberships
+    const campaignIds = (t.memberships || [])
+      .map(m => m.project?.gid ?? "")
+      .filter(gid => gid !== MARKETING_TIMELINE_PROJECT_ID && CAMPAIGN_PROJECT_MAP[gid])
+      .map(gid => CAMPAIGN_PROJECT_MAP[gid]);
+
+    // Deduplicate
+    const campaigns = campaignIds.filter((v, i, arr) => arr.indexOf(v) === i);
+
+    // Fallback: use section name if no project membership mapped
+    if (campaigns.length === 0) {
+      const sectionName = t.memberships?.[0]?.section?.name ?? "";
+      const fallback = Object.keys(CAMPAIGN_SECTIONS).find(k =>
+        sectionName.toLowerCase().includes(k.split(" ")[0].toLowerCase())
+      );
+      if (fallback) campaigns.push(
+        CAMPAIGN_PROJECT_MAP[
+          Object.entries(CAMPAIGN_SECTIONS).find(([, gid]) =>
+            Object.keys(CAMPAIGN_SECTIONS).indexOf(fallback) ===
+            Object.keys(CAMPAIGN_SECTIONS).indexOf(fallback)
+          )?.[1] ?? ""
+        ] ?? "trial_conversion"
+      );
+    }
+
+    const datesConfirmed = !!(t.start_on && t.due_on);
+
+    const status: AsanaMasterTimelineItem["status"] = t.completed
+      ? "completed"
+      : t.start_on && t.start_on > today
+        ? "planned"
+        : "active";
+
+    const category: AsanaMasterTimelineItem["category"] =
+      t.resource_subtype === "milestone" ? "promotion" : "program";
+
+    const firstNonMasterGid = (t.memberships || [])
+      .map(m => m.project?.gid ?? "")
+      .find(gid => gid !== MARKETING_TIMELINE_PROJECT_ID && gid !== "");
+
+    return {
+      id: t.gid,
+      name: t.name,
+      category,
+      campaigns: campaigns.length > 0 ? campaigns : ["trial_conversion"],
+      start: t.start_on ?? "",
+      end: t.due_on ?? "",
+      datesConfirmed,
+      status,
+      kpiHint: t.notes ? t.notes.slice(0, 80) : undefined,
+      asanaTaskId: t.gid,
+      asanaProjectId: firstNonMasterGid,
+    };
+  });
 }

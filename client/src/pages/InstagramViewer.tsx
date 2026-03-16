@@ -67,8 +67,8 @@ export default function InstagramViewer() {
               <Instagram className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Instagram Analytics</h1>
-              <p className="text-muted-foreground text-sm">@golfvxarlingtonheights</p>
+              <h1 className="text-2xl font-bold text-[#222222]">Instagram Analytics</h1>
+              <p className="text-[#6F6F6B] text-sm">@golfvxarlingtonheights</p>
             </div>
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -81,16 +81,16 @@ export default function InstagramViewer() {
           </div>
         </div>
 
-        <Card className="border-blue-500/30 bg-[#888888]/100/5">
+        <Card className="border-blue-500/30 bg-[#6F6F6B]/100/5">
           <CardContent className="pt-4 pb-4">
             <div className="flex items-start gap-3">
-              <Info className="h-5 w-5 text-[#888888] shrink-0 mt-0.5" />
+              <Info className="h-5 w-5 text-[#6F6F6B] shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-foreground">Instagram auto-sync requires additional OAuth permissions</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  The current Meta Ads token does not include <code className="bg-muted px-1 rounded text-xs">instagram_basic</code> scopes.
+                <p className="text-sm font-medium text-[#222222]">Instagram auto-sync requires additional OAuth permissions</p>
+                <p className="text-xs text-[#6F6F6B] mt-1">
+                  The current Meta Ads token does not include <code className="bg-[#F1F1EF] px-1 rounded text-xs">instagram_basic</code> scopes.
                   Use <strong>Sync Data</strong> to manually enter stats from{" "}
-                  <a href="https://business.facebook.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">Meta Business Suite</a>.
+                  <a href="https://business.facebook.com" target="_blank" rel="noopener noreferrer" className="text-[#F2DD48] underline">Meta Business Suite</a>.
                 </p>
               </div>
             </div>
@@ -99,19 +99,19 @@ export default function InstagramViewer() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {([
-            { label: "Followers", value: latestInsight?.followersCount?.toLocaleString() ?? "—", Icon: Users, color: "text-[#888888]" },
+            { label: "Followers", value: latestInsight?.followersCount?.toLocaleString() ?? "—", Icon: Users, color: "text-[#6F6F6B]" },
             { label: "Reach (28d)", value: latestInsight?.reach?.toLocaleString() ?? "—", Icon: Eye, color: "text-pink-400" },
-            { label: "Impressions (28d)", value: latestInsight?.impressions?.toLocaleString() ?? "—", Icon: BarChart2, color: "text-[#F5C72C]" },
-            { label: "Profile Views (28d)", value: latestInsight?.profileViews?.toLocaleString() ?? "—", Icon: MousePointer, color: "text-[#F5C72C]" },
+            { label: "Impressions (28d)", value: latestInsight?.impressions?.toLocaleString() ?? "—", Icon: BarChart2, color: "text-[#F2DD48]" },
+            { label: "Profile Views (28d)", value: latestInsight?.profileViews?.toLocaleString() ?? "—", Icon: MousePointer, color: "text-[#F2DD48]" },
           ] as const).map((kpi) => (
             <Card key={kpi.label}>
               <CardContent className="pt-5 pb-4">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{kpi.label}</p>
+                  <p className="text-xs text-[#6F6F6B] font-medium uppercase tracking-wide">{kpi.label}</p>
                   <kpi.Icon className={`h-4 w-4 ${kpi.color}`} />
                 </div>
-                <p className="text-2xl font-bold text-foreground">{kpi.value}</p>
-                {latestInsight && <p className="text-xs text-muted-foreground mt-1">Last synced: {new Date(latestInsight.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</p>}
+                <p className="text-2xl font-bold text-[#222222]">{kpi.value}</p>
+                {latestInsight && <p className="text-xs text-[#6F6F6B] mt-1">Last synced: {new Date(latestInsight.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</p>}
               </CardContent>
             </Card>
           ))}
@@ -126,7 +126,7 @@ export default function InstagramViewer() {
             <CardContent>
               <ResponsiveContainer width="100%" height={240}>
                 <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <CartesianGrid strokeDasharray="4 4" strokeWidth={0.5} stroke="#F0F0F0" vertical={false} />
                   <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
                   <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
                   <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }} />
@@ -150,21 +150,21 @@ export default function InstagramViewer() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-border">
+                    <tr className="border-b border-[#DEDEDA]">
                       {["Date","Followers","Reach","Impressions","Profile Views","Engagement %"].map(h => (
-                        <th key={h} className={`py-2 text-muted-foreground font-medium text-xs ${h === "Date" ? "text-left" : "text-right"}`}>{h}</th>
+                        <th key={h} className={`py-2 text-[#6F6F6B] font-medium text-xs ${h === "Date" ? "text-left" : "text-right"}`}>{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {insights.slice(0, 10).map((ins) => (
-                      <tr key={ins.id} className="border-b border-border/50 hover:bg-muted/20">
-                        <td className="py-2 text-foreground">{new Date(ins.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</td>
+                      <tr key={ins.id} className="border-b border-[#DEDEDA]/50 hover:bg-[#F1F1EF]/20">
+                        <td className="py-2 text-[#222222]">{new Date(ins.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</td>
                         <td className="py-2 text-right font-medium">{ins.followersCount?.toLocaleString() ?? "—"}</td>
-                        <td className="py-2 text-right text-muted-foreground">{ins.reach?.toLocaleString() ?? "—"}</td>
-                        <td className="py-2 text-right text-muted-foreground">{ins.impressions?.toLocaleString() ?? "—"}</td>
-                        <td className="py-2 text-right text-muted-foreground">{ins.profileViews?.toLocaleString() ?? "—"}</td>
-                        <td className="py-2 text-right text-muted-foreground">{ins.engagementRate ? `${parseFloat(ins.engagementRate).toFixed(2)}%` : "—"}</td>
+                        <td className="py-2 text-right text-[#6F6F6B]">{ins.reach?.toLocaleString() ?? "—"}</td>
+                        <td className="py-2 text-right text-[#6F6F6B]">{ins.impressions?.toLocaleString() ?? "—"}</td>
+                        <td className="py-2 text-right text-[#6F6F6B]">{ins.profileViews?.toLocaleString() ?? "—"}</td>
+                        <td className="py-2 text-right text-[#6F6F6B]">{ins.engagementRate ? `${parseFloat(ins.engagementRate).toFixed(2)}%` : "—"}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -179,8 +179,8 @@ export default function InstagramViewer() {
                 <Instagram className="h-6 w-6 text-pink-400" />
               </div>
               <div>
-                <p className="font-semibold text-foreground">No data synced yet</p>
-                <p className="text-sm text-muted-foreground mt-1">Click "Sync Data" to enter your Instagram stats from Meta Business Suite.</p>
+                <p className="font-semibold text-[#222222]">No data synced yet</p>
+                <p className="text-sm text-[#6F6F6B] mt-1">Click "Sync Data" to enter your Instagram stats from Meta Business Suite.</p>
               </div>
               <Button onClick={() => setSyncOpen(true)} className="gap-2"><Plus className="h-4 w-4" /> Sync First Data Point</Button>
             </CardContent>
@@ -195,13 +195,13 @@ export default function InstagramViewer() {
             { label: "Creator Studio", url: "https://www.facebook.com/creatorstudio", desc: "Schedule & manage posts" },
           ].map((link) => (
             <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" className="block">
-              <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
+              <Card className="hover:border-[#F2DD48]/50 transition-colors cursor-pointer h-full">
                 <CardContent className="pt-4 pb-4 flex flex-col gap-1">
                   <div className="flex items-center justify-between">
                     <p className="font-semibold text-sm">{link.label}</p>
-                    <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
+                    <ExternalLink className="h-3.5 w-3.5 text-[#6F6F6B]" />
                   </div>
-                  <p className="text-xs text-muted-foreground">{link.desc}</p>
+                  <p className="text-xs text-[#6F6F6B]">{link.desc}</p>
                 </CardContent>
               </Card>
             </a>
@@ -211,8 +211,8 @@ export default function InstagramViewer() {
         <Dialog open={syncOpen} onOpenChange={setSyncOpen}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2"><RefreshCw className="h-5 w-5 text-primary" /> Sync Instagram Data</DialogTitle>
-              <DialogDescription>Enter your stats from <a href="https://business.facebook.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">Meta Business Suite</a></DialogDescription>
+              <DialogTitle className="flex items-center gap-2"><RefreshCw className="h-5 w-5 text-[#F2DD48]" /> Sync Instagram Data</DialogTitle>
+              <DialogDescription>Enter your stats from <a href="https://business.facebook.com" target="_blank" rel="noopener noreferrer" className="text-[#F2DD48] underline">Meta Business Suite</a></DialogDescription>
             </DialogHeader>
             <div className="grid grid-cols-2 gap-4 mt-2">
               <div className="col-span-2">

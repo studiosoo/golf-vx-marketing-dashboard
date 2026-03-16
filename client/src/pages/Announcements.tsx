@@ -23,17 +23,17 @@ export default function Announcements() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Announcements</h1>
-          <p className="text-muted-foreground text-sm mt-1">Member communications and announcements</p>
+          <h1 className="text-2xl font-bold text-[#222222]">Announcements</h1>
+          <p className="text-[#6F6F6B] text-sm mt-1">Member communications and announcements</p>
         </div>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" className="bg-[#F5C72C] text-black hover:bg-yellow-500">
+            <Button size="sm" className="bg-[#F2DD48] text-black hover:bg-yellow-500">
               <Plus size={14} />
               New Announcement
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-card border-border">
+          <DialogContent className="bg-white border-[#DEDEDA]">
             <DialogHeader><DialogTitle>New Announcement</DialogTitle></DialogHeader>
             <div className="space-y-4">
               <div>
@@ -51,25 +51,25 @@ export default function Announcements() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-              <Button className="bg-[#F5C72C] text-black hover:bg-yellow-500" onClick={() => setIsOpen(false)}>Send</Button>
+              <Button className="bg-[#F2DD48] text-black hover:bg-yellow-500" onClick={() => setIsOpen(false)}>Send</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
       <div className="space-y-3">
         {demoAnnouncements.map((ann) => (
-          <Card key={ann.id} className="bg-card border-border">
+          <Card key={ann.id} className="bg-white border-[#DEDEDA]">
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
                 <div>
-                  <div className="font-semibold text-foreground">{ann.title}</div>
-                  <div className="text-sm text-muted-foreground mt-1">{ann.content}</div>
+                  <div className="font-semibold text-[#222222]">{ann.title}</div>
+                  <div className="text-sm text-[#6F6F6B] mt-1">{ann.content}</div>
                   <div className="flex items-center gap-3 mt-2">
-                    <span className="text-xs text-muted-foreground">{ann.date.toLocaleDateString()}</span>
-                    <span className="text-xs text-muted-foreground">To: {ann.recipients}</span>
+                    <span className="text-xs text-[#6F6F6B]">{ann.date.toLocaleDateString()}</span>
+                    <span className="text-xs text-[#6F6F6B]">To: {ann.recipients}</span>
                   </div>
                 </div>
-                <Badge className="bg-[#3DB855]/20 text-[#3DB855] border-[#3DB855]/30 text-xs">{ann.status}</Badge>
+                <Badge className="bg-[#72B84A]/20 text-[#72B84A] border-[#72B84A]/30 text-xs">{ann.status}</Badge>
               </div>
             </CardContent>
           </Card>

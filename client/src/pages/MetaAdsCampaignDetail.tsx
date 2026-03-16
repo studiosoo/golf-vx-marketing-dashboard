@@ -92,7 +92,7 @@ export default function MetaAdsCampaignDetail() {
               </Button>
             </Link>
             <h1 className="text-3xl font-bold">{campaignName}</h1>
-            <p className="text-muted-foreground">Detailed performance analysis and insights</p>
+            <p className="text-[#6F6F6B]">Detailed performance analysis and insights</p>
           </div>
         </div>
 
@@ -115,7 +115,7 @@ export default function MetaAdsCampaignDetail() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Total Spend</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
+                <DollarSign className="h-4 w-4 text-[#6F6F6B]" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{formatCurrency(summaryMetrics.totalSpend)}</div>
@@ -125,7 +125,7 @@ export default function MetaAdsCampaignDetail() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Impressions</CardTitle>
-                <Eye className="h-4 w-4 text-muted-foreground" />
+                <Eye className="h-4 w-4 text-[#6F6F6B]" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{formatNumber(summaryMetrics.totalImpressions)}</div>
@@ -135,7 +135,7 @@ export default function MetaAdsCampaignDetail() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Clicks</CardTitle>
-                <MousePointerClick className="h-4 w-4 text-muted-foreground" />
+                <MousePointerClick className="h-4 w-4 text-[#6F6F6B]" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{formatNumber(summaryMetrics.totalClicks)}</div>
@@ -145,7 +145,7 @@ export default function MetaAdsCampaignDetail() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Avg CTR</CardTitle>
-                <Target className="h-4 w-4 text-muted-foreground" />
+                <Target className="h-4 w-4 text-[#6F6F6B]" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{formatPercentage(summaryMetrics.avgCTR)}</div>
@@ -155,7 +155,7 @@ export default function MetaAdsCampaignDetail() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Avg CPC</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
+                <DollarSign className="h-4 w-4 text-[#6F6F6B]" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{formatCurrency(summaryMetrics.avgCPC)}</div>
@@ -165,11 +165,11 @@ export default function MetaAdsCampaignDetail() {
         ) : null}
 
         {/* AI Optimization Panel */}
-        <Card className="border-l-4 border-l-[#F5C72C]">
+        <Card className="border-l-4 border-l-[#F2DD48]">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-[#F5C72C]" />
+                <Sparkles className="h-5 w-5 text-[#F2DD48]" />
                 AI Optimization Analysis
               </CardTitle>
               <CardDescription>AI-powered recommendations based on your campaign performance data</CardDescription>
@@ -177,7 +177,7 @@ export default function MetaAdsCampaignDetail() {
             <Button
               onClick={() => { setAiLoading(true); generateInsights.mutate({ campaignId, datePreset: "last_30d" }); }}
               disabled={aiLoading}
-              className="bg-[#F5C72C] text-[#111111] hover:bg-[#e6b820] font-semibold"
+              className="bg-[#F2DD48] text-[#222222] hover:bg-[#e6b820] font-semibold"
             >
               {aiLoading ? (
                 <><span className="animate-spin mr-2">⟳</span> Analyzing...</>
@@ -188,11 +188,11 @@ export default function MetaAdsCampaignDetail() {
           </CardHeader>
           <CardContent>
             {aiInsight ? (
-              <div className="prose prose-sm max-w-none text-foreground whitespace-pre-wrap leading-relaxed">
+              <div className="prose prose-sm max-w-none text-[#222222] whitespace-pre-wrap leading-relaxed">
                 {aiInsight}
               </div>
             ) : (
-              <div className="text-center py-8 text-muted-foreground">
+              <div className="text-center py-8 text-[#6F6F6B]">
                 <Sparkles className="h-10 w-10 mx-auto mb-3 opacity-30" />
                 <p className="font-medium">Click "Generate Analysis" to get AI-powered optimization recommendations</p>
                 <p className="text-sm mt-1">Analyzes CTR, CPM, frequency, audience saturation, and creative performance vs. industry benchmarks</p>
@@ -214,7 +214,7 @@ export default function MetaAdsCampaignDetail() {
               ) : (
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
+                    <CartesianGrid strokeDasharray="4 4" strokeWidth={0.5} />
                     <XAxis dataKey="date" />
                     <YAxis />
                     <Tooltip formatter={(value: number) => formatCurrency(value)} />
@@ -236,7 +236,7 @@ export default function MetaAdsCampaignDetail() {
               ) : (
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
+                    <CartesianGrid strokeDasharray="4 4" strokeWidth={0.5} />
                     <XAxis dataKey="date" />
                     <YAxis yAxisId="left" />
                     <YAxis yAxisId="right" orientation="right" />
@@ -283,7 +283,7 @@ export default function MetaAdsCampaignDetail() {
                 ))}
               </div>
             ) : (
-              <p className="text-muted-foreground">No creatives available for this campaign</p>
+              <p className="text-[#6F6F6B]">No creatives available for this campaign</p>
             )}
           </CardContent>
         </Card>
@@ -307,20 +307,20 @@ export default function MetaAdsCampaignDetail() {
                     </div>
                     <div className="flex gap-6 text-sm">
                       <div>
-                        <span className="text-muted-foreground">Impressions:</span> {formatNumber(demo.impressions)}
+                        <span className="text-[#6F6F6B]">Impressions:</span> {formatNumber(demo.impressions)}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Clicks:</span> {formatNumber(demo.clicks)}
+                        <span className="text-[#6F6F6B]">Clicks:</span> {formatNumber(demo.clicks)}
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Spend:</span> {formatCurrency(demo.spend)}
+                        <span className="text-[#6F6F6B]">Spend:</span> {formatCurrency(demo.spend)}
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-muted-foreground">No audience data available for this campaign</p>
+              <p className="text-[#6F6F6B]">No audience data available for this campaign</p>
             )}
           </CardContent>
         </Card>

@@ -464,7 +464,7 @@ function extractWinterClinicSource(appointment: AcuityAppointment): string {
 /**
  * Categorize Winter Clinic appointment type into a group
  */
-function categorizeClinicType(typeName: string): {
+export function categorizeClinicType(typeName: string): {
   category: 'kids' | 'adults' | 'family';
   ageGroup: string;
   dayOfWeek: string;

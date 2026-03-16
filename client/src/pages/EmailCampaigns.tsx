@@ -43,27 +43,27 @@ function StatusBadge({ status }: { status: BroadcastStatus }) {
   const config: Record<BroadcastStatus, { label: string; className: string; icon: React.ReactNode }> = {
     sent: {
       label: "Sent",
-      className: "bg-green-500/10 text-[#3DB855] border-green-500/20",
+      className: "bg-green-500/10 text-[#72B84A] border-green-500/20",
       icon: <CheckCircle size={10} />,
     },
     sending: {
       label: "Sending",
-      className: "bg-[#888888]/100/10 text-[#888888] border-blue-500/20",
+      className: "bg-[#6F6F6B]/100/10 text-[#6F6F6B] border-blue-500/20",
       icon: <Loader2 size={10} className="animate-spin" />,
     },
     scheduled: {
       label: "Scheduled",
-      className: "bg-yellow-500/10 text-[#F5C72C] border-yellow-500/20",
+      className: "bg-yellow-500/10 text-[#F2DD48] border-yellow-500/20",
       icon: <Clock size={10} />,
     },
     draft: {
       label: "Draft",
-      className: "bg-muted text-muted-foreground border-border",
+      className: "bg-[#F1F1EF] text-[#6F6F6B] border-[#DEDEDA]",
       icon: <FileText size={10} />,
     },
     failed: {
       label: "Failed",
-      className: "bg-[#E8453C]/10 text-[#E8453C] border-[#E8453C]/20",
+      className: "bg-[#FF3B30]/10 text-[#FF3B30] border-[#FF3B30]/20",
       icon: <XCircle size={10} />,
     },
   };
@@ -90,13 +90,13 @@ function MetricPill({
   highlight?: boolean;
 }) {
   return (
-    <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md ${highlight ? "bg-primary/10" : "bg-muted"}`}>
-      <span className={highlight ? "text-primary" : "text-muted-foreground"}>{icon}</span>
+    <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md ${highlight ? "bg-[#F2DD48]/10" : "bg-[#F1F1EF]"}`}>
+      <span className={highlight ? "text-[#F2DD48]" : "text-[#6F6F6B]"}>{icon}</span>
       <div>
-        <div className={`text-sm font-semibold leading-none ${highlight ? "text-primary" : "text-foreground"}`}>
+        <div className={`text-sm font-semibold leading-none ${highlight ? "text-[#F2DD48]" : "text-[#222222]"}`}>
           {value}
         </div>
-        <div className="text-xs text-muted-foreground leading-none mt-0.5">{label}</div>
+        <div className="text-xs text-[#6F6F6B] leading-none mt-0.5">{label}</div>
       </div>
     </div>
   );
@@ -107,28 +107,28 @@ function BroadcastCard({ broadcast }: { broadcast: Broadcast }) {
   const clickRateNum = broadcast.clickRate ? parseFloat(broadcast.clickRate) : null;
 
   return (
-    <div className="bg-card border border-border rounded-lg p-5">
+    <div className="bg-white border border-[#DEDEDA] rounded-lg p-5">
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <StatusBadge status={broadcast.status} />
             {broadcast.metricsStale && (
-              <span className="text-xs text-[#F5C72C] flex items-center gap-1">
+              <span className="text-xs text-[#F2DD48] flex items-center gap-1">
                 <AlertCircle size={10} />
                 Stale
               </span>
             )}
           </div>
-          <h3 className="font-semibold text-foreground truncate">{broadcast.name}</h3>
+          <h3 className="font-semibold text-[#222222] truncate">{broadcast.name}</h3>
           {broadcast.subject && (
-            <p className="text-sm text-muted-foreground truncate mt-0.5">{broadcast.subject}</p>
+            <p className="text-sm text-[#6F6F6B] truncate mt-0.5">{broadcast.subject}</p>
           )}
         </div>
-        <Mail size={18} className="text-muted-foreground shrink-0" />
+        <Mail size={18} className="text-[#6F6F6B] shrink-0" />
       </div>
 
       {/* Metadata */}
-      <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mb-4">
+      <div className="flex flex-wrap gap-3 text-xs text-[#6F6F6B] mb-4">
         {broadcast.fromName && (
           <span>From: {broadcast.fromName}</span>
         )}
@@ -218,12 +218,12 @@ export default function EmailCampaigns() {
           <h1 className="text-2xl font-bold" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
             Email Campaigns
           </h1>
-          <p className="text-sm text-muted-foreground">Encharge broadcast performance</p>
+          <p className="text-sm text-[#6F6F6B]">Encharge broadcast performance</p>
         </div>
         <button
           onClick={() => syncMutation.mutate()}
           disabled={syncMutation.isPending}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 bg-[#F2DD48] text-[#222222] rounded-md text-sm font-medium hover:brightness-95 transition-colors disabled:opacity-50"
         >
           {syncMutation.isPending ? (
             <Loader2 size={14} className="animate-spin" />
@@ -237,25 +237,25 @@ export default function EmailCampaigns() {
       {/* Summary stats */}
       {summary && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="bg-card border border-border rounded-lg p-4">
-            <div className="text-sm text-muted-foreground mb-1">Total Broadcasts</div>
-            <div className="text-3xl font-bold text-foreground">{summary.totalBroadcasts}</div>
+          <div className="bg-white border border-[#DEDEDA] rounded-lg p-4">
+            <div className="text-sm text-[#6F6F6B] mb-1">Total Broadcasts</div>
+            <div className="text-3xl font-bold text-[#222222]">{summary.totalBroadcasts}</div>
           </div>
-          <div className="bg-card border border-border rounded-lg p-4">
-            <div className="text-sm text-muted-foreground mb-1">Total Delivered</div>
-            <div className="text-3xl font-bold text-foreground">
+          <div className="bg-white border border-[#DEDEDA] rounded-lg p-4">
+            <div className="text-sm text-[#6F6F6B] mb-1">Total Delivered</div>
+            <div className="text-3xl font-bold text-[#222222]">
               {summary.totalDelivered.toLocaleString()}
             </div>
           </div>
-          <div className="bg-card border border-border rounded-lg p-4">
-            <div className="text-sm text-muted-foreground mb-1">Avg Open Rate</div>
-            <div className="text-3xl font-bold text-primary">
+          <div className="bg-white border border-[#DEDEDA] rounded-lg p-4">
+            <div className="text-sm text-[#6F6F6B] mb-1">Avg Open Rate</div>
+            <div className="text-3xl font-bold text-[#F2DD48]">
               {(summary.avgOpenRate * 100).toFixed(1)}%
             </div>
           </div>
-          <div className="bg-card border border-border rounded-lg p-4">
-            <div className="text-sm text-muted-foreground mb-1">Avg Click Rate</div>
-            <div className="text-3xl font-bold text-foreground">
+          <div className="bg-white border border-[#DEDEDA] rounded-lg p-4">
+            <div className="text-sm text-[#6F6F6B] mb-1">Avg Click Rate</div>
+            <div className="text-3xl font-bold text-[#222222]">
               {(summary.avgClickRate * 100).toFixed(1)}%
             </div>
           </div>
@@ -264,14 +264,14 @@ export default function EmailCampaigns() {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 size={24} className="animate-spin text-primary" />
+          <Loader2 size={24} className="animate-spin text-[#F2DD48]" />
         </div>
       ) : (
         <>
           {/* Sent broadcasts */}
           {sentBroadcasts.length > 0 && (
             <div>
-              <h2 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wider">
+              <h2 className="text-sm font-medium text-[#6F6F6B] mb-3 uppercase tracking-wider">
                 Sent ({sentBroadcasts.length})
               </h2>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -285,7 +285,7 @@ export default function EmailCampaigns() {
           {/* Other broadcasts */}
           {otherBroadcasts.length > 0 && (
             <div>
-              <h2 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wider">
+              <h2 className="text-sm font-medium text-[#6F6F6B] mb-3 uppercase tracking-wider">
                 Other ({otherBroadcasts.length})
               </h2>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -297,10 +297,10 @@ export default function EmailCampaigns() {
           )}
 
           {broadcasts.length === 0 && (
-            <div className="text-center py-12 border border-dashed border-border rounded-lg">
-              <Mail size={32} className="text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground">No email campaigns synced yet</p>
-              <p className="text-sm text-muted-foreground mt-1">Click "Sync Now" to fetch your Encharge broadcasts</p>
+            <div className="text-center py-12 border border-dashed border-[#DEDEDA] rounded-lg">
+              <Mail size={32} className="text-[#6F6F6B] mx-auto mb-3" />
+              <p className="text-[#6F6F6B]">No email campaigns synced yet</p>
+              <p className="text-sm text-[#6F6F6B] mt-1">Click "Sync Now" to fetch your Encharge broadcasts</p>
             </div>
           )}
         </>

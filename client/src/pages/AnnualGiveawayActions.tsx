@@ -29,9 +29,9 @@ export default function AnnualGiveawayActions() {
     return (
         <div className="container py-8">
           <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-muted rounded w-1/3"></div>
-            <div className="h-32 bg-muted rounded"></div>
-            <div className="h-32 bg-muted rounded"></div>
+            <div className="h-8 bg-[#F1F1EF] rounded w-1/3"></div>
+            <div className="h-32 bg-[#F1F1EF] rounded"></div>
+            <div className="h-32 bg-[#F1F1EF] rounded"></div>
           </div>
         </div>
     );
@@ -44,7 +44,7 @@ export default function AnnualGiveawayActions() {
             <CardHeader>
               <CardTitle>No Action Plan for Today</CardTitle>
               <CardDescription>
-                Generate today's AI-powered action plan for the Annual Giveaway campaign
+                Generate today's AI-powered action plan for the Annual Membership Giveaway campaign
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -92,8 +92,8 @@ export default function AnnualGiveawayActions() {
       <div className="container py-8 space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold">Annual Giveaway - Today's Action Plan</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-3xl font-bold">Annual Membership Giveaway — Today's Action Plan</h1>
+          <p className="text-[#6F6F6B] mt-2">
             Generated: {new Date(plan.generatedAt).toLocaleString()}
           </p>
         </div>
@@ -112,7 +112,7 @@ export default function AnnualGiveawayActions() {
                   )}
                   {urgentActions.length === 0 && (
                     <>
-                      <CheckCircle2 className="h-5 w-5 text-[#3DB855]" />
+                      <CheckCircle2 className="h-5 w-5 text-[#72B84A]" />
                       All urgent actions completed
                     </>
                   )}
@@ -139,9 +139,9 @@ export default function AnnualGiveawayActions() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="bg-muted p-4 rounded-lg">
+            <div className="bg-[#F1F1EF] p-4 rounded-lg">
               <p className="text-sm font-medium mb-2">AI Analysis:</p>
-              <p className="text-sm text-muted-foreground">{plan.aiAnalysis}</p>
+              <p className="text-sm text-[#6F6F6B]">{plan.aiAnalysis}</p>
             </div>
           </CardContent>
         </Card>
@@ -179,9 +179,9 @@ export default function AnnualGiveawayActions() {
                               {action.priority.toUpperCase()}
                             </Badge>
                             <Badge variant="outline">{typeLabels[action.type as keyof typeof typeLabels]}</Badge>
-                            <span className="text-xs text-muted-foreground">{action.effortRequired}</span>
+                            <span className="text-xs text-[#6F6F6B]">{action.effortRequired}</span>
                             {isCompleted && (
-                              <Badge variant="outline" className="bg-[#3DB855]/10 text-[#3DB855] border-[#3DB855]/30">
+                              <Badge variant="outline" className="bg-[#72B84A]/10 text-[#72B84A] border-[#72B84A]/30">
                                 <CheckCircle2 className="h-3 w-3 mr-1" />
                                 Completed
                               </Badge>
@@ -197,8 +197,8 @@ export default function AnnualGiveawayActions() {
                           <CardDescription className="mt-1">{action.description}</CardDescription>
                           {action.expectedImpact && (
                             <div className="mt-2 flex items-center gap-2 text-sm">
-                              <TrendingUp className="h-4 w-4 text-[#3DB855]" />
-                              <span className="text-muted-foreground">Expected: {action.expectedImpact}</span>
+                              <TrendingUp className="h-4 w-4 text-[#72B84A]" />
+                              <span className="text-[#6F6F6B]">Expected: {action.expectedImpact}</span>
                             </div>
                           )}
                         </div>
@@ -215,9 +215,9 @@ export default function AnnualGiveawayActions() {
                       <div className="space-y-4">
                         {/* Execution Data Preview */}
                         {action.executionData && (
-                          <div className="bg-muted p-3 rounded-lg">
+                          <div className="bg-[#F1F1EF] p-3 rounded-lg">
                             <p className="text-xs font-medium mb-2">Execution Details:</p>
-                            <pre className="text-xs text-muted-foreground overflow-x-auto">
+                            <pre className="text-xs text-[#6F6F6B] overflow-x-auto">
                               {JSON.stringify(action.executionData, null, 2)}
                             </pre>
                           </div>
@@ -249,9 +249,9 @@ export default function AnnualGiveawayActions() {
 
                         {/* Result */}
                         {action.result && (
-                          <div className="bg-[#3DB855]/10 p-3 rounded-lg border border-[#3DB855]/20">
+                          <div className="bg-[#72B84A]/10 p-3 rounded-lg border border-[#72B84A]/20">
                             <p className="text-xs font-medium mb-1">Result:</p>
-                            <p className="text-sm text-muted-foreground">{action.result}</p>
+                            <p className="text-sm text-[#6F6F6B]">{action.result}</p>
                           </div>
                         )}
                       </div>

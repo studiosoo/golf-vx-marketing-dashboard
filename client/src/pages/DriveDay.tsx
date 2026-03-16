@@ -38,12 +38,12 @@ export default function DriveDay() {
             <span className="text-[#FFD700]">SHORT GAME</span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-[#888888] mb-12 max-w-2xl mx-auto font-light">
+          <p className="text-xl md:text-2xl text-[#6F6F6B] mb-12 max-w-2xl mx-auto font-light">
             Master your short game with PGA-certified coach Chuck Lynch
           </p>
 
           <div className="text-7xl font-black mb-12">$20</div>
-          <div className="text-sm text-[#888888] mb-16">PER PERSON (NON-MEMBERS)</div>
+          <div className="text-sm text-[#6F6F6B] mb-16">PER PERSON (NON-MEMBERS)</div>
 
           <button
             onClick={handleBooking}
@@ -111,7 +111,7 @@ export default function DriveDay() {
             READY TO IMPROVE?
           </h2>
           
-          <p className="text-xl text-[#888888] mb-14 font-light">
+          <p className="text-xl text-[#6F6F6B] mb-14 font-light">
             Join our next Drive Day session
           </p>
           

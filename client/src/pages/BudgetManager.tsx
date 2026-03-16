@@ -94,7 +94,7 @@ export default function BudgetManager() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Campaign Budget Manager</h1>
-            <p className="text-muted-foreground">
+            <p className="text-[#6F6F6B]">
               Track budgets, sync Meta Ads spend, and log manual expenses
             </p>
           </div>
@@ -169,22 +169,22 @@ export default function BudgetManager() {
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium">Planned Budget</CardTitle>
-                      <DollarSign className="h-4 w-4 text-muted-foreground" />
+                      <DollarSign className="h-4 w-4 text-[#6F6F6B]" />
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">{formatCurrency(budgetSummary.plannedBudget)}</div>
-                      <p className="text-xs text-muted-foreground mt-1">Total allocated</p>
+                      <p className="text-xs text-[#6F6F6B] mt-1">Total allocated</p>
                     </CardContent>
                   </Card>
                   
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium">Actual Spend</CardTitle>
-                      <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                      <TrendingUp className="h-4 w-4 text-[#6F6F6B]" />
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">{formatCurrency(budgetSummary.totalActualSpend)}</div>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-xs text-[#6F6F6B] mt-1">
                         Meta Ads: {formatCurrency(budgetSummary.metaAdsSpend || "0")} + 
                         Manual: {formatCurrency(budgetSummary.manualExpenses)}
                       </p>
@@ -194,11 +194,11 @@ export default function BudgetManager() {
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium">Remaining</CardTitle>
-                      <TrendingDown className="h-4 w-4 text-muted-foreground" />
+                      <TrendingDown className="h-4 w-4 text-[#6F6F6B]" />
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">{formatCurrency(budgetSummary.remaining)}</div>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-xs text-[#6F6F6B] mt-1">
                         {parseFloat(budgetSummary.remaining) >= 0 ? "Under budget" : "Over budget"}
                       </p>
                     </CardContent>
@@ -207,11 +207,11 @@ export default function BudgetManager() {
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium">Budget Utilization</CardTitle>
-                      <DollarSign className="h-4 w-4 text-muted-foreground" />
+                      <DollarSign className="h-4 w-4 text-[#6F6F6B]" />
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">{budgetSummary.utilization}%</div>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-xs text-[#6F6F6B] mt-1">
                         {parseFloat(budgetSummary.utilization) > 100 ? "Exceeded" : "Of budget used"}
                       </p>
                     </CardContent>
@@ -227,7 +227,7 @@ export default function BudgetManager() {
                   <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={budgetChartData}>
-                        <CartesianGrid strokeDasharray="3 3" />
+                        <CartesianGrid strokeDasharray="4 4" strokeWidth={0.5} />
                         <XAxis dataKey="name" />
                         <YAxis />
                         <Tooltip formatter={(value) => formatCurrency(value as number)} />
@@ -314,7 +314,7 @@ export default function BudgetManager() {
                     </TableBody>
                   </Table>
                 ) : (
-                  <div className="text-center py-8 text-muted-foreground">
+                  <div className="text-center py-8 text-[#6F6F6B]">
                     No manual expenses recorded yet. Click "Add Expense" to get started.
                   </div>
                 )}

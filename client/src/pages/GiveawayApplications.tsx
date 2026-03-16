@@ -51,20 +51,20 @@ type Application = {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function scoreColor(score: number) {
-  if (score >= 85) return "text-[#3DB855] bg-green-500/10";
-  if (score >= 70) return "text-[#F5C72C] bg-yellow-500/10";
-  return "text-muted-foreground bg-muted";
+  if (score >= 85) return "text-[#72B84A] bg-green-500/10";
+  if (score >= 70) return "text-[#F2DD48] bg-yellow-500/10";
+  return "text-[#6F6F6B] bg-[#F1F1EF]";
 }
 
 function statusBadge(status: string) {
   const map: Record<string, { label: string; cls: string; icon: React.ReactNode }> = {
-    pending:   { label: "Pending",   cls: "bg-muted text-muted-foreground",       icon: <Clock size={10} /> },
-    contacted: { label: "Contacted", cls: "bg-[#888888]/100/10 text-[#888888]",         icon: <Mail size={10} /> },
-    scheduled: { label: "Scheduled", cls: "bg-yellow-500/10 text-[#F5C72C]",     icon: <Calendar size={10} /> },
-    completed: { label: "Completed", cls: "bg-green-500/10 text-[#3DB855]",       icon: <CheckCircle size={10} /> },
-    declined:  { label: "Declined",  cls: "bg-[#E8453C]/10 text-[#E8453C]",           icon: <XCircle size={10} /> },
+    pending:   { label: "Pending",   cls: "bg-[#F1F1EF] text-[#6F6F6B]",       icon: <Clock size={10} /> },
+    contacted: { label: "Contacted", cls: "bg-[#6F6F6B]/100/10 text-[#6F6F6B]",         icon: <Mail size={10} /> },
+    scheduled: { label: "Scheduled", cls: "bg-yellow-500/10 text-[#F2DD48]",     icon: <Calendar size={10} /> },
+    completed: { label: "Completed", cls: "bg-green-500/10 text-[#72B84A]",       icon: <CheckCircle size={10} /> },
+    declined:  { label: "Declined",  cls: "bg-[#FF3B30]/10 text-[#FF3B30]",           icon: <XCircle size={10} /> },
   };
-  const s = map[status] ?? { label: status, cls: "bg-muted text-muted-foreground", icon: null };
+  const s = map[status] ?? { label: status, cls: "bg-[#F1F1EF] text-[#6F6F6B]", icon: null };
   return (
     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${s.cls}`}>
       {s.icon}{s.label}
@@ -87,22 +87,22 @@ function ApplicantDrawer({ app, onClose }: { app: Application; onClose: () => vo
       {/* Backdrop */}
       <div className="flex-1 bg-black/50" onClick={onClose} />
       {/* Panel */}
-      <div className="w-full max-w-md bg-background border-l border-border overflow-y-auto">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border sticky top-0 bg-background z-10">
+      <div className="w-full max-w-md bg-white border-l border-[#DEDEDA] overflow-y-auto">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#DEDEDA] sticky top-0 bg-white z-10">
           <div className="flex items-center gap-2">
-            <User size={16} className="text-primary" />
+            <User size={16} className="text-[#F2DD48]" />
             <span className="font-semibold">{app.name}</span>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded hover:bg-muted transition-colors">
+          <button onClick={onClose} className="p-1.5 rounded hover:bg-[#F1F1EF] transition-colors">
             <X size={16} />
           </button>
         </div>
 
         <div className="p-5 space-y-5">
           {/* Drive Day Score */}
-          <div className="bg-card border border-border rounded-lg p-4">
+          <div className="bg-white border border-[#DEDEDA] rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-muted-foreground">Drive Day Score</span>
+              <span className="text-sm font-medium text-[#6F6F6B]">Drive Day Score</span>
               <span className={`text-2xl font-bold px-3 py-1 rounded-lg ${scoreColor(app.driveDayScore ?? 0)}`}>
                 {app.driveDayScore}
               </span>
@@ -110,7 +110,7 @@ function ApplicantDrawer({ app, onClose }: { app: Application; onClose: () => vo
             {app.driveDayReasons.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-2">
                 {app.driveDayReasons.map((r) => (
-                  <span key={r} className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">{r}</span>
+                  <span key={r} className="text-xs bg-[#F2DD48]/10 text-[#F2DD48] px-2 py-0.5 rounded-full">{r}</span>
                 ))}
               </div>
             )}
@@ -118,21 +118,21 @@ function ApplicantDrawer({ app, onClose }: { app: Application; onClose: () => vo
 
           {/* Contact */}
           <div className="space-y-2">
-            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Contact</h4>
+            <h4 className="text-xs font-semibold text-[#6F6F6B] uppercase tracking-wider">Contact</h4>
             <div className="space-y-1.5 text-sm">
               <div className="flex items-center gap-2">
-                <Mail size={13} className="text-muted-foreground shrink-0" />
-                <a href={`mailto:${app.email}`} className="text-primary hover:underline truncate">{app.email}</a>
+                <Mail size={13} className="text-[#6F6F6B] shrink-0" />
+                <a href={`mailto:${app.email}`} className="text-[#F2DD48] hover:underline truncate">{app.email}</a>
               </div>
               {app.phone && (
                 <div className="flex items-center gap-2">
-                  <Phone size={13} className="text-muted-foreground shrink-0" />
+                  <Phone size={13} className="text-[#6F6F6B] shrink-0" />
                   <a href={`tel:${app.phone}`} className="hover:underline">{app.phone}</a>
                 </div>
               )}
               {app.city && (
                 <div className="flex items-center gap-2">
-                  <MapPin size={13} className="text-muted-foreground shrink-0" />
+                  <MapPin size={13} className="text-[#6F6F6B] shrink-0" />
                   <span>{app.city}{app.illinoisResident ? " · IL Resident ✓" : ""}</span>
                 </div>
               )}
@@ -141,14 +141,14 @@ function ApplicantDrawer({ app, onClose }: { app: Application; onClose: () => vo
 
           {/* Demographics */}
           <div className="space-y-2">
-            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Demographics</h4>
+            <h4 className="text-xs font-semibold text-[#6F6F6B] uppercase tracking-wider">Demographics</h4>
             <div className="grid grid-cols-2 gap-2 text-sm">
-              <div className="bg-card border border-border rounded p-2">
-                <div className="text-xs text-muted-foreground">Age Range</div>
+              <div className="bg-white border border-[#DEDEDA] rounded p-2">
+                <div className="text-xs text-[#6F6F6B]">Age Range</div>
                 <div className="font-medium">{app.ageRange || "—"}</div>
               </div>
-              <div className="bg-card border border-border rounded p-2">
-                <div className="text-xs text-muted-foreground">Gender</div>
+              <div className="bg-white border border-[#DEDEDA] rounded p-2">
+                <div className="text-xs text-[#6F6F6B]">Gender</div>
                 <div className="font-medium">{app.gender || "—"}</div>
               </div>
             </div>
@@ -156,18 +156,18 @@ function ApplicantDrawer({ app, onClose }: { app: Application; onClose: () => vo
 
           {/* Golf Background */}
           <div className="space-y-2">
-            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Golf Background</h4>
+            <h4 className="text-xs font-semibold text-[#6F6F6B] uppercase tracking-wider">Golf Background</h4>
             <div className="space-y-2 text-sm">
-              <div className="bg-card border border-border rounded p-2">
-                <div className="text-xs text-muted-foreground">Experience Level</div>
+              <div className="bg-white border border-[#DEDEDA] rounded p-2">
+                <div className="text-xs text-[#6F6F6B]">Experience Level</div>
                 <div className="font-medium">{app.golfExperienceLevel || "—"}</div>
               </div>
-              <div className="bg-card border border-border rounded p-2">
-                <div className="text-xs text-muted-foreground">Visited Golf VX Before</div>
+              <div className="bg-white border border-[#DEDEDA] rounded p-2">
+                <div className="text-xs text-[#6F6F6B]">Visited Golf VX Before</div>
                 <div className="font-medium">{app.visitedBefore || "—"}</div>
               </div>
-              <div className="bg-card border border-border rounded p-2">
-                <div className="text-xs text-muted-foreground">Indoor Golf Familiarity</div>
+              <div className="bg-white border border-[#DEDEDA] rounded p-2">
+                <div className="text-xs text-[#6F6F6B]">Indoor Golf Familiarity</div>
                 <div className="font-medium">{app.indoorGolfFamiliarity || "—"}</div>
               </div>
             </div>
@@ -176,8 +176,8 @@ function ApplicantDrawer({ app, onClose }: { app: Application; onClose: () => vo
           {/* Attribution */}
           {app.howDidTheyHear && (
             <div className="space-y-2">
-              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Attribution</h4>
-              <div className="bg-card border border-border rounded p-2 text-sm">
+              <h4 className="text-xs font-semibold text-[#6F6F6B] uppercase tracking-wider">Attribution</h4>
+              <div className="bg-white border border-[#DEDEDA] rounded p-2 text-sm">
                 {app.howDidTheyHear}
               </div>
             </div>
@@ -185,20 +185,20 @@ function ApplicantDrawer({ app, onClose }: { app: Application; onClose: () => vo
 
           {/* Meta */}
           <div className="space-y-2">
-            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Submission</h4>
+            <h4 className="text-xs font-semibold text-[#6F6F6B] uppercase tracking-wider">Submission</h4>
             <div className="grid grid-cols-2 gap-2 text-sm">
-              <div className="bg-card border border-border rounded p-2">
-                <div className="text-xs text-muted-foreground">Date</div>
+              <div className="bg-white border border-[#DEDEDA] rounded p-2">
+                <div className="text-xs text-[#6F6F6B]">Date</div>
                 <div className="font-medium">{formatDate(app.submissionTimestamp)}</div>
               </div>
-              <div className="bg-card border border-border rounded p-2">
-                <div className="text-xs text-muted-foreground">Status</div>
+              <div className="bg-white border border-[#DEDEDA] rounded p-2">
+                <div className="text-xs text-[#6F6F6B]">Status</div>
                 <div className="mt-0.5">{statusBadge(app.status)}</div>
               </div>
             </div>
             {app.bestTimeToCall && (
-              <div className="bg-card border border-border rounded p-2 text-sm">
-                <div className="text-xs text-muted-foreground">Best Time to Call</div>
+              <div className="bg-white border border-[#DEDEDA] rounded p-2 text-sm">
+                <div className="text-xs text-[#6F6F6B]">Best Time to Call</div>
                 <div className="font-medium">{app.bestTimeToCall}</div>
               </div>
             )}
@@ -208,14 +208,14 @@ function ApplicantDrawer({ app, onClose }: { app: Application; onClose: () => vo
           <div className="flex gap-2 pt-2">
             <a
               href={`mailto:${app.email}?subject=Golf VX Arlington Heights — Annual Membership Giveaway`}
-              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-[#F2DD48] text-[#222222] rounded-md text-sm font-medium hover:brightness-95 transition-colors"
             >
               <Mail size={13} /> Email
             </a>
             {app.phone && (
               <a
                 href={`tel:${app.phone}`}
-                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-border rounded-md text-sm font-medium hover:bg-muted transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-[#DEDEDA] rounded-md text-sm font-medium hover:bg-[#F1F1EF] transition-colors"
               >
                 <Phone size={13} /> Call
               </a>
@@ -239,7 +239,7 @@ function SortHeader({
   return (
     <button
       onClick={() => onSort(field)}
-      className="flex items-center gap-1 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wider"
+      className="flex items-center gap-1 text-xs font-semibold text-[#6F6F6B] hover:text-[#222222] transition-colors uppercase tracking-wider"
     >
       {label}
       {active ? (
@@ -356,13 +356,13 @@ export default function GiveawayApplications() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <Gift size={20} className="text-primary" />
+            <Gift size={20} className="text-[#F2DD48]" />
             <h1 className="text-2xl font-bold" style={{ fontFamily: "Rajdhani, sans-serif" }}>
               Annual Membership Giveaway
             </h1>
-            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">2026</span>
+            <span className="text-xs bg-[#F2DD48]/10 text-[#F2DD48] px-2 py-0.5 rounded-full font-medium">2026</span>
           </div>
-          <p className="text-sm text-muted-foreground mt-0.5">
+          <p className="text-sm text-[#6F6F6B] mt-0.5">
             {stats?.totalApplications ?? 0} applicants · Last sync: {formatLastSync(lastSync)}
           </p>
         </div>
@@ -370,14 +370,14 @@ export default function GiveawayApplications() {
           <button
             onClick={handleExport}
             disabled={apps.length === 0}
-            className="flex items-center gap-1.5 px-3 py-2 text-sm border border-border rounded-md hover:bg-muted transition-colors disabled:opacity-40"
+            className="flex items-center gap-1.5 px-3 py-2 text-sm border border-[#DEDEDA] rounded-md hover:bg-[#F1F1EF] transition-colors disabled:opacity-40"
           >
             <Download size={13} /> Export CSV
           </button>
           <button
             onClick={() => syncMutation.mutate()}
             disabled={syncStatus === "loading"}
-            className="flex items-center gap-1.5 px-3 py-2 text-sm border border-border rounded-md hover:bg-muted transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-2 text-sm border border-[#DEDEDA] rounded-md hover:bg-[#F1F1EF] transition-colors disabled:opacity-50"
           >
             {syncStatus === "loading" ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
             {syncStatus === "loading" ? "Syncing…" : syncStatus === "success" ? "Synced!" : "Sync Now"}
@@ -394,20 +394,20 @@ export default function GiveawayApplications() {
             { label: "Female", value: stats.genderDistribution?.["Female"] ?? 0 },
             { label: "IL Residents", value: Object.values(stats.genderDistribution ?? {}).reduce((s: number, v) => s + (v as number), 0) },
           ].map((s, i) => (
-            <div key={i} className="bg-card border border-border rounded-lg p-3 text-center">
-              <div className="text-xl font-bold text-foreground">{s.value}</div>
-              <div className="text-xs text-muted-foreground">{s.label}</div>
+            <div key={i} className="bg-white border border-[#DEDEDA] rounded-lg p-3 text-center">
+              <div className="text-xl font-bold text-[#222222]">{s.value}</div>
+              <div className="text-xs text-[#6F6F6B]">{s.label}</div>
             </div>
           ))}
         </div>
       )}
 
       {/* Filters */}
-      <div className="bg-card border border-border rounded-lg p-4 space-y-3">
-        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+      <div className="bg-white border border-[#DEDEDA] rounded-lg p-4 space-y-3">
+        <div className="flex items-center gap-2 text-sm font-medium text-[#6F6F6B]">
           <Filter size={14} /> Filters
           {hasFilters && (
-            <button onClick={clearFilters} className="ml-auto flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
+            <button onClick={clearFilters} className="ml-auto flex items-center gap-1 text-xs text-[#6F6F6B] hover:text-[#222222]">
               <X size={11} /> Clear all
             </button>
           )}
@@ -415,20 +415,20 @@ export default function GiveawayApplications() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-2">
           {/* Search */}
           <div className="relative xl:col-span-2">
-            <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#6F6F6B]" />
             <input
               type="text"
               placeholder="Search name, email, city…"
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              className="w-full pl-8 pr-3 py-1.5 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full pl-8 pr-3 py-1.5 text-sm bg-white border border-[#DEDEDA] rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
           {/* Gender */}
           <select
             value={filterGender}
             onChange={(e) => { setFilterGender(e.target.value); setPage(1); }}
-            className="px-2.5 py-1.5 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+            className="px-2.5 py-1.5 text-sm bg-white border border-[#DEDEDA] rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
           >
             <option value="">All Genders</option>
             <option value="Male">Male</option>
@@ -440,7 +440,7 @@ export default function GiveawayApplications() {
           <select
             value={filterAge}
             onChange={(e) => { setFilterAge(e.target.value); setPage(1); }}
-            className="px-2.5 py-1.5 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+            className="px-2.5 py-1.5 text-sm bg-white border border-[#DEDEDA] rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
           >
             <option value="">All Ages</option>
             <option value="Under 25">Under 25</option>
@@ -453,7 +453,7 @@ export default function GiveawayApplications() {
           <select
             value={filterStatus}
             onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
-            className="px-2.5 py-1.5 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+            className="px-2.5 py-1.5 text-sm bg-white border border-[#DEDEDA] rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
           >
             <option value="">All Statuses</option>
             <option value="pending">Pending</option>
@@ -469,7 +469,7 @@ export default function GiveawayApplications() {
               setFilterIL(e.target.value === "" ? undefined : e.target.value === "yes");
               setPage(1);
             }}
-            className="px-2.5 py-1.5 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+            className="px-2.5 py-1.5 text-sm bg-white border border-[#DEDEDA] rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
           >
             <option value="">All Locations</option>
             <option value="yes">IL Residents Only</option>
@@ -482,33 +482,33 @@ export default function GiveawayApplications() {
               type="checkbox"
               checked={showTest}
               onChange={(e) => { setShowTest(e.target.checked); setPage(1); }}
-              className="rounded border-border"
+              className="rounded border-[#DEDEDA]"
             />
-            <span className="text-muted-foreground">Show test entries</span>
+            <span className="text-[#6F6F6B]">Show test entries</span>
           </label>
-          <span className="text-muted-foreground ml-auto">
+          <span className="text-[#6F6F6B] ml-auto">
             {total} result{total !== 1 ? "s" : ""}
           </span>
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-card border border-border rounded-lg overflow-hidden">
+      <div className="bg-white border border-[#DEDEDA] rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border bg-muted/30">
+              <tr className="border-b border-[#DEDEDA] bg-[#F6F6F4]">
                 <th className="px-4 py-3 text-left">
                   <SortHeader label="Name" field="name" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
                 </th>
                 <th className="px-4 py-3 text-left hidden md:table-cell">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Contact</span>
+                  <span className="text-xs font-semibold text-[#6F6F6B] uppercase tracking-wider">Contact</span>
                 </th>
                 <th className="px-4 py-3 text-left hidden lg:table-cell">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Demographics</span>
+                  <span className="text-xs font-semibold text-[#6F6F6B] uppercase tracking-wider">Demographics</span>
                 </th>
                 <th className="px-4 py-3 text-left hidden xl:table-cell">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Golf Background</span>
+                  <span className="text-xs font-semibold text-[#6F6F6B] uppercase tracking-wider">Golf Background</span>
                 </th>
                 <th className="px-4 py-3 text-center">
                   <SortHeader label="Drive Day" field="driveDayScore" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
@@ -524,17 +524,17 @@ export default function GiveawayApplications() {
             <tbody>
               {isLoading ? (
                 Array.from({ length: 8 }).map((_, i) => (
-                  <tr key={i} className="border-b border-border/50">
+                  <tr key={i} className="border-b border-[#DEDEDA]/50">
                     {[1, 2, 3, 4, 5, 6, 7].map((j) => (
                       <td key={j} className="px-4 py-3">
-                        <div className="h-4 bg-muted rounded animate-pulse w-full" />
+                        <div className="h-4 bg-[#F1F1EF] rounded animate-pulse w-full" />
                       </td>
                     ))}
                   </tr>
                 ))
               ) : apps.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
+                  <td colSpan={7} className="px-4 py-12 text-center text-[#6F6F6B]">
                     <AlertCircle size={24} className="mx-auto mb-2 opacity-40" />
                     No applications match your filters.
                   </td>
@@ -544,29 +544,29 @@ export default function GiveawayApplications() {
                   <tr
                     key={app.id}
                     onClick={() => setSelectedApp(app as unknown as Application)}
-                    className="border-b border-border/50 hover:bg-muted/30 cursor-pointer transition-colors"
+                    className="border-b border-[#DEDEDA]/50 hover:bg-[#F6F6F4] cursor-pointer transition-colors"
                   >
                     {/* Name */}
                     <td className="px-4 py-3">
-                      <div className="font-medium text-foreground">{app.name}</div>
+                      <div className="font-medium text-[#222222]">{app.name}</div>
                       {app.isTestEntry && (
-                        <span className="text-xs text-muted-foreground">(test)</span>
+                        <span className="text-xs text-[#6F6F6B]">(test)</span>
                       )}
                     </td>
                     {/* Contact */}
                     <td className="px-4 py-3 hidden md:table-cell">
-                      <div className="text-xs text-muted-foreground truncate max-w-[160px]">{app.email}</div>
-                      {app.city && <div className="text-xs text-muted-foreground">{app.city}{app.illinoisResident ? " · IL" : ""}</div>}
+                      <div className="text-xs text-[#6F6F6B] truncate max-w-[160px]">{app.email}</div>
+                      {app.city && <div className="text-xs text-[#6F6F6B]">{app.city}{app.illinoisResident ? " · IL" : ""}</div>}
                     </td>
                     {/* Demographics */}
                     <td className="px-4 py-3 hidden lg:table-cell">
-                      <div className="text-xs text-muted-foreground">{app.ageRange || "—"}</div>
-                      <div className="text-xs text-muted-foreground">{app.gender || "—"}</div>
+                      <div className="text-xs text-[#6F6F6B]">{app.ageRange || "—"}</div>
+                      <div className="text-xs text-[#6F6F6B]">{app.gender || "—"}</div>
                     </td>
                     {/* Golf Background */}
                     <td className="px-4 py-3 hidden xl:table-cell">
-                      <div className="text-xs text-muted-foreground truncate max-w-[140px]">{app.golfExperienceLevel || "—"}</div>
-                      <div className="text-xs text-muted-foreground truncate max-w-[140px]">{app.indoorGolfFamiliarity || "—"}</div>
+                      <div className="text-xs text-[#6F6F6B] truncate max-w-[140px]">{app.golfExperienceLevel || "—"}</div>
+                      <div className="text-xs text-[#6F6F6B] truncate max-w-[140px]">{app.indoorGolfFamiliarity || "—"}</div>
                     </td>
                     {/* Drive Day Score */}
                     <td className="px-4 py-3 text-center">
@@ -577,7 +577,7 @@ export default function GiveawayApplications() {
                     {/* Status */}
                     <td className="px-4 py-3">{statusBadge(app.status)}</td>
                     {/* Submitted */}
-                    <td className="px-4 py-3 hidden sm:table-cell text-xs text-muted-foreground">
+                    <td className="px-4 py-3 hidden sm:table-cell text-xs text-[#6F6F6B]">
                       {formatDate(app.submissionTimestamp)}
                     </td>
                   </tr>
@@ -589,20 +589,20 @@ export default function GiveawayApplications() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-border text-sm text-muted-foreground">
+          <div className="flex items-center justify-between px-4 py-3 border-t border-[#DEDEDA] text-sm text-[#6F6F6B]">
             <span>Page {page} of {totalPages} · {total} total</span>
             <div className="flex gap-2">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="px-3 py-1 border border-border rounded hover:bg-muted disabled:opacity-40 transition-colors"
+                className="px-3 py-1 border border-[#DEDEDA] rounded hover:bg-[#F1F1EF] disabled:opacity-40 transition-colors"
               >
                 Previous
               </button>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="px-3 py-1 border border-border rounded hover:bg-muted disabled:opacity-40 transition-colors"
+                className="px-3 py-1 border border-[#DEDEDA] rounded hover:bg-[#F1F1EF] disabled:opacity-40 transition-colors"
               >
                 Next
               </button>

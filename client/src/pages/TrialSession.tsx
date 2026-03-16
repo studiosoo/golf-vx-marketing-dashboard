@@ -38,7 +38,7 @@ export default function TrialSession() {
             <span className="text-[#FFD700]">TRIAL SESSION</span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-[#888888] mb-20 max-w-2xl mx-auto font-light">
+          <p className="text-xl md:text-2xl text-[#6F6F6B] mb-20 max-w-2xl mx-auto font-light">
             Take your first swing at Golf VX with our 1-hour intro session
           </p>
 
@@ -144,7 +144,7 @@ export default function TrialSession() {
             READY TO SWING?
           </h2>
           
-          <p className="text-xl text-[#888888] mb-14 font-light">
+          <p className="text-xl text-[#6F6F6B] mb-14 font-light">
             No credit card required
           </p>
           

@@ -60,7 +60,7 @@ export default function InstagramSync() {
     <div className="container mx-auto py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Instagram Data Sync</h1>
-        <p className="text-muted-foreground">
+        <p className="text-[#6F6F6B]">
           Manually sync Instagram Business Insights data to track performance over time
         </p>
       </div>
@@ -181,7 +181,7 @@ export default function InstagramSync() {
           <div className="space-y-4 text-sm">
             <div>
               <h3 className="font-semibold mb-2">📱 On Instagram App:</h3>
-              <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+              <ol className="list-decimal list-inside space-y-1 text-[#6F6F6B]">
                 <li>Go to your profile</li>
                 <li>Tap the menu (☰) → Insights</li>
                 <li>View "Accounts reached" for the last 7 days</li>
@@ -191,7 +191,7 @@ export default function InstagramSync() {
 
             <div>
               <h3 className="font-semibold mb-2">💻 On Meta Business Suite:</h3>
-              <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+              <ol className="list-decimal list-inside space-y-1 text-[#6F6F6B]">
                 <li>Go to business.facebook.com</li>
                 <li>Select your Instagram account</li>
                 <li>Click "Insights" in the left sidebar</li>
@@ -199,17 +199,17 @@ export default function InstagramSync() {
               </ol>
             </div>
 
-            <div className="bg-muted p-4 rounded-lg">
+            <div className="bg-[#F1F1EF] p-4 rounded-lg">
               <h3 className="font-semibold mb-2">💡 Pro Tip:</h3>
-              <p className="text-muted-foreground">
+              <p className="text-[#6F6F6B]">
                 Sync data weekly (every Monday) to track trends over time. The AI will analyze your
                 performance and generate content recommendations based on what works best.
               </p>
             </div>
 
-            <div className="bg-[#888888]/10 dark:bg-blue-950 p-4 rounded-lg">
+            <div className="bg-[#6F6F6B]/10 dark:bg-blue-950 p-4 rounded-lg">
               <h3 className="font-semibold mb-2">🤖 Coming Soon:</h3>
-              <p className="text-muted-foreground">
+              <p className="text-[#6F6F6B]">
                 Browser bookmarklet to automatically extract and sync Instagram data with one click!
               </p>
             </div>

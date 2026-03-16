@@ -19,12 +19,12 @@ export function SidebarNav({ isCollapsed, location, setLocation, onNavigate }: S
           return (
             <div key={item.heading} className={cn(idx > 0 && "mt-4")}>
               {!isCollapsed && (
-                <p className="px-2.5 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-[#AAAAAA] select-none">
+                <p className="px-2.5 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-[#A8A8A3] select-none">
                   {item.heading}
                 </p>
               )}
               {isCollapsed && idx > 0 && (
-                <div className="mx-2 my-2 h-px bg-[#E0E0E0]" />
+                <div className="mx-2 my-2 h-px bg-[#DEDEDA]" />
               )}
               <div className="space-y-0.5">
                 {item.items.map((subItem) => (

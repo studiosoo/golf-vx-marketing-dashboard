@@ -228,231 +228,97 @@ These are the named visual styles from the 2026 Style Guide. Reference when disc
 
 ## Layer 2 — App-Style Implementation (Dashboard)
 
-The dashboard follows the **Golf VX mobile app's visual language** — a clean, data-first, light-themed UI. This is intentionally different from the public website (which uses the corporate dark-theme brand). Both are valid expressions of Golf VX; they serve different contexts.
+This layer defines how the Golf VX brand identity is implemented in the web dashboard UI. It is derived from the native Golf VX mobile app visual language. The core design philosophy is "Quiet Utility": extreme reliance on whitespace, strict typographic hierarchy, ultra-thin dividing lines, and surgical use of brand yellow.
 
-### Color Palette (App Implementation)
+CRITICAL: Every new component, page, or UI element built in this dashboard must follow these rules without exception. Do not reference generic SaaS dashboard conventions. Do not invent new colors outside the token system below.
 
+### Design Tokens
+
+All colors must reference these CSS variables. Never hardcode hex values directly in components.
 ```css
-/* === Core Palette === */
---brand-primary:     #F5C72C;  /* App Yellow — CTAs, active states, chart fills */
-                               /* (Official brand yellow is #FFCD00; app uses this warmer value) */
---bg-default:        #FFFFFF;  /* Primary background */
---bg-secondary:      #F5F5F5;  /* Section backgrounds, alternating rows */
---surface-elevated:  #F2F2F7;  /* Cards, search inputs, elevated surfaces */
---text-primary:      #111111;  /* Headings, body text, primary labels */
---text-secondary:    #888888;  /* Meta text, descriptions, secondary labels */
---text-tertiary:     #AAAAAA;  /* Captions, placeholders, disabled text */
---border-default:    #E0E0E0;  /* Dividers, table borders, card borders */
---brand-green:       #3DB855;  /* Success, "In Progress", positive metrics */
---surface-dark:      #545A60;  /* Profile cards, dark accent surfaces */
---badge-dark:        #2C2C2C;  /* Grade badges, dark circular indicators */
---link-blue:         #007AFF;  /* Selected items, links, booking indicators */
+:root {
+  /* Surfaces */
+  --gvx-bg-canvas: #F6F6F4;
+  --gvx-bg-surface: #FFFFFF;
+  --gvx-bg-muted: #F8F9FA;
+  --gvx-bg-hover: #F1F1EF;
 
-/* === Tailwind Mapping === */
-/* yellow:      #F5C72C  (use as brand color, not Tailwind's yellow-400) */
-/* gray-100:    #F5F5F5 / #F2F2F7 */
-/* gray-200:    #E0E0E0 */
-/* gray-400:    #AAAAAA */
-/* gray-500:    #888888 */
-/* gray-600:    #545A60 */
-/* neutral-800: #2C2C2C */
-/* neutral-950: #111111 */
-```
+  /* Borders */
+  --gvx-border-faint: #F0F0F0;
+  --gvx-border-light: #E9E9E6;
+  --gvx-border-strong: #DEDEDA;
 
-### Tailwind Config Extension
+  /* Typography */
+  --gvx-text-primary: #222222;
+  --gvx-text-secondary: #6F6F6B;
+  --gvx-text-muted: #A8A8A3;
+  --gvx-text-inverse: #FFFFFF;
 
-```javascript
-// tailwind.config.js — extend theme
-colors: {
-  brand: {
-    yellow: '#F5C72C',
-    green: '#3DB855',
-  },
-  surface: {
-    elevated: '#F2F2F7',
-    dark: '#545A60',
-  }
+  /* Brand Accents */
+  --gvx-yellow: #F2DD48;
+  --gvx-yellow-soft: #FDF9E3;
+  --gvx-charcoal: #333333;
+
+  /* Semantic Status */
+  --gvx-status-green-bg: #E6F0DC;
+  --gvx-status-green-text: #4C882A;
+  --gvx-status-orange-bg: #F6E5CF;
+  --gvx-status-orange-text: #B46A0B;
+  --gvx-status-red-bg: #F9E5E5;
+  --gvx-status-red-text: #C81E1E;
+  --gvx-status-gray-bg: #F1F1EF;
+  --gvx-status-gray-text: #6F6F6B;
+  --gvx-status-blue-bg: #EAF2FF;
+  --gvx-status-blue-text: #1A56DB;
+
+  /* Golf-Specific */
+  --gvx-golf-eagle: #F5A623;
+  --gvx-golf-birdie: #F9D671;
+  --gvx-golf-par: #E9E9E6;
+  --gvx-golf-bogey: #7DC1E8;
+  --gvx-golf-double: #4A90E2;
+  --gvx-chart-negative: #FFA7A7;
 }
 ```
 
-### Color Usage Rules
+### Yellow Usage Rule
+`--gvx-yellow` (#F2DD48) is used ONLY for: primary CTAs, active tab underlines, main chart bars, and MAX indicators. Never as decorative fill. This value supersedes any previously used yellow (#F5C72C or #FFCD00) in dashboard components.
 
-1. **Yellow (`#F5C72C`) is RESERVED** — only for: primary CTA buttons, active tab underlines, chart bar fills, active pagination dots, "Upcoming" status labels. Never decorative.
-2. **95% of the UI is black/white/gray.** Yellow creates maximum contrast against the neutral background.
-3. **Green (`#3DB855`)** — success states, "In Progress" labels, positive metric changes, competition badges.
-4. **Blue (`#007AFF`)** — links, selected list items, booked calendar dates.
-5. **No other accent colors.** If you need a warning state, use yellow. If you need an error state, use a muted red (`#FF3B30`) sparingly.
+### Typography
+- Font: `'Inter', sans-serif` (English) / `'Pretendard', sans-serif` (Korean)
+- Page Title: 24px / 32px / weight 600 / `--gvx-text-primary` / tracking `-0.02em`
+- Section Title: 18px / 26px / weight 600 / `--gvx-text-primary`
+- KPI Number: 32px / 40px / weight 700 / `--gvx-text-primary` / tracking `-0.02em`
+- Table Header: 12px / 16px / weight 500 / `--gvx-text-secondary`
+- Body / Data: 14px / 20px / weight 400 / `--gvx-text-primary`
+- Meta / Small: 12px / 16px / weight 400 / `--gvx-text-muted` / tracking `0.05em`
 
-### Typography (App Implementation)
+### Layout & Components
+- Canvas background: `--gvx-bg-canvas`
+- Card background: `--gvx-bg-surface`
+- Card border: `1px solid var(--gvx-border-light)`
+- Card border radius: `16px` standard / `12px` nested
+- Card shadow: `0 1px 2px rgba(0,0,0,0.03)` only — no heavy shadows
+- Sidebar background: `#FFFFFF` / `border-right: 1px solid var(--gvx-border-light)`
+- Sidebar active item: `--gvx-text-primary` semibold + `--gvx-bg-hover` + `border-left: 3px solid var(--gvx-yellow)` — no filled background blocks
+- Tab active: `border-bottom: 2px solid var(--gvx-yellow)` — no pill shapes
+- Tab inactive: `--gvx-text-secondary`, hover → primary
+- Status badges: `border-radius: 999px` / `4px 10px` padding / weight 500 / always soft-bg + dark-text token pairs
 
-```css
-font-family: 'Inter', -apple-system, 'SF Pro Text', sans-serif;
-/* Inter is the brand primary (2026 guide). SF Pro Text is system fallback on Apple devices. */
-```
+### Data Visualization
+- Primary chart bars: solid `--gvx-yellow`, no gradients
+- Secondary bars: `--gvx-border-strong`
+- Negative values: `--gvx-chart-negative`
+- Grid lines: dashed `stroke-dasharray: 4 4`, `stroke-width: 0.5px`, `--gvx-border-faint`
+- Min indicator: dark capsule (`--gvx-charcoal` bg, white text)
+- Max indicator: yellow capsule (`--gvx-yellow` bg, black text)
+- Tables: horizontal dividers only — no vertical column dividers
+- Table row min-height: `48px` / hover: `--gvx-bg-hover`
+- Calendar events: dots below date numeral only — no filled cells
 
-| Role | Size | Weight | Color | Tailwind |
-|------|------|--------|-------|----------|
-| Page title | 17–18px | 600 | `#111111` | `text-lg font-semibold text-neutral-950` |
-| Section heading | 16px | 700 | `#111111` | `text-base font-bold text-neutral-950` |
-| List item title | 16px | 600 | `#111111` | `text-base font-semibold` |
-| Body / default | 14–15px | 400 | `#111111` | `text-sm text-neutral-950` |
-| Secondary / meta | 13px | 400 | `#888888` | `text-xs text-gray-500` |
-| Caption / label | 12px | 400 | `#AAAAAA` | `text-xs text-gray-400` |
-| Stat number (hero) | 28–36px | 700 | `#111111` | `text-3xl font-bold` |
-| Stat on dark bg | 28px | 700 | `#F5C72C` | `text-2xl font-bold text-brand-yellow` |
-| Button label | 15–16px | 600 | `#111111` | `text-base font-semibold` |
-| Table header | 12px | 400 | `#AAAAAA` | `text-xs text-gray-400` |
-
-**Letter spacing:**
-- Body: `leading-snug` (line-height 1.4)
-- Large stat numbers: `tracking-tight` (-0.02em)
-- Captions: `tracking-wide` (+0.02em)
-- Dark background + bright text: add `tracking-[0.01em]` minimum (brand rule: +10 spacing)
-
-### Component Patterns
-
-#### Buttons
-
-```tsx
-// Primary CTA — Yellow (full-width, bottom of screen)
-<button className="w-full h-[52px] bg-brand-yellow text-neutral-950 font-semibold 
-  text-base rounded-none active:opacity-80 transition-transform duration-100 
-  active:scale-[0.98]">
-  Book a Bay
-</button>
-
-// Primary CTA — Inline (rounded)
-<button className="px-6 py-3.5 bg-brand-yellow text-neutral-950 font-semibold 
-  rounded-[10px] hover:brightness-95 active:scale-95 transition-all duration-100">
-  Save Settings
-</button>
-
-// Outline Button
-<button className="px-4 py-2 bg-transparent border border-neutral-800 
-  text-neutral-950 text-sm rounded-md hover:bg-gray-50">
-  Competition Terms
-</button>
-
-// Settings row / list item
-<div className="h-14 px-4 flex items-center justify-between 
-  border-b border-gray-200 hover:bg-gray-50 active:bg-gray-50">
-```
-
-#### Cards
-
-```tsx
-// Standard card
-<div className="bg-white border border-gray-200 rounded-[10px] p-4 
-  shadow-[0_1px_4px_rgba(0,0,0,0.06)] hover:shadow-md transition-shadow duration-150">
-```
-
-#### Tables
-
-```tsx
-// Column header
-<th className="text-xs text-gray-400 font-normal px-4 py-2 
-  border-b border-gray-200 text-left">
-
-// Data row
-<tr className="h-14 border-b border-gray-100 hover:bg-gray-50">
-  <td className="px-4 text-sm font-semibold text-neutral-950">
-  <td className="px-4 text-sm font-bold text-right">
-```
-
-#### Badges & Status
-
-```tsx
-// Competition badge
-<span className="inline-block px-2 py-0.5 bg-green-50 text-brand-green 
-  text-[11px] font-medium rounded">
-
-// Status labels (text only, no background)
-<span className="text-xs text-brand-green">In Progress</span>   // green
-<span className="text-xs text-gray-400">Ended</span>            // gray
-<span className="text-xs text-brand-yellow">Upcoming</span>     // yellow
-
-// Grade badge (circle)
-<div className="w-8 h-8 rounded-full bg-neutral-800 text-white 
-  text-[13px] font-semibold flex items-center justify-center">
-```
-
-#### Navigation
-
-```tsx
-// In-page tab bar
-<div className="h-11 flex border-b border-gray-200 bg-white">
-  {/* Active tab */}
-  <button className="px-4 text-neutral-950 font-semibold 
-    border-b-2 border-brand-yellow">
-  {/* Inactive tab */}
-  <button className="px-4 text-gray-400 font-normal 
-    hover:text-neutral-950 transition-all duration-200">
-</div>
-```
-
-#### Form Elements
-
-```tsx
-// Search input
-<input className="w-full h-9 bg-[#F2F2F7] border-none rounded-[10px] 
-  px-3 text-sm text-neutral-950 placeholder:text-gray-400 
-  focus:ring-1 focus:ring-gray-300 focus:outline-none" />
-```
-
-### Layout & Spacing
-
-| Usage | Value | Tailwind |
-|-------|-------|----------|
-| Page edge padding | 16px | `px-4` |
-| Card inner padding | 14–16px | `p-3.5` or `p-4` |
-| Between sections | 24px | `space-y-6` |
-| Between cards | 8–10px | `space-y-2` or `gap-2.5` |
-| List item height | 56–64px | `h-14` or `h-16` |
-| Section label margin-bottom | 8px | `mb-2` |
-
-### Border Radius Reference
-
-| Element | Radius | Tailwind |
-|---------|--------|----------|
-| Sticky bottom CTA | 0px | `rounded-none` |
-| Inline button | 8–10px | `rounded-lg` |
-| Card | 10–12px | `rounded-[10px]` or `rounded-xl` |
-| Badge / tag | 4–6px | `rounded` or `rounded-md` |
-| Search input | 10px | `rounded-[10px]` |
-| Grade circle | 50% | `rounded-full` |
-| Toast / snackbar | 20px | `rounded-[20px]` |
-
-### Interaction States
-
-```tsx
-// Hover
-"hover:bg-gray-50"       // list items, cards
-"hover:shadow-md"        // cards
-"hover:brightness-95"    // CTA buttons
-"hover:text-neutral-950" // navigation links
-
-// Active / Press
-"active:bg-gray-50"      // list items
-"active:opacity-80"      // bottom CTAs
-"active:scale-95"        // buttons
-
-// Transitions
-"transition-all duration-200 ease-out"     // tab underlines
-"transition-transform duration-100"         // button press
-"transition-shadow duration-150"            // card shadow
-"transition-opacity duration-300"           // modals
-```
-
-### Design Principles
-
-1. **Brand identity is the foundation** — when in conflict, brand guidelines take precedence over app-style preferences.
-2. **Yellow is reserved** — primary CTAs, active states, data moments only. Never decorative fill. (Brand rule: ≤20% of visual surface.)
-3. **Minimal color vocabulary** — 95% black/white/gray. Yellow creates maximum contrast.
-4. **Data-first hierarchy** — large bold numbers are the visual hero on data screens.
-5. **Flat depth** — no heavy drop shadows. Use hairline borders and subtle background contrast.
-6. **Type does the heavy lifting** — weight variation (regular → semibold → bold) conveys hierarchy, not color.
-7. **Consistent density** — 56px list rows, 16px gutters, 10px card radius. Don't vary.
-8. **Inter is primary** — consistent with 2026 brand guide. Do not substitute Pretendard unless Korean text is present.
+### Empty States & Feedback
+- Empty state: centered, one mono-stroke icon (`stroke-width: 1.5px`, `--gvx-text-muted`), single text line
+- Toast: `--gvx-charcoal` background, white text, bottom-right position
 
 
 ---
@@ -554,3 +420,280 @@ font-family: 'Inter', -apple-system, 'SF Pro Text', sans-serif;
 ---
 
 *Last updated: March 2, 2026*
+# CLAUDE.md — 디자인 시스템 섹션 (추가분)
+
+> 이 섹션을 기존 CLAUDE.md 파일에 추가한다.
+> 위치: 기존 "Layer 2: App-style dashboard implementation" 섹션 뒤에 삽입.
+> 이 내용은 Claude Code, Genspark, 또는 다른 어떤 코드 작업 도구가 대시보드를 수정할 때도
+> 반드시 준수해야 하는 **기준 문서**다.
+
+---
+
+## Design System — Golf VX App Reference (v1.0, March 2026)
+
+> **권위 우선순위:** 2026 Style Guide > 2024 Brand Guidelines > 이 섹션
+> 코드 작업 시 이 섹션의 디자인 토큰과 패턴을 반드시 따른다.
+> 원본 참조 문서: `GolfVX_App_Design_System.md` (Studio Soo, March 2026)
+
+---
+
+### DS-1. 색상 시스템
+
+#### Layer 1: 공식 브랜드 (Brand Guidelines 기준)
+| 토큰 | 값 | 역할 |
+|---|---|---|
+| Brand Yellow | `#FFCD00` | 공식 브랜드 옐로우 (앱, 인쇄물) |
+| Text Dark | `#1A1A1A` | 주요 텍스트 (라이트 배경) |
+
+#### Layer 2: 대시보드 구현 (Dashboard Implementation)
+| CSS 변수 | 값 | 역할 |
+|---|---|---|
+| `--gvx-yellow` | `#F5C72C` | CTA, active 탭, toggle ON, Max badge — 장식 금지 |
+| `--gvx-yellow-muted` | `rgba(245,199,44,0.12)` | Key Insights 하이라이트 배경 |
+| `--gvx-yellow-border` | `rgba(245,199,44,0.6)` | Key Insights 하이라이트 left-border |
+| `--gvx-bg-page` | `#1A1A1A` | 페이지 최외곽 배경 |
+| `--gvx-bg-surface` | `#242424` | 카드, 패널 |
+| `--gvx-bg-elevated` | `#2E2E2E` | 호버, 드롭다운 |
+| `--gvx-text-primary` | `#F0F0F0` | 제목, 숫자, 주요 텍스트 |
+| `--gvx-text-secondary` | `#888888` | 서브라벨, 메타데이터 |
+| `--gvx-text-tertiary` | `#555555` | 날짜, 단위, 비활성 |
+| `--gvx-border` | `#2E2E2E` | 카드 테두리 |
+| `--gvx-divider` | `#333333` | 행 구분선 |
+| `--gvx-blue` | `#4A90E2` | 링크, In Progress, 선택 |
+| `--gvx-green` | `#4ADE80` | 완료, 긍정 |
+| `--gvx-purple` | `#A78BFA` | Monitoring |
+| `--gvx-orange` | `#F5A623` | Awaiting, Individual badge |
+
+#### 캠페인 색상
+| CSS 변수 | 값 | 캠페인 |
+|---|---|---|
+| `--gvx-campaign-trial` | `#4ADE80` | Trial Conversion |
+| `--gvx-campaign-membership` | `#60A5FA` | Membership Acquisition |
+| `--gvx-campaign-retention` | `#A78BFA` | Member Retention |
+| `--gvx-campaign-b2b` | `#FB923C` | B2B & Events |
+
+#### ⚠️ Yellow 사용 규칙 (앱 디자인 시스템 7.1 준수)
+- Yellow(`#F5C72C`)는 **CTA, active 탭 underline, toggle ON, Max badge**에만 사용
+- **절대 금지:** 장식용 fill, 데이터 시각화 바, 일반 아이콘 색상, 텍스트 색상
+- 화면 전체 surface 대비 yellow 면적 최대 20%
+- Yellow 텍스트 사용 금지 — 강조는 underline 또는 `--gvx-yellow-muted` 배경으로
+
+---
+
+### DS-2. 타이포그래피
+
+#### 폰트 패밀리
+- **영어:** Inter (primary, 2026 Brand Guide 기준)
+- **한국어:** Pretendard (secondary)
+
+#### 사이즈 토큰
+| CSS 변수 | 값 | 용도 |
+|---|---|---|
+| `--gvx-text-xs` | 11px | 타임스탬프, 배지, 각주, 축 레이블 |
+| `--gvx-text-sm` | 13px | 바디, 테이블 행, 메타데이터, 서브라벨 |
+| `--gvx-text-base` | 15px | 카드 바디, 설명, 폼 라벨 |
+| `--gvx-text-lg` | 18px | 섹션 헤더, 카드 제목 |
+| `--gvx-text-xl` | 22px | KPI 숫자 (카드 레벨) |
+| `--gvx-text-2xl` | 28px | KPI 숫자 (페이지 레벨), 주요 통계 |
+| `--gvx-text-page` | 20px | 페이지 타이틀 h1 |
+
+#### 웨이트 토큰
+| CSS 변수 | 값 |
+|---|---|
+| `--gvx-weight-regular` | 400 |
+| `--gvx-weight-medium` | 500 |
+| `--gvx-weight-semibold` | 600 |
+| `--gvx-weight-bold` | 700 |
+
+#### 숫자 + 단위 패턴 (앱 기준)
+```html
+<!-- 앱: bold 숫자 + 작은 lighter 단위 -->
+<span class="kpi-number">206.0</span>
+<span class="kpi-unit">yd</span>
+
+/* kpi-number: --gvx-text-xl or 2xl, bold, --gvx-text-primary */
+/* kpi-unit: --gvx-text-sm, regular, --gvx-text-secondary */
+```
+
+---
+
+### DS-3. 컴포넌트 패턴
+
+#### 카드
+```css
+background: var(--gvx-bg-surface);
+border-radius: 10px;
+border: 1px solid var(--gvx-border);
+padding: 16–20px;
+/* shadow OR border — 둘 다 사용하지 않는다 */
+```
+
+#### 탭 네비게이션 (앱 3.2 기준)
+```css
+/* active */
+border-bottom: 2px solid var(--gvx-yellow);
+color: var(--gvx-text-primary);
+
+/* inactive */
+color: var(--gvx-text-tertiary);
+border: none;
+```
+
+#### 배지 (Status Pills)
+| 배지 | 배경 | 텍스트 |
+|---|---|---|
+| In Progress | transparent | `#4A90E2` |
+| Awaiting | transparent | `#F5A623` |
+| Executed | transparent | `#4ADE80` |
+| Ended / Archived | transparent | `#555555` |
+| Trial | `rgba(74,222,128,0.15)` | `#4ADE80` |
+| Membership | `rgba(96,165,250,0.15)` | `#60A5FA` |
+| Retention | `rgba(167,139,250,0.15)` | `#A78BFA` |
+| B2B | `rgba(251,146,60,0.15)` | `#FB923C` |
+
+배지 스타일: `border-radius: 9999px; font-size: var(--gvx-text-xs); font-weight: 600;`
+**outline-only 배지 사용 금지** — 항상 filled pill.
+
+#### Key Insights 하이라이트 (앱 key phrase underline 대시보드 적용)
+```css
+/* 다크 배경이므로 underline 대신 하이라이트 카드 패턴 */
+background: var(--gvx-yellow-muted);
+border-left: 2px solid var(--gvx-yellow-border);
+border-radius: 4px;
+padding: 12px 16px;
+```
+
+#### 빈 상태 (Empty State, 앱 기준)
+```tsx
+// 모든 빈 상태는 icon + text 패턴
+<div className="flex flex-col items-center gap-3 py-10 text-center">
+  <div className="rounded-full border border-[var(--gvx-border)] p-3
+                  text-[var(--gvx-text-tertiary)]">
+    {icon}
+  </div>
+  <p style={{ fontSize: 'var(--gvx-text-sm)', color: 'var(--gvx-text-secondary)' }}>
+    {message}
+  </p>
+</div>
+```
+
+#### 리스트 행
+```
+높이: 36–40px (테이블), 56px (설정/프로필 리스트)
+레이아웃: 레이블 left / 값 right (chevron 있으면 값 왼쪽)
+구분선: 1px solid var(--gvx-divider) bottom
+```
+
+#### CTA 버튼 계층
+```
+Primary:    bg var(--gvx-yellow), text #1A1A1A, semibold
+Secondary:  bg transparent, border 1px var(--gvx-yellow), text var(--gvx-yellow)
+Ghost:      bg transparent, border 1px var(--gvx-border), text var(--gvx-text-secondary)
+Destructive: bg transparent, border 1px #F87171, text #F87171
+```
+
+#### 차트 색상
+```
+기본 데이터:  #60A5FA (blue), #4ADE80 (green), #A78BFA (purple) — 85% opacity
+Max 표시:    var(--gvx-yellow) pill badge
+Min 표시:    #3A3A3A dark pill badge
+방향/음수:   #FFB3B3 (pink/salmon)
+Reference:   dashed #555555
+Yellow bar 사용 금지 — yellow는 MAX callout에만
+```
+
+---
+
+### DS-4. 레이아웃 & 간격
+
+```
+기본 단위: 4px
+권장 배수: 8 / 16 / 24 / 32 / 48px
+카드 padding: 16–20px
+섹션 gap: 24px
+페이지 padding: 24–32px
+```
+
+---
+
+### DS-5. 코드 작업 규칙
+
+이 섹션은 Claude Code, Genspark, 또는 다른 어떤 도구가 대시보드를 수정할 때 반드시 따른다.
+
+1. **색상 하드코딩 금지** — 반드시 CSS 변수(`--gvx-*`) 사용
+2. **Yellow 장식 금지** — CTA, active 상태 외 yellow 사용 시 즉시 제거
+3. **인라인 스타일 최소화** — 스타일은 CSS 변수 + Tailwind arbitrary value 사용
+4. **타이포그래피 직접 px 금지** — 반드시 `--gvx-text-*` 토큰 사용
+5. **`venueId` 필수** — 모든 DB 쿼리에 venueId 포함 (멀티테넌트 규칙)
+6. **배지는 filled pill** — outline-only 배지 생성 금지
+7. **빈 상태** — "No data" 단독 텍스트 금지, EmptyState 컴포넌트 사용
+8. **숫자 + 단위** — 숫자 bold/large + 단위 regular/small 패턴 준수
+9. **라우트 변경 금지** — UI 레이블 변경이 필요해도 route path는 유지
+10. **프롬프트/지시문에 없는 수정 금지** — 명시된 범위 외 변경 없음
+
+---
+
+### DS-6. 참조 문서
+
+| 문서 | 위치 | 역할 |
+|---|---|---|
+| GolfVX_App_Design_System.md | Studio Soo 프로젝트 | 앱 디자인 언어 원본 레퍼런스 (v1.0) |
+| GolfVXBrandGuidelines202601201TK.pdf | 프로젝트 파일 | 2026 공식 브랜드 가이드 (Layer 1) |
+| GolfVX_App_Design_System.docx | Studio Soo 프로젝트 | 위 md의 Word 버전 |
+
+---
+
+## Layout Grid (Layer 2)
+
+### 페이지 기본 구조
+
+```
+사이드바 너비: 220px (fixed)
+메인 콘텐츠 시작 X: 220px + 24px margin = 244px
+메인 콘텐츠 최대 너비: calc(100vw - 244px)
+내부 패딩: 32px (top), 32px (right), 32px (bottom), 32px (left)
+Tailwind: p-8
+```
+
+### 페이지 헤더
+
+```
+"Good morning, {name}": 28px / bold / --gvx-text-primary (#222222)
+  → margin-top: 0 (페이지 콘텐츠 최상단 기준)
+  → margin-bottom: 4px
+
+서브타이틀 (날짜/설명): 13px / regular / --gvx-text-secondary (#6F6F6B)
+  → margin-bottom: 32px
+
+페이지 제목 (h1, e.g. "Overview", "Activities"):
+  → font-size: var(--gvx-text-xl) = 20px
+  → font-weight: 600 (semibold)
+  → margin-bottom: 24px
+```
+
+공통 컴포넌트: `client/src/components/layout/PageHeader.tsx`, `client/src/components/layout/PageTitle.tsx`
+
+### 카드 박스
+
+```
+카드 padding: 20px 24px
+카드 border-radius: 10px
+카드 border: 1px solid var(--gvx-border, #DEDEDA)
+카드 background: #FFFFFF
+```
+
+### 카드 간격 (gap)
+
+```
+row gap: 16px
+column gap: 16px
+섹션 간 gap: 32px
+```
+
+### 내부 텍스트 여백
+
+```
+카드 내 섹션 제목 → margin-bottom: 8px
+카드 내 항목 간 → gap: 12px
+카드 내 stat → gap: 24px (좌우)
+```

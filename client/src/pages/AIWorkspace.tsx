@@ -91,16 +91,16 @@ function FileUploadZone({
   // Show attached chip
   if (attached) {
     const icon = attached.fileType === "image"
-      ? <Image size={13} className="text-[#F5C72C]" />
-      : <FileIcon size={13} className="text-[#F5C72C]" />;
+      ? <Image size={13} className="text-[#F2DD48]" />
+      : <FileIcon size={13} className="text-[#F2DD48]" />;
     return (
-      <div className="flex items-center gap-2 px-3 py-2 bg-[#F5C72C]/10 border border-[#F5C72C]/30 rounded-lg text-xs text-foreground">
+      <div className="flex items-center gap-2 px-3 py-2 bg-[#F2DD48]/10 border border-[#F2DD48]/30 rounded-lg text-xs text-[#222222]">
         {icon}
         <span className="truncate max-w-[200px] font-medium">{attached.fileName}</span>
-        <span className="text-muted-foreground capitalize ml-1">
+        <span className="text-[#6F6F6B] capitalize ml-1">
           ({attached.fileType === "gemini" ? "PDF/File" : attached.fileType})
         </span>
-        <button onClick={onRemove} className="ml-auto text-muted-foreground hover:text-foreground shrink-0">
+        <button onClick={onRemove} className="ml-auto text-[#6F6F6B] hover:text-[#222222] shrink-0">
           <X size={13} />
         </button>
       </div>
@@ -115,7 +115,7 @@ function FileUploadZone({
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploadMutation.isPending}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-border text-xs text-muted-foreground hover:border-[#F5C72C]/50 hover:text-foreground transition-colors disabled:opacity-50"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-[#DEDEDA] text-xs text-[#6F6F6B] hover:border-[#F2DD48]/50 hover:text-[#222222] transition-colors disabled:opacity-50"
         >
           {uploadMutation.isPending ? <Loader2 size={12} className="animate-spin" /> : <Paperclip size={12} />}
           {uploadMutation.isPending ? "Uploading…" : "Attach file"}
@@ -134,18 +134,18 @@ function FileUploadZone({
         onClick={() => inputRef.current?.click()}
         className={`flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-xl py-6 cursor-pointer transition-colors ${
           isDragging
-            ? "border-[#F5C72C] bg-[#F5C72C]/5"
-            : "border-border hover:border-[#F5C72C]/50 hover:bg-muted/20"
+            ? "border-[#F2DD48] bg-[#F2DD48]/5"
+            : "border-[#DEDEDA] hover:border-[#F2DD48]/50 hover:bg-[#F1F1EF]/20"
         }`}
       >
         {uploadMutation.isPending ? (
-          <><Loader2 size={20} className="animate-spin text-[#F5C72C]" /><p className="text-xs text-muted-foreground">Uploading file…</p></>
+          <><Loader2 size={20} className="animate-spin text-[#F2DD48]" /><p className="text-xs text-[#6F6F6B]">Uploading file…</p></>
         ) : (
           <>
-            <Upload size={20} className="text-muted-foreground" />
+            <Upload size={20} className="text-[#6F6F6B]" />
             <div className="text-center">
-              <p className="text-xs font-medium text-foreground">Drop file here or click to browse</p>
-              <p className="text-xs text-muted-foreground mt-0.5">PDF, images, text, video, audio — up to 50MB</p>
+              <p className="text-xs font-medium text-[#222222]">Drop file here or click to browse</p>
+              <p className="text-xs text-[#6F6F6B] mt-0.5">PDF, images, text, video, audio — up to 50MB</p>
             </div>
           </>
         )}
@@ -200,7 +200,7 @@ const ANALYSIS_TYPES: {
     icon: <TrendingUp size={15} />,
     description: "Analyze competitor tactics and identify opportunities for Golf VX",
     placeholder: "Paste a competitor email, promotion, article, or any content about what competitors are doing...\n\nExample: Topgolf sent an email about their 'Book Early for a Chance at a New Car' promotion for corporate events. Paste the full content here.",
-    color: "text-[#888888]",
+    color: "text-[#6F6F6B]",
   },
   {
     value: "marketing_plan",
@@ -208,7 +208,7 @@ const ANALYSIS_TYPES: {
     icon: <Target size={15} />,
     description: "Generate a detailed marketing action plan",
     placeholder: "Describe the situation, goal, or context you want a marketing plan for...\n\nExample: We want to increase trial session bookings by 30% in Q2. We have a $2,000/month budget.",
-    color: "text-[#3DB855]",
+    color: "text-[#72B84A]",
   },
   {
     value: "event_roi",
@@ -216,7 +216,7 @@ const ANALYSIS_TYPES: {
     icon: <BarChart3 size={15} />,
     description: "Evaluate event performance and ROI",
     placeholder: "Paste your event recap, notes, or data...\n\nExample: Paste the Chicago Golf Show recap with visitor counts, giveaways distributed, leads captured, and costs.",
-    color: "text-[#F5C72C]",
+    color: "text-[#F2DD48]",
   },
   {
     value: "b2b_strategy",
@@ -224,7 +224,7 @@ const ANALYSIS_TYPES: {
     icon: <Building2 size={15} />,
     description: "Develop corporate events and partnership strategy",
     placeholder: "Paste any B2B-related content: competitor promotions, corporate inquiry emails, partnership ideas...\n\nExample: Paste Kyu's forwarded Topgolf email about corporate event promotions.",
-    color: "text-[#888888]",
+    color: "text-[#6F6F6B]",
   },
   {
     value: "campaign_brief",
@@ -232,7 +232,7 @@ const ANALYSIS_TYPES: {
     icon: <Megaphone size={15} />,
     description: "Write a complete campaign brief",
     placeholder: "Describe the campaign idea or paste relevant context...\n\nExample: We want to run a spring campaign targeting families for our Junior Summer Camp. Budget: $1,500.",
-    color: "text-[#F5C72C]",
+    color: "text-[#F2DD48]",
   },
   {
     value: "community_outreach",
@@ -376,8 +376,8 @@ function ChatTab() {
               onClick={() => setContext(opt.value)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
                 isActive
-                  ? "bg-[#F5C72C] text-[#111111] border-[#F5C72C]"
-                  : "bg-transparent text-muted-foreground border-border hover:border-[#F5C72C]/50 hover:text-foreground"
+                  ? "bg-[#F2DD48] text-[#222222] border-[#F2DD48]"
+                  : "bg-transparent text-[#6F6F6B] border-[#DEDEDA] hover:border-[#F2DD48]/50 hover:text-[#222222]"
               }`}
             >
               <Icon size={11} />
@@ -416,7 +416,7 @@ function ChatTab() {
 
       {messages.length === 0 && (
         <div className="mt-4 flex-shrink-0">
-          <p className="text-xs text-muted-foreground mb-2 font-medium uppercase tracking-wide">Quick actions</p>
+          <p className="text-xs text-[#6F6F6B] mb-2 font-medium uppercase tracking-wide">Quick actions</p>
           <div className="flex gap-2 flex-wrap">
             {[
               "Log Drive Day attendance",
@@ -429,7 +429,7 @@ function ChatTab() {
                 key={action}
                 variant="outline"
                 size="sm"
-                className="text-xs h-7 rounded-full border-border text-muted-foreground hover:text-foreground hover:border-[#F5C72C]/50"
+                className="text-xs h-7 rounded-full border-[#DEDEDA] text-[#6F6F6B] hover:text-[#222222] hover:border-[#F2DD48]/50"
                 onClick={() => handleSendMessage(action)}
               >
                 {action}
@@ -489,9 +489,9 @@ function StrategyWorkspaceTab() {
         {/* Left: Input */}
         <div className="lg:col-span-2 space-y-4">
           {/* Type Selector */}
-          <Card className="bg-card border-border">
+          <Card className="bg-white border-[#DEDEDA]">
             <CardHeader className="pb-3">
-              <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Analysis Type</CardTitle>
+              <CardTitle className="text-xs font-medium text-[#6F6F6B] uppercase tracking-wide">Analysis Type</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
@@ -501,20 +501,20 @@ function StrategyWorkspaceTab() {
                     onClick={() => { setSelectedType(type.value); setCurrentResult(null); }}
                     className={`flex flex-col items-start gap-1 p-3 rounded-lg border text-left transition-all ${
                       selectedType === type.value
-                        ? "border-[#F5C72C]/60 bg-[#F5C72C]/10"
-                        : "border-border bg-muted/20 hover:bg-muted/40"
+                        ? "border-[#F2DD48]/60 bg-[#F2DD48]/10"
+                        : "border-[#DEDEDA] bg-[#F1F1EF]/20 hover:bg-[#F6F6F4]"
                     }`}
                   >
-                    <span className={selectedType === type.value ? type.color : "text-muted-foreground"}>
+                    <span className={selectedType === type.value ? type.color : "text-[#6F6F6B]"}>
                       {type.icon}
                     </span>
-                    <span className={`text-xs font-medium leading-tight ${selectedType === type.value ? "text-foreground" : "text-muted-foreground"}`}>
+                    <span className={`text-xs font-medium leading-tight ${selectedType === type.value ? "text-[#222222]" : "text-[#6F6F6B]"}`}>
                       {type.label}
                     </span>
                   </button>
                 ))}
               </div>
-              <p className="text-xs text-muted-foreground mt-3">
+              <p className="text-xs text-[#6F6F6B] mt-3">
                 <span className={selectedTypeConfig.color}>{selectedTypeConfig.label}:</span>{" "}
                 {selectedTypeConfig.description}
               </p>
@@ -523,12 +523,12 @@ function StrategyWorkspaceTab() {
 
           {/* Quick Templates */}
           <div className="flex gap-2 flex-wrap items-center">
-            <span className="text-xs text-muted-foreground">Quick start:</span>
+            <span className="text-xs text-[#6F6F6B]">Quick start:</span>
             {QUICK_TEMPLATES.map(template => (
               <button
                 key={template.label}
                 onClick={() => { setSelectedType(template.type); setContent(template.content); setCurrentResult(null); }}
-                className="text-xs px-3 py-1.5 rounded-full border border-border bg-muted/20 hover:bg-muted/40 text-muted-foreground hover:text-foreground transition-colors"
+                className="text-xs px-3 py-1.5 rounded-full border border-[#DEDEDA] bg-[#F1F1EF]/20 hover:bg-[#F6F6F4] text-[#6F6F6B] hover:text-[#222222] transition-colors"
               >
                 {template.label}
               </button>
@@ -536,14 +536,14 @@ function StrategyWorkspaceTab() {
           </div>
 
           {/* Content Input */}
-          <Card className="bg-card border-border">
+          <Card className="bg-white border-[#DEDEDA]">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                <CardTitle className="text-xs font-medium text-[#6F6F6B] uppercase tracking-wide flex items-center gap-2">
                   <FileText size={13} />
                   Content to Analyze
                 </CardTitle>
-                <span className={`text-xs ${charCount > 45000 ? "text-[#E8453C]" : "text-muted-foreground"}`}>
+                <span className={`text-xs ${charCount > 45000 ? "text-[#FF3B30]" : "text-[#6F6F6B]"}`}>
                   {charCount.toLocaleString()} / 50,000
                 </span>
               </div>
@@ -560,12 +560,12 @@ function StrategyWorkspaceTab() {
                 value={content}
                 onChange={e => setContent(e.target.value)}
                 placeholder={attachedFile ? "Add notes or context about the attached file (optional)..." : selectedTypeConfig.placeholder}
-                className="min-h-[140px] text-sm font-mono bg-muted/20 border-border resize-y"
+                className="min-h-[140px] text-sm font-mono bg-[#F1F1EF]/20 border-[#DEDEDA] resize-y"
                 maxLength={50000}
               />
               <button
                 onClick={() => setShowCustomPrompt(!showCustomPrompt)}
-                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                className="flex items-center gap-1 text-xs text-[#6F6F6B] hover:text-[#222222] transition-colors"
               >
                 {showCustomPrompt ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                 Custom instructions (optional)
@@ -575,7 +575,7 @@ function StrategyWorkspaceTab() {
                   value={customPrompt}
                   onChange={e => setCustomPrompt(e.target.value)}
                   placeholder="Add specific instructions... e.g., 'Focus on the corporate event angle and suggest 3 package tiers with pricing.'"
-                  className="min-h-[70px] text-sm bg-muted/20 border-border"
+                  className="min-h-[70px] text-sm bg-[#F1F1EF]/20 border-[#DEDEDA]"
                 />
               )}
               <Button
@@ -595,7 +595,7 @@ function StrategyWorkspaceTab() {
                   });
                 }}
                 disabled={(!content.trim() && !attachedFile) || analyzeMutation.isPending}
-                className="w-full bg-[#F5C72C] text-black hover:bg-yellow-300 font-semibold"
+                className="w-full bg-[#F2DD48] text-black hover:bg-yellow-300 font-semibold"
               >
                 {analyzeMutation.isPending ? (
                   <><Loader2 size={15} className="mr-2 animate-spin" />Analyzing...</>
@@ -604,7 +604,7 @@ function StrategyWorkspaceTab() {
                 )}
               </Button>
               {analyzeMutation.isError && (
-                <p className="text-xs text-[#E8453C]">Error: {analyzeMutation.error?.message || "Analysis failed."}</p>
+                <p className="text-xs text-[#FF3B30]">Error: {analyzeMutation.error?.message || "Analysis failed."}</p>
               )}
             </CardContent>
           </Card>
@@ -612,16 +612,16 @@ function StrategyWorkspaceTab() {
 
         {/* Right: History + Tips */}
         <div className="space-y-4">
-          <Card className="bg-card border-border">
+          <Card className="bg-white border-[#DEDEDA]">
             <CardHeader className="pb-3">
-              <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+              <CardTitle className="text-xs font-medium text-[#6F6F6B] uppercase tracking-wide flex items-center gap-2">
                 <Clock size={13} />
                 Recent Analyses
               </CardTitle>
             </CardHeader>
             <CardContent>
               {history.length === 0 ? (
-                <p className="text-xs text-muted-foreground text-center py-6">
+                <p className="text-xs text-[#6F6F6B] text-center py-6">
                   Your analysis history will appear here.
                 </p>
               ) : (
@@ -629,25 +629,25 @@ function StrategyWorkspaceTab() {
                   {history.map(item => {
                     const typeConfig = ANALYSIS_TYPES.find(t => t.value === item.analysisType);
                     return (
-                      <div key={item.id} className="border border-border rounded-lg overflow-hidden">
+                      <div key={item.id} className="border border-[#DEDEDA] rounded-lg overflow-hidden">
                         <button
                           onClick={() => setExpandedHistory(expandedHistory === item.id ? null : item.id)}
-                          className="w-full flex items-start justify-between gap-2 p-3 text-left hover:bg-muted/20 transition-colors"
+                          className="w-full flex items-start justify-between gap-2 p-3 text-left hover:bg-[#F1F1EF]/20 transition-colors"
                         >
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5 mb-0.5">
-                              <span className={typeConfig?.color || "text-muted-foreground"}>{typeConfig?.icon}</span>
-                              <span className="text-xs text-muted-foreground">{typeConfig?.label}</span>
+                              <span className={typeConfig?.color || "text-[#6F6F6B]"}>{typeConfig?.icon}</span>
+                              <span className="text-xs text-[#6F6F6B]">{typeConfig?.label}</span>
                             </div>
-                            <p className="text-xs text-foreground truncate">{item.title}</p>
-                            <p className="text-xs text-muted-foreground mt-0.5">
+                            <p className="text-xs text-[#222222] truncate">{item.title}</p>
+                            <p className="text-xs text-[#6F6F6B] mt-0.5">
                               {new Date(item.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                             </p>
                           </div>
                           <div className="flex items-center gap-1 shrink-0">
                             <button
                               onClick={e => { e.stopPropagation(); setHistory(prev => prev.filter(h => h.id !== item.id)); }}
-                              className="text-muted-foreground hover:text-[#E8453C] transition-colors p-1"
+                              className="text-[#6F6F6B] hover:text-[#FF3B30] transition-colors p-1"
                             >
                               <Trash2 size={11} />
                             </button>
@@ -655,7 +655,7 @@ function StrategyWorkspaceTab() {
                           </div>
                         </button>
                         {expandedHistory === item.id && (
-                          <div className="border-t border-border p-3 bg-muted/10">
+                          <div className="border-t border-[#DEDEDA] p-3 bg-[#F1F1EF]/10">
                             <div className="prose prose-sm prose-invert max-w-none text-xs">
                               <Streamdown>{item.result}</Streamdown>
                             </div>
@@ -681,15 +681,15 @@ function StrategyWorkspaceTab() {
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-border">
+          <Card className="bg-white border-[#DEDEDA]">
             <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+              <CardTitle className="text-xs font-medium text-[#6F6F6B] uppercase tracking-wide flex items-center gap-2">
                 <Lightbulb size={13} />
                 Tips
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-2 text-xs text-muted-foreground">
+              <ul className="space-y-2 text-xs text-[#6F6F6B]">
                 {[
                   "Upload PDFs, images, or text files directly",
                   "Drop a competitor PDF or flyer for instant analysis",
@@ -699,7 +699,7 @@ function StrategyWorkspaceTab() {
                   "Event ROI works great for Chicago Golf Show recap",
                 ].map(tip => (
                   <li key={tip} className="flex gap-2">
-                    <span className="text-[#F5C72C] shrink-0">•</span>
+                    <span className="text-[#F2DD48] shrink-0">•</span>
                     {tip}
                   </li>
                 ))}
@@ -713,11 +713,11 @@ function StrategyWorkspaceTab() {
       {(analyzeMutation.isPending || currentResult) && (
         <div ref={resultRef}>
           <Separator className="my-2" />
-          <Card className="bg-card border-border border-[#F5C72C]/20">
+          <Card className="bg-white border-[#DEDEDA] border-[#F2DD48]/20">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
-                  <Brain size={17} className="text-[#F5C72C]" />
+                <CardTitle className="text-base font-semibold text-[#222222] flex items-center gap-2">
+                  <Brain size={17} className="text-[#F2DD48]" />
                   AI Analysis Result
                   {currentResult && (
                     <Badge variant="outline" className={`text-xs ml-2 ${ANALYSIS_TYPES.find(t => t.value === currentResult.analysisType)?.color || ""} border-current`}>
@@ -740,8 +740,8 @@ function StrategyWorkspaceTab() {
             <CardContent>
               {analyzeMutation.isPending ? (
                 <div className="flex items-center gap-3 py-8 justify-center">
-                  <Loader2 size={20} className="animate-spin text-[#F5C72C]" />
-                  <span className="text-muted-foreground text-sm">Analyzing content with AI...</span>
+                  <Loader2 size={20} className="animate-spin text-[#F2DD48]" />
+                  <span className="text-[#6F6F6B] text-sm">Analyzing content with AI...</span>
                 </div>
               ) : currentResult ? (
                 <div className="prose prose-sm prose-invert max-w-none text-sm leading-relaxed">
@@ -788,14 +788,14 @@ interface ActionPlanData {
 }
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  membership: { bg: "bg-[#F5C72C]/10", text: "text-[#8B6E00]", border: "border-[#F5C72C]/30" },
-  meta_ads: { bg: "bg-[#888888]/10", text: "text-[#888888]", border: "border-blue-200" },
-  programs: { bg: "bg-green-50", text: "text-[#3DB855]", border: "border-green-200" },
-  retention: { bg: "bg-[#888888]/10", text: "text-[#888888]", border: "border-[#888888]/30" },
+  membership: { bg: "bg-[#F2DD48]/10", text: "text-[#8B6E00]", border: "border-[#F2DD48]/30" },
+  meta_ads: { bg: "bg-[#6F6F6B]/10", text: "text-[#6F6F6B]", border: "border-blue-200" },
+  programs: { bg: "bg-green-50", text: "text-[#72B84A]", border: "border-green-200" },
+  retention: { bg: "bg-[#6F6F6B]/10", text: "text-[#6F6F6B]", border: "border-[#6F6F6B]/30" },
   content: { bg: "bg-pink-50", text: "text-pink-700", border: "border-pink-200" },
 };
 const EFFORT_COLORS: Record<string, string> = {
-  low: "text-[#3DB855] bg-green-50 border-green-200",
+  low: "text-[#72B84A] bg-green-50 border-green-200",
   medium: "text-yellow-700 bg-yellow-50 border-yellow-200",
   high: "text-red-600 bg-red-50 border-red-200",
 };
@@ -804,33 +804,33 @@ function PriorityCard({ priority, index }: { priority: Priority; index: number }
   const [expanded, setExpanded] = useState(index === 0);
   const cat = CATEGORY_COLORS[priority.category] || CATEGORY_COLORS.membership;
   return (
-    <div className="bg-white border border-[#E0E0E0] rounded-xl overflow-hidden hover:border-[#F5C72C]/40 transition-colors">
+    <div className="bg-white border border-[#DEDEDA] rounded-xl overflow-hidden hover:border-[#F2DD48]/40 transition-colors">
       <div className="flex items-start gap-4 p-4 cursor-pointer" onClick={() => setExpanded(!expanded)}>
         <div className="w-8 h-8 rounded-lg bg-[#111] flex items-center justify-center text-white text-sm font-bold shrink-0">{priority.rank}</div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-1">
             <span className={`text-xs font-medium px-2 py-0.5 rounded border ${cat.bg} ${cat.text} ${cat.border}`}>{priority.category.replace(/_/g, " ")}</span>
             <span className={`text-xs font-medium px-2 py-0.5 rounded border ${EFFORT_COLORS[priority.effort] || EFFORT_COLORS.medium}`}>{priority.effort} effort</span>
-            <span className="text-xs text-[#888] bg-[#F5F5F5] px-2 py-0.5 rounded border border-[#E0E0E0]"><Clock size={10} className="inline mr-1" />{priority.deadline}</span>
+            <span className="text-xs text-[#6F6F6B] bg-[#F1F1EF] px-2 py-0.5 rounded border border-[#DEDEDA]"><Clock size={10} className="inline mr-1" />{priority.deadline}</span>
           </div>
           <h3 className="text-sm font-semibold text-[#111]">{priority.title}</h3>
-          <p className="text-xs text-[#666] mt-0.5 line-clamp-2">{priority.description}</p>
+          <p className="text-xs text-[#6F6F6B] mt-0.5 line-clamp-2">{priority.description}</p>
         </div>
         <button className="p-1 text-[#999] hover:text-[#111] shrink-0">{expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}</button>
       </div>
       {expanded && (
-        <div className="px-4 pb-4 space-y-3 border-t border-[#F5F5F5]">
+        <div className="px-4 pb-4 space-y-3 border-t border-[#F1F1EF]">
           <div className="pt-3">
-            <div className="text-xs font-semibold text-[#888] mb-1.5">Expected Impact</div>
-            <p className="text-xs text-[#8B6E00] bg-[#F5C72C]/5 border border-[#F5C72C]/20 px-3 py-2 rounded-lg">{priority.expectedImpact}</p>
+            <div className="text-xs font-semibold text-[#6F6F6B] mb-1.5">Expected Impact</div>
+            <p className="text-xs text-[#8B6E00] bg-[#F2DD48]/5 border border-[#F2DD48]/20 px-3 py-2 rounded-lg">{priority.expectedImpact}</p>
           </div>
           {priority.steps && priority.steps.length > 0 && (
             <div>
-              <div className="text-xs font-semibold text-[#888] mb-1.5">Action Steps</div>
+              <div className="text-xs font-semibold text-[#6F6F6B] mb-1.5">Action Steps</div>
               <ol className="space-y-1.5">
                 {priority.steps.map((step, i) => (
-                  <li key={i} className="flex items-start gap-2 text-xs text-[#555]">
-                    <span className="w-4 h-4 rounded-full bg-[#F5F5F5] border border-[#E0E0E0] flex items-center justify-center text-[10px] font-bold text-[#888] shrink-0 mt-0.5">{i + 1}</span>
+                  <li key={i} className="flex items-start gap-2 text-xs text-[#6F6F6B]">
+                    <span className="w-4 h-4 rounded-full bg-[#F1F1EF] border border-[#DEDEDA] flex items-center justify-center text-[10px] font-bold text-[#6F6F6B] shrink-0 mt-0.5">{i + 1}</span>
                     {step}
                   </li>
                 ))}
@@ -864,72 +864,72 @@ function ActionPlanTab() {
   return (
     <div className="space-y-5">
       {/* Controls */}
-      <div className="bg-white border border-[#E0E0E0] rounded-xl p-4">
+      <div className="bg-white border border-[#DEDEDA] rounded-xl p-4">
         <div className="flex flex-wrap items-end gap-4">
           <div>
-            <label className="text-xs font-semibold text-[#888] uppercase tracking-wide mb-2 block">Timeframe</label>
+            <label className="text-xs font-semibold text-[#6F6F6B] uppercase tracking-wide mb-2 block">Timeframe</label>
             <div className="flex gap-2">
               {(["week", "month"] as Timeframe[]).map(t => (
                 <button key={t} onClick={() => setTimeframe(t)} className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
-                  timeframe === t ? "bg-[#111] text-white border-[#111]" : "bg-white text-[#555] border-[#E0E0E0] hover:border-[#111]"
+                  timeframe === t ? "bg-[#111] text-white border-[#111]" : "bg-white text-[#6F6F6B] border-[#DEDEDA] hover:border-[#111]"
                 }`}>{t === "week" ? "This Week" : "This Month"}</button>
               ))}
             </div>
           </div>
           <div>
-            <label className="text-xs font-semibold text-[#888] uppercase tracking-wide mb-2 block">Focus Area</label>
+            <label className="text-xs font-semibold text-[#6F6F6B] uppercase tracking-wide mb-2 block">Focus Area</label>
             <div className="flex flex-wrap gap-2">
               {FOCUS_OPTIONS.map(opt => (
                 <button key={opt.value} onClick={() => setFocus(opt.value)} className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${
-                  focus === opt.value ? "bg-[#F5C72C] text-[#111] border-[#F5C72C]" : "bg-white text-[#555] border-[#E0E0E0] hover:border-[#F5C72C]/50"
+                  focus === opt.value ? "bg-[#F2DD48] text-[#111] border-[#F2DD48]" : "bg-white text-[#6F6F6B] border-[#DEDEDA] hover:border-[#F2DD48]/50"
                 }`}>{opt.label}</button>
               ))}
             </div>
           </div>
           <Button onClick={() => generateMutation.mutate({ timeframe, focus })} disabled={generateMutation.isPending}
-            className="flex items-center gap-2 bg-[#F5C72C] hover:bg-[#E6B800] text-[#111] font-semibold px-5 py-2.5 rounded-lg border-0 ml-auto">
+            className="flex items-center gap-2 bg-[#F2DD48] hover:bg-[#E6B800] text-[#111] font-semibold px-5 py-2.5 rounded-lg border-0 ml-auto">
             {generateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
             {generateMutation.isPending ? "Generating…" : "Generate Plan"}
           </Button>
         </div>
       </div>
       {!plan && !generateMutation.isPending && (
-        <div className="bg-white border border-dashed border-[#E0E0E0] rounded-xl p-12 text-center">
-          <Sparkles className="w-10 h-10 mx-auto mb-4 text-[#F5C72C]" />
+        <div className="bg-white border border-dashed border-[#DEDEDA] rounded-xl p-12 text-center">
+          <Sparkles className="w-10 h-10 mx-auto mb-4 text-[#F2DD48]" />
           <h3 className="text-base font-semibold text-[#111] mb-2">Ready to Generate Your Action Plan</h3>
-          <p className="text-sm text-[#888] max-w-md mx-auto mb-6">Select a timeframe and focus area, then click "Generate Plan" to receive AI-powered strategic recommendations.</p>
-          <Button onClick={() => generateMutation.mutate({ timeframe, focus })} className="flex items-center gap-2 bg-[#F5C72C] hover:bg-[#E6B800] text-[#111] font-semibold px-6 py-2.5 rounded-lg border-0 mx-auto">
+          <p className="text-sm text-[#6F6F6B] max-w-md mx-auto mb-6">Select a timeframe and focus area, then click "Generate Plan" to receive AI-powered strategic recommendations.</p>
+          <Button onClick={() => generateMutation.mutate({ timeframe, focus })} className="flex items-center gap-2 bg-[#F2DD48] hover:bg-[#E6B800] text-[#111] font-semibold px-6 py-2.5 rounded-lg border-0 mx-auto">
             <Sparkles className="w-4 h-4" />Generate Now
           </Button>
         </div>
       )}
       {generateMutation.isPending && (
-        <div className="bg-white border border-[#E0E0E0] rounded-xl p-12 text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-[#F5C72C] mx-auto mb-4" />
+        <div className="bg-white border border-[#DEDEDA] rounded-xl p-12 text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-[#F2DD48] mx-auto mb-4" />
           <p className="text-sm font-medium text-[#111]">Analyzing live data and generating your plan…</p>
-          <p className="text-xs text-[#888] mt-1">This may take 10–20 seconds</p>
+          <p className="text-xs text-[#6F6F6B] mt-1">This may take 10–20 seconds</p>
         </div>
       )}
       {plan && !generateMutation.isPending && (
         <div className="space-y-5">
-          <div className="bg-white border border-[#E0E0E0] rounded-xl p-5">
+          <div className="bg-white border border-[#DEDEDA] rounded-xl p-5">
             <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-lg bg-[#F5C72C]/10 flex items-center justify-center shrink-0"><Sparkles className="w-4 h-4 text-[#8B6E00]" /></div>
+              <div className="w-9 h-9 rounded-lg bg-[#F2DD48]/10 flex items-center justify-center shrink-0"><Sparkles className="w-4 h-4 text-[#8B6E00]" /></div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <h2 className="text-sm font-semibold text-[#111]">Executive Summary</h2>
                   <span className={`text-xs font-medium px-2 py-0.5 rounded border ${
                     plan.priority === "high" ? "bg-red-50 text-red-700 border-red-200" :
                     plan.priority === "medium" ? "bg-yellow-50 text-yellow-700 border-yellow-200" :
-                    "bg-[#3DB855]/10 text-[#3DB855] border-[#3DB855]/30"
+                    "bg-[#72B84A]/10 text-[#72B84A] border-[#72B84A]/30"
                   }`}>{plan.priority?.toUpperCase()} PRIORITY</span>
-                  <span className="text-xs text-[#AAAAAA] ml-auto">Generated {plan.generatedAt ? new Date(plan.generatedAt).toLocaleString() : "just now"}</span>
+                  <span className="text-xs text-[#A8A8A3] ml-auto">Generated {plan.generatedAt ? new Date(plan.generatedAt).toLocaleString() : "just now"}</span>
                 </div>
                 <p className="text-sm text-[#444] leading-relaxed">{plan.summary}</p>
                 {plan.insight && (
-                  <div className="mt-3 flex items-start gap-2 p-3 bg-[#F5C72C]/5 border border-[#F5C72C]/20 rounded-lg">
+                  <div className="mt-3 flex items-start gap-2 p-3 bg-[#F2DD48]/5 border border-[#F2DD48]/20 rounded-lg">
                     <TrendingUp className="w-4 h-4 text-[#8B6E00] shrink-0 mt-0.5" />
-                    <p className="text-xs text-[#555] leading-relaxed"><span className="font-semibold text-[#8B6E00]">Key Insight: </span>{plan.insight}</p>
+                    <p className="text-xs text-[#6F6F6B] leading-relaxed"><span className="font-semibold text-[#8B6E00]">Key Insight: </span>{plan.insight}</p>
                   </div>
                 )}
               </div>
@@ -937,7 +937,7 @@ function ActionPlanTab() {
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
             <div className="lg:col-span-2 space-y-3">
-              <div className="flex items-center gap-2"><Target className="w-4 h-4 text-[#111]" /><h2 className="text-sm font-semibold text-[#111]">Top Priorities</h2><span className="text-xs bg-[#F5F5F5] border border-[#E0E0E0] text-[#666] px-2 py-0.5 rounded-full">{plan.topPriorities?.length || 0}</span></div>
+              <div className="flex items-center gap-2"><Target className="w-4 h-4 text-[#111]" /><h2 className="text-sm font-semibold text-[#111]">Top Priorities</h2><span className="text-xs bg-[#F1F1EF] border border-[#DEDEDA] text-[#6F6F6B] px-2 py-0.5 rounded-full">{plan.topPriorities?.length || 0}</span></div>
               <div className="space-y-3">{(plan.topPriorities || []).map((p, i) => <PriorityCard key={i} priority={p} index={i} />)}</div>
             </div>
             <div className="space-y-4">
@@ -945,35 +945,35 @@ function ActionPlanTab() {
                 <div>
                   <div className="flex items-center gap-2 mb-3"><Zap className="w-4 h-4 text-[#8B6E00]" /><h2 className="text-sm font-semibold text-[#111]">Quick Wins</h2></div>
                   <div className="space-y-2">{plan.quickWins.map((qw, i) => (
-                    <div key={i} className="bg-white border border-[#E0E0E0] rounded-xl p-3 hover:border-[#F5C72C]/40 transition-colors">
-                      <div className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[#F5C72C] shrink-0 mt-0.5" /><div><p className="text-xs font-semibold text-[#111]">{qw.title}</p><p className="text-xs text-[#666] mt-0.5">{qw.action}</p><span className="text-xs text-[#999] mt-1 inline-block"><Clock size={10} className="inline mr-1" />{qw.time}</span></div></div>
+                    <div key={i} className="bg-white border border-[#DEDEDA] rounded-xl p-3 hover:border-[#F2DD48]/40 transition-colors">
+                      <div className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[#F2DD48] shrink-0 mt-0.5" /><div><p className="text-xs font-semibold text-[#111]">{qw.title}</p><p className="text-xs text-[#6F6F6B] mt-0.5">{qw.action}</p><span className="text-xs text-[#999] mt-1 inline-block"><Clock size={10} className="inline mr-1" />{qw.time}</span></div></div>
                     </div>
                   ))}</div>
                 </div>
               )}
               {plan.kpiTargets && plan.kpiTargets.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-2 mb-3"><BarChart3 className="w-4 h-4 text-[#888888]" /><h2 className="text-sm font-semibold text-[#111]">KPI Targets</h2></div>
-                  <div className="bg-white border border-[#E0E0E0] rounded-xl overflow-hidden">{plan.kpiTargets.map((kpi, i) => (
-                    <div key={i} className={`px-4 py-3 ${i < plan.kpiTargets.length - 1 ? "border-b border-[#F5F5F5]" : ""}`}>
-                      <div className="flex items-center justify-between mb-1"><span className="text-xs font-medium text-[#111]">{kpi.metric}</span><span className="text-xs text-[#888]">{kpi.by}</span></div>
-                      <div className="flex items-center gap-2"><span className="text-xs text-[#888]">{kpi.current}</span><span className="text-xs text-[#CCCCCC]">→</span><span className="text-xs font-semibold text-[#3DB855] bg-green-50 px-1.5 py-0.5 rounded">{kpi.target}</span></div>
+                  <div className="flex items-center gap-2 mb-3"><BarChart3 className="w-4 h-4 text-[#6F6F6B]" /><h2 className="text-sm font-semibold text-[#111]">KPI Targets</h2></div>
+                  <div className="bg-white border border-[#DEDEDA] rounded-xl overflow-hidden">{plan.kpiTargets.map((kpi, i) => (
+                    <div key={i} className={`px-4 py-3 ${i < plan.kpiTargets.length - 1 ? "border-b border-[#F1F1EF]" : ""}`}>
+                      <div className="flex items-center justify-between mb-1"><span className="text-xs font-medium text-[#111]">{kpi.metric}</span><span className="text-xs text-[#6F6F6B]">{kpi.by}</span></div>
+                      <div className="flex items-center gap-2"><span className="text-xs text-[#6F6F6B]">{kpi.current}</span><span className="text-xs text-[#A8A8A3]">→</span><span className="text-xs font-semibold text-[#72B84A] bg-green-50 px-1.5 py-0.5 rounded">{kpi.target}</span></div>
                     </div>
                   ))}</div>
                 </div>
               )}
               {plan.risks && plan.risks.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-2 mb-3"><AlertTriangle className="w-4 h-4 text-[#F5C72C]" /><h2 className="text-sm font-semibold text-[#111]">Watch Out For</h2></div>
+                  <div className="flex items-center gap-2 mb-3"><AlertTriangle className="w-4 h-4 text-[#F2DD48]" /><h2 className="text-sm font-semibold text-[#111]">Watch Out For</h2></div>
                   <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 space-y-2">{plan.risks.map((risk, i) => (
-                    <div key={i} className="flex items-start gap-2"><span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 mt-1.5" /><p className="text-xs text-[#111111]">{risk}</p></div>
+                    <div key={i} className="flex items-start gap-2"><span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 mt-1.5" /><p className="text-xs text-[#222222]">{risk}</p></div>
                   ))}</div>
                 </div>
               )}
             </div>
           </div>
           <div className="flex justify-center pt-2">
-            <Button onClick={() => generateMutation.mutate({ timeframe, focus })} variant="outline" className="flex items-center gap-2 text-sm font-medium text-[#555] border-[#E0E0E0] hover:border-[#111] bg-white">
+            <Button onClick={() => generateMutation.mutate({ timeframe, focus })} variant="outline" className="flex items-center gap-2 text-sm font-medium text-[#6F6F6B] border-[#DEDEDA] hover:border-[#111] bg-white">
               <RefreshCw className="w-4 h-4" />Regenerate Plan
             </Button>
           </div>
@@ -1008,27 +1008,27 @@ export default function AIWorkspace() {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="px-6 pt-6 pb-4 border-b border-border flex-shrink-0">
+      <div className="px-6 pt-6 pb-4 border-b border-[#DEDEDA] flex-shrink-0">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-[#F5C72C]/10 flex items-center justify-center">
-              <Brain size={18} className="text-[#F5C72C]" />
+            <div className="w-9 h-9 rounded-lg bg-[#F2DD48]/10 flex items-center justify-center">
+              <Brain size={18} className="text-[#F2DD48]" />
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-foreground">AI Workspace</h1>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <h1 className="text-xl font-semibold text-[#222222]">AI Workspace</h1>
+              <p className="text-xs text-[#6F6F6B] mt-0.5">
                 Chat assistant + document analysis for strategic marketing decisions
               </p>
             </div>
           </div>
           <div className="flex flex-col items-end gap-1">
             <div className="flex items-center gap-1.5">
-              <Zap size={12} className="text-[#F5C72C]" />
-              <span className="text-xs text-muted-foreground">Live data connected</span>
+              <Zap size={12} className="text-[#F2DD48]" />
+              <span className="text-xs text-[#6F6F6B]">Live data connected</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] text-muted-foreground/60">model:</span>
-              <span className="text-[10px] font-medium text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded">
+              <span className="text-[10px] text-[#6F6F6B]/60">model:</span>
+              <span className="text-[10px] font-medium text-[#6F6F6B] bg-[#F1F1EF] px-1.5 py-0.5 rounded">
                 {activeModel}
               </span>
             </div>
@@ -1036,13 +1036,13 @@ export default function AIWorkspace() {
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex gap-1 bg-muted/30 rounded-lg p-1 w-fit">
+        <div className="flex gap-1 bg-[#F6F6F4] rounded-lg p-1 w-fit">
           <button
             onClick={() => setActiveTab("chat")}
             className={`flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
               activeTab === "chat"
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+                ? "bg-white text-[#222222] shadow-sm"
+                : "text-[#6F6F6B] hover:text-[#222222]"
             }`}
           >
             <Bot size={14} />
@@ -1052,8 +1052,8 @@ export default function AIWorkspace() {
             onClick={() => setActiveTab("strategy")}
             className={`flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
               activeTab === "strategy"
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+                ? "bg-white text-[#222222] shadow-sm"
+                : "text-[#6F6F6B] hover:text-[#222222]"
             }`}
           >
             <Brain size={14} />
@@ -1063,8 +1063,8 @@ export default function AIWorkspace() {
             onClick={() => setActiveTab("action-plan")}
             className={`flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
               activeTab === "action-plan"
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+                ? "bg-white text-[#222222] shadow-sm"
+                : "text-[#6F6F6B] hover:text-[#222222]"
             }`}
           >
             <Target size={14} />

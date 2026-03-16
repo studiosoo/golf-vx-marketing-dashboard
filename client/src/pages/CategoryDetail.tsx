@@ -62,10 +62,10 @@ export default function CategoryDetail() {
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      active: "bg-green-500/10 text-[#3DB855] dark:text-[#3DB855] border-green-500/20",
-      completed: "bg-[#888888]/100/10 text-[#888888] dark:text-[#888888] border-blue-500/20",
-      planned: "bg-yellow-500/10 text-yellow-700 dark:text-[#F5C72C] border-yellow-500/20",
-      paused: "bg-[#F5F5F5] text-[#888888] border-[#E0E0E0]",
+      active: "bg-green-500/10 text-[#72B84A] dark:text-[#72B84A] border-green-500/20",
+      completed: "bg-[#6F6F6B]/100/10 text-[#6F6F6B] dark:text-[#6F6F6B] border-blue-500/20",
+      planned: "bg-yellow-500/10 text-yellow-700 dark:text-[#F2DD48] border-yellow-500/20",
+      paused: "bg-[#F1F1EF] text-[#6F6F6B] border-[#DEDEDA]",
     };
     return colors[status] || colors.planned;
   };
@@ -74,7 +74,7 @@ export default function CategoryDetail() {
     return (
         <div className="p-6">
           <div className="text-center py-12">
-            <h2 className="text-2xl font-bold text-foreground">Category not found</h2>
+            <h2 className="text-2xl font-bold text-[#222222]">Category not found</h2>
             <Button variant="outline" className="mt-4" asChild>
               <Link href="/">
                 <ArrowLeft className="h-4 w-4 mr-2" />
@@ -89,7 +89,7 @@ export default function CategoryDetail() {
   if (isLoading) {
     return (
         <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#F2DD48]" />
         </div>
     );
   }
@@ -124,10 +124,10 @@ export default function CategoryDetail() {
                 style={{ backgroundColor: category.color }}
               />
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-foreground">
+                <h1 className="text-3xl font-bold tracking-tight text-[#222222]">
                   {category.name}
                 </h1>
-                <p className="text-muted-foreground mt-1">{category.description}</p>
+                <p className="text-[#6F6F6B] mt-1">{category.description}</p>
               </div>
             </div>
           </div>
@@ -135,59 +135,59 @@ export default function CategoryDetail() {
 
         {/* Category Summary Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="bg-card border-border">
+          <Card className="bg-white border-[#DEDEDA]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Budget</CardTitle>
-              <Target className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-[#6F6F6B]">Total Budget</CardTitle>
+              <Target className="h-4 w-4 text-[#6F6F6B]" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground">{formatCurrency(totals.budget)}</div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <div className="text-2xl font-bold text-[#222222]">{formatCurrency(totals.budget)}</div>
+              <p className="text-xs text-[#6F6F6B] mt-1">
                 Across {campaigns?.length || 0} promotions
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-border">
+          <Card className="bg-white border-[#DEDEDA]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Spend</CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-[#6F6F6B]">Total Spend</CardTitle>
+              <BarChart3 className="h-4 w-4 text-[#6F6F6B]" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground">{formatCurrency(totals.spend)}</div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <div className="text-2xl font-bold text-[#222222]">{formatCurrency(totals.spend)}</div>
+              <p className="text-xs text-[#6F6F6B] mt-1">
                 Meta Ads: {formatCurrency(totals.metaAdsSpend)}
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-border">
+          <Card className="bg-white border-[#DEDEDA]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Revenue</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-[#6F6F6B]">Total Revenue</CardTitle>
+              <DollarSign className="h-4 w-4 text-[#6F6F6B]" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground">{formatCurrency(totals.revenue)}</div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <div className="text-2xl font-bold text-[#222222]">{formatCurrency(totals.revenue)}</div>
+              <p className="text-xs text-[#6F6F6B] mt-1">
                 From Acuity bookings
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-border">
+          <Card className="bg-white border-[#DEDEDA]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Category ROI</CardTitle>
+              <CardTitle className="text-sm font-medium text-[#6F6F6B]">Category ROI</CardTitle>
               {roi >= 0 ? (
-                <TrendingUp className="h-4 w-4 text-[#3DB855] dark:text-[#3DB855]" />
+                <TrendingUp className="h-4 w-4 text-[#72B84A] dark:text-[#72B84A]" />
               ) : (
-                <TrendingDown className="h-4 w-4 text-red-600 dark:text-[#E8453C]" />
+                <TrendingDown className="h-4 w-4 text-red-600 dark:text-[#FF3B30]" />
               )}
             </CardHeader>
             <CardContent>
-              <div className={`text-2xl font-bold ${roi >= 0 ? 'text-[#3DB855] dark:text-[#3DB855]' : 'text-red-600 dark:text-[#E8453C]'}`}>
+              <div className={`text-2xl font-bold ${roi >= 0 ? 'text-[#72B84A] dark:text-[#72B84A]' : 'text-red-600 dark:text-[#FF3B30]'}`}>
                 {formatPercent(roi)}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-[#6F6F6B] mt-1">
                 {roi >= 0 ? 'Profitable' : 'Loss'}
               </p>
             </CardContent>
@@ -196,7 +196,7 @@ export default function CategoryDetail() {
 
         {/* Promotions List */}
         <div>
-          <h2 className="text-2xl font-bold text-foreground mb-4">Promotions</h2>
+          <h2 className="text-2xl font-bold text-[#222222] mb-4">Promotions</h2>
           {campaigns && campaigns.length > 0 ? (
             <div className="grid gap-4">
               {campaigns.map((campaign) => {
@@ -205,12 +205,12 @@ export default function CategoryDetail() {
                   : 0;
 
                 return (
-                  <Card key={campaign.id} className="bg-card border-border hover:border-primary/50 transition-all">
+                  <Card key={campaign.id} className="bg-white border-[#DEDEDA] hover:border-[#F2DD48]/50 transition-all">
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <CardTitle className="text-lg font-bold text-foreground">
+                            <CardTitle className="text-lg font-bold text-[#222222]">
                               {campaign.name}
                             </CardTitle>
                             <Badge variant="outline" className={getStatusColor(campaign.status)}>
@@ -240,7 +240,7 @@ export default function CategoryDetail() {
                               <img
                                 src={campaign.posterImageUrl || campaign.landingPageUrl}
                                 alt="Landing page"
-                                className="h-24 w-36 object-cover rounded-lg border border-border"
+                                className="h-24 w-36 object-cover rounded-lg border border-[#DEDEDA]"
                               />
                               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
                                 <span className="text-xs text-white font-medium">Landing Page</span>
@@ -252,7 +252,7 @@ export default function CategoryDetail() {
                               <img
                                 src={campaign.posterImageUrl}
                                 alt="Poster"
-                                className="h-24 w-24 object-cover rounded-lg border border-border"
+                                className="h-24 w-24 object-cover rounded-lg border border-[#DEDEDA]"
                               />
                               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
                                 <span className="text-xs text-white font-medium">Poster</span>
@@ -264,7 +264,7 @@ export default function CategoryDetail() {
                               <img
                                 src={campaign.reelThumbnailUrl}
                                 alt="Reel"
-                                className="h-24 w-24 object-cover rounded-lg border border-border"
+                                className="h-24 w-24 object-cover rounded-lg border border-[#DEDEDA]"
                               />
                               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
                                 <span className="text-xs text-white font-medium">Reel</span>
@@ -275,7 +275,7 @@ export default function CategoryDetail() {
                       )}
 
                       {/* Timeline */}
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2 text-sm text-[#6F6F6B]">
                         <Calendar className="h-4 w-4" />
                         <span>
                           {formatDate(campaign.startDate)} → {formatDate(campaign.endDate)}
@@ -283,40 +283,40 @@ export default function CategoryDetail() {
                       </div>
 
                       {/* Metrics Grid */}
-                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 pt-3 border-t border-border">
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 pt-3 border-t border-[#DEDEDA]">
                         <div>
-                          <div className="text-xs text-muted-foreground mb-1">Budget</div>
-                          <div className="text-sm font-semibold text-foreground">
+                          <div className="text-xs text-[#6F6F6B] mb-1">Budget</div>
+                          <div className="text-sm font-semibold text-[#222222]">
                             {formatCurrency(campaign.budget)}
                           </div>
                         </div>
                         <div>
-                          <div className="text-xs text-muted-foreground mb-1">Spend</div>
-                          <div className="text-sm font-semibold text-foreground">
+                          <div className="text-xs text-[#6F6F6B] mb-1">Spend</div>
+                          <div className="text-sm font-semibold text-[#222222]">
                             {formatCurrency(campaign.actualSpend)}
                           </div>
                           {campaign.metaAdsSpend && Number(campaign.metaAdsSpend) > 0 && (
-                            <div className="text-xs text-muted-foreground">
+                            <div className="text-xs text-[#6F6F6B]">
                               Ads: {formatCurrency(campaign.metaAdsSpend)}
                             </div>
                           )}
                         </div>
                         <div>
-                          <div className="text-xs text-muted-foreground mb-1">Revenue</div>
-                          <div className="text-sm font-semibold text-foreground">
+                          <div className="text-xs text-[#6F6F6B] mb-1">Revenue</div>
+                          <div className="text-sm font-semibold text-[#222222]">
                             {formatCurrency(campaign.actualRevenue)}
                           </div>
                         </div>
                         <div>
-                          <div className="text-xs text-muted-foreground mb-1">Conversions</div>
-                          <div className="text-sm font-semibold text-foreground flex items-center gap-1">
+                          <div className="text-xs text-[#6F6F6B] mb-1">Conversions</div>
+                          <div className="text-sm font-semibold text-[#222222] flex items-center gap-1">
                             <Users className="h-3 w-3" />
                             {campaign.actualConversions || 0}
                           </div>
                         </div>
                         <div>
-                          <div className="text-xs text-muted-foreground mb-1">ROI</div>
-                          <div className={`text-sm font-semibold ${campaignRoi >= 0 ? 'text-[#3DB855] dark:text-[#3DB855]' : 'text-red-600 dark:text-[#E8453C]'}`}>
+                          <div className="text-xs text-[#6F6F6B] mb-1">ROI</div>
+                          <div className={`text-sm font-semibold ${campaignRoi >= 0 ? 'text-[#72B84A] dark:text-[#72B84A]' : 'text-red-600 dark:text-[#FF3B30]'}`}>
                             {formatPercent(campaignRoi)}
                           </div>
                         </div>
@@ -324,7 +324,7 @@ export default function CategoryDetail() {
 
                       {/* ROAS Badge (for campaigns with Meta Ads) */}
                       {campaign.metaAdsSpend && Number(campaign.metaAdsSpend) > 0 && (
-                        <div className="pt-3 border-t border-border">
+                        <div className="pt-3 border-t border-[#DEDEDA]">
                           <ROASBadge 
                             roas={Number(campaign.actualRevenue) > 0 && Number(campaign.metaAdsSpend) > 0 
                               ? (Number(campaign.actualRevenue) / Number(campaign.metaAdsSpend)) * 100 
@@ -337,7 +337,7 @@ export default function CategoryDetail() {
 
                       {/* Meta Ads Link */}
                       {campaign.metaAdsCampaignId && (
-                        <div className="pt-3 border-t border-border">
+                        <div className="pt-3 border-t border-[#DEDEDA]">
                           <Button variant="outline" size="sm" asChild>
                             <Link href={`/meta-ads?campaign=${campaign.metaAdsCampaignId}`}>
                               View Meta Ads Details
@@ -351,9 +351,9 @@ export default function CategoryDetail() {
               })}
             </div>
           ) : (
-            <Card className="bg-card border-border">
+            <Card className="bg-white border-[#DEDEDA]">
               <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground">No promotions in this category yet.</p>
+                <p className="text-[#6F6F6B]">No promotions in this category yet.</p>
               </CardContent>
             </Card>
           )}

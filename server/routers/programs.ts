@@ -5,6 +5,9 @@ import { TRPCError } from "@trpc/server";
 import * as giveawaySync from "../giveawaySync";
 import { syncGiveawayFromSheets } from "../googleSheetsSync";
 
+// Internal team members to exclude from bottom-funnel conversion reporting
+const INTERNAL_TEAM_NAMES = new Set(["Sue Kim", "sue kim"]);
+
 export const anniversaryGiveawayRouter = router({
   submitEntry: publicProcedure
     .input(z.object({
@@ -171,6 +174,9 @@ export const giveawayRouter = router({
     for (const appt of appts) {
       const emailKey = appt.email?.toLowerCase().trim() ?? '';
       if (!emailKey || !applicantEmailMap.has(emailKey)) continue;
+      const applicantName = applicantEmailMap.get(emailKey) || appt.memberName || '';
+      // Exclude internal team members from conversion reporting
+      if (INTERNAL_TEAM_NAMES.has(applicantName) || INTERNAL_TEAM_NAMES.has(applicantName.toLowerCase())) continue;
       const isDriveDay = appt.appointmentType.toLowerCase().includes('drive day');
       const conversionType = isDriveDay ? 'drive_day' as const : 'trial' as const;
       const dedupeKey = `${emailKey}:${conversionType}`;
@@ -179,7 +185,7 @@ export const giveawayRouter = router({
       if (isDriveDay) driveDayCount++; else trialCount++;
       conversions.push({
         email: emailKey,
-        applicantName: applicantEmailMap.get(emailKey) || appt.memberName || '',
+        applicantName,
         appointmentType: appt.appointmentType,
         appointmentDate: appt.appointmentDate,
         conversionType,

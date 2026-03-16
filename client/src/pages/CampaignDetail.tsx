@@ -179,7 +179,7 @@ export default function CampaignDetail() {
   if (isLoading) {
     return (
         <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#F2DD48]" />
         </div>
     );
   }
@@ -199,14 +199,14 @@ export default function CampaignDetail() {
               Back to Meta Ads
             </Button>
             <div className="flex items-center gap-3">
-              <h1 className="text-4xl font-bold tracking-tight text-foreground">
+              <h1 className="text-4xl font-bold tracking-tight text-[#222222]">
                 {campaign.name}
               </h1>
               <Badge variant={campaign.status === "active" ? "default" : "secondary"}>
                 {campaign.status}
               </Badge>
             </div>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-4 text-sm text-[#6F6F6B]">
               <div className="flex items-center gap-1">
                 <Target className="h-4 w-4" />
                 {campaign.objective}
@@ -228,8 +228,8 @@ export default function CampaignDetail() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-1 text-sm">
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground">${campaign.dailyBudget}/day budget</span>
+                <DollarSign className="h-4 w-4 text-[#6F6F6B]" />
+                <span className="text-[#6F6F6B]">${campaign.dailyBudget}/day budget</span>
               </div>
             </CardContent>
           </Card>
@@ -241,8 +241,8 @@ export default function CampaignDetail() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-1 text-sm">
-                <Users className="h-4 w-4 text-[#3DB855]" />
-                <span className="text-[#3DB855]">${campaign.cpl.toFixed(2)} per lead</span>
+                <Users className="h-4 w-4 text-[#72B84A]" />
+                <span className="text-[#72B84A]">${campaign.cpl.toFixed(2)} per lead</span>
               </div>
             </CardContent>
           </Card>
@@ -254,8 +254,8 @@ export default function CampaignDetail() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingUp className="h-4 w-4 text-[#3DB855]" />
-                <span className="text-[#3DB855]">Above average</span>
+                <TrendingUp className="h-4 w-4 text-[#72B84A]" />
+                <span className="text-[#72B84A]">Above average</span>
               </div>
             </CardContent>
           </Card>
@@ -267,8 +267,8 @@ export default function CampaignDetail() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-1 text-sm">
-                <TrendingDown className="h-4 w-4 text-[#E8453C]" />
-                <span className="text-[#E8453C]">${campaign.cpa.toFixed(2)} per conversion</span>
+                <TrendingDown className="h-4 w-4 text-[#FF3B30]" />
+                <span className="text-[#FF3B30]">${campaign.cpa.toFixed(2)} per conversion</span>
               </div>
             </CardContent>
           </Card>
@@ -332,7 +332,7 @@ export default function CampaignDetail() {
                   </p>
                 </div>
 
-                <div className="p-4 bg-[#888888]/10 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <div className="p-4 bg-[#6F6F6B]/10 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                   <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
                     💡 Opportunity: Email Nurture
                   </h4>

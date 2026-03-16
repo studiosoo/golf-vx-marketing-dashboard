@@ -153,10 +153,28 @@ export const enchargeRouter = router({
   }),
 
   getAHTILCount: protectedProcedure.query(async () => {
+    // Try Encharge API first; fall back to local DB count (populated by import script)
     try {
-      return { count: await encharge.getAHTILTagCount() };
-    } catch (err) {
-      return { count: 0 };
+      const apiCount = await encharge.getAHTILTagCount();
+      if (apiCount > 0) return { count: apiCount, source: "encharge_api" };
+    } catch (_err) {
+      // fall through to DB
     }
+    try {
+      const { getDb } = await import("../db");
+      const dbConn = await getDb();
+      if (dbConn) {
+        const { emailCaptures } = await import("../../drizzle/schema");
+        const { sql: sqlTag } = await import("drizzle-orm");
+        const [{ count }] = await dbConn
+          .select({ count: sqlTag<number>`COUNT(*)` })
+          .from(emailCaptures)
+          .where(sqlTag`JSON_SEARCH(tags, 'one', 'AHTIL') IS NOT NULL`);
+        return { count: Number(count), source: "local_db" };
+      }
+    } catch (_err) {
+      // ignore
+    }
+    return { count: 0, source: "unavailable" };
   }),
 });

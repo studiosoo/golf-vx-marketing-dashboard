@@ -12,7 +12,7 @@ export default function AnniversaryGiveawayThankYou() {
               alt="Golf VX" 
               className="h-8 mb-2"
             />
-            <div className="text-xs text-[#888888] tracking-widest">ARLINGTON HEIGHTS</div>
+            <div className="text-xs text-[#6F6F6B] tracking-widest">ARLINGTON HEIGHTS</div>
           </div>
         </div>
       </header>
@@ -50,7 +50,7 @@ export default function AnniversaryGiveawayThankYou() {
             <h3 className="text-[#FFD000] text-3xl font-bold mb-4">
               BAY TRIAL
             </h3>
-            <p className="text-[#888888] line-through text-lg mb-2">
+            <p className="text-[#6F6F6B] line-through text-lg mb-2">
               Regular rate: $45/hour
             </p>
             <p className="text-[#FFD000] text-5xl font-bold mb-6">
@@ -74,7 +74,7 @@ export default function AnniversaryGiveawayThankYou() {
             <h3 className="text-[#FFD000] text-3xl font-bold mb-4">
               PGA COACHING
             </h3>
-            <p className="text-[#888888] line-through text-lg mb-2">
+            <p className="text-[#6F6F6B] line-through text-lg mb-2">
               Regular value: $200
             </p>
             <p className="text-[#FFD000] text-5xl font-bold mb-6">
@@ -214,9 +214,9 @@ export default function AnniversaryGiveawayThankYou() {
             />
           </div>
           <p className="text-white font-bold mb-2">Copyright © Golf VX Corp</p>
-          <p className="text-[#888888] text-sm mb-1">644 E Rand Rd • Arlington Heights, IL 60004</p>
-          <p className="text-[#888888] text-sm mb-1">arlingtonheights@playgolfvx.com</p>
-          <p className="text-[#888888] text-sm">(847) 749-1054</p>
+          <p className="text-[#6F6F6B] text-sm mb-1">644 E Rand Rd • Arlington Heights, IL 60004</p>
+          <p className="text-[#6F6F6B] text-sm mb-1">arlingtonheights@playgolfvx.com</p>
+          <p className="text-[#6F6F6B] text-sm">(847) 749-1054</p>
           <p className="text-gray-500 text-xs mt-4">
             Open exclusively to Illinois residents. All prizes redeemable only at Golf VX Arlington Heights.
           </p>

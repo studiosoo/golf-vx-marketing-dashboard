@@ -1,8 +1,8 @@
 import { trpc } from "@/lib/trpc";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, RefreshCw, TrendingUp, Users, DollarSign, Target, Sparkles, Calendar } from "lucide-react";
+import { Loader2, RefreshCw, TrendingUp, Users, DollarSign, Target, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { StatCard } from "@/components/giveaway/StatCard";
 import { ProgressBar } from "@/components/giveaway/ProgressBar";
@@ -11,13 +11,12 @@ import { BottomFunnelConversion } from "@/components/giveaway/BottomFunnelConver
 import { DemographicsTab } from "@/components/giveaway/DemographicsTab";
 import { AIIntelligenceTab } from "@/components/giveaway/AIIntelligenceTab";
 import { ApplicationsTab } from "@/components/giveaway/ApplicationsTab";
-import { MetaAdsStatusBadge } from "@/components/MetaAdsStatusBadge";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const ENTRY_GOAL = 1500;
-const LONG_FORM_GOAL = 250;
-// Campaign IDs for Annual Giveaway (A1 + A2)
-const GIVEAWAY_CAMPAIGN_IDS = ["120239570172470217", "120239627905950217"];
+const LONG_FORM_GOAL = 150;           // Primary goal: 150 valid applicants (email list acquisition)
+const TOTAL_AD_SPEND = 1182;          // A1 ($803 ended Mar 3) + A2 ($379 active) combined spend
+const ENTRY_PAGE_UV = 875;            // Short-form entry page unique visitors (from ClickFunnels)
+const VALID_APPLICANTS_NOTE = "77 valid · 82 raw (−4 duplicates, −1 test entry)";
 
 export default function AnnualGiveaway() {
   const { toast } = useToast();
@@ -31,14 +30,7 @@ export default function AnnualGiveaway() {
     { refetchInterval: 30000 }
   );
   const { data: lastSyncInfo } = trpc.giveaway.getLastSyncInfo.useQuery(undefined, { refetchInterval: 30000 });
-  const { data: timeline } = trpc.giveaway.getTimeline.useQuery(undefined, { refetchInterval: 60000 });
   const { data: conversions } = trpc.giveaway.getConversions.useQuery(undefined, { refetchInterval: 60000 });
-
-  // Pull live Meta Ads data for giveaway campaigns (lifetime spend + impressions)
-  const { data: metaCampaigns } = trpc.metaAds.getAllCampaignsWithInsights.useQuery(
-    { datePreset: "maximum" },
-    { refetchInterval: 300000 } // refresh every 5 min
-  );
 
   const syncMutation = trpc.giveaway.sync.useMutation({
     onSuccess: () => {
@@ -52,39 +44,28 @@ export default function AnnualGiveaway() {
     onSuccess: () => refetchApps(),
   });
 
-  // Derive live ad spend and reach from Meta Ads data
-  const giveawayCampaigns = metaCampaigns?.filter((c: any) =>
-    GIVEAWAY_CAMPAIGN_IDS.includes(c.id)
-  ) ?? [];
-  const liveAdSpend = giveawayCampaigns.reduce(
-    (sum: number, c: any) => sum + parseFloat(c.spend || c.totalSpend || "0"),
-    0
-  );
-  const liveReach = giveawayCampaigns.reduce(
-    (sum: number, c: any) => sum + parseInt(c.reach || "0", 10),
-    0
-  );
-  // Fall back to last known values if Meta Ads not yet loaded
-  const TOTAL_AD_SPEND = liveAdSpend > 0 ? liveAdSpend : 467.59;
-  const ENTRY_PAGE_UV = liveReach > 0 ? liveReach : 875;
-
   const totalApplications = stats?.totalApplications || 0;
   const costPerSubmission = totalApplications > 0
     ? (TOTAL_AD_SPEND / totalApplications).toFixed(2)
-    : "—";
+    : "0.00";
   const funnelConversionRate = ENTRY_PAGE_UV > 0
     ? ((totalApplications / ENTRY_PAGE_UV) * 100).toFixed(1)
-    : "—";
+    : "0.0";
 
   const entryProgress = (ENTRY_PAGE_UV / ENTRY_GOAL) * 100;
   const healthStatus = entryProgress >= 80 ? "on_track" : entryProgress >= 40 ? "behind" : "critical";
-  const healthColor = healthStatus === "on_track" ? "#3DB855" : healthStatus === "behind" ? "#F5C72C" : "#888888";
   const healthLabel = healthStatus === "on_track" ? "On Track" : healthStatus === "behind" ? "Behind" : "Critical";
+  // Status badge: solid background for contrast (min 4.5:1)
+  const healthBadgeStyle = healthStatus === "on_track"
+    ? { backgroundColor: "#72B84A", color: "#FFFFFF" }
+    : healthStatus === "behind"
+      ? { backgroundColor: "#F2DD48", color: "#1A1A1A" }
+      : { backgroundColor: "#E55A5A", color: "#FFFFFF" };
 
   if (loadingApps || loadingStats) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-[#AAAAAA]" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#A8A8A3]" />
       </div>
     );
   }
@@ -95,28 +76,25 @@ export default function AnnualGiveaway() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#111111] tracking-tight">Annual Membership Giveaway</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#222222] tracking-tight">Annual Membership Giveaway</h1>
             <span
               className="text-xs font-semibold px-2 py-0.5 rounded-full"
-              style={{ backgroundColor: `${healthColor}20`, color: healthColor }}
+              style={healthBadgeStyle}
             >
               {healthLabel}
             </span>
           </div>
-          <p className="text-sm text-[#888888] mt-1">
-            2026 Lead Generation Campaign
-            {lastSyncInfo?.lastSyncedAt
-              ? <span className="ml-2 text-xs text-[#AAAAAA]">• Last synced {new Date(lastSyncInfo.lastSyncedAt).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</span>
-              : <span className="ml-2 text-xs text-[#AAAAAA]">• Syncs 3× daily</span>
-            }
-            <span className="ml-2"><MetaAdsStatusBadge /></span>
+          <p className="text-sm text-[#6F6F6B] mt-1">
+            2026 Lead Generation Campaign · Goal: 150 valid applicants
+            {lastSyncInfo && <span className="ml-2 text-xs text-[#A8A8A3]">· Syncs 3× daily</span>}
           </p>
         </div>
         <Button
           onClick={() => syncMutation.mutate()}
           disabled={syncMutation.isPending}
           size="sm"
-          className="bg-[#F5C72C] hover:bg-[#e6b820] text-[#111111] font-semibold"
+          variant="outline"
+          className="border-[#DEDEDA] text-[#6F6F6B] hover:bg-[#F1F1EF] font-medium"
         >
           {syncMutation.isPending
             ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Syncing...</>
@@ -126,11 +104,11 @@ export default function AnnualGiveaway() {
       </div>
 
       {/* Goal Progress */}
-      <Card className="border border-[#E0E0E0] shadow-none">
+      <Card className="border border-[#DEDEDA] shadow-none">
         <CardContent className="pt-4 pb-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <ProgressBar value={ENTRY_PAGE_UV} max={ENTRY_GOAL} label="Entry Goal (Short-Form)" color="#F5C72C" />
-            <ProgressBar value={totalApplications} max={LONG_FORM_GOAL} label="Application Goal (Long-Form)" color="#545A60" />
+            <ProgressBar value={totalApplications} max={LONG_FORM_GOAL} label="Application Goal (Long-Form) ★" color="#F2DD48" />
+            <ProgressBar value={ENTRY_PAGE_UV} max={ENTRY_GOAL} label="Entry Page Goal (Short-Form)" color="#DEDEDA" />
           </div>
         </CardContent>
       </Card>
@@ -139,74 +117,30 @@ export default function AnnualGiveaway() {
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Applications (Long-Form)"
-          value={stats == null ? "N/A" : totalApplications}
-          sub={`Goal: ${LONG_FORM_GOAL} • ${Math.max(0, LONG_FORM_GOAL - totalApplications)} remaining`}
+          value={totalApplications}
+          sub={`${VALID_APPLICANTS_NOTE} · Goal: ${LONG_FORM_GOAL}`}
           icon={Users}
+          accent
         />
         <StatCard
           title="Entry Page UV"
           value={ENTRY_PAGE_UV}
           sub={`Goal: ${ENTRY_GOAL} entries • ${Math.max(0, ENTRY_GOAL - ENTRY_PAGE_UV)} remaining`}
           icon={Target}
-          accent
         />
         <StatCard
           title="Funnel Conversion"
-          value={stats == null ? "N/A" : `${funnelConversionRate}%`}
+          value={`${funnelConversionRate}%`}
           sub={`${totalApplications} long-form / ${ENTRY_PAGE_UV} entry UV`}
           icon={TrendingUp}
         />
         <StatCard
           title="Cost per Application"
           value={`$${costPerSubmission}`}
-          sub={`$${TOTAL_AD_SPEND.toFixed(2)} total ad spend`}
+          sub={`$${TOTAL_AD_SPEND.toLocaleString()} total · A1 $803 (ended) + A2 $379 (active)`}
           icon={DollarSign}
         />
       </div>
-
-      {/* Applicant Timeline Chart */}
-      {timeline && timeline.length > 0 && (
-        <Card className="border border-[#E0E0E0] shadow-none">
-          <CardHeader className="pb-2 pt-4 px-4">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-[#AAAAAA]" />
-              <CardTitle className="text-sm font-semibold text-[#111111]">Applications Over Time</CardTitle>
-              <span className="text-xs text-[#AAAAAA] ml-1">— Cumulative applicant count</span>
-            </div>
-          </CardHeader>
-          <CardContent className="px-2 pb-4">
-            <ResponsiveContainer width="100%" height={180}>
-              <AreaChart data={timeline} margin={{ left: 0, right: 8, top: 4, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="timelineGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#F5C72C" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#F5C72C" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" vertical={false} />
-                <XAxis
-                  dataKey="date"
-                  tick={{ fontSize: 10, fill: "#AAAAAA" }}
-                  axisLine={false}
-                  tickLine={false}
-                  tickFormatter={(d: string) => {
-                    const dt = new Date(d + "T00:00:00");
-                    return dt.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-                  }}
-                  interval="preserveStartEnd"
-                />
-                <YAxis tick={{ fontSize: 10, fill: "#AAAAAA" }} axisLine={false} tickLine={false} width={32} />
-                <Tooltip
-                  formatter={(value: number, name: string) => [value, name === "cumulative" ? "Total applicants" : "New today"]}
-                  labelFormatter={(d: string) => new Date(d + "T00:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
-                  contentStyle={{ fontSize: 12, border: "1px solid #E0E0E0", borderRadius: 8, boxShadow: "none" }}
-                />
-                <Area type="monotone" dataKey="cumulative" stroke="#F5C72C" strokeWidth={2} fill="url(#timelineGradient)" dot={false} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Bottom Funnel Conversion */}
       <BottomFunnelConversion conversions={conversions} totalApplications={totalApplications} />
@@ -214,41 +148,18 @@ export default function AnnualGiveaway() {
       {/* ClickFunnels Funnel Steps */}
       <FunnelTable />
 
-      {/* AI Intelligence scroll anchor */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="text-sm font-semibold text-[#111111]">Campaign Analysis</div>
-          <MetaAdsStatusBadge />
-        </div>
-        <button
-          onClick={() => {
-            const el = document.getElementById("giveaway-ai-section");
-            if (el) el.scrollIntoView({ behavior: "smooth" });
-          }}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all"
-          style={{
-            background: "linear-gradient(135deg, #F5C72C 0%, #e6b820 100%)",
-            color: "#111111",
-            boxShadow: "0 2px 8px rgba(245,199,44,0.4)",
-          }}
-        >
-          <Sparkles className="h-4 w-4" />
-          AI Intelligence
-        </button>
-      </div>
-
       {/* Tabs: Demographics / Applications */}
       <Tabs defaultValue="demographics" className="space-y-4">
-        <TabsList className="bg-[#F2F2F7] border border-[#E0E0E0]">
+        <TabsList className="bg-[#E9E9E6] border border-[#DEDEDA]">
           <TabsTrigger
             value="demographics"
-            className="data-[state=active]:bg-white data-[state=active]:text-[#111111] data-[state=active]:shadow-none text-[#888888]"
+            className="data-[state=active]:bg-white data-[state=active]:text-[#222222] data-[state=active]:shadow-none text-[#6F6F6B]"
           >
             Demographics
           </TabsTrigger>
           <TabsTrigger
             value="applications"
-            className="data-[state=active]:bg-white data-[state=active]:text-[#111111] data-[state=active]:shadow-none text-[#888888]"
+            className="data-[state=active]:bg-white data-[state=active]:text-[#222222] data-[state=active]:shadow-none text-[#6F6F6B]"
           >
             Applications ({totalApplications})
           </TabsTrigger>
@@ -270,16 +181,16 @@ export default function AnnualGiveaway() {
       {/* AI Intelligence Section */}
       <div
         id="giveaway-ai-section"
-        className="border-2 rounded-xl p-1"
+        className="border rounded-xl p-1"
         style={{
-          borderColor: "#F5C72C",
-          background: "linear-gradient(135deg, rgba(245,199,44,0.05) 0%, rgba(245,199,44,0.02) 100%)",
+          borderColor: "#DEDEDA",
+          background: "rgba(242,221,72,0.06)",
         }}
       >
         <div className="flex items-center gap-2 px-4 pt-3 pb-2">
-          <Sparkles className="h-5 w-5" style={{ color: "#F5C72C" }} />
-          <span className="text-base font-bold text-[#111111]">AI Intelligence</span>
-          <span className="text-xs text-[#888888] ml-1">— Powered by Golf VX Marketing Engine</span>
+          <Sparkles className="h-4 w-4" style={{ color: "#B8A800" }} />
+          <span className="text-sm font-semibold text-[#222222]">AI Intelligence</span>
+          <span className="text-xs text-[#6F6F6B] ml-1">— Powered by Golf VX Marketing Engine</span>
         </div>
         <div className="px-1 pb-1">
           <AIIntelligenceTab programId={5} />

@@ -21,57 +21,57 @@ export default function Automations() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Automations</h1>
-        <p className="text-muted-foreground text-sm mt-1">Email automation flows via Encharge</p>
+        <h1 className="text-2xl font-bold text-[#222222]">Automations</h1>
+        <p className="text-[#6F6F6B] text-sm mt-1">Email automation flows via Encharge</p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="bg-card border-border">
+        <Card className="bg-white border-[#DEDEDA]">
           <CardContent className="p-4">
-            <div className="text-2xl font-bold text-[#F5C72C]">{(metrics as any)?.totalSubscribers || 0}</div>
-            <div className="text-xs text-muted-foreground">Total Subscribers</div>
+            <div className="text-2xl font-bold text-[#F2DD48]">{(metrics as any)?.totalSubscribers || 0}</div>
+            <div className="text-xs text-[#6F6F6B]">Total Subscribers</div>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border">
+        <Card className="bg-white border-[#DEDEDA]">
           <CardContent className="p-4">
-            <div className="text-2xl font-bold text-[#3DB855]">{(metrics as any)?.activeSubscribers || 0}</div>
-            <div className="text-xs text-muted-foreground">Active</div>
+            <div className="text-2xl font-bold text-[#72B84A]">{(metrics as any)?.activeSubscribers || 0}</div>
+            <div className="text-xs text-[#6F6F6B]">Active</div>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border">
+        <Card className="bg-white border-[#DEDEDA]">
           <CardContent className="p-4">
-            <div className="text-2xl font-bold text-[#888888]">{(segments as any[])?.length || 0}</div>
-            <div className="text-xs text-muted-foreground">Segments</div>
+            <div className="text-2xl font-bold text-[#6F6F6B]">{(segments as any[])?.length || 0}</div>
+            <div className="text-xs text-[#6F6F6B]">Segments</div>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border">
+        <Card className="bg-white border-[#DEDEDA]">
           <CardContent className="p-4">
-            <div className="text-2xl font-bold text-[#888888]">{automationFlows.filter(f => f.status === "active").length}</div>
-            <div className="text-xs text-muted-foreground">Active Flows</div>
+            <div className="text-2xl font-bold text-[#6F6F6B]">{automationFlows.filter(f => f.status === "active").length}</div>
+            <div className="text-xs text-[#6F6F6B]">Active Flows</div>
           </CardContent>
         </Card>
       </div>
 
       <div>
-        <h2 className="text-base font-semibold text-foreground mb-3">Automation Flows</h2>
+        <h2 className="text-base font-semibold text-[#222222] mb-3">Automation Flows</h2>
         <div className="space-y-3">
           {automationFlows.map((flow) => (
-            <Card key={flow.id} className="bg-card border-border">
+            <Card key={flow.id} className="bg-white border-[#DEDEDA]">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#F5C72C]/10 flex items-center justify-center">
-                      <Zap size={16} className="text-[#F5C72C]" />
+                    <div className="w-8 h-8 rounded-lg bg-[#F2DD48]/10 flex items-center justify-center">
+                      <Zap size={16} className="text-[#F2DD48]" />
                     </div>
                     <div>
-                      <div className="font-medium text-foreground text-sm">{flow.name}</div>
-                      <div className="text-xs text-muted-foreground">Trigger: {flow.trigger} · {flow.actions} actions · {flow.enrolled} enrolled</div>
+                      <div className="font-medium text-[#222222] text-sm">{flow.name}</div>
+                      <div className="text-xs text-[#6F6F6B]">Trigger: {flow.trigger} · {flow.actions} actions · {flow.enrolled} enrolled</div>
                     </div>
                   </div>
                   <Badge
                     className={flow.status === "active"
-                      ? "bg-[#3DB855]/20 text-[#3DB855] border-[#3DB855]/30 text-xs"
-                      : "bg-muted text-muted-foreground text-xs"}
+                      ? "bg-[#72B84A]/20 text-[#72B84A] border-[#72B84A]/30 text-xs"
+                      : "bg-[#F1F1EF] text-[#6F6F6B] text-xs"}
                   >
                     {flow.status}
                   </Badge>
@@ -84,13 +84,13 @@ export default function Automations() {
 
       {(segments as any[])?.length > 0 && (
         <div>
-          <h2 className="text-base font-semibold text-foreground mb-3">Segments</h2>
+          <h2 className="text-base font-semibold text-[#222222] mb-3">Segments</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {(segments as any[]).map((seg: any) => (
-              <Card key={seg.id} className="bg-card border-border">
+              <Card key={seg.id} className="bg-white border-[#DEDEDA]">
                 <CardContent className="p-3">
-                  <div className="font-medium text-foreground text-sm">{seg.name}</div>
-                  <div className="text-xs text-muted-foreground mt-1">{seg.count || 0} subscribers</div>
+                  <div className="font-medium text-[#222222] text-sm">{seg.name}</div>
+                  <div className="text-xs text-[#6F6F6B] mt-1">{seg.count || 0} subscribers</div>
                 </CardContent>
               </Card>
             ))}

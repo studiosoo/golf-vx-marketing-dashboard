@@ -53,7 +53,7 @@ export default function Duplicates() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#6F6F6B]" />
       </div>
     );
   }
@@ -64,7 +64,7 @@ export default function Duplicates() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Duplicate Members</h1>
-        <p className="text-muted-foreground mt-2">
+        <p className="text-[#6F6F6B] mt-2">
           Review and merge duplicate member records to maintain clean data
         </p>
       </div>
@@ -84,17 +84,17 @@ export default function Duplicates() {
           <div className="grid grid-cols-3 gap-4">
             <div>
               <div className="text-2xl font-bold">{duplicateGroups?.length || 0}</div>
-              <div className="text-sm text-muted-foreground">Duplicate Groups</div>
+              <div className="text-sm text-[#6F6F6B]">Duplicate Groups</div>
             </div>
             <div>
               <div className="text-2xl font-bold">{totalDuplicates}</div>
-              <div className="text-sm text-muted-foreground">Duplicate Records</div>
+              <div className="text-sm text-[#6F6F6B]">Duplicate Records</div>
             </div>
             <div>
               <div className="text-2xl font-bold">
                 {duplicateGroups ? duplicateGroups.reduce((sum, g) => sum + g.length, 0) : 0}
               </div>
-              <div className="text-sm text-muted-foreground">Total Affected Members</div>
+              <div className="text-sm text-[#6F6F6B]">Total Affected Members</div>
             </div>
           </div>
         </CardContent>
@@ -136,7 +136,7 @@ export default function Duplicates() {
                   >
                     <div className="flex-1">
                       <div className="font-medium">{member.name}</div>
-                      <div className="text-sm text-muted-foreground space-y-1 mt-1">
+                      <div className="text-sm text-[#6F6F6B] space-y-1 mt-1">
                         {member.email && <div>Email: {member.email}</div>}
                         {member.phone && <div>Phone: {member.phone}</div>}
                         <div className="flex gap-2 mt-2">
@@ -149,10 +149,10 @@ export default function Duplicates() {
                       <div className="text-sm font-medium">
                         ${parseFloat(member.lifetimeValue || '0').toFixed(2)} LTV
                       </div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-sm text-[#6F6F6B]">
                         {member.totalVisits || 0} visits
                       </div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-sm text-[#6F6F6B]">
                         {member.totalLessons || 0} lessons
                       </div>
                     </div>
@@ -180,7 +180,7 @@ export default function Duplicates() {
                 key={member.id}
                 className={`flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors ${
                   primaryId === member.id
-                    ? 'border-primary bg-primary/5'
+                    ? 'border-primary bg-[#FDF9E3]'
                     : 'hover:border-muted-foreground/50'
                 }`}
                 onClick={() => setPrimaryId(member.id)}
@@ -193,7 +193,7 @@ export default function Duplicates() {
                 />
                 <div className="flex-1">
                   <div className="font-medium">{member.name}</div>
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-sm text-[#6F6F6B]">
                     {member.email || 'No email'} • {member.phone || 'No phone'}
                   </div>
                   <div className="flex gap-2 mt-2">

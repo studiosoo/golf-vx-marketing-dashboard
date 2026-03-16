@@ -43,7 +43,7 @@ function AttendeeListModal({
       <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {type === "members" ? <Users className="h-5 w-5 text-primary" /> : <UserPlus className="h-5 w-5 text-primary" />}
+            {type === "members" ? <Users className="h-5 w-5 text-[#F2DD48]" /> : <UserPlus className="h-5 w-5 text-[#F2DD48]" />}
             {title}
             {attendees && (
               <Badge variant="secondary" className="ml-2">{attendees.length}</Badge>
@@ -55,43 +55,43 @@ function AttendeeListModal({
         <div className="overflow-y-auto flex-1 mt-2">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              <Loader2 className="h-6 w-6 animate-spin text-[#F2DD48]" />
             </div>
           ) : !attendees?.length ? (
-            <div className="text-center py-12 text-muted-foreground">
+            <div className="text-center py-12 text-[#6F6F6B]">
               No {type === "members" ? "member" : "new visitor"} attendees found in this date range.
             </div>
           ) : (
             <div className="space-y-2">
               {attendees.map((a) => (
-                <div key={`${a.email}-${a.date}`} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                <div key={`${a.email}-${a.date}`} className="flex items-center justify-between p-3 rounded-lg bg-[#F6F6F4] hover:bg-[#F1F1EF] transition-colors">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                      <span className="text-xs font-bold text-primary">
+                    <div className="w-8 h-8 rounded-full bg-[#F2DD48]/10 flex items-center justify-center shrink-0">
+                      <span className="text-xs font-bold text-[#F2DD48]">
                         {(a.firstName?.[0] || "?").toUpperCase()}
                       </span>
                     </div>
                     <div className="min-w-0">
-                      <p className="font-medium text-sm text-foreground truncate">
+                      <p className="font-medium text-sm text-[#222222] truncate">
                         {a.firstName} {a.lastName}
                       </p>
-                      <p className="text-xs text-muted-foreground truncate">{a.type}</p>
+                      <p className="text-xs text-[#6F6F6B] truncate">{a.type}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 shrink-0 ml-4">
                     {a.email && (
-                      <button onClick={() => sendEmail.mutate({ recipientId: a.id, recipientType: type === 'members' ? 'member' : 'lead', recipientName: `${a.firstName} ${a.lastName}`, email: a.email, subject: `Golf VX - Follow Up`, htmlBody: `<p>Hi ${a.firstName}, thanks for joining us at Golf VX!</p>` })} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors" title="Send email">
+                      <button onClick={() => sendEmail.mutate({ recipientId: a.id, recipientType: type === 'members' ? 'member' : 'lead', recipientName: `${a.firstName} ${a.lastName}`, email: a.email, subject: `Golf VX - Follow Up`, htmlBody: `<p>Hi ${a.firstName}, thanks for joining us at Golf VX!</p>` })} className="flex items-center gap-1 text-xs text-[#6F6F6B] hover:text-[#F2DD48] transition-colors" title="Send email">
                         <Mail className="h-3 w-3" />
                         <span className="hidden sm:inline truncate max-w-[160px]">{a.email}</span>
                       </button>
                     )}
                     {a.phone && (
-                      <button onClick={() => sendSms.mutate({ recipientId: a.id, recipientType: type === 'members' ? 'member' : 'lead', recipientName: `${a.firstName} ${a.lastName}`, phone: a.phone, body: `Hi ${a.firstName}! Thanks for joining us at Golf VX Drive Day. Book your next session at playgolfvx.com!` })} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors" title="Send SMS">
+                      <button onClick={() => sendSms.mutate({ recipientId: a.id, recipientType: type === 'members' ? 'member' : 'lead', recipientName: `${a.firstName} ${a.lastName}`, phone: a.phone, body: `Hi ${a.firstName}! Thanks for joining us at Golf VX Drive Day. Book your next session at playgolfvx.com!` })} className="flex items-center gap-1 text-xs text-[#6F6F6B] hover:text-[#F2DD48] transition-colors" title="Send SMS">
                         <Phone className="h-3 w-3" />
                         <span className="hidden sm:inline">{a.phone}</span>
                       </button>
                     )}
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs text-[#6F6F6B]">
                       {a.date ? new Date(a.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : ""}
                     </span>
                   </div>
@@ -101,7 +101,7 @@ function AttendeeListModal({
           )}
         </div>
 
-        <div className="pt-3 border-t border-border flex items-center justify-between">
+        <div className="pt-3 border-t border-[#DEDEDA] flex items-center justify-between">
           {attendees && attendees.length > 0 ? (
             <div className="flex gap-2">
               <Button size="sm" variant="outline" onClick={() => attendees.forEach(a => a.email && sendEmail.mutate({ recipientId: a.id, recipientType: type === 'members' ? 'member' : 'lead', recipientName: `${a.firstName} ${a.lastName}`, email: a.email, subject: `Golf VX - Follow Up`, htmlBody: `<p>Hi ${a.firstName}, thanks for joining us at Golf VX!</p>` }))} disabled={sendEmail.isPending}>
@@ -135,7 +135,7 @@ function SourceAttendeeModal({
       <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Share2 className="h-5 w-5 text-primary" />
+            <Share2 className="h-5 w-5 text-[#F2DD48]" />
             Source: {source}
             {attendees && <Badge variant="secondary" className="ml-2">{attendees.length}</Badge>}
           </DialogTitle>
@@ -143,30 +143,30 @@ function SourceAttendeeModal({
         </DialogHeader>
         <div className="overflow-y-auto flex-1 mt-2">
           {isLoading ? (
-            <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+            <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-[#F2DD48]" /></div>
           ) : !attendees?.length ? (
-            <div className="text-center py-12 text-muted-foreground">No attendees found for this source.</div>
+            <div className="text-center py-12 text-[#6F6F6B]">No attendees found for this source.</div>
           ) : (
             <div className="space-y-2">
               {attendees.map((a) => (
-                <div key={`${a.email}-${a.date}`} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                <div key={`${a.email}-${a.date}`} className="flex items-center justify-between p-3 rounded-lg bg-[#F6F6F4] hover:bg-[#F1F1EF] transition-colors">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                      <span className="text-xs font-bold text-primary">{(a.firstName?.[0] || "?").toUpperCase()}</span>
+                    <div className="w-8 h-8 rounded-full bg-[#F2DD48]/10 flex items-center justify-center shrink-0">
+                      <span className="text-xs font-bold text-[#F2DD48]">{(a.firstName?.[0] || "?").toUpperCase()}</span>
                     </div>
                     <div className="min-w-0">
-                      <p className="font-medium text-sm text-foreground truncate">{a.firstName} {a.lastName}</p>
-                      <p className="text-xs text-muted-foreground truncate">{a.type}</p>
+                      <p className="font-medium text-sm text-[#222222] truncate">{a.firstName} {a.lastName}</p>
+                      <p className="text-xs text-[#6F6F6B] truncate">{a.type}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0 ml-4">
                     {a.email && (
-                      <button onClick={() => sendEmail.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, email: a.email, subject: `Golf VX - Follow Up`, htmlBody: `<p>Hi ${a.firstName}, thanks for visiting Golf VX!</p>` })} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors" title="Send email">
+                      <button onClick={() => sendEmail.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, email: a.email, subject: `Golf VX - Follow Up`, htmlBody: `<p>Hi ${a.firstName}, thanks for visiting Golf VX!</p>` })} className="flex items-center gap-1 text-xs text-[#6F6F6B] hover:text-[#F2DD48] transition-colors" title="Send email">
                         <Mail className="h-3 w-3" /><span className="hidden sm:inline truncate max-w-[140px]">{a.email}</span>
                       </button>
                     )}
                     {a.phone && (
-                      <button onClick={() => sendSms.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, phone: a.phone, body: `Hi ${a.firstName}! Thanks for joining us at Golf VX Drive Day. Book your next session at playgolfvx.com!` })} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors" title="Send SMS">
+                      <button onClick={() => sendSms.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, phone: a.phone, body: `Hi ${a.firstName}! Thanks for joining us at Golf VX Drive Day. Book your next session at playgolfvx.com!` })} className="flex items-center gap-1 text-xs text-[#6F6F6B] hover:text-[#F2DD48] transition-colors" title="Send SMS">
                         <Phone className="h-3 w-3" /><span className="hidden sm:inline">{a.phone}</span>
                       </button>
                     )}
@@ -177,7 +177,7 @@ function SourceAttendeeModal({
           )}
         </div>
         {attendees && attendees.length > 0 && (
-          <div className="pt-3 border-t border-border flex items-center justify-between">
+          <div className="pt-3 border-t border-[#DEDEDA] flex items-center justify-between">
             <div className="flex gap-2">
               <Button size="sm" variant="outline" onClick={() => attendees.forEach(a => a.email && sendEmail.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, email: a.email, subject: `Golf VX - Follow Up`, htmlBody: `<p>Hi ${a.firstName}, thanks for visiting Golf VX!</p>` }))} disabled={sendEmail.isPending}>
                 <Mail className="h-3 w-3 mr-1" /> Email All ({attendees.length})
@@ -190,7 +190,7 @@ function SourceAttendeeModal({
           </div>
         )}
         {(!attendees || attendees.length === 0) && (
-          <div className="pt-3 border-t border-border flex justify-end">
+          <div className="pt-3 border-t border-[#DEDEDA] flex justify-end">
             <Button variant="outline" size="sm" onClick={onClose}><X className="h-4 w-4 mr-1" /> Close</Button>
           </div>
         )}
@@ -213,7 +213,7 @@ function EventAttendeeModal({
       <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-primary" />
+            <Calendar className="h-5 w-5 text-[#F2DD48]" />
             Event: {label}
             {attendees && <Badge variant="secondary" className="ml-2">{attendees.length}</Badge>}
           </DialogTitle>
@@ -221,31 +221,31 @@ function EventAttendeeModal({
         </DialogHeader>
         <div className="overflow-y-auto flex-1 mt-2">
           {isLoading ? (
-            <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+            <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-[#F2DD48]" /></div>
           ) : !attendees?.length ? (
-            <div className="text-center py-12 text-muted-foreground">No attendees found for this event.</div>
+            <div className="text-center py-12 text-[#6F6F6B]">No attendees found for this event.</div>
           ) : (
             <div className="space-y-2">
               {attendees.map((a) => (
-                <div key={`${a.email}-${a.date}`} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                <div key={`${a.email}-${a.date}`} className="flex items-center justify-between p-3 rounded-lg bg-[#F6F6F4] hover:bg-[#F1F1EF] transition-colors">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                      <span className="text-xs font-bold text-primary">{(a.firstName?.[0] || "?").toUpperCase()}</span>
+                    <div className="w-8 h-8 rounded-full bg-[#F2DD48]/10 flex items-center justify-center shrink-0">
+                      <span className="text-xs font-bold text-[#F2DD48]">{(a.firstName?.[0] || "?").toUpperCase()}</span>
                     </div>
                     <div className="min-w-0">
-                      <p className="font-medium text-sm text-foreground truncate">{a.firstName} {a.lastName}</p>
-                      <p className="text-xs text-muted-foreground truncate">{a.type} • {a.source}</p>
+                      <p className="font-medium text-sm text-[#222222] truncate">{a.firstName} {a.lastName}</p>
+                      <p className="text-xs text-[#6F6F6B] truncate">{a.type} • {a.source}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0 ml-4">
                     {a.isMember && <Badge variant="default" className="text-xs">Member</Badge>}
                     {a.email && (
-                      <button onClick={() => sendEmail.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, email: a.email, subject: `Golf VX - Follow Up`, htmlBody: `<p>Hi ${a.firstName}, thanks for visiting Golf VX!</p>` })} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors" title="Send email">
+                      <button onClick={() => sendEmail.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, email: a.email, subject: `Golf VX - Follow Up`, htmlBody: `<p>Hi ${a.firstName}, thanks for visiting Golf VX!</p>` })} className="flex items-center gap-1 text-xs text-[#6F6F6B] hover:text-[#F2DD48] transition-colors" title="Send email">
                         <Mail className="h-3 w-3" /><span className="hidden sm:inline truncate max-w-[120px]">{a.email}</span>
                       </button>
                     )}
                     {a.phone && (
-                      <button onClick={() => sendSms.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, phone: a.phone, body: `Hi ${a.firstName}! Thanks for joining us at Golf VX Drive Day!` })} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors" title="Send SMS">
+                      <button onClick={() => sendSms.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, phone: a.phone, body: `Hi ${a.firstName}! Thanks for joining us at Golf VX Drive Day!` })} className="flex items-center gap-1 text-xs text-[#6F6F6B] hover:text-[#F2DD48] transition-colors" title="Send SMS">
                         <Phone className="h-3 w-3" />
                       </button>
                     )}
@@ -256,7 +256,7 @@ function EventAttendeeModal({
           )}
         </div>
         {attendees && attendees.length > 0 && (
-          <div className="pt-3 border-t border-border flex items-center justify-between">
+          <div className="pt-3 border-t border-[#DEDEDA] flex items-center justify-between">
             <div className="flex gap-2">
               <Button size="sm" variant="outline" onClick={() => attendees.forEach(a => a.email && sendEmail.mutate({ recipientId: a.id, recipientType: 'lead', recipientName: `${a.firstName} ${a.lastName}`, email: a.email, subject: `Golf VX - Follow Up`, htmlBody: `<p>Hi ${a.firstName}, thanks for attending our Drive Day!</p>` }))} disabled={sendEmail.isPending}>
                 <Mail className="h-3 w-3 mr-1" /> Email All ({attendees.length})
@@ -269,7 +269,7 @@ function EventAttendeeModal({
           </div>
         )}
         {(!attendees || attendees.length === 0) && (
-          <div className="pt-3 border-t border-border flex justify-end">
+          <div className="pt-3 border-t border-[#DEDEDA] flex justify-end">
             <Button variant="outline" size="sm" onClick={onClose}><X className="h-4 w-4 mr-1" /> Close</Button>
           </div>
         )}
@@ -278,27 +278,51 @@ function EventAttendeeModal({
   );
 }
 
-export default function SundayClinicDetail() {
+export default function SundayClinicDetail({ embedded = false }: { embedded?: boolean }) {
   const [attendeeModal, setAttendeeModal] = useState<AttendeeType | null>(null);
   const [sourceModal, setSourceModal] = useState<SourceModal>(null);
   const [eventModal, setEventModal] = useState<EventModal>(null);
 
-  const { data: metrics, isLoading } = trpc.campaigns.getSundayClinicMetrics.useQuery({
+  const { data: metrics, isLoading, error } = trpc.campaigns.getSundayClinicMetrics.useQuery({
     minDate: "2026-01-01",
     maxDate: "2026-03-31",
   }, { staleTime: 0 });
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-6">
+        {!embedded && (
+          <div>
+            <h1 className="text-2xl font-bold text-[#222222]">Sunday Clinic — Drive Day Series</h1>
+            <p className="text-[#6F6F6B]">Loading clinic data from Acuity…</p>
+          </div>
+        )}
+        <div className="flex items-center justify-center h-48">
+          <Loader2 className="h-8 w-8 animate-spin text-[#F2DD48]" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        {!embedded && (
+          <div>
+            <h1 className="text-2xl font-bold text-[#222222]">Sunday Clinic — Drive Day Series</h1>
+          </div>
+        )}
+        <div className="rounded-lg border border-[#DEDEDA] bg-[#F1F1EF]/20 p-6 text-center space-y-1">
+          <p className="text-sm font-semibold text-[#222222]">Unable to load clinic data</p>
+          <p className="text-xs text-[#6F6F6B]">Acuity scheduling data is temporarily unavailable. Try refreshing the page.</p>
+        </div>
       </div>
     );
   }
 
   if (!metrics) {
     return (
-      <div className="text-center text-muted-foreground">No data available</div>
+      <div className="text-center text-[#6F6F6B]">No data available</div>
     );
   }
 
@@ -310,28 +334,30 @@ export default function SundayClinicDetail() {
     <>
       <div className="space-y-6">
         {/* Header */}
+        {!embedded && (
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Sunday Clinic — Drive Day Series</h1>
-          <p className="text-muted-foreground">6-session public clinic series (Jan 25 – Mar 29, 2026) · Member retention & new visitor acquisition</p>
+          <h1 className="text-2xl font-bold text-[#222222]">Sunday Clinic — Drive Day Series</h1>
+          <p className="text-[#6F6F6B]">6-session public clinic series (Jan 25 – Mar 29, 2026) · Member retention & new visitor acquisition</p>
           {/* Topic Series Overview */}
           <div className="flex flex-wrap gap-2 mt-3">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F5F5F5] border border-[#E0E0E0]">
-              <span className="w-2 h-2 rounded-full bg-[#111111] inline-block" />
-              <span className="text-xs font-medium text-[#111111]">Sessions 1–2: Driving to the Ball</span>
-              <span className="text-xs text-[#888888] ml-1">Jan 25 · Feb 1</span>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F1F1EF] border border-[#DEDEDA]">
+              <span className="w-2 h-2 rounded-full bg-[#222222] inline-block" />
+              <span className="text-xs font-medium text-[#222222]">Sessions 1–2: Driving to the Ball</span>
+              <span className="text-xs text-[#6F6F6B] ml-1">Jan 25 · Feb 1</span>
             </div>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FFFBEA] border border-[#F5C72C]/40">
-              <span className="w-2 h-2 rounded-full bg-[#F5C72C] inline-block" />
-              <span className="text-xs font-medium text-[#111111]">Sessions 3–4: Putting — Score Low</span>
-              <span className="text-xs text-[#888888] ml-1">Feb 22 · Mar 1</span>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FFFBEA] border border-[#F2DD48]/40">
+              <span className="w-2 h-2 rounded-full bg-[#F2DD48] inline-block" />
+              <span className="text-xs font-medium text-[#222222]">Sessions 3–4: Putting — Score Low</span>
+              <span className="text-xs text-[#6F6F6B] ml-1">Feb 22 · Mar 1</span>
             </div>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F5F5F5] border border-[#E0E0E0]">
-              <span className="w-2 h-2 rounded-full bg-[#888888] inline-block" />
-              <span className="text-xs font-medium text-[#111111]">Sessions 5–6: Short Game — Swing Below the Hips</span>
-              <span className="text-xs text-[#888888] ml-1">Mar 22 · Mar 29</span>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F1F1EF] border border-[#DEDEDA]">
+              <span className="w-2 h-2 rounded-full bg-[#6F6F6B] inline-block" />
+              <span className="text-xs font-medium text-[#222222]">Sessions 5–6: Short Game — Swing Below the Hips</span>
+              <span className="text-xs text-[#6F6F6B] ml-1">Mar 22 · Mar 29</span>
             </div>
           </div>
         </div>
+        )}
 
         {/* Dual Goal Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -340,8 +366,8 @@ export default function SundayClinicDetail() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-primary" />
-                  <CardTitle>Member Retention</CardTitle>
+                  <Users className="h-5 w-5 text-[#F2DD48]" />
+                  <CardTitle className="text-sm font-semibold">Member Retention</CardTitle>
                 </div>
                 <Badge variant={memberPerformance >= 80 ? "default" : "secondary"}>
                   {Math.round(memberPerformance)}% Performance
@@ -352,31 +378,31 @@ export default function SundayClinicDetail() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs text-muted-foreground">Total Members</p>
-                  <p className="text-2xl font-bold text-foreground">{metrics.totalMembers}</p>
+                  <p className="text-xs text-[#6F6F6B]">Total Members</p>
+                  <p className="text-2xl font-bold text-[#222222]">{metrics.totalMembers}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Members Attended</p>
+                  <p className="text-xs text-[#6F6F6B]">Members Attended</p>
                   <button
                     onClick={() => setAttendeeModal("members")}
-                    className="text-2xl font-bold text-primary hover:underline cursor-pointer transition-colors"
+                    className="text-2xl font-bold text-[#F2DD48] hover:underline cursor-pointer transition-colors"
                     title="Click to see member list"
                   >
                     {metrics.memberAttendees}
                   </button>
-                  <p className="text-xs text-muted-foreground mt-0.5">↑ click to view list</p>
+                  <p className="text-xs text-[#6F6F6B] mt-0.5">↑ click to view list</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Attendance Rate</p>
-                  <p className="text-lg font-semibold text-foreground">{metrics.memberAttendanceRate.toFixed(1)}%</p>
+                  <p className="text-xs text-[#6F6F6B]">Attendance Rate</p>
+                  <p className="text-lg font-semibold text-[#222222]">{metrics.memberAttendanceRate.toFixed(1)}%</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Repeat Rate</p>
-                  <p className="text-lg font-semibold text-foreground">{metrics.memberRepeatRate.toFixed(1)}%</p>
+                  <p className="text-xs text-[#6F6F6B]">Repeat Rate</p>
+                  <p className="text-lg font-semibold text-[#222222]">{metrics.memberRepeatRate.toFixed(1)}%</p>
                 </div>
               </div>
               <div>
-                <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                <div className="flex justify-between text-xs text-[#6F6F6B] mb-1">
                   <span>Member Engagement Goal</span>
                   <span>{memberGoalProgress.toFixed(0)}%</span>
                 </div>
@@ -390,8 +416,8 @@ export default function SundayClinicDetail() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <UserPlus className="h-5 w-5 text-primary" />
-                  <CardTitle>New Visitor Acquisition</CardTitle>
+                  <UserPlus className="h-5 w-5 text-[#F2DD48]" />
+                  <CardTitle className="text-sm font-semibold">New Visitor Acquisition</CardTitle>
                 </div>
                 <Badge variant="secondary">
                   {metrics.nonMemberAttendees} Prospects
@@ -402,35 +428,35 @@ export default function SundayClinicDetail() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs text-muted-foreground">New Visitors</p>
+                  <p className="text-xs text-[#6F6F6B]">New Visitors</p>
                   <button
                     onClick={() => setAttendeeModal("new_visitors")}
-                    className="text-2xl font-bold text-primary hover:underline cursor-pointer transition-colors"
+                    className="text-2xl font-bold text-[#F2DD48] hover:underline cursor-pointer transition-colors"
                     title="Click to see new visitor list"
                   >
                     {metrics.nonMemberAttendees}
                   </button>
-                  <p className="text-xs text-muted-foreground mt-0.5">↑ click to view list</p>
+                  <p className="text-xs text-[#6F6F6B] mt-0.5">↑ click to view list</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Total Visits</p>
-                  <p className="text-2xl font-bold text-foreground">{metrics.nonMemberTotalBookings}</p>
+                  <p className="text-xs text-[#6F6F6B]">Total Visits</p>
+                  <p className="text-2xl font-bold text-[#222222]">{metrics.nonMemberTotalBookings}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Conversion Opportunities</p>
-                  <p className="text-lg font-semibold text-foreground">{metrics.conversionOpportunities}</p>
+                  <p className="text-xs text-[#6F6F6B]">Conversion Opportunities</p>
+                  <p className="text-lg font-semibold text-[#222222]">{metrics.conversionOpportunities}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Avg Visits/Person</p>
-                  <p className="text-lg font-semibold text-foreground">
+                  <p className="text-xs text-[#6F6F6B]">Avg Visits/Person</p>
+                  <p className="text-lg font-semibold text-[#222222]">
                     {metrics.nonMemberAttendees > 0
                       ? (metrics.nonMemberTotalBookings / metrics.nonMemberAttendees).toFixed(1)
                       : '0'}
                   </p>
                 </div>
               </div>
-              <div className="bg-muted/50 p-3 rounded-lg">
-                <p className="text-sm text-muted-foreground">
+              <div className="bg-[#F1F1EF] p-3 rounded-lg">
+                <p className="text-sm text-[#6F6F6B]">
                   💡 Follow up with {metrics.conversionOpportunities} prospects to convert them into members
                 </p>
               </div>
@@ -443,8 +469,8 @@ export default function SundayClinicDetail() {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Share2 className="h-5 w-5 text-primary" />
-                <CardTitle>Acquisition Sources</CardTitle>
+                <Share2 className="h-5 w-5 text-[#F2DD48]" />
+                <CardTitle className="text-sm font-semibold">Acquisition Sources</CardTitle>
               </div>
               <CardDescription>
                 How attendees found out about Sunday Clinic events
@@ -466,26 +492,26 @@ export default function SundayClinicDetail() {
                     const goalProgress = goal > 0 ? Math.min(((count as number) / goal) * 100, 100) : 0;
 
                     return (
-                      <div key={source} className="space-y-2 p-3 bg-muted/20 rounded-lg">
+                      <div key={source} className="space-y-2 p-3 bg-[#F1F1EF]/20 rounded-lg">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-primary" />
-                            <span className="font-medium text-foreground">{source}</span>
+                            <div className="w-3 h-3 rounded-full bg-[#F2DD48]" />
+                            <span className="font-medium text-[#222222]">{source}</span>
                           </div>
                           <div className="text-right">
                             <button
                               onClick={() => setSourceModal({ source })}
-                              className="font-bold text-primary hover:underline cursor-pointer transition-colors"
+                              className="font-bold text-[#F2DD48] hover:underline cursor-pointer transition-colors"
                               title="Click to see attendee list"
                             >{count}</button>
-                            <span className="text-sm text-muted-foreground ml-2">({percentage.toFixed(1)}%)</span>
+                            <span className="text-sm text-[#6F6F6B] ml-2">({percentage.toFixed(1)}%)</span>
                           </div>
                         </div>
                         <Progress value={percentage} className="h-2" />
                         {goal > 0 && (
-                          <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
+                          <div className="flex items-center justify-between text-xs text-[#6F6F6B] mt-2">
                             <span>Goal: {goal} attendees</span>
-                            <span className={goalProgress >= 100 ? "text-[#3DB855] font-semibold" : ""}>
+                            <span className={goalProgress >= 100 ? "text-[#72B84A] font-semibold" : ""}>
                               {goalProgress.toFixed(0)}% of goal
                             </span>
                           </div>
@@ -502,8 +528,8 @@ export default function SundayClinicDetail() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-primary" />
-              <CardTitle>Event Breakdown</CardTitle>
+              <Calendar className="h-5 w-5 text-[#F2DD48]" />
+              <CardTitle className="text-sm font-semibold">Event Breakdown</CardTitle>
             </div>
             <CardDescription>
               {metrics.totalEvents} events • {metrics.totalBookings} total bookings
@@ -511,41 +537,41 @@ export default function SundayClinicDetail() {
           </CardHeader>
           <CardContent>
             {/* 6-Session Schedule — 2 sessions per topic */}
-            <div className="mb-4 p-3 bg-[#FFFBEA] border border-[#F5C72C]/30 rounded-lg">
-              <p className="text-xs font-semibold text-[#888888] mb-2">6-Session Schedule</p>
+            <div className="mb-4 p-3 bg-[#FFFBEA] border border-[#F2DD48]/30 rounded-lg">
+              <p className="text-xs font-semibold text-[#6F6F6B] mb-2">6-Session Schedule</p>
               <div className="grid grid-cols-3 gap-2 text-xs">
-                <div className="text-center p-2 bg-[#F5F5F5] rounded border border-[#E0E0E0]">
-                  <div className="font-semibold text-[#111111] mb-1">Driving to the Ball</div>
-                  <div className="text-[#888888]">Jan 25 &amp; Feb 1</div>
+                <div className="text-center p-2 bg-[#F1F1EF] rounded border border-[#DEDEDA]">
+                  <div className="font-semibold text-[#222222] mb-1">Driving to the Ball</div>
+                  <div className="text-[#6F6F6B]">Jan 25 &amp; Feb 1</div>
                 </div>
-                <div className="text-center p-2 bg-[#FFFBEA] rounded border border-[#F5C72C]/40">
-                  <div className="font-semibold text-[#111111] mb-1">Putting — Score Low</div>
-                  <div className="text-[#888888]">Feb 22 &amp; Mar 1</div>
+                <div className="text-center p-2 bg-[#FFFBEA] rounded border border-[#F2DD48]/40">
+                  <div className="font-semibold text-[#222222] mb-1">Putting — Score Low</div>
+                  <div className="text-[#6F6F6B]">Feb 22 &amp; Mar 1</div>
                 </div>
-                <div className="text-center p-2 bg-[#F5F5F5] rounded border border-[#E0E0E0]">
-                  <div className="font-semibold text-[#111111] mb-1">Short Game — Below the Hips</div>
-                  <div className="text-[#888888]">Mar 22 &amp; Mar 29</div>
+                <div className="text-center p-2 bg-[#F1F1EF] rounded border border-[#DEDEDA]">
+                  <div className="font-semibold text-[#222222] mb-1">Short Game — Below the Hips</div>
+                  <div className="text-[#6F6F6B]">Mar 22 &amp; Mar 29</div>
                 </div>
               </div>
             </div>
             <div className="space-y-3">
               {metrics.events.map((event, idx) => {
                 const topicColors: Record<string, { bg: string; text: string; dot: string }> = {
-                  drive_day: { bg: 'bg-[#F5F5F5] border-[#E0E0E0]', text: 'text-[#111111]', dot: 'bg-[#111111]' },
-                  putting: { bg: 'bg-[#FFFBEA] border-[#F5C72C]/40', text: 'text-[#111111]', dot: 'bg-[#F5C72C]' },
-                  short_game: { bg: 'bg-[#F5F5F5] border-[#E0E0E0]', text: 'text-[#111111]', dot: 'bg-[#888888]' },
+                  drive_day: { bg: 'bg-[#F1F1EF] border-[#DEDEDA]', text: 'text-[#222222]', dot: 'bg-[#222222]' },
+                  putting: { bg: 'bg-[#FFFBEA] border-[#F2DD48]/40', text: 'text-[#222222]', dot: 'bg-[#F2DD48]' },
+                  short_game: { bg: 'bg-[#F1F1EF] border-[#DEDEDA]', text: 'text-[#222222]', dot: 'bg-[#6F6F6B]' },
                 };
                 const tc = topicColors[(event as any).topic || 'drive_day'];
                 return (
                 <div key={event.date} className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-[#F6F6F4] rounded-lg">
                     <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center w-10 h-10 bg-primary/10 rounded-lg shrink-0">
-                        <span className="text-sm font-bold text-primary">#{idx + 1}</span>
+                      <div className="flex items-center justify-center w-10 h-10 bg-[#F2DD48]/10 rounded-lg shrink-0">
+                        <span className="text-sm font-bold text-[#F2DD48]">#{idx + 1}</span>
                       </div>
                       <div>
                         <div className="flex items-center gap-2 mb-0.5">
-                          <p className="font-semibold text-foreground">
+                          <p className="font-semibold text-[#222222]">
                             {new Date(event.date).toLocaleDateString('en-US', {
                               month: 'short',
                               day: 'numeric',
@@ -557,7 +583,7 @@ export default function SundayClinicDetail() {
                             {(event as any).topicLabel || 'Driving to the Ball'}
                           </span>
                         </div>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-[#6F6F6B]">
                           {event.uniqueAttendees} unique attendees
                         </p>
                       </div>
@@ -565,10 +591,10 @@ export default function SundayClinicDetail() {
                     <div className="text-right">
                       <button
                         onClick={() => setEventModal({ eventDate: event.date, label: new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) })}
-                        className="text-lg font-bold text-primary hover:underline cursor-pointer transition-colors block"
+                        className="text-lg font-bold text-[#F2DD48] hover:underline cursor-pointer transition-colors block"
                         title="Click to see attendee list"
                       >{event.totalBookings}</button>
-                      <p className="text-xs text-muted-foreground">bookings ↑ click</p>
+                      <p className="text-xs text-[#6F6F6B]">bookings ↑ click</p>
                     </div>
                   </div>
 
@@ -581,7 +607,7 @@ export default function SundayClinicDetail() {
                             <Badge
                               key={source}
                               variant="outline"
-                              className="text-xs cursor-pointer hover:bg-primary/10 hover:border-primary transition-colors"
+                              className="text-xs cursor-pointer hover:bg-[#F2DD48]/10 hover:border-[#F2DD48] transition-colors"
                               onClick={() => setSourceModal({ source })}
                               title={`Click to see ${source} attendees`}
                             >
@@ -605,7 +631,7 @@ export default function SundayClinicDetail() {
               <CardDescription>Total Events</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold text-foreground">{metrics.totalEvents}</p>
+              <p className="text-2xl font-bold text-[#222222]">{metrics.totalEvents}</p>
             </CardContent>
           </Card>
           <Card>
@@ -613,7 +639,7 @@ export default function SundayClinicDetail() {
               <CardDescription>Total Bookings</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold text-foreground">{metrics.totalBookings}</p>
+              <p className="text-2xl font-bold text-[#222222]">{metrics.totalBookings}</p>
             </CardContent>
           </Card>
           <Card>
@@ -621,7 +647,7 @@ export default function SundayClinicDetail() {
               <CardDescription>Unique Attendees</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold text-foreground">{metrics.uniqueAttendees}</p>
+              <p className="text-2xl font-bold text-[#222222]">{metrics.uniqueAttendees}</p>
             </CardContent>
           </Card>
           <Card>
@@ -629,8 +655,8 @@ export default function SundayClinicDetail() {
               <CardDescription>Repeat Attendees</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold text-foreground">{metrics.repeatAttendees}</p>
-              <p className="text-sm text-muted-foreground">{metrics.repeatRate.toFixed(1)}% repeat rate</p>
+              <p className="text-2xl font-bold text-[#222222]">{metrics.repeatAttendees}</p>
+              <p className="text-sm text-[#6F6F6B]">{metrics.repeatRate.toFixed(1)}% repeat rate</p>
             </CardContent>
           </Card>
         </div>
@@ -638,8 +664,8 @@ export default function SundayClinicDetail() {
         {/* Marketing Intelligence */}
         <div className="space-y-4">
           <div>
-            <h2 className="text-xl font-bold">Marketing Intelligence</h2>
-            <p className="text-sm text-muted-foreground mt-1">Meta Ads, Instagram, and newsletter efforts for Drive Day Clinics.</p>
+            <h2 className="text-sm font-semibold">Marketing Intelligence</h2>
+            <p className="text-sm text-[#6F6F6B] mt-1">Meta Ads, Instagram, and newsletter efforts for Drive Day Clinics.</p>
           </div>
           <ProgramMarketingPanel
             programName="Drive Day Clinics"
@@ -650,10 +676,10 @@ export default function SundayClinicDetail() {
         {/* AI Marketing Intelligence */}
         <div className="space-y-4">
           <div>
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <span className="text-[#F5C72C]">✦</span> AI Marketing Intelligence
+            <h2 className="text-sm font-semibold flex items-center gap-2">
+              <span className="text-[#F2DD48]">✦</span> AI Marketing Intelligence
             </h2>
-            <p className="text-sm text-muted-foreground mt-1">AI-generated multi-channel marketing strategy based on program performance data.</p>
+            <p className="text-sm text-[#6F6F6B] mt-1">AI-generated multi-channel marketing strategy based on program performance data.</p>
           </div>
           <ProgramAIIntelligence campaignId={1} programName="Drive Day Clinics" />
         </div>
