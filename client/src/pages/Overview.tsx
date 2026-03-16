@@ -203,11 +203,7 @@ export default function Overview() {
           </tbody>
         </table>
 
-        <div className="px-5 py-3" style={{ borderTop: `1px solid ${BORDER}` }}>
-          <a href={routes.studioSoo.campaigns} className="text-[12px]" style={{ color: "#4E8DF4" }}>
-            → View full campaign details in Campaigns
-          </a>
-        </div>
+        {/* Campaigns link hidden — StrategicCampaigns has a conditional useState hook violation (React #310). Re-expose once fixed. */}
       </div>
     </div>
   );

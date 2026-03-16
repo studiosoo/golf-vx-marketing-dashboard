@@ -1,6 +1,5 @@
 import {
   FileText,
-  Flag,
   LayoutDashboard,
   MessageSquare,
   Search,
@@ -54,10 +53,8 @@ function buildNav(venueSlug: string) {
       matchPaths: [
         venue.studioSoo.home,
         venue.studioSoo.autopilot,
-        venue.studioSoo.campaigns,
         // Keep matching old operations paths for backward compatibility
         venue.operations.home,
-        venue.operations.campaigns,
         venue.operations.paidMedia,
         venue.operations.programs,
         venue.operations.promotions,
@@ -65,8 +62,9 @@ function buildNav(venueSlug: string) {
         venue.operations.content,
       ],
       children: [
-        { label: "Autopilot",  path: venue.studioSoo.autopilot,  icon: Zap },
-        { label: "Campaigns",  path: venue.studioSoo.campaigns,  icon: Flag },
+        { label: "Autopilot", path: venue.studioSoo.autopilot, icon: Zap },
+        // Campaigns hidden — StrategicCampaigns has a conditional useState hook violation (React #310)
+        // Re-expose once StrategicCampaigns.tsx is fixed
       ],
     },
     {
