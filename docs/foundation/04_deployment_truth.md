@@ -8,7 +8,17 @@ The application is deployed using Railway, a modern Platform as a Service (PaaS)
 
 The build process is governed by the `Dockerfile` located in the root of the repository. This file instructs Railway to use a Node.js 22 environment, install dependencies via pnpm, build the Vite frontend, and compile the Express backend. The final artifact is a single Docker container that encompasses both the client and server code.
 
-The `railway.json` configuration file specifies that the container should be started using the command `node dist/index.js`. This starts the Express server, which serves the built React frontend and handles all API requests.
+## How the Application Actually Starts in Production
+
+There are two start command definitions in the repository, and understanding which one takes precedence is critical.
+
+The `Dockerfile` defines `CMD ["/app/startup.sh"]` as its default entry point. The `startup.sh` script performs pre-flight tasks — it copies the Meta Ads cache to `/tmp` and runs database migrations — before finally executing `node /app/dist/index.js`.
+
+However, the `railway.json` configuration file defines a `startCommand` of `node dist/index.js`. **When Railway uses the Dockerfile builder and a `startCommand` is set in `railway.json`, Railway's `startCommand` overrides the Dockerfile `CMD` at runtime.** This means in production, Railway executes `node dist/index.js` directly, bypassing `startup.sh` entirely.
+
+The practical consequence is that in the current Railway production configuration, **database migrations are not automatically applied on each deployment**, and the Meta Ads cache is not automatically copied to `/tmp` at startup. The `startup.sh` script exists and is correct, but it is not invoked by Railway due to the `startCommand` override.
+
+To restore the intended behavior — automatic migrations and cache setup on each deploy — the `startCommand` in `railway.json` should be changed to `/app/startup.sh`, or the `startCommand` field should be removed so the Dockerfile `CMD` takes effect.
 
 ## Stateless Application Design
 
@@ -28,6 +38,6 @@ The `Dockerfile` explicitly bakes certain `VITE_` prefixed environment variables
 
 ## Migration Execution
 
-Database migrations are executed automatically during the application startup sequence.
+Database migrations are handled by the `startup.sh` script and the `scripts/run-migrations.mjs` file. When `startup.sh` runs, it checks for the presence of the `DATABASE_URL` environment variable, waits for the MySQL database to become available, and then executes `node /app/scripts/run-migrations.mjs`. This script reads the Drizzle migration journal and applies any pending SQL migration files in order.
 
-The `startup.sh` script, which is the entry point for the Docker container, checks for the presence of the `DATABASE_URL` environment variable. If present, it waits for the database to become available and then runs the Drizzle migration script (`scripts/run-migrations.mjs`). This ensures that the database schema is always in sync with the deployed application code before the server begins accepting traffic.
+As noted above, `startup.sh` is only invoked if Railway's `startCommand` is set to `/app/startup.sh`. If `startCommand` is set to `node dist/index.js`, migrations must be applied manually or through a separate Railway deploy hook.

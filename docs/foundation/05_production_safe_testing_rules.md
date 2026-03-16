@@ -16,7 +16,7 @@ The production MySQL database must never be used for local development or automa
 
 Developers must use a separate, dedicated development database. The `DATABASE_URL` in the local `.env` file must point to this isolated instance. When writing tests, particularly those involving database operations, the testing framework (Vitest) should be configured to use a test-specific database or utilize mocking to intercept database calls.
 
-Running Drizzle migrations (`pnpm db:push` or `drizzle-kit generate`) should only be performed against the local development database to verify schema changes before they are committed and eventually deployed to production.
+Running Drizzle migrations locally uses the `pnpm db:push` command, which runs `drizzle-kit generate` (creates a new SQL migration file) followed by `drizzle-kit migrate` (applies it). This should only be performed against the local development database to verify schema changes before they are committed and eventually deployed to production. Note that `pnpm db:push` is not the same as `drizzle-kit push` — it does not bypass the migration file system.
 
 ## Mocking External APIs
 
