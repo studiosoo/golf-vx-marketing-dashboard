@@ -1,3 +1,4 @@
+import Activities from "./Activities";
 import Home from "./Home";
 import Reports from "./Reports";
 import Performance from "./Performance";
@@ -79,6 +80,10 @@ export function InsightsAskWrapper() {
 
 export function InsightsResearchWrapper() {
   return <MarketResearch />;
+}
+
+export function StudioSooActivitiesWrapper() {
+  return <Activities />;
 }
 
 export function StudioSooProductionWrapper() {

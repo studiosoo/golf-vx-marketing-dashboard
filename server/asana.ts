@@ -126,3 +126,38 @@ export async function createAsanaTask(params: {
 export function getProjectUrl(): string {
   return `https://app.asana.com/0/${MARKETING_TIMELINE_PROJECT_ID}/timeline`;
 }
+
+export interface AsanaProjectTask {
+  gid: string;
+  name: string;
+  assignee: string | null;
+  due_on: string | null;
+  completed: boolean;
+}
+
+export async function getProjectTasks(projectGid: string): Promise<AsanaProjectTask[]> {
+  const optFields = "name,assignee.name,due_on,completed";
+  const data = await asanaGet(
+    `/projects/${projectGid}/tasks?opt_fields=${optFields}&limit=100`
+  ) as { data: Array<{ gid: string; name: string; assignee?: { name: string } | null; due_on?: string | null; completed?: boolean }> };
+  return (data.data || []).map(t => ({
+    gid: t.gid,
+    name: t.name,
+    assignee: t.assignee?.name ?? null,
+    due_on: t.due_on ?? null,
+    completed: t.completed ?? false,
+  }));
+}
+
+const BUDGET_FIELD_GID = "1212082575127819";
+const SPEND_FIELD_GID  = "1212082575127824";
+
+export async function getProjectBudget(projectGid: string): Promise<{ budget: number | null; spend: number | null }> {
+  const data = await asanaGet(
+    `/projects/${projectGid}?opt_fields=custom_fields.gid,custom_fields.number_value`
+  ) as { data: { custom_fields?: Array<{ gid: string; number_value: number | null }> } };
+  const fields = data.data?.custom_fields ?? [];
+  const budget = fields.find(f => f.gid === BUDGET_FIELD_GID)?.number_value ?? null;
+  const spend  = fields.find(f => f.gid === SPEND_FIELD_GID)?.number_value  ?? null;
+  return { budget, spend };
+}
