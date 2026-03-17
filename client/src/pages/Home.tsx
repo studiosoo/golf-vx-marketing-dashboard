@@ -582,7 +582,7 @@ export default function Home() {
                 className="text-[42px] font-bold text-[#111111] leading-none tracking-tight hover:text-[#F5C72C] transition-colors cursor-pointer"
                 title="View member list"
               >
-                {snapLoading ? "—" : fmt(memberTotal)}
+                {snapLoading || members?.total == null ? "—" : fmt(memberTotal)}
               </button>
               {members?.newThisMonth !== undefined && members.newThisMonth !== 0 && (
                 <span className={cn("text-[13px] font-semibold mb-1.5", members.newThisMonth > 0 ? "text-[#3DB855]" : "text-[#FF3B30]")}>
@@ -653,7 +653,7 @@ export default function Home() {
                 <span className="text-[10px] text-[#AAAAAA]">Toast POS · MTD</span>
               </div>
               <p className="text-[24px] font-bold text-[#111111] leading-none tracking-tight">{fmtCurrency(toastMTD)}</p>
-              <p className="text-[11px] text-[#888888] mt-1">{now.toLocaleDateString("en-US", { month: "long" })} · {toastOrders > 0 ? `${toastOrders} orders` : "No orders yet"}</p>
+              <p className="text-[11px] text-[#888888] mt-1">{now.toLocaleDateString("en-US", { month: "long" })} · {(toastSummary as any)?.thisMonthOrders != null ? (toastOrders > 0 ? `${toastOrders} orders` : "No orders yet") : "—"}</p>
               {toastLastMonth > 0 && <p className="text-[10px] text-[#AAAAAA] mt-0.5">Last month: {fmtCurrency(toastLastMonth)}</p>}
             </div>
           )}
@@ -693,28 +693,30 @@ export default function Home() {
           </div>
         )}
 
-        {/* Annual Revenue Goal — $2M */}
-        <div className="mt-4 pt-4 border-t border-[#F0F0F0]">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-1.5">
-              <TrendingUp className="h-3.5 w-3.5 text-[#111111]" />
-              <span className="text-[13px] font-semibold text-[#111111]">Annual Revenue Goal</span>
+        {/* Annual Revenue Goal — $2M (only when real revenue data is available) */}
+        {hasAnyRevenue && (
+          <div className="mt-4 pt-4 border-t border-[#F0F0F0]">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1.5">
+                <TrendingUp className="h-3.5 w-3.5 text-[#111111]" />
+                <span className="text-[13px] font-semibold text-[#111111]">Annual Revenue Goal</span>
+              </div>
+              <div className="text-right">
+                <span className="text-[18px] font-bold text-[#F5C72C]">{annualGoalPct.toFixed(1)}%</span>
+                <span className="text-[11px] text-[#AAAAAA] ml-1">run rate</span>
+              </div>
             </div>
-            <div className="text-right">
-              <span className="text-[18px] font-bold text-[#F5C72C]">{annualGoalPct.toFixed(1)}%</span>
-              <span className="text-[11px] text-[#AAAAAA] ml-1">run rate</span>
+            <div className="h-2 bg-[#F2F2F7] rounded-full overflow-hidden">
+              <div className="h-full rounded-full bg-[#F5C72C] transition-all" style={{ width: `${annualGoalPct}%` }} />
+            </div>
+            <div className="flex justify-between mt-1.5">
+              <span className="text-[11px] text-[#AAAAAA]">{fmtCurrency(annualRunRate)} projected / {fmtCurrency(ANNUAL_REVENUE_GOAL)} goal</span>
+              {annualRunRate < ANNUAL_REVENUE_GOAL && (
+                <span className="text-[11px] text-[#AAAAAA]">{fmtCurrency(ANNUAL_REVENUE_GOAL - annualRunRate)} gap</span>
+              )}
             </div>
           </div>
-          <div className="h-2 bg-[#F2F2F7] rounded-full overflow-hidden">
-            <div className="h-full rounded-full bg-[#F5C72C] transition-all" style={{ width: `${annualGoalPct}%` }} />
-          </div>
-          <div className="flex justify-between mt-1.5">
-            <span className="text-[11px] text-[#AAAAAA]">{fmtCurrency(annualRunRate)} projected / {fmtCurrency(ANNUAL_REVENUE_GOAL)} goal</span>
-            {annualRunRate < ANNUAL_REVENUE_GOAL && (
-              <span className="text-[11px] text-[#AAAAAA]">{fmtCurrency(ANNUAL_REVENUE_GOAL - annualRunRate)} gap</span>
-            )}
-          </div>
-        </div>
+        )}
 
       </div>
 
