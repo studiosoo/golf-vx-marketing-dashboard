@@ -8,7 +8,7 @@
 ## Project Identity
 
 - **Repo:** `studiosoo/golf-vx-marketing-dashboard`
-- **Domain:** `dashboard.playgolfvx.com`
+- **Domain:** `golfvxdashboard.studiosoo.com`
 - **Purpose:** Internal marketing operations dashboard for Golf VX locations, operated by Studio Soo (marketing agency)
 - **Users:** Studio Soo marketers (full access), location staff (view-only), Golf VX HQ (future aggregate view)
 - **Current pilot:** Golf VX Arlington Heights (644 E Rand Rd, Arlington Heights, IL 60004)

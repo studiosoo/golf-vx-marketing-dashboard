@@ -10,7 +10,7 @@ The goal is to help ChatGPT 5.4 Pro analyze the product as a **Business Intellig
 ## Repository identity
 
 - **Repository:** `studiosoo/golf-vx-marketing-dashboard`
-- **Primary domain:** `dashboard.playgolfvx.com`
+- **Primary domain:** `golfvxdashboard.studiosoo.com`
 - **Purpose:** Internal marketing operations dashboard for Golf VX locations
 - **Primary current pilot location:** **Golf VX Arlington Heights**
 - **Primary operator:** **Studio Soo** (marketing agency)
