@@ -136,7 +136,7 @@ function WinterClinicAttendeeModal({
   );
 }
 
-export default function WinterClinicDetail() {
+export default function WinterClinicDetail({ embedded = false }: { embedded?: boolean }) {
   const [, setLocation] = useLocation();
   const [selectedClinic, setSelectedClinic] = useState<{ shortName: string; displayName: string; category?: 'kids' | 'adults' | 'family' } | null>(null);
 
@@ -150,7 +150,7 @@ export default function WinterClinicDetail() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center gap-3">
+        {!embedded && <div className="flex items-center gap-3">
           <button
             onClick={() => setLocation("/programs")}
             className="p-2 rounded-lg hover:bg-muted transition-colors"
@@ -161,7 +161,7 @@ export default function WinterClinicDetail() {
             <h1 className="text-2xl font-bold">PBGA Winter Clinics</h1>
             <p className="text-muted-foreground">Loading clinic data from Acuity...</p>
           </div>
-        </div>
+        </div>}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="bg-card border border-border rounded-xl p-5 animate-pulse">
@@ -177,7 +177,7 @@ export default function WinterClinicDetail() {
   if (error) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center gap-3">
+        {!embedded && <div className="flex items-center gap-3">
           <button
             onClick={() => setLocation("/programs")}
             className="p-2 rounded-lg hover:bg-muted transition-colors"
@@ -188,7 +188,7 @@ export default function WinterClinicDetail() {
             <h1 className="text-2xl font-bold">PBGA Winter Clinics</h1>
             <p className="text-[#E8453C]">Error loading data: {error.message}</p>
           </div>
-        </div>
+        </div>}
       </div>
     );
   }
@@ -249,7 +249,7 @@ export default function WinterClinicDetail() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
+      {!embedded && <div className="flex items-center gap-3">
         <button
           onClick={() => setLocation("/programs")}
           className="p-2 rounded-lg hover:bg-muted transition-colors"
@@ -265,7 +265,7 @@ export default function WinterClinicDetail() {
         <span className="px-3 py-1 text-xs font-medium bg-[#F0FAF3] text-[#3DB855] rounded-full border border-[#3DB855]/30">
           Active
         </span>
-      </div>
+      </div>}
 
       {/* Overview KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

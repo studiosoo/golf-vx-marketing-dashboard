@@ -11,6 +11,7 @@ import AnniversaryGiveaway from "./pages/AnniversaryGiveaway";
 import AnniversaryGiveawayApplication from "./pages/AnniversaryGiveawayApplication";
 import AnniversaryGiveawayThankYou from "./pages/AnniversaryGiveawayThankYou";
 import CampaignDetail from "./pages/CampaignDetail";
+import ActivityDetail from "./pages/ActivityDetail";
 import MetaAdsCampaignDetail from "./pages/MetaAdsCampaignDetail";
 import ProgramDetailRouter from "./pages/ProgramDetailRouter";
 import MemberProfile from "./pages/MemberProfile";
@@ -53,6 +54,7 @@ import {
   OperationsTasksWrapper,
   PerformancePageWrapper,
   ReportsPageWrapper,
+  StudioSooActivitiesWrapper,
   StudioSooProductionWrapper,
 } from "./pages/ControlTowerWrappers";
 import {
@@ -116,6 +118,12 @@ function DashboardAppRoutes() {
         <Route path="/app/:venueSlug/studio-soo/campaigns" component={OperationsCampaignsWrapper} />
         <Route path="/app/:venueSlug/studio-soo/campaigns/:id" component={CampaignDetail} />
         <Route path="/app/:venueSlug/studio-soo/production" component={StudioSooProductionWrapper} />
+        <Route path="/app/:venueSlug/studio-soo/activities/all" component={StudioSooActivitiesWrapper} />
+        <Route path="/app/:venueSlug/studio-soo/activities/programs" component={StudioSooActivitiesWrapper} />
+        <Route path="/app/:venueSlug/studio-soo/activities/promotions" component={StudioSooActivitiesWrapper} />
+        <Route path="/app/:venueSlug/studio-soo/activities/local" component={StudioSooActivitiesWrapper} />
+        <Route path="/app/:venueSlug/studio-soo/activities/:tab/:id" component={ActivityDetail} />
+        <Route path="/app/:venueSlug/studio-soo/activities">{params => <Redirect to={appRoutes.venue(params.venueSlug).studioSoo.activityPrograms} />}</Route>
 
         <Route path="/app/:venueSlug/audience">{params => <Redirect to={appRoutes.venue(params.venueSlug).audience.people} />}</Route>
         <Route path="/app/:venueSlug/audience/people" component={AudiencePeopleWrapper} />

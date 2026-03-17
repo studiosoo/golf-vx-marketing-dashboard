@@ -1,6 +1,7 @@
 import {
   FileText,
   Flag,
+  Grid,
   Layers,
   LayoutDashboard,
   MessageSquare,
@@ -57,6 +58,10 @@ function buildNav(venueSlug: string) {
         venue.studioSoo.autopilot,
         venue.studioSoo.campaigns,
         venue.studioSoo.production,
+        venue.studioSoo.activityPrograms,
+        venue.studioSoo.activityPromotions,
+        venue.studioSoo.activityLocal,
+        venue.studioSoo.activityAll,
         // Keep matching old operations paths for backward compatibility
         venue.operations.home,
         venue.operations.paidMedia,
@@ -66,9 +71,10 @@ function buildNav(venueSlug: string) {
         venue.operations.content,
       ],
       children: [
-        { label: "Autopilot",   path: venue.studioSoo.autopilot,   icon: Zap },
-        { label: "Campaigns",   path: venue.studioSoo.campaigns,   icon: Flag },
-        { label: "Production",  path: venue.studioSoo.production,  icon: Layers },
+        { label: "Autopilot",   path: venue.studioSoo.autopilot,        icon: Zap },
+        { label: "Campaigns",   path: venue.studioSoo.campaigns,        icon: Flag },
+        { label: "Activities",  path: venue.studioSoo.activityPrograms, icon: Grid },
+        { label: "Production",  path: venue.studioSoo.production,       icon: Layers },
       ],
     },
     {

@@ -1,8 +1,21 @@
 import { z } from "zod";
 import { router, protectedProcedure } from "../_core/trpc";
-import { getTimelineTasks, createAsanaTask, getProjectUrl, CAMPAIGN_SECTIONS, MARKETING_TIMELINE_PROJECT_ID } from "../asana";
+import { getTimelineTasks, createAsanaTask, getProjectUrl, getProjectTasks, getProjectBudget, CAMPAIGN_SECTIONS, MARKETING_TIMELINE_PROJECT_ID } from "../asana";
 
 export const asanaRouter = router({
+  getProjectTasks: protectedProcedure
+    .input(z.object({ projectGid: z.string().min(1) }))
+    .query(async ({ input }) => {
+      const tasks = await getProjectTasks(input.projectGid);
+      return { tasks };
+    }),
+
+  getProjectBudget: protectedProcedure
+    .input(z.object({ projectGid: z.string().min(1) }))
+    .query(async ({ input }) => {
+      return await getProjectBudget(input.projectGid);
+    }),
+
   getTimeline: protectedProcedure.query(async () => {
     const tasks = await getTimelineTasks();
     return {

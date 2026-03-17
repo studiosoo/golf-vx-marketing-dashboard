@@ -278,7 +278,7 @@ function EventAttendeeModal({
   );
 }
 
-export default function SundayClinicDetail() {
+export default function SundayClinicDetail({ embedded = false }: { embedded?: boolean }) {
   const [attendeeModal, setAttendeeModal] = useState<AttendeeType | null>(null);
   const [sourceModal, setSourceModal] = useState<SourceModal>(null);
   const [eventModal, setEventModal] = useState<EventModal>(null);
@@ -310,7 +310,7 @@ export default function SundayClinicDetail() {
     <>
       <div className="space-y-6">
         {/* Header */}
-        <div>
+        {!embedded && <div>
           <h1 className="text-3xl font-bold text-foreground">Sunday Clinic — Drive Day Series</h1>
           <p className="text-muted-foreground">6-session public clinic series (Jan 25 – Mar 29, 2026) · Member retention & new visitor acquisition</p>
           {/* Topic Series Overview */}
@@ -331,7 +331,7 @@ export default function SundayClinicDetail() {
               <span className="text-xs text-[#888888] ml-1">Mar 22 · Mar 29</span>
             </div>
           </div>
-        </div>
+        </div>}
 
         {/* Dual Goal Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

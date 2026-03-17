@@ -156,7 +156,7 @@ export const enchargeRouter = router({
     try {
       return { count: await encharge.getAHTILTagCount() };
     } catch (err) {
-      return { count: 0 };
+      return { count: null };
     }
   }),
 });
