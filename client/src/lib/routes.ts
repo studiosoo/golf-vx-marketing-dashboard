@@ -68,6 +68,7 @@ export const appRoutes = {
         autopilot: `${base}/studio-soo/autopilot`,
         campaigns: `${base}/studio-soo/campaigns`,
         campaignDetail: (id: string | number) => `${base}/studio-soo/campaigns/${id}`,
+        production: `${base}/studio-soo/production`,
       },
       audience: {
         home: `${base}/audience`,

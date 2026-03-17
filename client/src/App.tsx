@@ -53,6 +53,7 @@ import {
   OperationsTasksWrapper,
   PerformancePageWrapper,
   ReportsPageWrapper,
+  StudioSooProductionWrapper,
 } from "./pages/ControlTowerWrappers";
 import {
   DEFAULT_VENUE_SLUG,
@@ -114,6 +115,7 @@ function DashboardAppRoutes() {
         <Route path="/app/:venueSlug/studio-soo/autopilot" component={InsightsRecommendationsWrapper} />
         <Route path="/app/:venueSlug/studio-soo/campaigns" component={OperationsCampaignsWrapper} />
         <Route path="/app/:venueSlug/studio-soo/campaigns/:id" component={CampaignDetail} />
+        <Route path="/app/:venueSlug/studio-soo/production" component={StudioSooProductionWrapper} />
 
         <Route path="/app/:venueSlug/audience">{params => <Redirect to={appRoutes.venue(params.venueSlug).audience.people} />}</Route>
         <Route path="/app/:venueSlug/audience/people" component={AudiencePeopleWrapper} />

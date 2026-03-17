@@ -4,6 +4,7 @@ import Performance from "./Performance";
 import StrategicCampaigns from "./StrategicCampaigns";
 import MetaAds from "./MetaAds";
 import Programs from "./Programs";
+import Production from "./Production";
 import PromotionsHub from "./PromotionsHub";
 import CommunicationsHub from "./CommunicationsHub";
 import CalendarViewer from "./CalendarViewer";
@@ -78,6 +79,10 @@ export function InsightsAskWrapper() {
 
 export function InsightsResearchWrapper() {
   return <MarketResearch />;
+}
+
+export function StudioSooProductionWrapper() {
+  return <Production />;
 }
 
 export function AdminIntegrationsWrapper() {
