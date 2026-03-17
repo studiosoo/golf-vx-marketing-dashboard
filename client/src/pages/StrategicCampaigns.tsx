@@ -27,6 +27,7 @@ export default function StrategicCampaigns() {
   const [, setLocation] = useLocation();
   const { data: campaigns, isLoading } = trpc.strategicCampaigns.getOverview.useQuery();
   const { data: kpiData } = trpc.intelligence.getStrategicKPIs.useQuery();
+  const [activeTab, setActiveTab] = useState<"campaigns" | "timeline">("campaigns");
 
   if (isLoading) {
     return (
@@ -43,8 +44,6 @@ export default function StrategicCampaigns() {
       </div>
     );
   }
-
-  const [activeTab, setActiveTab] = useState<"campaigns" | "timeline">("campaigns");
 
   return (
     <div className="space-y-6">
