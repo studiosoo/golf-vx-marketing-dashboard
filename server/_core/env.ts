@@ -20,7 +20,7 @@ export const ENV = {
   // SQR.co short link + QR code platform
   sqrApiKey: process.env.SQR_API_KEY ?? "",
   // Public base URL (used for promo landing page links)
-  appBaseUrl: process.env.APP_BASE_URL ?? "https://dashboard.playgolfvx.com",
+  appBaseUrl: process.env.APP_BASE_URL ?? "https://golfvxdashboard.studiosoo.com",
   // Password bypass — when set, allows login with this password instead of Manus OAuth
   bypassPassword: process.env.BYPASS_PASSWORD ?? "",
 };
