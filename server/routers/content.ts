@@ -452,21 +452,17 @@ export const previewRouter = router({
     const memberRows = Array.isArray((memberResult as any)[0]) ? (memberResult as any)[0] : (memberResult as any);
     const m = (memberRows as any)[0] || {};
 
-    const revenueResult = await database.execute(`
-      SELECT COALESCE(SUM(amount), 0) as thisMonth
-      FROM revenue
-      WHERE date >= DATE_FORMAT(NOW(), '%Y-%m-01')
-    `);
-    const revenueLastMonthResult = await database.execute(`
-      SELECT COALESCE(SUM(amount), 0) as lastMonth
-      FROM revenue
-      WHERE date >= DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 1 MONTH), '%Y-%m-01')
-        AND date < DATE_FORMAT(NOW(), '%Y-%m-01')
-    `);
-    const revRows = Array.isArray((revenueResult as any)[0]) ? (revenueResult as any)[0] : (revenueResult as any);
-    const revLastRows = Array.isArray((revenueLastMonthResult as any)[0]) ? (revenueLastMonthResult as any)[0] : (revenueLastMonthResult as any);
-    const thisMonthRevenue = parseFloat((revRows as any)[0]?.thisMonth || '0');
-    const lastMonthRevenue = parseFloat((revLastRows as any)[0]?.lastMonth || '0');
+    // Use toastDailySummary (real Toast POS data) — revenue table is empty
+    const { toastDailySummary } = await import("../../drizzle/schema");
+    const now = new Date();
+    const currentMonthPrefix = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
+    const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastMonthPrefix = `${lastMonthDate.getFullYear()}${String(lastMonthDate.getMonth() + 1).padStart(2, "0")}`;
+    const allToastRows = await database.select().from(toastDailySummary);
+    const thisMonthRows = allToastRows.filter(r => String(r.date).startsWith(currentMonthPrefix));
+    const lastMonthRows = allToastRows.filter(r => String(r.date).startsWith(lastMonthPrefix));
+    const thisMonthRevenue = thisMonthRows.reduce((s, r) => s + parseFloat(String(r.totalRevenue ?? 0)), 0);
+    const lastMonthRevenue = lastMonthRows.reduce((s, r) => s + parseFloat(String(r.totalRevenue ?? 0)), 0);
 
     const budgetResult = await database.execute(`
       SELECT
