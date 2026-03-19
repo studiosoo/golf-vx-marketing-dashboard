@@ -553,4 +553,72 @@ font-family: 'Inter', -apple-system, 'SF Pro Text', sans-serif;
 
 ---
 
-*Last updated: March 2, 2026*
+*Last updated: March 19, 2026*
+
+---
+
+## Current Key Paths
+
+```
+client/src/pages/         # One file per page (100+ pages)
+client/src/components/    # Shared UI components
+  └── ui/                 # shadcn/ui primitives
+  └── layout/             # SidebarNav, navConfig, CollapsibleNavItem
+  └── activities/         # Activity-specific components (AssetGallery, etc.)
+client/src/data/          # Static seed data (reportCampaignData, etc.)
+client/src/lib/
+  └── trpc.ts             # tRPC client
+  └── design-tokens.ts    # Canonical v2 design tokens
+server/
+  ├── _core/index.ts      # Express app + startup migrations
+  ├── routers.ts          # tRPC root router (imports domain routers)
+  ├── routers/            # Domain routers: members, campaigns, advertising,
+  │                       #   content, programs, activities, intelligence, asana
+  ├── db.ts               # Drizzle query helpers (~1,000 lines)
+  ├── acuity.ts           # Acuity Scheduling API client
+  ├── metaAds.ts          # Meta Ads API client + cache
+  ├── encharge.ts         # Encharge email API client
+  └── autonomous.ts       # AI marketing engine
+drizzle/schema.ts         # All 39 table definitions
+scripts/                  # One-off ops scripts (import-toast-authoritative.cjs, etc.)
+```
+
+---
+
+## Agent Operating Rules — V1
+
+> These rules apply to all Claude agents and sessions working in this repository.
+> They exist to prevent scope creep, protect production data, and keep PRs reviewable.
+
+### Scope Constraints
+
+- **Touch only what the task explicitly names.** Do not refactor, clean up, or "improve" adjacent code.
+- **One concern per PR.** Data ops, schema changes, and feature work must not be bundled together.
+- **No schema or migration changes** unless the task spec explicitly requires them and the output section documents what changed and why.
+- **No env changes** unless the task spec names specific variables. Never log or echo secret values.
+
+### Branch Rules
+
+- Always branch from latest `origin/main` unless told otherwise.
+- Branch naming: `feature/`, `fix/`, `chore/`, `ops/`, `audit/` prefixes required.
+- Never commit directly to `main`.
+- Never force-push to `main` or `origin/main`.
+
+### Production Data Rules
+
+- **No production DB writes** without explicit user approval in the current session.
+- Before any import or mutation: run a dry-run, save a pre-snapshot, report the plan.
+- Approved data windows must be enforced in the script itself, not just described.
+- Import scripts must be idempotent (`ON DUPLICATE KEY UPDATE` or equivalent).
+
+### PR Rules
+
+- PRs must include: what changed, why, what was validated, and the exact run command if an ops script is involved.
+- Do not merge or deploy — surface the PR link and stop.
+- File scope must be verified before opening the PR.
+
+### Output Rules
+
+- Return structured reports in the format the task spec defines — no improvised formats.
+- Flag uncertainty explicitly rather than guessing. Use "UNCLEAR — needs verification" when a fact cannot be confirmed from the codebase alone.
+- Never claim an import or fix is complete without showing evidence (query result, dry-run output, or test pass).
