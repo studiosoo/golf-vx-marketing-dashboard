@@ -4,6 +4,7 @@ import * as db from "../db";
 import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
 import * as encharge from "../encharge";
+import { stripeSnapshot } from "../data/stripe-snapshot";
 
 export const membersRouter = router({
   list: protectedProcedure
@@ -22,6 +23,15 @@ export const membersRouter = router({
     .query(async ({ input }) => {
       return await db.getMemberStats(input?.venueId ?? 1);
     }),
+
+  /**
+   * Returns the authoritative Stripe member snapshot (2026-03-18 CSV export).
+   * Source-of-truth for member count, MRR, and tier breakdown on the Overview.
+   * Update server/data/stripe-snapshot.ts when a new Stripe export is available.
+   */
+  getStripeSnapshot: protectedProcedure.query(() => {
+    return stripeSnapshot;
+  }),
 
   getById: protectedProcedure
     .input(z.object({ id: z.number(), venueId: z.number().default(1) }))
