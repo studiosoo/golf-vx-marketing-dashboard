@@ -172,6 +172,14 @@ export default function Home() {
     enabled: isAuthenticated,
     staleTime: 5 * 60 * 1000,
   });
+  const { data: stripeSnap } = trpc.members.getStripeSnapshot.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 60 * 60 * 1000,
+  });
+  const { data: strategicKPIs } = trpc.intelligence.getStrategicKPIs.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 5 * 60 * 1000,
+  });
   const { data: ahtilData } = trpc.encharge.getAHTILCount.useQuery(undefined, {
     enabled: isAuthenticated,
     staleTime: 10 * 60 * 1000,
@@ -290,22 +298,33 @@ export default function Home() {
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
   const firstName = user?.name?.split(" ")[0] || "there";
 
-  // Revenue values
-  const mrr = members?.mrr ?? 0;
+  // Revenue values (mrr derived below after Stripe snapshot check)
   const toastMTD = (toastSummary as any)?.thisMonthRevenue ?? 0;
   const toastOrders = (toastSummary as any)?.thisMonthOrders ?? 0;
   const toastLastMonth = (toastSummary as any)?.lastMonthRevenue ?? 0;
   const acuityTotal = (acuityRevenue as any)?.total ?? 0;
   const acuityBookings = (acuityRevenue as any)?.totalBookings ?? 0;
 
-  // Member breakdown by plan (from getStats)
-  const memberBreakdown = [
-    { label: "All Access Ace", count: memberStats?.allAccessCount ?? 0 },
-    { label: "Swing Saver", count: memberStats?.swingSaversCount ?? 0 },
-    { label: "Golf VX Pro", count: memberStats?.golfVxProCount ?? 0 },
-  ].filter(t => t.count > 0);
+  // Stripe snapshot is authoritative source for member count, MRR, and tier breakdown.
+  // Falls back to Boomerang DB snapshot when Stripe snapshot is unavailable.
+  const stripeTiers = stripeSnap?.tiers ?? [];
+  const stripeMRR = stripeSnap?.totalMRR ?? null;
+  const stripeMemberTotal = stripeSnap?.payingMembers ?? null;
 
-  const memberTotal = members?.total ?? 0;
+  // Tier table for display (Stripe-derived, excludes comped/staff from the main count)
+  const memberBreakdown = stripeTiers.length > 0
+    ? stripeTiers.filter(t => t.mrr > 0).map(t => ({ label: t.name, count: t.count }))
+    : [
+        { label: "All Access Ace", count: memberStats?.allAccessCount ?? 0 },
+        { label: "Swing Saver", count: memberStats?.swingSaversCount ?? 0 },
+        { label: "Golf VX Pro", count: memberStats?.golfVxProCount ?? 0 },
+      ].filter(t => t.count > 0);
+
+  // Prefer Stripe snapshot for authoritative member count; fall back to DB snapshot
+  const memberTotal = stripeMemberTotal ?? members?.total ?? 0;
+  // MRR: prefer Stripe snapshot; fall back to DB-derived MRR
+  const mrr = stripeMRR ?? members?.mrr ?? 0;
+
   const memberGoal = 300;
   const memberGoalPct = memberGoal > 0 ? Math.min((memberTotal / memberGoal) * 100, 100) : 0;
 
@@ -329,7 +348,7 @@ export default function Home() {
   const annualGoalPct = Math.min((annualRunRate / ANNUAL_REVENUE_GOAL) * 100, 100);
   const hasAnyRevenue = mrr > 0 || toastMTD > 0 || acuityTotal > 0;
 
-  // Strategic campaigns — enrich membership_acquisition with live member KPI
+  // Strategic campaigns — enrich all 4 campaign cards with live KPI data
   const rawCampaigns = (strategicOverview ?? []) as any[];
   const enrichedCampaigns = rawCampaigns.map((c: any) => {
     if (c.id === "membership_acquisition" && memberTotal >= 0) {
@@ -339,13 +358,33 @@ export default function Home() {
         primaryKpi: { current: memberTotal, target: memberGoal, remaining, unit: "" },
       };
     }
+    if (c.id === "trial_conversion" && strategicKPIs?.trialConversion != null) {
+      const { current, target } = strategicKPIs.trialConversion;
+      return {
+        ...c,
+        primaryKpi: { current: Math.round(current * 10) / 10, target, unit: "%" },
+      };
+    }
+    if (c.id === "member_retention" && strategicKPIs?.memberRetention != null) {
+      const { retentionRate, target } = strategicKPIs.memberRetention;
+      return {
+        ...c,
+        primaryKpi: { current: Math.round(retentionRate * 10) / 10, target, unit: "%" },
+      };
+    }
     return c;
   });
-  const activeCampaigns = enrichedCampaigns.filter((c: any) => c.totalSpend > 0 || c.totalRevenue > 0 || (c.primaryKpi?.current ?? 0) > 0);
+  // Show all 4 campaign categories — include even those with no spend (KPI-only cards)
+  const activeCampaigns = enrichedCampaigns.filter((c: any) =>
+    c.totalSpend > 0 || c.totalRevenue > 0 || (c.primaryKpi?.current ?? 0) > 0
+  );
 
   // 2026 Key Goals data
   const igFollowers = (igStats as any)?.followers ?? (igStats as any)?.followers_count ?? null;
-  const emailSubscribers = ahtilData?.count ?? null;
+  // Email Subscribers: live Encharge API (AHTIL tag count); static fallback = 100 (CSV 2026-03-18)
+  const AHTIL_FALLBACK = 100;
+  const emailSubscribers = ahtilData?.count != null ? ahtilData.count : AHTIL_FALLBACK;
+  const emailSubscribersIsLive = ahtilData?.count != null;
 
   const igTokenNote = !tokenValid && tokenStatus !== undefined
     ? "Token refresh needed"
@@ -383,6 +422,8 @@ export default function Home() {
       display: fmt(memberTotal),
       goalDisplay: "300",
       color: "#3DB855",
+      statusNote: stripeSnap ? `Stripe · as of ${stripeSnap.asOf}` : null,
+      statusColor: "#888888",
     },
     {
       label: "Instagram Followers",
@@ -400,9 +441,11 @@ export default function Home() {
       icon: Mail,
       current: emailSubscribers,
       goal: 5000,
-      display: emailSubscribers != null ? fmt(emailSubscribers) : "—",
+      display: fmt(emailSubscribers),
       goalDisplay: "5,000",
       color: "#111111",
+      statusNote: emailSubscribersIsLive ? "Encharge · AHTIL tag · live" : "Encharge · AHTIL tag · CSV 2026-03-18",
+      statusColor: "#888888",
     },
   ];
 
@@ -455,9 +498,12 @@ export default function Home() {
 
   const DATA_SOURCES: DataSource[] = [
     {
-      label: "Members · Boomerang",
-      status: snapLoading ? "loading" : memberTotal > 0 ? "live" : "offline",
-      detail: snapLoading ? "Syncing…" : memberTotal > 0 ? `${fmt(memberTotal)} active` : "No members synced yet",
+      label: "Members · Stripe",
+      status: stripeSnap ? "live" : snapLoading ? "loading" : memberTotal > 0 ? "live" : "offline",
+      detail: stripeSnap
+        ? `${fmt(memberTotal)} paying · ${fmtCurrency(mrr)} MRR · as of ${stripeSnap.asOf}`
+        : snapLoading ? "Syncing…" : memberTotal > 0 ? `${fmt(memberTotal)} active` : "No members synced yet",
+      note: stripeSnap ? "Static snapshot — update server/data/stripe-snapshot.ts on new export" : undefined,
     },
     {
       label: "Revenue · Toast POS",
@@ -476,10 +522,9 @@ export default function Home() {
     igDataSource(),
     {
       label: "Email · Encharge",
-      status: emailSubscribers != null ? "live" : "loading",
-      detail: emailSubscribers != null
-        ? `${fmt(emailSubscribers)} AHTIL contacts`
-        : "Connecting to Encharge…",
+      status: emailSubscribersIsLive ? "live" : "warning",
+      detail: `${fmt(emailSubscribers)} AHTIL contacts`,
+      note: emailSubscribersIsLive ? undefined : "Encharge API not responding — showing CSV snapshot (2026-03-18)",
     },
     {
       label: "Meta Ads",
@@ -582,7 +627,7 @@ export default function Home() {
                 className="text-[42px] font-bold text-[#111111] leading-none tracking-tight hover:text-[#F5C72C] transition-colors cursor-pointer"
                 title="View member list"
               >
-                {snapLoading || members?.total == null ? "—" : fmt(memberTotal)}
+                {fmt(memberTotal)}
               </button>
               {members?.newThisMonth !== undefined && members.newThisMonth !== 0 && (
                 <span className={cn("text-[13px] font-semibold mb-1.5", members.newThisMonth > 0 ? "text-[#3DB855]" : "text-[#FF3B30]")}>
@@ -590,22 +635,40 @@ export default function Home() {
                 </span>
               )}
             </div>
-            <p className="text-[13px] text-[#888888]">Active Members</p>
-            {memberBreakdown.length > 0 && (
-              <div className="flex gap-4 mt-3">
-                {memberBreakdown.map(t => (
-                  <div key={t.label}>
-                    <p className="text-[16px] font-bold text-[#111111]">{t.count}</p>
-                    <p className="text-[11px] text-[#AAAAAA]">{t.label}</p>
-                  </div>
-                ))}
-              </div>
+            <p className="text-[13px] text-[#888888]">
+              Paying Members
+              {stripeSnap && (
+                <span className="ml-2 text-[10px] text-[#AAAAAA]">· Stripe · {stripeSnap.asOf}</span>
+              )}
+            </p>
+            {stripeSnap && (
+              <p className="text-[11px] text-[#AAAAAA] mt-0.5">{stripeSnap.totalContacts} total contacts · {stripeSnap.billingBreakdown.monthly} monthly · {stripeSnap.billingBreakdown.annual} annual</p>
             )}
           </div>
-          <div className="flex flex-col justify-center space-y-2">
-            <p className="text-[12px] text-[#888888]">Goal progress is tracked in the <strong className="text-[#111111]">2026 Key Goals</strong> section above.</p>
-            {members?.newThisMonth === undefined && (
-              <p className="text-[11px] text-[#AAAAAA]">New member count will appear once synced.</p>
+          {/* Stripe tier table */}
+          <div>
+            {stripeSnap ? (
+              <div className="space-y-1.5">
+                {stripeSnap.tiers.map(t => (
+                  <div key={t.name} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-[12px] font-medium text-[#111111] truncate">{t.name}</span>
+                      <span className="text-[11px] text-[#AAAAAA] shrink-0">{t.count}</span>
+                    </div>
+                    <span className="text-[12px] font-semibold text-[#111111] shrink-0">
+                      {t.mrr > 0 ? fmtCurrency(t.mrr) : "—"}
+                    </span>
+                  </div>
+                ))}
+                <div className="pt-1.5 mt-1.5 border-t border-[#F0F0F0] flex items-center justify-between">
+                  <span className="text-[11px] font-semibold text-[#888888]">Total MRR</span>
+                  <span className="text-[13px] font-bold text-[#111111]">{fmtCurrency(stripeSnap.totalMRR)}</span>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col justify-center space-y-2">
+                <p className="text-[12px] text-[#888888]">Goal progress is tracked in the <strong className="text-[#111111]">2026 Key Goals</strong> section above.</p>
+              </div>
             )}
           </div>
         </div>
