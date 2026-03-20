@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { TrendingUp, Target, DollarSign, BarChart3, ChevronRight, TrendingDown, CalendarRange, LayoutGrid } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useLocation } from "wouter";
+import { DEFAULT_VENUE_SLUG } from "@/lib/routes";
 import AsanaTimeline from "@/components/AsanaTimeline";
 import { MetaAdsStatusBadge } from "@/components/MetaAdsStatusBadge";
 
@@ -23,8 +24,27 @@ const CAMPAIGN_BG_COLORS: Record<string, string> = {
   amber: "bg-[#F5C72C]/10 text-[#111111]",
 };
 
+function getProgramRoute(program: { id: number; name: string }, venueSlug: string): string {
+  const name = program.name.toLowerCase();
+  if (name.includes("winter clinic") || name.includes("pbga winter")) {
+    return `/app/${venueSlug}/studio-soo/activities/programs/winter-camp`;
+  }
+  if (name.includes("summer camp") || name.includes("junior")) {
+    return `/app/${venueSlug}/studio-soo/activities/programs/junior-summer-camp`;
+  }
+  if (name.includes("sunday clinic")) {
+    return `/app/${venueSlug}/studio-soo/activities/programs/sunday-clinic`;
+  }
+  if (name.includes("trial")) {
+    return `/app/${venueSlug}/studio-soo/activities/promotions/trial-session`;
+  }
+  return `/app/${venueSlug}/operations/campaigns/${program.id}`;
+}
+
 export default function StrategicCampaigns() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
+  const venueSlugMatch = location.match(/\/app\/([^/]+)\//);
+  const venueSlug = venueSlugMatch?.[1] || DEFAULT_VENUE_SLUG;
   const { data: campaigns, isLoading } = trpc.strategicCampaigns.getOverview.useQuery();
   const { data: kpiData } = trpc.intelligence.getStrategicKPIs.useQuery();
   const [activeTab, setActiveTab] = useState<"campaigns" | "timeline">("campaigns");
@@ -174,22 +194,20 @@ export default function StrategicCampaigns() {
                 )}
                 {campaign.id === 'trial_conversion' && kpiData && (
                   <div className="p-4 rounded-lg border-2 border-primary/20 bg-primary/5">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Primary KPI — Trial Conversion Rate</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Primary KPI — New Paying Members (90d)</p>
                     <div className="flex items-end justify-between mb-2">
                       <span className={`text-4xl font-black ${
                         kpiData.trialConversion.current >= kpiData.trialConversion.target
                           ? 'text-[#3DB855]'
                           : kpiData.trialConversion.current > 0 ? 'text-[#F5C72C]' : 'text-muted-foreground'
                       }`}>
-                        {kpiData.trialConversion.current.toFixed(1)}%
+                        {kpiData.trialConversion.current}
                       </span>
-                      <span className="text-sm text-muted-foreground mb-1">target: {kpiData.trialConversion.target}%</span>
+                      <span className="text-sm text-muted-foreground mb-1">goal: {kpiData.trialConversion.target} members</span>
                     </div>
                     <Progress value={kpiData.trialConversion.progress} className="h-2.5" />
                     <p className="text-xs text-muted-foreground mt-2">
-                      {kpiData.trialConversion.current < kpiData.trialConversion.target
-                        ? `${(kpiData.trialConversion.target - kpiData.trialConversion.current).toFixed(1)}% below target`
-                        : `${(kpiData.trialConversion.current - kpiData.trialConversion.target).toFixed(1)}% above target`}
+                      {kpiData.trialConversion.note}
                     </p>
                   </div>
                 )}
@@ -293,7 +311,7 @@ export default function StrategicCampaigns() {
                       return (
                         <button
                           key={program.id}
-                          onClick={() => setLocation("/programs")}
+                          onClick={() => setLocation(getProgramRoute(program, venueSlug))}
                           className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-accent transition-colors text-left group"
                         >
                           <div className="flex-1 min-w-0">
