@@ -21,7 +21,7 @@ const META_ADS_MAPPING: Record<string, string> = {
   "sunday-clinic":      "Sunday Clinic",
   "winter-camp":        "Winter Clinic",
   "junior-summer-camp": "Summer Camp",
-  "annual-giveaway":    "Membership Giveaway",
+  "annual-giveaway":    "Annual Giveaway",
   "trial-session":      "Trial",
 };
 
