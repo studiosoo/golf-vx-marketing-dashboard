@@ -4,6 +4,7 @@ import * as db from "../db";
 import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
 import * as encharge from "../encharge";
+import { readStripeSnapshot } from "../stripeCache";
 
 export const membersRouter = router({
   list: protectedProcedure
@@ -114,6 +115,19 @@ export const membersRouter = router({
         );
       }
       return { success: true, mergedCount: input.duplicateIds.length };
+    }),
+
+  getStripeSnapshot: protectedProcedure
+    .input(z.object({ venueId: z.number().default(1) }).optional())
+    .query(() => {
+      const snapshot = readStripeSnapshot();
+      if (!snapshot) return null;
+      return {
+        generatedAt: snapshot.generatedAt,
+        exportDate: snapshot.exportDate,
+        summary: snapshot.summary,
+        tiers: snapshot.tiers,
+      };
     }),
 });
 

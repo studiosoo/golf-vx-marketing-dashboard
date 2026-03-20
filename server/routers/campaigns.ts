@@ -681,16 +681,29 @@ export const dashboardRouter = router({
   getOverview: protectedProcedure
     .input(z.object({ startDate: z.date(), endDate: z.date() }).optional())
     .query(async () => {
+      const { readStripeSnapshot } = await import("../stripeCache");
       const [memberStats, activeCampaigns] = await Promise.all([
         db.getMemberStats(),
         db.getCampaignsByStatus('active'),
       ]);
-      const totalMembers = memberStats?.totalMembers || 0;
-      const activeMembers = memberStats?.activeMembers || 0;
-      const allAccessMRR = parseFloat(memberStats?.allAccessMRR || '0');
-      const swingSaversMRR = parseFloat(memberStats?.swingSaversMRR || '0');
-      const golfVxProMRR = parseFloat(memberStats?.golfVxProMRR || '0');
-      const monthlyRecurringRevenue = allAccessMRR + swingSaversMRR + golfVxProMRR;
+
+      // Prefer Stripe snapshot for member count and MRR when available —
+      // it is the authoritative billing source (103 paying vs 91 from Boomerang DB).
+      const stripeSnap = readStripeSnapshot();
+      const totalMembers = stripeSnap
+        ? stripeSnap.summary.payingMembers
+        : (memberStats?.totalMembers || 0);
+      const activeMembers = stripeSnap
+        ? stripeSnap.summary.totalActive
+        : (memberStats?.activeMembers || 0);
+      const monthlyRecurringRevenue = stripeSnap
+        ? stripeSnap.summary.mrr
+        : (() => {
+            const allAccessMRR = parseFloat(memberStats?.allAccessMRR || '0');
+            const swingSaversMRR = parseFloat(memberStats?.swingSaversMRR || '0');
+            const golfVxProMRR = parseFloat(memberStats?.golfVxProMRR || '0');
+            return allAccessMRR + swingSaversMRR + golfVxProMRR;
+          })();
       const activeCampaignsCount = activeCampaigns.length;
       const marketingSpend = activeCampaigns
         .reduce((s, c) => s + parseFloat(c.actualSpend || '0'), 0)
