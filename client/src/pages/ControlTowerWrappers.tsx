@@ -16,6 +16,7 @@ import Duplicates from "./Duplicates";
 import Autopilot from "./Autopilot";
 import Assistant from "./Assistant";
 import MarketResearch from "./MarketResearch";
+import Strategy from "./Strategy";
 import Integrations from "./Integrations";
 
 export function DashboardPageWrapper() {
@@ -80,6 +81,10 @@ export function InsightsAskWrapper() {
 
 export function InsightsResearchWrapper() {
   return <MarketResearch />;
+}
+
+export function InsightsStrategyWrapper() {
+  return <Strategy />;
 }
 
 export function StudioSooActivitiesWrapper() {

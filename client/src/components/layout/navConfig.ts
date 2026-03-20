@@ -1,4 +1,5 @@
 import {
+  Brain,
   FileText,
   Flag,
   Grid,
@@ -94,12 +95,14 @@ function buildNav(venueSlug: string) {
         venue.insights.home,
         venue.insights.ask,
         venue.insights.research,
+        venue.insights.strategy,
         venue.insights.recommendations,
         venue.insights.alerts,
       ],
       children: [
         { label: "Ask",      path: venue.insights.ask,      icon: MessageSquare },
         { label: "Research", path: venue.insights.research, icon: Search },
+        { label: "Strategy", path: venue.insights.strategy, icon: Brain },
       ],
     },
     {

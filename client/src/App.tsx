@@ -44,6 +44,7 @@ import {
   InsightsAskWrapper,
   InsightsRecommendationsWrapper,
   InsightsResearchWrapper,
+  InsightsStrategyWrapper,
   OperationsCalendarWrapper,
   OperationsCampaignsWrapper,
   OperationsCommunicationsWrapper,
@@ -136,6 +137,7 @@ function DashboardAppRoutes() {
         <Route path="/app/:venueSlug/insights/recommendations" component={InsightsRecommendationsWrapper} />
         <Route path="/app/:venueSlug/insights/ask" component={InsightsAskWrapper} />
         <Route path="/app/:venueSlug/insights/research" component={InsightsResearchWrapper} />
+        <Route path="/app/:venueSlug/insights/strategy" component={InsightsStrategyWrapper} />
 
         <Route path="/app/:venueSlug">{params => <Redirect to={appRoutes.venue(params.venueSlug).dashboard} />}</Route>
 
@@ -157,7 +159,7 @@ function LegacyRoutes() {
       <Route path="/intelligence">{() => <Redirect to={venue.insights.recommendations} />}</Route>
       <Route path="/intelligence/autopilot">{() => <Redirect to={venue.insights.recommendations} />}</Route>
       <Route path="/intelligence/assistant">{() => <Redirect to={venue.insights.ask} />}</Route>
-      <Route path="/intelligence/strategy">{() => <Redirect to={venue.insights.recommendations} />}</Route>
+      <Route path="/intelligence/strategy">{() => <Redirect to={venue.insights.strategy} />}</Route>
       <Route path="/intelligence/market-research">{() => <Redirect to={venue.insights.research} />}</Route>
       <Route path="/intelligence/performance">{() => <Redirect to={venue.performance} />}</Route>
       <Route path="/intelligence/revenue">{() => <Redirect to={venue.performance} />}</Route>

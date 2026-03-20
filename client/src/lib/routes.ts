@@ -91,6 +91,7 @@ export const appRoutes = {
         recommendations: `${base}/insights/recommendations`,
         ask: `${base}/insights/ask`,
         research: `${base}/insights/research`,
+        strategy: `${base}/insights/strategy`,
       },
     };
   },
