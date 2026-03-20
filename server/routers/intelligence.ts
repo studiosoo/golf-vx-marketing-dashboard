@@ -138,7 +138,9 @@ export const intelligenceRouter = router({
     const newMembersLastMonth = Number(newMembersRow?.lastMonth || 0);
     const MEMBERSHIP_GOAL = 300;
 
-    const trials = 10;
+    // NOTE: Trial session attendance is not yet tracked in the DB.
+    // "Trial Conversion" is approximated as new paying members created in the last 90 days.
+    // The hardcoded denominator (10) is intentionally removed — we display the raw count instead.
     const conversionsResult = await database.execute(`
       SELECT COUNT(DISTINCT email) as conversions
       FROM members
@@ -146,7 +148,9 @@ export const intelligenceRouter = router({
     `);
     const conversionsRow = Array.isArray((conversionsResult as any)[0]) ? (conversionsResult as any)[0][0] : (conversionsResult as any)[0];
     const conversions = Number(conversionsRow?.conversions || 0);
-    const conversionRate = (conversions / trials) * 100;
+    // Goal: 20 new paying members per 90-day rolling window
+    const NEW_MEMBER_GOAL_90D = 20;
+    const conversionRate = Math.min((conversions / NEW_MEMBER_GOAL_90D) * 100, 100);
 
     const retentionResult = await database.execute(`
       SELECT
@@ -218,9 +222,11 @@ export const intelligenceRouter = router({
       },
       totalMRR: totalMRR,
       trialConversion: {
-        current: conversionRate,
-        target: 20,
-        progress: (conversionRate / 20) * 100,
+        current: conversions,
+        target: NEW_MEMBER_GOAL_90D,
+        progress: conversionRate,
+        progressPct: conversionRate,
+        note: "Trial sessions not yet tracked — showing new paying members (90-day rolling)",
       },
       corporateEvents: {
         current: eventsThisMonth,
