@@ -26,6 +26,20 @@ export const asanaRouter = router({
     };
   }),
 
+  getMasterTimeline: protectedProcedure.query(async () => {
+    // Stub for the ReportTimeline "Asana Live" toggle.
+    // Returns an empty item list; a full implementation would map
+    // Asana timeline tasks to the TimelineItem shape.
+    return {
+      items: [] as Array<{
+        id: string; name: string; category: string; campaigns: string[];
+        datesConfirmed: boolean; start: string; end: string;
+        status: string; kpiHint?: string;
+      }>,
+      fetchedAt: new Date().toISOString(),
+    };
+  }),
+
   createTask: protectedProcedure
     .input(z.object({
       name: z.string().min(1).max(200),
