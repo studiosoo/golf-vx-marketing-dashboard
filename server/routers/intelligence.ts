@@ -611,6 +611,7 @@ export const workspaceRouter = router({
     }))
     .mutation(async ({ input }) => {
       const { invokeLLM, LLM_MODELS } = await import("../_core/llm");
+      const { ENV } = await import("../_core/env");
       const { context } = input;
       let contextData = "";
       try {
@@ -676,9 +677,12 @@ Studio Soo's primary channels: Meta Ads → ClickFunnels landing pages → Acuit
 
 When the user provides data (e.g., "Drive Day had 12 attendees"), acknowledge it, suggest a follow-up action, and offer to draft content. Be concise and specific. Use numbers. Keep responses under 400 words unless more depth is explicitly requested.`;
 
-      const model = LLM_MODELS.chat;
+      // Claude is preferred for chat when ANTHROPIC_API_KEY is set (text-only; image path requires invokeLLM)
+      const useClaudeForChat = Boolean(ENV.anthropicApiKey);
+      const claudeModel = "claude-sonnet-4-6";
+      const geminiModel = LLM_MODELS.chat;
 
-      // If image attached, build multipart last user message
+      // If image attached, build multipart last user message — always uses invokeLLM (Gemini/OpenAI)
       if (input.fileType === "image" && input.fileDataUrl) {
         const priorMessages = input.messages.slice(0, -1);
         const lastMsg = input.messages[input.messages.length - 1];
@@ -693,20 +697,29 @@ When the user provides data (e.g., "Drive Day had 12 attendees"), acknowledge it
             ],
           },
         ];
-        const response = await invokeLLM({ messages, model });
+        const response = await invokeLLM({ messages, model: geminiModel });
         const rawContent = response.choices?.[0]?.message?.content;
         const reply = typeof rawContent === "string" ? rawContent : (Array.isArray(rawContent) ? rawContent.map((c: any) => c.text || "").join("") : "I couldn't generate a response.");
-        return { reply, model };
+        return { reply, model: geminiModel };
       }
 
-      // Standard text chat
-      const messages = [
+      // Standard text chat — use Claude when available
+      const chatMessages = [
         { role: "system" as const, content: systemPrompt },
         ...input.messages.map(msg => ({ role: msg.role as "user" | "assistant" | "system", content: msg.content })),
       ];
-      const response = await invokeLLM({ messages, model });
+
+      if (useClaudeForChat) {
+        const { invokeClaudeLLM } = await import("../_core/claude");
+        const response = await invokeClaudeLLM({ messages: chatMessages }, claudeModel);
+        const rawContent = response.choices[0]?.message?.content ?? "";
+        const reply = typeof rawContent === "string" ? rawContent : "I couldn't generate a response. Please try again.";
+        return { reply, model: response.model };
+      }
+
+      const response = await invokeLLM({ messages: chatMessages, model: geminiModel });
       const reply = response.choices?.[0]?.message?.content || "I couldn't generate a response. Please try again.";
-      return { reply, model };
+      return { reply, model: geminiModel };
     }),
 
   getSuggestedPrompts: protectedProcedure.query(async () => {
@@ -729,7 +742,7 @@ export const aiWorkspaceRouter = router({
     const { LLM_MODELS } = await import("../_core/llm");
     const { ENV } = await import("../_core/env");
     return {
-      chat: LLM_MODELS.chat,
+      chat: ENV.anthropicApiKey ? "claude-sonnet-4-6" : LLM_MODELS.chat,
       analysis: ENV.anthropicApiKey ? "claude-sonnet-4-6" : LLM_MODELS.analysis,
       structured: LLM_MODELS.structured,
     };
