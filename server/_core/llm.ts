@@ -285,6 +285,8 @@ const normalizeResponseFormat = ({
 
 // Models resolved from env vars with hardcoded fallbacks.
 // When OPENAI_API_KEY is set, default to GPT-4o family; otherwise Gemini.
+// Note: chat and analyze paths prefer Claude (invokeClaudeLLM) when ANTHROPIC_API_KEY is set.
+// LLM_MODELS is used for image paths and structured/tool-calling endpoints that need invokeLLM.
 export const LLM_MODELS = {
   get chat()       { return ENV.llmModelChat       || (ENV.openaiApiKey ? "gpt-4o-mini"  : "gemini-2.0-flash-lite"); },
   get analysis()   { return ENV.llmModelAnalysis   || (ENV.openaiApiKey ? "gpt-4o"       : "gemini-2.5-pro"); },
