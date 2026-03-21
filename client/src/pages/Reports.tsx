@@ -24,6 +24,7 @@ import { trpc } from "@/lib/trpc";
 import {
   ChevronDown,
   ChevronRight,
+  ChevronUp,
   Target,
   UserCheck,
   Users,
@@ -34,6 +35,7 @@ import {
   Megaphone,
   MapPin,
   ImageIcon,
+  ArrowRight,
 } from "lucide-react";
 import { ReportTimeline } from "@/components/reports/ReportTimeline";
 import {
@@ -943,6 +945,7 @@ function LocalSEOBlock() {
 // ─── Marketing Performance Highlights ─────────────────────────────────────────
 function MarketingPerformanceHighlights() {
   const [open, setOpen] = useState(true);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   type CardStatus = "active" | "completed" | "planned";
 
@@ -956,6 +959,13 @@ function MarketingPerformanceHighlights() {
     progress?: number;
     phase?: string;
     note?: string;
+    detail: {
+      strategy: string;
+      channels: string;
+      keyDates: string;
+      dataNote: string;
+      activityPath?: string;
+    };
   }[] = [
     {
       id:     "pbga-winter-clinic",
@@ -968,6 +978,13 @@ function MarketingPerformanceHighlights() {
         { label: "Revenue",      value: "—", awaiting: true },
       ],
       note: "Acuity integration in progress",
+      detail: {
+        strategy:    "Studio Soo partnered with PBGA coaches Amy Welch and Romy Hayashi to run a weekly indoor clinic series targeting junior and beginner golfers during peak winter demand. Revenue target: $15,000.",
+        channels:    "PBGA organic · Meta Ads (warm audience) · in-venue signage",
+        keyDates:    "Jan 2026 launch → Mar 2026 final session. Series fully completed.",
+        dataNote:    "Participant count and revenue pending Acuity API integration. Raw appointment data is available — dashboard pull is in progress.",
+        activityPath: "/app/arlington-heights/studio-soo/activities/programs/winter-camp",
+      },
     },
     {
       id:     "swing-saver-promo",
@@ -981,6 +998,13 @@ function MarketingPerformanceHighlights() {
         { label: "Avg Discount",  value: "44% off" },
       ],
       note: "Self-reported · Pending verification",
+      detail: {
+        strategy:    "Annual end-of-year membership promotion offering significant discount on All Access Ace and Swing Saver memberships. Ran as Black Friday + Year-End Membership Special (merged into single annual promo).",
+        channels:    "Email list · in-venue physical displays · social media (organic)",
+        keyDates:    "Nov 2025 launch (Black Friday) → Feb 2026 close (Year-End extended). Now closed.",
+        dataNote:    "3 units sold and $4,500 revenue are self-reported estimates. Stripe integration will enable verified tracking for future cycles.",
+        activityPath: "/app/arlington-heights/studio-soo/activities/promotions/swing-saver-promo",
+      },
     },
     {
       id:       "annual-giveaway",
@@ -990,6 +1014,13 @@ function MarketingPerformanceHighlights() {
       period:   "Jan–Mar 2026",
       kpis:     [{ label: "Applicants", value: "~90", estimated: true }],
       progress: 60,
+      detail: {
+        strategy:    "Free 1-year All Access Aces membership giveaway designed to generate high awareness and bottom-of-funnel leads at minimal cost. Requires registration → drives email captures and trial intent.",
+        channels:    "Meta Ads ($1,225 total spend across 3 ad sets) · organic Instagram · landing page at ah.playgolfvx.com/giveaway",
+        keyDates:    "Jan 2026 launch → April 4, 2026 deadline. Winner announced April 2026.",
+        dataNote:    "~90 applicants as of Mar 2026 (estimated). Meta Ads: ~50,000 impressions, 588% blended ROI on paid portion.",
+        activityPath: "/app/arlington-heights/studio-soo/activities/promotions/annual-giveaway",
+      },
     },
     {
       id:     "junior-summer-camp",
@@ -1000,6 +1031,13 @@ function MarketingPerformanceHighlights() {
       kpis:   [],
       phase:  "Planning & Enrollment",
       note:   "Session 1 starts June 9 · Pre-registration open",
+      detail: {
+        strategy:    "Multi-week PBGA-certified junior golf camp for ages 4–17. Full-day and half-day sessions targeting Arlington Heights families. Addresses the underserved junior golf market (~8,200 local families with school-age children).",
+        channels:    "Meta Ads (parent targeting, 5-mi radius) · PBGA organic network · email to existing member parents",
+        keyDates:    "Session 1: June 9 · Session 2: June 23 · Session 3: July 7 · Session 4: July 21 · Session 5: Aug 4 · Session 6: Aug 18. Pre-registration open now.",
+        dataNote:    "Enrollment tracking will be via Acuity once sessions open. Budget: $350 for early-bird Meta Ads phase.",
+        activityPath: "/app/arlington-heights/studio-soo/activities/programs/junior-summer-camp",
+      },
     },
     {
       id:     "trial-sessions",
@@ -1012,6 +1050,13 @@ function MarketingPerformanceHighlights() {
         { label: "Chicago Golf Show",      value: "30", estimated: true },
       ],
       note: "No seasonal end date · rolling intake",
+      detail: {
+        strategy:    "Rolling trial offer to convert first-time visitors into members. Two active offers: $9 off-peak trial session and $25 peak trial session. Chicago Golf Show distributed ~30 vouchers for this offer.",
+        channels:    "Meta Ads ($441 Feb spend · 1,922% ROI) · Chicago Golf Show vouchers · in-venue referral",
+        keyDates:    "No end date. Gift Card Promo (companion offer) expires March 31, 2026.",
+        dataNote:    "Trial-to-member conversion tracked via Sunday Clinic (~31% conversion rate observed). Chicago Golf Show estimate is self-reported (30 vouchers distributed).",
+        activityPath: "/app/arlington-heights/studio-soo/activities/promotions/trial-session",
+      },
     },
     {
       id:       "sunday-clinic",
@@ -1022,6 +1067,13 @@ function MarketingPerformanceHighlights() {
       kpis:     [{ label: "Participants", value: "~50", estimated: true }],
       progress: 83,
       note:     "Next: Mar 29 Drive Day launch",
+      detail: {
+        strategy:    "Recurring Sunday group clinic run by PBGA coaches. Core retention and acquisition touchpoint — ~31% of trial attendees convert to memberships after attending. Drive Day (Mar 29 launch) is an expansion format targeting casual golfers.",
+        channels:    "Organic · word of mouth · in-venue signage · email to active member list",
+        keyDates:    "Weekly Sundays (year-round). Drive Day: March 29, 2026 inaugural session.",
+        dataNote:    "~50 total participants is a cumulative estimate from Acuity appointments. Sunday Clinic is the highest-conversion trial channel identified to date.",
+        activityPath: "/app/arlington-heights/studio-soo/activities/programs/sunday-clinic",
+      },
     },
   ];
 
@@ -1045,7 +1097,7 @@ function MarketingPerformanceHighlights() {
             Marketing Performance Highlights · Jan–Mar 2026
           </h2>
           <p className="text-xs mt-0.5 text-left" style={{ color: TEXT_S }}>
-            6 active programs and promotions — status, KPIs, and data quality flags
+            6 active programs and promotions — click any card to see strategy, channels, and key dates
           </p>
         </div>
         {open
@@ -1059,11 +1111,17 @@ function MarketingPerformanceHighlights() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
             {cards.map(card => {
               const ss = statusStyle(card.status);
+              const isSelected = selectedId === card.id;
               return (
-                <div
+                <button
                   key={card.id}
-                  className="rounded-xl border p-4"
-                  style={{ borderColor: BORDER, background: "#FAFAF9" }}
+                  onClick={() => setSelectedId(isSelected ? null : card.id)}
+                  className="rounded-xl border p-4 text-left w-full transition-all"
+                  style={{
+                    borderColor: isSelected ? "#4E8DF4" : BORDER,
+                    background: isSelected ? "#F5F8FF" : "#FAFAF9",
+                    boxShadow: isSelected ? "0 0 0 1px rgba(78,141,244,0.3)" : undefined,
+                  }}
                 >
                   {/* Header row */}
                   <div className="flex items-start justify-between mb-3 gap-2">
@@ -1071,12 +1129,18 @@ function MarketingPerformanceHighlights() {
                       <div className="text-[13px] font-semibold leading-snug" style={{ color: TEXT_P }}>{card.name}</div>
                       <div className="text-[11px] mt-0.5" style={{ color: TEXT_M }}>{card.type} · {card.period}</div>
                     </div>
-                    <span
-                      className="text-[11px] font-medium px-2 py-0.5 rounded-full shrink-0"
-                      style={{ background: ss.bg, color: ss.color }}
-                    >
-                      {ss.label}
-                    </span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span
+                        className="text-[11px] font-medium px-2 py-0.5 rounded-full"
+                        style={{ background: ss.bg, color: ss.color }}
+                      >
+                        {ss.label}
+                      </span>
+                      {isSelected
+                        ? <ChevronUp size={12} style={{ color: TEXT_M }} />
+                        : <ChevronDown size={12} style={{ color: TEXT_M }} />
+                      }
+                    </div>
                   </div>
 
                   {/* Phase label */}
@@ -1133,10 +1197,48 @@ function MarketingPerformanceHighlights() {
                   )}
 
                   {/* Note */}
-                  {card.note && (
+                  {card.note && !isSelected && (
                     <p className="text-[11px] mt-1" style={{ color: TEXT_M }}>{card.note}</p>
                   )}
-                </div>
+
+                  {/* Expanded detail panel */}
+                  {isSelected && (
+                    <div
+                      className="mt-3 pt-3 space-y-2.5"
+                      style={{ borderTop: `1px solid ${BORDER}` }}
+                    >
+                      <div>
+                        <div className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: TEXT_M }}>Strategy</div>
+                        <p className="text-[12px] leading-relaxed" style={{ color: TEXT_P }}>{card.detail.strategy}</p>
+                      </div>
+                      <div>
+                        <div className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: TEXT_M }}>Channels</div>
+                        <p className="text-[12px]" style={{ color: TEXT_S }}>{card.detail.channels}</p>
+                      </div>
+                      <div>
+                        <div className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: TEXT_M }}>Key Dates</div>
+                        <p className="text-[12px]" style={{ color: TEXT_S }}>{card.detail.keyDates}</p>
+                      </div>
+                      <div
+                        className="rounded-lg px-3 py-2"
+                        style={{ background: BG_S, border: `1px solid ${BORDER}` }}
+                      >
+                        <div className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: TEXT_M }}>Data Note</div>
+                        <p className="text-[11px]" style={{ color: TEXT_S }}>{card.detail.dataNote}</p>
+                      </div>
+                      {card.detail.activityPath && (
+                        <a
+                          href={card.detail.activityPath}
+                          onClick={e => e.stopPropagation()}
+                          className="inline-flex items-center gap-1.5 text-[12px] font-medium hover:underline"
+                          style={{ color: "#4E8DF4" }}
+                        >
+                          View full activity detail <ArrowRight size={11} />
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </button>
               );
             })}
           </div>
