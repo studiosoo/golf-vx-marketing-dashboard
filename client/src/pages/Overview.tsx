@@ -50,7 +50,7 @@ const CAMPAIGN_PULSE = [
     status:      "Active",
     statusBg:    "rgba(242,221,72,0.18)",
     statusColor: "#8A7A00",
-    signal:      "2 events est. · target: 4/mo",
+    signal:      "2 events est. · target: 2/mo",
   },
 ] as const;
 

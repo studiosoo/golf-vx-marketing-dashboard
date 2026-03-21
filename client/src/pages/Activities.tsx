@@ -88,7 +88,7 @@ export const ACTIVITY_ITEMS: ActivityItem[] = [
     status: "active",
     color: "#A87FBE",
     startDate: "2026-01-01",
-    endDate: "2026-03-31",
+    endDate: "2026-04-30",
   },
 
   // ── Promotions ────────────────────────────────────────────
