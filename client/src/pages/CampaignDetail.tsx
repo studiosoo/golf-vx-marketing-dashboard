@@ -1,352 +1,317 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { trpc } from "@/lib/trpc";
+/**
+ * CampaignDetail — per-campaign summary page
+ * Reached from Overview "View →" links and StrategicCampaigns fallback.
+ * For the 4 strategic campaign slugs, shows correct campaign data from CAMPAIGN_ITEMS.
+ */
+import type { ElementType } from "react";
 import { useParams, useLocation } from "wouter";
-import { Loader2, TrendingUp, TrendingDown, DollarSign, Users, MousePointerClick, Eye, ArrowLeft, Calendar, Target } from "lucide-react";
-import { Line, Bar } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler,
-} from "chart.js";
+import { ArrowLeft, ArrowRight, Target, UserCheck, Users, Flag } from "lucide-react";
+import { appRoutes, getVenueSlugFromPath } from "@/lib/routes";
+import { CAMPAIGN_ITEMS, type CampaignItem } from "@/data/reportCampaignData";
 
-// Register ChartJS components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-);
+// ─── Design tokens (v2) ────────────────────────────────────────────────────────
+const TEXT_P = "#222222";
+const TEXT_S = "#6F6F6B";
+const TEXT_M = "#A8A8A3";
+const BORDER = "#DEDEDA";
+const BG_S   = "#F1F1EF";
+const BG_APP = "#F6F6F4";
+const GRN_TXT = "#72B84A";
+const ORG_TXT = "#D89A3C";
+const BLU_TXT = "#4E8DF4";
+const PRP_TXT = "#A87FBE";
+const YELLOW  = "#F2DD48";
 
-export default function CampaignDetail() {
-  const params = useParams();
-  const [, setLocation] = useLocation();
-  const campaignId = params.id;
+// ─── Static campaign metadata ─────────────────────────────────────────────────
+const CAMPAIGN_META: Record<string, {
+  name: string;
+  description: string;
+  accentColor: string;
+  Icon: ElementType;
+}> = {
+  trial_conversion: {
+    name:        "Trial & Experience",
+    description: "Trial sessions, clinics, and discovery programs that convert first-time visitors into members.",
+    accentColor: GRN_TXT,
+    Icon:        Target as ElementType,
+  },
+  membership_acquisition: {
+    name:        "Membership Acquisition",
+    description: "Campaigns, promotions, and referrals focused on growing the active member base.",
+    accentColor: BLU_TXT,
+    Icon:        UserCheck as ElementType,
+  },
+  member_retention: {
+    name:        "Membership Retention",
+    description: "Renewals, engagement programs, and loyalty initiatives that keep existing members active.",
+    accentColor: PRP_TXT,
+    Icon:        Users as ElementType,
+  },
+  corporate_events: {
+    name:        "B2B & Corporate Events",
+    description: "Group bookings, corporate outreach, and local event activations.",
+    accentColor: ORG_TXT,
+    Icon:        Flag as ElementType,
+  },
+};
 
-  // TODO: Replace with actual tRPC query
-  const isLoading = false;
-  
-  // Mock data - replace with real API data
-  const campaign = {
-    id: campaignId,
-    name: "Junior Golf Summer Camp 2026",
-    status: "active",
-    objective: "Lead Generation",
-    startDate: "2026-01-21",
-    endDate: "2026-05-31",
-    totalSpend: 224.56,
-    impressions: 89234,
-    clicks: 1764,
-    conversions: 1,
-    leads: 587,
-    ctr: 1.98,
-    cpc: 0.13,
-    cpl: 0.38,
-    cpa: 224.56,
-    dailyBudget: 7.50,
-  };
+// ─── Status pill ──────────────────────────────────────────────────────────────
+const STATUS_PILL: Record<string, { bg: string; text: string }> = {
+  active:    { bg: `${YELLOW}30`, text: "#8a7a00" },
+  completed: { bg: "#F6E5CF",     text: ORG_TXT   },
+  planned:   { bg: BG_S,          text: TEXT_S    },
+  archived:  { bg: BG_S,          text: TEXT_M    },
+  pending:   { bg: "#EAF2FF",     text: BLU_TXT   },
+};
 
-  const performanceData = {
-    labels: ["Jan 21", "Jan 28", "Feb 4", "Feb 11", "Feb 18"],
-    datasets: [
-      {
-        label: "Daily Spend",
-        data: [6.50, 7.20, 8.10, 7.80, 7.50],
-        borderColor: "oklch(0.70 0.20 30)",
-        backgroundColor: "oklch(0.70 0.20 30 / 0.1)",
-        fill: true,
-        tension: 0.4,
-      },
-      {
-        label: "Leads",
-        data: [45, 52, 61, 58, 55],
-        borderColor: "oklch(0.65 0.25 142)",
-        backgroundColor: "oklch(0.65 0.25 142 / 0.1)",
-        fill: true,
-        tension: 0.4,
-        yAxisID: "y1",
-      },
-    ],
-  };
+function StatusPill({ status }: { status: string }) {
+  const s = STATUS_PILL[status] ?? { bg: BG_S, text: TEXT_S };
+  return (
+    <span
+      style={{
+        background: s.bg,
+        color: s.text,
+        fontSize: "10px",
+        fontWeight: 500,
+        padding: "2px 8px",
+        borderRadius: "20px",
+      }}
+    >
+      {status}
+    </span>
+  );
+}
 
-  const audienceData = {
-    labels: ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"],
-    datasets: [
-      {
-        label: "Impressions by Age",
-        data: [8234, 24567, 32145, 18923, 4567, 798],
-        backgroundColor: [
-          "oklch(0.70 0.20 30 / 0.8)",
-          "oklch(0.65 0.25 142 / 0.8)",
-          "oklch(0.60 0.20 250 / 0.8)",
-          "oklch(0.65 0.20 60 / 0.8)",
-          "oklch(0.60 0.15 200 / 0.8)",
-          "oklch(0.55 0.15 300 / 0.8)",
-        ],
-      },
-    ],
-  };
+// ─── Category label ──────────────────────────────────────────────────────────
+const CATEGORY_LABEL: Record<string, { label: string; color: string }> = {
+  programs:   { label: "Program",   color: GRN_TXT },
+  promotions: { label: "Promo",     color: BLU_TXT },
+  paidAds:    { label: "Paid Ads",  color: ORG_TXT },
+};
 
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    interaction: {
-      mode: "index" as const,
-      intersect: false,
-    },
-    scales: {
-      y: {
-        type: "linear" as const,
-        display: true,
-        position: "left" as const,
-        grid: {
-          color: "oklch(0.25 0.01 240 / 0.1)",
-        },
-        ticks: {
-          color: "oklch(0.60 0.01 240)",
-        },
-      },
-      y1: {
-        type: "linear" as const,
-        display: true,
-        position: "right" as const,
-        grid: {
-          drawOnChartArea: false,
-        },
-        ticks: {
-          color: "oklch(0.60 0.01 240)",
-        },
-      },
-      x: {
-        grid: {
-          color: "oklch(0.25 0.01 240 / 0.1)",
-        },
-        ticks: {
-          color: "oklch(0.60 0.01 240)",
-        },
-      },
-    },
-    plugins: {
-      legend: {
-        labels: {
-          color: "oklch(0.70 0.01 240)",
-        },
-      },
-    },
-  };
+// ─── Convert CAMPAIGN_ITEMS relative route → full venue-scoped activity route ─
+function resolveItemRoute(relativeRoute: string, routes: ReturnType<typeof appRoutes.venue>): string {
+  // Pattern: /activities/:tab/:id  →  full studio-soo activity detail
+  const match = relativeRoute.match(/^\/activities\/(programs|promotions|local)\/(.+)$/);
+  if (match) {
+    const [, tab, id] = match;
+    return routes.studioSoo.activityDetail(tab, id);
+  }
+  // Pattern: /activities/:tab (list, no specific id)  →  activities tab
+  const tabMatch = relativeRoute.match(/^\/activities\/(programs|promotions|local)$/);
+  if (tabMatch) {
+    const [, tab] = tabMatch;
+    if (tab === "programs")   return routes.studioSoo.activityPrograms;
+    if (tab === "promotions") return routes.studioSoo.activityPromotions;
+    return routes.studioSoo.activityLocal;
+  }
+  return relativeRoute;
+}
 
-  const barChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      y: {
-        grid: {
-          color: "oklch(0.25 0.01 240 / 0.1)",
-        },
-        ticks: {
-          color: "oklch(0.60 0.01 240)",
-        },
-      },
-      x: {
-        grid: {
-          display: false,
-        },
-        ticks: {
-          color: "oklch(0.60 0.01 240)",
-        },
-      },
-    },
-    plugins: {
-      legend: {
-        display: false,
-      },
-    },
-  };
+// ─── Item row ─────────────────────────────────────────────────────────────────
+function ItemRow({
+  item,
+  category,
+  accentColor,
+  onNavigate,
+}: {
+  item: CampaignItem;
+  category: string;
+  accentColor: string;
+  onNavigate: () => void;
+}) {
+  const hasPct = item.kpiCurrent != null && item.kpiTarget != null && item.kpiTarget > 0;
+  const pct    = hasPct ? Math.min(100, (item.kpiCurrent! / item.kpiTarget!) * 100) : null;
+  const cat    = CATEGORY_LABEL[category] ?? { label: category, color: TEXT_M };
 
-  if (isLoading) {
-    return (
-        <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+  return (
+    <button
+      onClick={onNavigate}
+      style={{
+        width: "100%",
+        textAlign: "left",
+        padding: "12px 20px",
+        display: "flex",
+        alignItems: "flex-start",
+        gap: "12px",
+        borderBottom: `1px solid ${BORDER}`,
+        background: "transparent",
+        border: "none",
+        borderBottomColor: BORDER,
+        borderBottomWidth: "1px",
+        borderBottomStyle: "solid",
+        cursor: "pointer",
+      }}
+      onMouseEnter={e => (e.currentTarget.style.background = BG_APP)}
+      onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+    >
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap", marginBottom: "3px" }}>
+          <span style={{ fontSize: "10px", fontWeight: 500, color: cat.color }}>{cat.label}</span>
+          <span style={{ fontSize: "13px", fontWeight: 600, color: TEXT_P }}>{item.name}</span>
+          <StatusPill status={item.status} />
+          {item.isCross && (
+            <span style={{ fontSize: "10px", padding: "1px 5px", border: `1px solid ${BORDER}`, borderRadius: "4px", color: TEXT_M }}>
+              cross-campaign
+            </span>
+          )}
         </div>
+        <p style={{ fontSize: "11px", color: TEXT_S, marginBottom: hasPct || item.kpi ? "6px" : 0 }}>{item.type}</p>
+
+        {hasPct && (
+          <div style={{ marginTop: "4px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: TEXT_M, marginBottom: "3px" }}>
+              <span>{item.kpiLabel}</span>
+              <span>{item.kpiCurrent} / {item.kpiTarget}</span>
+            </div>
+            <div style={{ height: "4px", background: BORDER, borderRadius: "2px", overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${pct}%`, background: accentColor, borderRadius: "2px" }} />
+            </div>
+          </div>
+        )}
+
+        {!hasPct && item.kpi && (
+          <p style={{ fontSize: "11px", color: TEXT_S, marginTop: "2px" }}>
+            {item.kpiLabel ? `${item.kpiLabel}: ` : ""}{item.kpi}
+          </p>
+        )}
+
+        {item.costNote && (
+          <p style={{ fontSize: "10px", fontWeight: 500, color: ORG_TXT, marginTop: "3px" }}>{item.costNote}</p>
+        )}
+        {item.notes && (
+          <p style={{ fontSize: "10px", color: TEXT_M, marginTop: "2px" }}>{item.notes}</p>
+        )}
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px", flexShrink: 0, marginTop: "2px" }}>
+        {item.adSpend != null && item.adSpend > 0 && (
+          <span style={{ fontSize: "11px", fontWeight: 600, color: TEXT_P }}>
+            ${item.adSpend.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+          </span>
+        )}
+        {item.impressions != null && (
+          <span style={{ fontSize: "10px", color: TEXT_M }}>
+            {(item.impressions / 1000).toFixed(0)}K impr.
+          </span>
+        )}
+        {item.revenue != null && item.revenue > 0 && (
+          <span style={{ fontSize: "11px", fontWeight: 600, color: GRN_TXT }}>
+            ${item.revenue.toLocaleString(undefined, { maximumFractionDigits: 0 })} rev.
+          </span>
+        )}
+        <ArrowRight size={11} style={{ color: TEXT_M }} />
+      </div>
+    </button>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+export default function CampaignDetail() {
+  const [location, navigate] = useLocation();
+  const params    = useParams<{ venueSlug?: string; id?: string }>();
+  const venueSlug = params.venueSlug ?? getVenueSlugFromPath(location) ?? "arlington-heights";
+  const campaignId = params.id ?? "";
+  const routes    = appRoutes.venue(venueSlug);
+
+  const meta = CAMPAIGN_META[campaignId];
+  const data = CAMPAIGN_ITEMS[campaignId];
+
+  // Unknown campaign slug — redirect to campaigns list
+  if (!meta) {
+    return (
+      <div className="p-8 space-y-6">
+        <button
+          onClick={() => navigate(routes.studioSoo.campaigns)}
+          style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", color: TEXT_S, background: "none", border: "none", cursor: "pointer", padding: 0 }}
+        >
+          <ArrowLeft size={14} />
+          Back to Campaigns
+        </button>
+        <p style={{ fontSize: "14px", color: TEXT_M }}>Campaign not found.</p>
+      </div>
     );
   }
 
+  const { name, description, accentColor, Icon } = meta;
+
+  // Build flat item list with category labels
+  type FlatItem = { item: CampaignItem; category: string };
+  const allItems: FlatItem[] = [
+    ...(data?.programs   ?? []).map(item => ({ item, category: "programs"   })),
+    ...(data?.promotions ?? []).map(item => ({ item, category: "promotions" })),
+    ...(data?.paidAds    ?? []).map(item => ({ item, category: "paidAds"    })),
+  ];
+
+  const totalSpend = allItems.reduce((sum, { item }) => sum + (item.adSpend ?? 0), 0);
+
+  const statuses = allItems.reduce<Record<string, number>>((acc, { item }) => {
+    acc[item.status] = (acc[item.status] ?? 0) + 1;
+    return acc;
+  }, {});
+
   return (
-      <div className="space-y-6 p-6">
-        {/* Header */}
-        <div className="flex items-start justify-between">
-          <div className="space-y-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setLocation("/meta-ads")}
-              className="gap-2 mb-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Meta Ads
-            </Button>
-            <div className="flex items-center gap-3">
-              <h1 className="text-4xl font-bold tracking-tight text-foreground">
-                {campaign.name}
-              </h1>
-              <Badge variant={campaign.status === "active" ? "default" : "secondary"}>
-                {campaign.status}
-              </Badge>
-            </div>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <Target className="h-4 w-4" />
-                {campaign.objective}
-              </div>
-              <div className="flex items-center gap-1">
-                <Calendar className="h-4 w-4" />
-                {campaign.startDate} → {campaign.endDate}
-              </div>
-            </div>
+    <div className="p-8 space-y-6">
+      {/* Header */}
+      <div>
+        <button
+          onClick={() => navigate(routes.studioSoo.campaigns)}
+          style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", color: TEXT_S, background: "none", border: "none", cursor: "pointer", padding: 0, marginBottom: "16px" }}
+        >
+          <ArrowLeft size={14} />
+          Back to Campaigns
+        </button>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "4px" }}>
+          <div style={{ width: 36, height: 36, borderRadius: "10px", background: `${accentColor}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Icon size={18} style={{ color: accentColor }} />
           </div>
+          <h1 style={{ fontSize: "20px", fontWeight: 600, color: TEXT_P }}>{name}</h1>
         </div>
-
-        {/* Key Metrics */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Total Spend</CardDescription>
-              <CardTitle className="text-3xl">${campaign.totalSpend.toFixed(2)}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-1 text-sm">
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground">${campaign.dailyBudget}/day budget</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Leads Generated</CardDescription>
-              <CardTitle className="text-3xl">{campaign.leads}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-1 text-sm">
-                <Users className="h-4 w-4 text-[#3DB855]" />
-                <span className="text-[#3DB855]">${campaign.cpl.toFixed(2)} per lead</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Click-Through Rate</CardDescription>
-              <CardTitle className="text-3xl">{campaign.ctr.toFixed(2)}%</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-1 text-sm">
-                <TrendingUp className="h-4 w-4 text-[#3DB855]" />
-                <span className="text-[#3DB855]">Above average</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Conversions</CardDescription>
-              <CardTitle className="text-3xl">{campaign.conversions}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-1 text-sm">
-                <TrendingDown className="h-4 w-4 text-[#E8453C]" />
-                <span className="text-[#E8453C]">${campaign.cpa.toFixed(2)} per conversion</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Performance Trends */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Performance Trends</CardTitle>
-            <CardDescription>Daily spend and lead generation over time</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <Line data={performanceData} options={chartOptions} />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Audience Breakdown */}
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Audience by Age</CardTitle>
-              <CardDescription>Impressions distribution across age groups</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <Bar data={audienceData} options={barChartOptions} />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>AI Recommendations</CardTitle>
-              <CardDescription>Optimization suggestions for this campaign</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="p-4 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                  <h4 className="font-semibold text-yellow-900 dark:text-yellow-100 mb-2">
-                    ⚠️ High Cost Per Conversion
-                  </h4>
-                  <p className="text-sm text-yellow-800 dark:text-yellow-200 mb-3">
-                    Your cost per conversion ($224.56) is significantly higher than industry average ($20-50 for lead generation campaigns).
-                  </p>
-                  <p className="text-sm font-medium text-yellow-900 dark:text-yellow-100">
-                    Recommendation: Reduce daily budget to $3-5 and focus on landing page optimization.
-                  </p>
-                </div>
-
-                <div className="p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg">
-                  <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2">
-                    ✓ Strong Click-Through Rate
-                  </h4>
-                  <p className="text-sm text-green-800 dark:text-green-200 mb-3">
-                    Your CTR (1.98%) is above industry average (1-1.5%), indicating effective ad creative.
-                  </p>
-                  <p className="text-sm font-medium text-green-900 dark:text-green-100">
-                    Recommendation: Keep current ad creative and test variations with similar messaging.
-                  </p>
-                </div>
-
-                <div className="p-4 bg-[#888888]/10 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                  <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
-                    💡 Opportunity: Email Nurture
-                  </h4>
-                  <p className="text-sm text-blue-800 dark:text-blue-200 mb-3">
-                    You have 587 leads who haven't converted yet. Set up an email nurture sequence to convert them.
-                  </p>
-                  <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                    Expected outcome: 30-60 additional registrations at $0 cost.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <p style={{ fontSize: "13px", color: TEXT_S, marginLeft: "48px" }}>{description}</p>
       </div>
+
+      {/* Summary stats */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "12px" }}>
+        {[
+          { label: "Total Items",  value: String(allItems.length)  },
+          { label: "Active",       value: String(statuses.active ?? 0)    },
+          { label: "Completed",    value: String(statuses.completed ?? 0) },
+          ...(totalSpend > 0
+            ? [{ label: "Ad Spend", value: `$${totalSpend.toLocaleString(undefined, { maximumFractionDigits: 0 })}` }]
+            : []
+          ),
+        ].map(({ label, value }) => (
+          <div key={label} style={{ background: "#FFFFFF", border: `1px solid ${BORDER}`, borderRadius: "10px", padding: "14px 16px" }}>
+            <div style={{ fontSize: "11px", color: TEXT_M, textTransform: "uppercase" as const, letterSpacing: "0.05em", marginBottom: "6px" }}>{label}</div>
+            <div style={{ fontSize: "22px", fontWeight: 700, color: TEXT_P, lineHeight: 1 }}>{value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Items list */}
+      {allItems.length > 0 ? (
+        <div style={{ background: "#FFFFFF", border: `1px solid ${BORDER}`, borderRadius: "10px", overflow: "hidden" }}>
+          <div style={{ padding: "14px 20px", borderBottom: `1px solid ${BG_S}`, background: BG_S }}>
+            <span style={{ fontSize: "11px", fontWeight: 600, color: TEXT_M, textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>
+              Supporting Programs, Promotions &amp; Paid Ads
+            </span>
+          </div>
+          {allItems.map(({ item, category }) => (
+            <ItemRow
+              key={item.id}
+              item={item}
+              category={category}
+              accentColor={accentColor}
+              onNavigate={() => navigate(resolveItemRoute(item.route, routes))}
+            />
+          ))}
+        </div>
+      ) : (
+        <div style={{ background: "#FFFFFF", border: `1px solid ${BORDER}`, borderRadius: "10px", padding: "40px 20px", textAlign: "center" }}>
+          <p style={{ fontSize: "14px", color: TEXT_M }}>No items configured for this campaign yet.</p>
+        </div>
+      )}
+    </div>
   );
 }

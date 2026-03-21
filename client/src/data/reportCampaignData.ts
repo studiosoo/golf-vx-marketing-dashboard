@@ -64,7 +64,7 @@ export const CAMPAIGN_ITEMS: Record<string, CampaignData> = {
       {
         id: "tc-winter", name: "PBGA Winter Clinic", type: "Instruction Program", status: "active",
         kpiLabel: "Enrolled", kpi: "Live (Acuity)",
-        startDate: "2026-01-01", endDate: "2026-03-31",
+        startDate: "2026-01-01", endDate: "2026-04-30",
         route: "/activities/programs/winter-camp",
       },
       {
@@ -243,9 +243,9 @@ export const TIMELINE_ITEMS: TimelineItem[] = [
     name: "PBGA Winter Clinic",
     category: "program",
     campaigns: ["trial_conversion"],
-    start: "2026-01-01", end: "2026-03-31",
+    start: "2026-01-01", end: "2026-04-30",
     datesConfirmed: true, status: "active",
-    kpiHint: "Jan–Mar · enrollment via Acuity",
+    kpiHint: "Jan–Apr · enrollment via Acuity",
   },
   {
     id: "p-sunday",
