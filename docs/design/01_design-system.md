@@ -211,7 +211,8 @@ className="px-2 py-0.5 rounded-full text-[11px] font-semibold"
   <Loader2 className="h-6 w-6 animate-spin text-[#F2DD48]" />
 </div>
 
-// Error
+// Error (existing code — amber-* classes predate v2 token sweep)
+// Preferred for new components: bg-[#F6E5CF] border-[#EAC9A1] text-[#B46A0B]
 <div className="flex items-start gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded text-xs">
   <AlertTriangle className="w-3.5 h-3.5 text-[#F2DD48] flex-shrink-0 mt-0.5" />
   <span className="text-amber-700 font-medium">Error message</span>
@@ -223,10 +224,19 @@ className="px-2 py-0.5 rounded-full text-[11px] font-semibold"
 
 ### Data Confidence Labels
 
+These labels use Tailwind shorthand that predates the v2 token sweep.
+Prefer token-anchored equivalents for new instances.
+
 ```tsx
+// Existing code patterns (legacy Tailwind shorthand)
 <span className="text-[12px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">PARTIAL</span>
 <span className="text-[12px] text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">EST</span>
 <span style={{ fontSize: "11px", color: "#A8A8A3" }}>[AWAITING INTEGRATION]</span>
+
+// Preferred token equivalents for new components:
+// PARTIAL  → text-[#6F6F6B] bg-[#F1F1EF]
+// EST      → text-[#B46A0B] bg-[#F6E5CF]
+// AWAITING → color: #A8A8A3 (unchanged)
 ```
 
 ---
@@ -311,6 +321,7 @@ URL pattern: `https://cdn.simpleicons.org/{slug}/{hex-without-#}`
 | Tailwind `text-sm` (14px) | Multiple files | `text-[13px]` |
 | Tailwind `text-xs` (12px) | Multiple files | `text-[11px]` |
 | Filled pill tab active state | InstagramAnalytics.tsx | Underline pattern |
+| `amber-*` / `gray-*` in Error + Confidence labels | Loading/Error/Empty section above | Token equivalents documented in those patterns |
 | Brand shown as color box | Multiple pages | simpleicons CDN `<img>` |
 | Category color as card background | Multiple pages | `bg-[#FFFFFF] border-[#DEDEDA]` |
 | Multiple colored backgrounds on one screen | Multiple pages | Neutral bg + logo icon only |
