@@ -4,6 +4,7 @@ import * as db from "../db";
 import { TRPCError } from "@trpc/server";
 import { calculateCampaignPerformance, GOAL_TEMPLATES } from "../goalTemplates";
 import { inArray, and, gte } from "drizzle-orm";
+import { stripeSnapshot } from "../data/stripe-snapshot";
 
 export const campaignsRouter = router({
   list: protectedProcedure.query(async () => {
@@ -685,12 +686,17 @@ export const dashboardRouter = router({
         db.getMemberStats(),
         db.getCampaignsByStatus('active'),
       ]);
-      const totalMembers = memberStats?.totalMembers || 0;
-      const activeMembers = memberStats?.activeMembers || 0;
-      const allAccessMRR = parseFloat(memberStats?.allAccessMRR || '0');
-      const swingSaversMRR = parseFloat(memberStats?.swingSaversMRR || '0');
-      const golfVxProMRR = parseFloat(memberStats?.golfVxProMRR || '0');
-      const monthlyRecurringRevenue = allAccessMRR + swingSaversMRR + golfVxProMRR;
+      // Prefer Stripe snapshot for member count and MRR — authoritative billing source.
+      // stripeSnapshot is a static TS import (server/data/stripe-snapshot.ts); always defined.
+      // Falls back to Boomerang-derived DB stats if snapshot values are 0 (shouldn't occur).
+      const totalMembers = stripeSnapshot.payingMembers || memberStats?.totalMembers || 0;
+      const activeMembers = stripeSnapshot.payingMembers || memberStats?.activeMembers || 0;
+      const monthlyRecurringRevenue = stripeSnapshot.totalMRR || (() => {
+        const allAccessMRR = parseFloat(memberStats?.allAccessMRR || '0');
+        const swingSaversMRR = parseFloat(memberStats?.swingSaversMRR || '0');
+        const golfVxProMRR = parseFloat(memberStats?.golfVxProMRR || '0');
+        return allAccessMRR + swingSaversMRR + golfVxProMRR;
+      })();
       const activeCampaignsCount = activeCampaigns.length;
       const marketingSpend = activeCampaigns
         .reduce((s, c) => s + parseFloat(c.actualSpend || '0'), 0)

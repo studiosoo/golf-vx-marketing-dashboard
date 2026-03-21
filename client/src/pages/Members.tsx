@@ -12,6 +12,7 @@ import {
   ChevronDown,
   Star,
 } from "lucide-react";
+import { StripeTierTable } from "@/components/members/StripeTierTable";
 
 type MembershipTier = "trial" | "monthly" | "annual" | "corporate" | "none" | "all_access_aces" | "swing_savers" | "golf_vx_pro";
 type MemberStatus = "active" | "inactive" | "cancelled" | "trial";
@@ -162,6 +163,9 @@ export default function Members() {
           <div className="text-3xl font-bold text-[#888888]">{swingSaverCount}</div>
         </div>
       </div>
+
+      {/* Stripe Tier Breakdown */}
+      <StripeTierTable />
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
