@@ -136,7 +136,7 @@ export function getDefaultVenueRoute(section: VenueScopedSection = "dashboard"):
     case "audience":
       return venue.audience.people;
     case "insights":
-      return venue.insights.alerts;
+      return venue.insights.ask;
     case "dashboard":
     default:
       return venue.dashboard;

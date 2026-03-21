@@ -132,7 +132,7 @@ function DashboardAppRoutes() {
         <Route path="/app/:venueSlug/audience/duplicates" component={AudienceDuplicatesWrapper} />
         <Route path="/app/:venueSlug/audience/:id" component={MemberProfile} />
 
-        <Route path="/app/:venueSlug/insights">{params => <Redirect to={appRoutes.venue(params.venueSlug).insights.alerts} />}</Route>
+        <Route path="/app/:venueSlug/insights">{params => <Redirect to={appRoutes.venue(params.venueSlug).insights.ask} />}</Route>
         <Route path="/app/:venueSlug/insights/alerts" component={InsightsAlertsPlaceholder} />
         <Route path="/app/:venueSlug/insights/recommendations" component={InsightsRecommendationsWrapper} />
         <Route path="/app/:venueSlug/insights/ask" component={InsightsAskWrapper} />
