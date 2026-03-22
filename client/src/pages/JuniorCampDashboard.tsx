@@ -19,7 +19,7 @@ import { ProgramAIIntelligence } from "@/components/ProgramAIIntelligence";
 const ENROLLMENT_TARGET = 128; // 8 weeks × 16 students per week
 
 const TRACK_CONFIG = {
-  full_day: { label: "Full-Day Program", ageGroup: "Ages 7–17", color: "text-[#F5C72C]", bg: "bg-[#F5C72C]/10 border-[#F5C72C]/30" },
+  full_day: { label: "Full-Day Program", ageGroup: "Ages 7–17", color: "text-[#F2DD48]", bg: "bg-[#F2DD48]/10 border-[#F2DD48]/30" },
   half_day: { label: "Half-Day Program", ageGroup: "Ages 7–17", color: "text-[#888888]", bg: "bg-[#888888]/10 border-[#888888]/30" },
   tots: { label: "Tots Program", ageGroup: "Ages 4–6", color: "text-[#E8453C]", bg: "bg-[#E8453C]/10 border-[#E8453C]/30" },
 };
@@ -109,10 +109,10 @@ export default function JuniorCampDashboard() {
 
       {/* Registration opens notice */}
       {totalRegistrations === 0 && (
-        <div className="flex items-start gap-3 bg-[#F5C72C]/10 border border-[#F5C72C]/30 rounded-xl p-4">
-          <Info className="h-5 w-5 text-[#F5C72C] mt-0.5 shrink-0" />
+        <div className="flex items-start gap-3 bg-[#F2DD48]/10 border border-[#F2DD48]/30 rounded-xl p-4">
+          <Info className="h-5 w-5 text-[#F2DD48] mt-0.5 shrink-0" />
           <div>
-            <p className="font-semibold text-[#111111]">Registration Not Yet Open</p>
+            <p className="font-semibold text-[#222222]">Registration Not Yet Open</p>
             <p className="text-sm text-muted-foreground mt-1">
               Summer Camp runs Jun–Aug 2026. Once registrations open in Acuity, this dashboard will populate automatically.
               Use the Marketing tab below to track campaign efforts ahead of registration launch.
@@ -134,7 +134,7 @@ export default function JuniorCampDashboard() {
           </div>
           <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
             <div
-              className="h-full rounded-full bg-[#F5C72C] transition-all"
+              className="h-full rounded-full bg-[#F2DD48] transition-all"
               style={{ width: `${Math.min(100, (totalRegistrations / ENROLLMENT_TARGET) * 100)}%` }}
             />
           </div>
@@ -222,7 +222,7 @@ export default function JuniorCampDashboard() {
                   <tr key={i} className="border-t border-border hover:bg-muted/20 transition-colors">
                     <td className="px-4 py-3 font-medium">{pd.label}</td>
                     <td className="px-4 py-3 text-muted-foreground">{pd.week}</td>
-                    <td className="px-4 py-3 text-right">{fdCount > 0 ? <span className="text-[#F5C72C] font-semibold">{fdCount}</span> : <span className="text-muted-foreground/40">—</span>}</td>
+                    <td className="px-4 py-3 text-right">{fdCount > 0 ? <span className="text-[#F2DD48] font-semibold">{fdCount}</span> : <span className="text-muted-foreground/40">—</span>}</td>
                     <td className="px-4 py-3 text-right">{hdCount > 0 ? <span className="text-[#888888] font-semibold">{hdCount}</span> : <span className="text-muted-foreground/40">—</span>}</td>
                     <td className="px-4 py-3 text-right">{totsCount > 0 ? <span className="text-[#E8453C] font-semibold">{totsCount}</span> : <span className="text-muted-foreground/40">—</span>}</td>
                     <td className="px-4 py-3 text-right font-semibold">{total > 0 ? total : <span className="text-muted-foreground/40">—</span>}</td>
@@ -275,7 +275,7 @@ export default function JuniorCampDashboard() {
       <div className="space-y-4">
         <div>
           <h2 className="text-lg font-semibold flex items-center gap-2">
-            <span className="text-[#F5C72C]">❖</span> AI Marketing Intelligence
+            <span className="text-[#F2DD48]">❖</span> AI Marketing Intelligence
           </h2>
           <p className="text-sm text-muted-foreground mt-1">AI-generated multi-channel marketing strategy based on program performance data.</p>
         </div>

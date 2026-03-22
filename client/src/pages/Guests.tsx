@@ -21,8 +21,8 @@ function programLabel(type: string): string {
 const PROGRAM_COLORS: Record<string, string> = {
   "Drive Day": "bg-[#888888]/10 text-[#888888] border-blue-100",
   "Winter Clinic": "bg-[#888888]/10 text-[#888888] border-purple-100",
-  "Junior Summer Camp": "bg-green-50 text-[#3DB855] border-green-100",
-  "Trial Session": "bg-[#F5C72C]/10 text-[#8B6E00] border-[#F5C72C]/30",
+  "Junior Summer Camp": "bg-green-50 text-[#72B84A] border-green-100",
+  "Trial Session": "bg-[#F2DD48]/10 text-[#8B6E00] border-[#F2DD48]/30",
   "Watch Party": "bg-orange-50 text-orange-700 border-orange-100",
   "League": "bg-gray-50 text-gray-700 border-gray-200",
 };
@@ -63,8 +63,8 @@ export default function Guests() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white border border-[#E0E0E0] rounded-xl p-4 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-[#F5C72C]/10 flex items-center justify-center">
+        <div className="bg-white border border-[#DEDEDA] rounded-xl p-4 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-[#F2DD48]/10 flex items-center justify-center">
             <Users className="w-4.5 h-4.5 text-[#8B6E00]" />
           </div>
           <div>
@@ -72,7 +72,7 @@ export default function Guests() {
             <div className="text-xs text-[#888]">Unique Visitors</div>
           </div>
         </div>
-        <div className="bg-white border border-[#E0E0E0] rounded-xl p-4 flex items-center gap-3">
+        <div className="bg-white border border-[#DEDEDA] rounded-xl p-4 flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-[#888888]/10 flex items-center justify-center">
             <Calendar className="w-4.5 h-4.5 text-[#888888]" />
           </div>
@@ -81,9 +81,9 @@ export default function Guests() {
             <div className="text-xs text-[#888]">Total Bookings</div>
           </div>
         </div>
-        <div className="bg-white border border-[#E0E0E0] rounded-xl p-4 flex items-center gap-3">
+        <div className="bg-white border border-[#DEDEDA] rounded-xl p-4 flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-green-50 flex items-center justify-center">
-            <DollarSign className="w-4.5 h-4.5 text-[#3DB855]" />
+            <DollarSign className="w-4.5 h-4.5 text-[#72B84A]" />
           </div>
           <div>
             <div className="text-2xl font-bold text-[#111]">${totalRevenue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
@@ -99,12 +99,12 @@ export default function Guests() {
           placeholder="Search by name or email…"
           value={search}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
-          className="pl-9 bg-white border-[#E0E0E0] text-[#111] placeholder:text-[#AAAAAA] focus:border-[#F5C72C] focus:ring-[#F5C72C]/20 h-9 text-sm"
+          className="pl-9 bg-white border-[#DEDEDA] text-[#111] placeholder:text-[#AAAAAA] focus:border-[#F2DD48] focus:ring-[#F2DD48]/20 h-9 text-sm"
         />
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-[#E0E0E0] rounded-xl overflow-hidden">
+      <div className="bg-white border border-[#DEDEDA] rounded-xl overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="border-b border-[#F0F0F0] hover:bg-transparent">
@@ -136,7 +136,7 @@ export default function Guests() {
             {(contacts || []).map((c, i) => {
               const uniquePrograms = Array.from(new Set(c.programs.map(programLabel)));
               return (
-                <TableRow key={c.email} className={`border-b border-[#F5F5F5] hover:bg-[#FAFAFA] transition-colors ${i % 2 === 0 ? '' : 'bg-[#FAFAFA]/50'}`}>
+                <TableRow key={c.email} className={`border-b border-[#F1F1EF] hover:bg-[#FAFAFA] transition-colors ${i % 2 === 0 ? '' : 'bg-[#FAFAFA]/50'}`}>
                   <TableCell className="py-2.5 pl-4">
                     <span className="text-sm font-medium text-[#111]">{c.firstName} {c.lastName}</span>
                   </TableCell>

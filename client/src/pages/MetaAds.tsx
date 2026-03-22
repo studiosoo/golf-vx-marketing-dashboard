@@ -59,8 +59,8 @@ function getEffectiveStatus(campaign: any, overrideMap: Record<string, string>):
 
 function statusBadgeClass(status: string) {
   switch (status) {
-    case "ACTIVE": return "bg-[#3DB855]/20 text-[#3DB855] border-[#3DB855]/30";
-    case "PAUSED": return "bg-[#F5C72C]/20 text-[#111111] border-[#F5C72C]/50";
+    case "ACTIVE": return "bg-[#72B84A]/20 text-[#72B84A] border-[#72B84A]/30";
+    case "PAUSED": return "bg-[#F2DD48]/20 text-[#222222] border-[#F2DD48]/50";
     case "COMPLETED": return "bg-[#888888]/20 text-[#888888] border-[#888888]/30";
     case "ARCHIVED": return "bg-gray-500/20 text-gray-500 border-gray-500/30";
     default: return "bg-muted text-muted-foreground";
@@ -217,7 +217,7 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-xs h-7 px-2 gap-1 text-muted-foreground hover:text-[#3DB855]"
+                    className="text-xs h-7 px-2 gap-1 text-muted-foreground hover:text-[#72B84A]"
                     onClick={(e) => handleRestoreActive(e, c)}
                     title="Restore to Active"
                   >
@@ -258,7 +258,7 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                   {metrics.map((m) => (
                     <div key={m.label} className="bg-muted/30 rounded-lg p-2 text-center">
-                      <div className={`text-sm font-semibold ${m.highlight ? "text-[#3DB855]" : "text-foreground"}`}>{m.value}</div>
+                      <div className={`text-sm font-semibold ${m.highlight ? "text-[#72B84A]" : "text-foreground"}`}>{m.value}</div>
                       <div className="text-xs text-muted-foreground">{m.label}</div>
                     </div>
                   ))}
@@ -315,8 +315,8 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
         {[
           { label: "Active Spend", value: isLoading ? "—" : campaigns == null ? "N/A" : formatCurrency(totalSpend), icon: <DollarSign size={18} />, color: "text-[#E8453C]", tooltip: "Total amount spent across all active campaigns in the selected date range." },
           { label: "Total Reach", value: isLoading ? "—" : campaigns == null ? "N/A" : formatNum(totalReach), icon: <Eye size={18} />, color: "text-[#888888]", tooltip: "Number of unique people who saw at least one ad from your active campaigns." },
-          { label: "Impressions", value: isLoading ? "—" : campaigns == null ? "N/A" : formatNum(totalImpressions), icon: <TrendingUp size={18} />, color: "text-[#3DB855]", tooltip: "Total times your ads were displayed, including multiple views by the same person." },
-          { label: "Clicks", value: isLoading ? "—" : campaigns == null ? "N/A" : formatNum(totalClicks), icon: <MousePointer size={18} />, color: "text-[#F5C72C]", tooltip: "Total clicks on your ads, including link clicks, button clicks, and profile visits." },
+          { label: "Impressions", value: isLoading ? "—" : campaigns == null ? "N/A" : formatNum(totalImpressions), icon: <TrendingUp size={18} />, color: "text-[#72B84A]", tooltip: "Total times your ads were displayed, including multiple views by the same person." },
+          { label: "Clicks", value: isLoading ? "—" : campaigns == null ? "N/A" : formatNum(totalClicks), icon: <MousePointer size={18} />, color: "text-[#F2DD48]", tooltip: "Total clicks on your ads, including link clicks, button clicks, and profile visits." },
         ].map((kpi) => (
           <Card key={kpi.label} className="bg-card border-border">
             <CardContent className="p-4">
@@ -349,7 +349,7 @@ export default function MetaAds({ embedded }: MetaAdsProps = {}) {
           <div className="space-y-5">
             <div className="flex items-center gap-2">
               <span className="text-sm font-semibold text-foreground">Active Campaigns</span>
-              <Badge className="bg-[#3DB855]/20 text-[#3DB855] border-[#3DB855]/30 text-xs border" variant="outline">
+              <Badge className="bg-[#72B84A]/20 text-[#72B84A] border-[#72B84A]/30 text-xs border" variant="outline">
                 {activeCampaigns.length}
               </Badge>
             </div>

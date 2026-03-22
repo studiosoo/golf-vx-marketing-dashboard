@@ -51,8 +51,8 @@ type Application = {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function scoreColor(score: number) {
-  if (score >= 85) return "text-[#3DB855] bg-green-500/10";
-  if (score >= 70) return "text-[#F5C72C] bg-yellow-500/10";
+  if (score >= 85) return "text-[#72B84A] bg-green-500/10";
+  if (score >= 70) return "text-[#F2DD48] bg-yellow-500/10";
   return "text-muted-foreground bg-muted";
 }
 
@@ -60,8 +60,8 @@ function statusBadge(status: string) {
   const map: Record<string, { label: string; cls: string; icon: React.ReactNode }> = {
     pending:   { label: "Pending",   cls: "bg-muted text-muted-foreground",       icon: <Clock size={10} /> },
     contacted: { label: "Contacted", cls: "bg-[#888888]/100/10 text-[#888888]",         icon: <Mail size={10} /> },
-    scheduled: { label: "Scheduled", cls: "bg-yellow-500/10 text-[#F5C72C]",     icon: <Calendar size={10} /> },
-    completed: { label: "Completed", cls: "bg-green-500/10 text-[#3DB855]",       icon: <CheckCircle size={10} /> },
+    scheduled: { label: "Scheduled", cls: "bg-yellow-500/10 text-[#F2DD48]",     icon: <Calendar size={10} /> },
+    completed: { label: "Completed", cls: "bg-green-500/10 text-[#72B84A]",       icon: <CheckCircle size={10} /> },
     declined:  { label: "Declined",  cls: "bg-[#E8453C]/10 text-[#E8453C]",           icon: <XCircle size={10} /> },
   };
   const s = map[status] ?? { label: status, cls: "bg-muted text-muted-foreground", icon: null };

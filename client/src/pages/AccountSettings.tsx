@@ -31,8 +31,8 @@ export default function AccountSettings() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-16 h-16 rounded-full bg-[#F5C72C]/20 flex items-center justify-center">
-                  <User size={24} className="text-[#F5C72C]" />
+                <div className="w-16 h-16 rounded-full bg-[#F2DD48]/20 flex items-center justify-center">
+                  <User size={24} className="text-[#F2DD48]" />
                 </div>
                 <div>
                   <div className="font-semibold text-foreground">{(user as any)?.name || "Owner"}</div>
@@ -50,7 +50,7 @@ export default function AccountSettings() {
                   <Input defaultValue={(user as any)?.email || ""} className="mt-1" disabled />
                 </div>
               </div>
-              <Button className="bg-[#F5C72C] text-black hover:bg-yellow-500" size="sm">Save Profile</Button>
+              <Button className="bg-[#F2DD48] text-black hover:bg-yellow-500" size="sm">Save Profile</Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -70,7 +70,7 @@ export default function AccountSettings() {
                     <div className="text-sm font-medium text-foreground">{item.label}</div>
                     <div className="text-xs text-muted-foreground">{item.description}</div>
                   </div>
-                  <div className="w-10 h-5 bg-[#F5C72C] rounded-full cursor-pointer relative">
+                  <div className="w-10 h-5 bg-[#F2DD48] rounded-full cursor-pointer relative">
                     <div className="absolute right-0.5 top-0.5 w-4 h-4 bg-black rounded-full" />
                   </div>
                 </div>
@@ -90,7 +90,7 @@ export default function AccountSettings() {
                     <div className="text-sm font-medium text-foreground">{api}</div>
                     <div className="text-xs text-muted-foreground font-mono mt-0.5">••••••••••••••••••••••••••••••••</div>
                   </div>
-                  <Badge className="bg-[#3DB855]/20 text-[#3DB855] border-[#3DB855]/30 text-xs">Active</Badge>
+                  <Badge className="bg-[#72B84A]/20 text-[#72B84A] border-[#72B84A]/30 text-xs">Active</Badge>
                 </div>
               ))}
             </CardContent>
@@ -110,7 +110,7 @@ export default function AccountSettings() {
                 <Label>Timezone</Label>
                 <Input defaultValue="America/Chicago (CST)" className="mt-1" />
               </div>
-              <Button className="bg-[#F5C72C] text-black hover:bg-yellow-500" size="sm">Save Preferences</Button>
+              <Button className="bg-[#F2DD48] text-black hover:bg-yellow-500" size="sm">Save Preferences</Button>
             </CardContent>
           </Card>
         </TabsContent>

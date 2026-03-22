@@ -28,13 +28,13 @@ export default function Automations() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="bg-card border-border">
           <CardContent className="p-4">
-            <div className="text-2xl font-bold text-[#F5C72C]">{(metrics as any)?.totalSubscribers || 0}</div>
+            <div className="text-2xl font-bold text-[#F2DD48]">{(metrics as any)?.totalSubscribers || 0}</div>
             <div className="text-xs text-muted-foreground">Total Subscribers</div>
           </CardContent>
         </Card>
         <Card className="bg-card border-border">
           <CardContent className="p-4">
-            <div className="text-2xl font-bold text-[#3DB855]">{(metrics as any)?.activeSubscribers || 0}</div>
+            <div className="text-2xl font-bold text-[#72B84A]">{(metrics as any)?.activeSubscribers || 0}</div>
             <div className="text-xs text-muted-foreground">Active</div>
           </CardContent>
         </Card>
@@ -60,8 +60,8 @@ export default function Automations() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#F5C72C]/10 flex items-center justify-center">
-                      <Zap size={16} className="text-[#F5C72C]" />
+                    <div className="w-8 h-8 rounded-lg bg-[#F2DD48]/10 flex items-center justify-center">
+                      <Zap size={16} className="text-[#F2DD48]" />
                     </div>
                     <div>
                       <div className="font-medium text-foreground text-sm">{flow.name}</div>
@@ -70,7 +70,7 @@ export default function Automations() {
                   </div>
                   <Badge
                     className={flow.status === "active"
-                      ? "bg-[#3DB855]/20 text-[#3DB855] border-[#3DB855]/30 text-xs"
+                      ? "bg-[#72B84A]/20 text-[#72B84A] border-[#72B84A]/30 text-xs"
                       : "bg-muted text-muted-foreground text-xs"}
                   >
                     {flow.status}

@@ -15,7 +15,7 @@ export const PLATFORM_ICONS: Record<string, React.ReactNode> = {
 };
 
 export const INFLUENCER_STATUS_CONFIG: Record<InfluencerStatus, { label: string; color: string }> = {
-  negotiating: { label: "Negotiating", color: "bg-yellow-500/20 text-[#F5C72C] border-yellow-500/30" },
+  negotiating: { label: "Negotiating", color: "bg-yellow-500/20 text-[#F2DD48] border-yellow-500/30" },
   contracted: { label: "Contracted", color: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
   in_progress: { label: "In Progress", color: "bg-purple-500/20 text-purple-400 border-purple-500/30" },
   completed: { label: "Completed", color: "bg-green-500/20 text-green-400 border-green-500/30" },
@@ -24,7 +24,7 @@ export const INFLUENCER_STATUS_CONFIG: Record<InfluencerStatus, { label: string;
 
 export const OUTREACH_STATUS_CONFIG: Record<OutreachStatus, { label: string; color: string; icon: React.ReactNode }> = {
   received: { label: "Received", color: "bg-blue-500/20 text-blue-400 border-blue-500/30", icon: <Clock size={12} /> },
-  under_review: { label: "Under Review", color: "bg-yellow-500/20 text-[#F5C72C] border-yellow-500/30", icon: <AlertCircle size={12} /> },
+  under_review: { label: "Under Review", color: "bg-yellow-500/20 text-[#F2DD48] border-yellow-500/30", icon: <AlertCircle size={12} /> },
   approved: { label: "Approved", color: "bg-green-500/20 text-green-400 border-green-500/30", icon: <CheckCircle2 size={12} /> },
   rejected: { label: "Rejected", color: "bg-[#E8453C]/20 text-[#E8453C] border-[#E8453C]/30", icon: <XCircle size={12} /> },
   fulfilled: { label: "Fulfilled", color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30", icon: <Star size={12} /> },
@@ -57,7 +57,7 @@ export const PRINT_STATUS_COLORS: Record<string, string> = {
   active: "bg-green-500/20 text-green-400 border-green-500/30",
   completed: "bg-blue-500/20 text-blue-400 border-blue-500/30",
   cancelled: "bg-[#E8453C]/20 text-[#E8453C] border-[#E8453C]/30",
-  negotiating: "bg-yellow-500/20 text-[#F5C72C] border-yellow-500/30",
+  negotiating: "bg-yellow-500/20 text-[#F2DD48] border-yellow-500/30",
 };
 
 export const EVENT_STATUS_COLORS: Record<string, string> = {

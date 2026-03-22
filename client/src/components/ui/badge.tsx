@@ -11,19 +11,19 @@ const badgeVariants = cva(
       variant: {
         // Primary — Golf VX yellow for active/primary state
         default:
-          "border-transparent bg-[#F5C72C] text-[#111111] [a&]:hover:brightness-95",
+          "border-transparent bg-[#F2DD48] text-[#222222] [a&]:hover:brightness-95",
         // Secondary — neutral gray for inactive/default labels
         secondary:
-          "border-transparent bg-[#F2F2F7] text-[#555555] [a&]:hover:bg-[#E8E8ED]",
+          "border-transparent bg-[#F1F1EF] text-[#555555] [a&]:hover:bg-[#E8E8ED]",
         // Destructive — muted red for error/expired states
         destructive:
           "border-transparent bg-[#FF3B30]/10 text-[#FF3B30] border-[#FF3B30]/20 [a&]:hover:bg-[#FF3B30]/15",
         // Outline — quiet border-only treatment
         outline:
-          "text-[#555555] border-[#E0E0E0] [a&]:hover:bg-[#F5F5F5]",
+          "text-[#555555] border-[#DEDEDA] [a&]:hover:bg-[#F1F1EF]",
         // Success — soft green for healthy/connected/active states (§20.3)
         success:
-          "border-transparent bg-[#3DB855]/12 text-[#2A9040] border-[#3DB855]/20",
+          "border-transparent bg-[#72B84A]/12 text-[#2A9040] border-[#72B84A]/20",
         // Warning — soft orange for caution/renewal-soon/action-needed states (§20.3)
         warning:
           "border-transparent bg-[#F59E0B]/12 text-[#B45309] border-[#F59E0B]/20",
@@ -32,7 +32,7 @@ const badgeVariants = cva(
           "border-transparent bg-[#3B82F6]/10 text-[#1D4ED8] border-[#3B82F6]/20",
         // Muted — gray for inactive/missing/disconnected states (§20.3)
         muted:
-          "border-transparent bg-[#F2F2F7] text-[#AAAAAA] border-[#E0E0E0]",
+          "border-transparent bg-[#F1F1EF] text-[#AAAAAA] border-[#DEDEDA]",
       },
     },
     defaultVariants: {

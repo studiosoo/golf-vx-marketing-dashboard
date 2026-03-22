@@ -23,7 +23,7 @@ export default function SiteControl() {
           <h1 className="text-2xl font-bold text-foreground">Site Control</h1>
           <p className="text-muted-foreground text-sm mt-1">Manage website content and settings</p>
         </div>
-        <Button size="sm" className="bg-[#F5C72C] text-black hover:bg-yellow-500" onClick={handleSave}>
+        <Button size="sm" className="bg-[#F2DD48] text-black hover:bg-yellow-500" onClick={handleSave}>
           <Save size={14} />
           Save Changes
         </Button>

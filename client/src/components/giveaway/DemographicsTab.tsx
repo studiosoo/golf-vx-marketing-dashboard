@@ -16,8 +16,8 @@ interface TooltipProps {
 function CustomTooltip({ active, payload, label }: TooltipProps) {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white border border-[#E0E0E0] rounded-lg shadow-sm p-2 text-xs">
-        <p className="font-semibold text-[#111111]">{label}</p>
+      <div className="bg-white border border-[#DEDEDA] rounded-lg shadow-sm p-2 text-xs">
+        <p className="font-semibold text-[#222222]">{label}</p>
         <p className="text-[#888888]">{payload[0].value} applicants</p>
       </div>
     );
@@ -110,9 +110,9 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
     <div className="space-y-4">
       {/* Timeline: Applications Per Day */}
       {timelineData.length > 0 && (
-        <Card className="border border-[#E0E0E0] shadow-none">
+        <Card className="border border-[#DEDEDA] shadow-none">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-[#111111]">Applications Per Day</CardTitle>
+            <CardTitle className="text-sm font-semibold text-[#222222]">Applications Per Day</CardTitle>
             <CardDescription className="text-xs text-[#AAAAAA]">Daily submission count over the campaign period</CardDescription>
           </CardHeader>
           <CardContent>
@@ -141,9 +141,9 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
 
       {/* Row 1: Age + Gender */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="border border-[#E0E0E0] shadow-none">
+        <Card className="border border-[#DEDEDA] shadow-none">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-[#111111]">Age Distribution</CardTitle>
+            <CardTitle className="text-sm font-semibold text-[#222222]">Age Distribution</CardTitle>
             <CardDescription className="text-xs text-[#AAAAAA]">Applicants by age group</CardDescription>
           </CardHeader>
           <CardContent>
@@ -155,7 +155,7 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                   {ageData.map((_, i) => (
-                    <Cell key={i} fill={i === 0 ? "#F5C72C" : i === 1 ? "#545A60" : CHART_PALETTE[i % CHART_PALETTE.length]} />
+                    <Cell key={i} fill={i === 0 ? "#F2DD48" : i === 1 ? "#545A60" : CHART_PALETTE[i % CHART_PALETTE.length]} />
                   ))}
                 </Bar>
               </BarChart>
@@ -163,9 +163,9 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
           </CardContent>
         </Card>
 
-        <Card className="border border-[#E0E0E0] shadow-none">
+        <Card className="border border-[#DEDEDA] shadow-none">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-[#111111]">Gender Distribution</CardTitle>
+            <CardTitle className="text-sm font-semibold text-[#222222]">Gender Distribution</CardTitle>
             <CardDescription className="text-xs text-[#AAAAAA]">Applicants by gender</CardDescription>
           </CardHeader>
           <CardContent>
@@ -183,7 +183,7 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
                   labelLine={false}
                 >
                   {genderData.map((_, i) => (
-                    <Cell key={i} fill={i === 0 ? "#545A60" : i === 1 ? "#F5C72C" : CHART_PALETTE[i]} />
+                    <Cell key={i} fill={i === 0 ? "#545A60" : i === 1 ? "#F2DD48" : CHART_PALETTE[i]} />
                   ))}
                 </Pie>
                 <Tooltip formatter={(v: number) => [`${v} applicants`]} />
@@ -192,7 +192,7 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
             <div className="flex justify-center gap-4 mt-1">
               {genderData.map((d, i) => (
                 <div key={i} className="flex items-center gap-1.5 text-xs text-[#545A60]">
-                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: i === 0 ? "#545A60" : i === 1 ? "#F5C72C" : CHART_PALETTE[i] }} />
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: i === 0 ? "#545A60" : i === 1 ? "#F2DD48" : CHART_PALETTE[i] }} />
                   {d.name}: {d.value}
                 </div>
               ))}
@@ -203,9 +203,9 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
 
       {/* Row 2: City + Visited Before */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="border border-[#E0E0E0] shadow-none">
+        <Card className="border border-[#DEDEDA] shadow-none">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-[#111111] flex items-center gap-1.5">
+            <CardTitle className="text-sm font-semibold text-[#222222] flex items-center gap-1.5">
               <MapPin className="h-3.5 w-3.5 text-[#AAAAAA]" /> City Distribution
             </CardTitle>
             <CardDescription className="text-xs text-[#AAAAAA]">Top 10 cities</CardDescription>
@@ -219,7 +219,7 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="value" fill="#545A60" radius={[0, 4, 4, 0]}>
                   {cityData.map((_, i) => (
-                    <Cell key={i} fill={i === 0 ? "#F5C72C" : i < 3 ? "#545A60" : "#888888"} />
+                    <Cell key={i} fill={i === 0 ? "#F2DD48" : i < 3 ? "#545A60" : "#888888"} />
                   ))}
                 </Bar>
               </BarChart>
@@ -227,9 +227,9 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
           </CardContent>
         </Card>
 
-        <Card className="border border-[#E0E0E0] shadow-none">
+        <Card className="border border-[#DEDEDA] shadow-none">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-[#111111] flex items-center gap-1.5">
+            <CardTitle className="text-sm font-semibold text-[#222222] flex items-center gap-1.5">
               <UserCheck className="h-3.5 w-3.5 text-[#AAAAAA]" /> Visited Golf VX Before
             </CardTitle>
             <CardDescription className="text-xs text-[#AAAAAA]">Prior venue experience</CardDescription>
@@ -250,7 +250,7 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
                 >
                   {visitedData.map((entry, i) => {
                     const v = entry.name.toLowerCase();
-                    const color = v === "yes" || v === "existing" ? "#3DB855"
+                    const color = v === "yes" || v === "existing" ? "#72B84A"
                       : v === "no" || v === "new" ? "#545A60"
                       : "#AAAAAA";
                     return <Cell key={i} fill={color} />;
@@ -262,7 +262,7 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
             <div className="flex flex-wrap justify-center gap-3 mt-1">
               {visitedData.map((d, i) => {
                 const v = d.name.toLowerCase();
-                const color = v === "yes" || v === "existing" ? "#3DB855" : v === "no" || v === "new" ? "#545A60" : "#AAAAAA";
+                const color = v === "yes" || v === "existing" ? "#72B84A" : v === "no" || v === "new" ? "#545A60" : "#AAAAAA";
                 return (
                   <div key={i} className="flex items-center gap-1.5 text-xs text-[#545A60]">
                     <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
@@ -277,9 +277,9 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
 
       {/* Row 3: Golf Experience + Indoor Golf Familiarity */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="border border-[#E0E0E0] shadow-none">
+        <Card className="border border-[#DEDEDA] shadow-none">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-[#111111] flex items-center gap-1.5">
+            <CardTitle className="text-sm font-semibold text-[#222222] flex items-center gap-1.5">
               <Star className="h-3.5 w-3.5 text-[#AAAAAA]" /> Golf Experience Level
             </CardTitle>
             <CardDescription className="text-xs text-[#AAAAAA]">Self-reported skill level</CardDescription>
@@ -293,7 +293,7 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                   {experienceData.map((_, i) => (
-                    <Cell key={i} fill={i === 0 ? "#545A60" : i === 1 ? "#888888" : i === 2 ? "#F5C72C" : "#AAAAAA"} />
+                    <Cell key={i} fill={i === 0 ? "#545A60" : i === 1 ? "#888888" : i === 2 ? "#F2DD48" : "#AAAAAA"} />
                   ))}
                 </Bar>
               </BarChart>
@@ -301,9 +301,9 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
           </CardContent>
         </Card>
 
-        <Card className="border border-[#E0E0E0] shadow-none">
+        <Card className="border border-[#DEDEDA] shadow-none">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-[#111111]">Indoor Golf Familiarity</CardTitle>
+            <CardTitle className="text-sm font-semibold text-[#222222]">Indoor Golf Familiarity</CardTitle>
             <CardDescription className="text-xs text-[#AAAAAA]">Experience with indoor simulators</CardDescription>
           </CardHeader>
           <CardContent>
@@ -314,12 +314,12 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
                     <span className="text-[#545A60] font-medium truncate max-w-[60%]">{d.name}</span>
                     <span className="text-[#AAAAAA]">{d.value}</span>
                   </div>
-                  <div className="h-1.5 bg-[#F2F2F7] rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-[#F1F1EF] rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full"
                       style={{
                         width: `${(d.value / (stats?.totalApplications || 1)) * 100}%`,
-                        backgroundColor: i === 0 ? "#545A60" : i === 1 ? "#888888" : i === 2 ? "#F5C72C" : "#AAAAAA"
+                        backgroundColor: i === 0 ? "#545A60" : i === 1 ? "#888888" : i === 2 ? "#F2DD48" : "#AAAAAA"
                       }}
                     />
                   </div>
@@ -332,9 +332,9 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
 
       {/* Row 4: How Did They Hear + Best Time to Call */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="border border-[#E0E0E0] shadow-none">
+        <Card className="border border-[#DEDEDA] shadow-none">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-[#111111]">Source Breakdown</CardTitle>
+            <CardTitle className="text-sm font-semibold text-[#222222]">Source Breakdown</CardTitle>
             <CardDescription className="text-xs text-[#AAAAAA]">How applicants heard about the giveaway (top 8)</CardDescription>
           </CardHeader>
           <CardContent>
@@ -346,7 +346,7 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                   {sourceData.map((_, i) => (
-                    <Cell key={i} fill={i === 0 ? "#F5C72C" : i === 1 ? "#545A60" : i < 4 ? "#888888" : "#AAAAAA"} />
+                    <Cell key={i} fill={i === 0 ? "#F2DD48" : i === 1 ? "#545A60" : i < 4 ? "#888888" : "#AAAAAA"} />
                   ))}
                 </Bar>
               </BarChart>
@@ -354,9 +354,9 @@ export function DemographicsTab({ stats }: DemographicsTabProps) {
           </CardContent>
         </Card>
 
-        <Card className="border border-[#E0E0E0] shadow-none">
+        <Card className="border border-[#DEDEDA] shadow-none">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-[#111111]">Best Time to Call</CardTitle>
+            <CardTitle className="text-sm font-semibold text-[#222222]">Best Time to Call</CardTitle>
             <CardDescription className="text-xs text-[#AAAAAA]">Preferred contact window</CardDescription>
           </CardHeader>
           <CardContent>

@@ -23,10 +23,10 @@ interface BottomFunnelConversionProps {
 
 export function BottomFunnelConversion({ conversions, totalApplications }: BottomFunnelConversionProps) {
   return (
-    <Card className="border border-[#E0E0E0] shadow-none">
+    <Card className="border border-[#DEDEDA] shadow-none">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold text-[#111111] flex items-center gap-2">
-          <Zap className="h-4 w-4 text-[#F5C72C]" />
+        <CardTitle className="text-sm font-semibold text-[#222222] flex items-center gap-2">
+          <Zap className="h-4 w-4 text-[#F2DD48]" />
           Bottom Funnel Conversion
         </CardTitle>
         <CardDescription className="text-xs text-[#AAAAAA]">
@@ -35,8 +35,8 @@ export function BottomFunnelConversion({ conversions, totalApplications }: Botto
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-          <div className="text-center p-3 bg-[#F2F2F7] rounded-lg">
-            <div className="text-2xl font-bold text-[#111111]">{conversions?.total ?? 0}</div>
+          <div className="text-center p-3 bg-[#F1F1EF] rounded-lg">
+            <div className="text-2xl font-bold text-[#222222]">{conversions?.total ?? 0}</div>
             <div className="text-xs text-[#888888] mt-0.5">Total Converted</div>
             <div className="text-xs text-[#AAAAAA] mt-0.5">
               {conversions && totalApplications > 0
@@ -44,12 +44,12 @@ export function BottomFunnelConversion({ conversions, totalApplications }: Botto
                 : "0.0"}% of applicants
             </div>
           </div>
-          <div className="text-center p-3 bg-[#F2F2F7] rounded-lg">
+          <div className="text-center p-3 bg-[#F1F1EF] rounded-lg">
             <div className="text-2xl font-bold text-[#545A60]">{conversions?.trialCount ?? 0}</div>
             <div className="text-xs text-[#888888] mt-0.5">$9 Trial</div>
             <div className="text-xs text-[#AAAAAA] mt-0.5">Anniversary Trial Sessions</div>
           </div>
-          <div className="text-center p-3 bg-[#F2F2F7] rounded-lg">
+          <div className="text-center p-3 bg-[#F1F1EF] rounded-lg">
             <div className="text-2xl font-bold text-[#545A60]">{conversions?.driveDayCount ?? 0}</div>
             <div className="text-xs text-[#888888] mt-0.5">Drive Day</div>
             <div className="text-xs text-[#AAAAAA] mt-0.5">Clinic bookings</div>
@@ -62,13 +62,13 @@ export function BottomFunnelConversion({ conversions, totalApplications }: Botto
             {conversions.conversions.map((c, i) => (
               <div key={i} className="flex items-center justify-between py-1.5 px-2 bg-[#F9F9F9] rounded text-xs">
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-[#3DB855]" />
-                  <span className="font-medium text-[#111111]">{c.applicantName}</span>
+                  <CheckCircle2 className="h-3.5 w-3.5 text-[#72B84A]" />
+                  <span className="font-medium text-[#222222]">{c.applicantName}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
                     c.conversionType === "trial"
-                      ? "bg-[#F5C72C]/20 text-[#8B6E00]"
+                      ? "bg-[#F2DD48]/20 text-[#8B6E00]"
                       : "bg-[#007AFF]/10 text-[#007AFF]"
                   }`}>
                     {c.conversionType === "trial" ? "$9 Trial" : "Drive Day"}

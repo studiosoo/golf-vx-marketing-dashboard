@@ -41,22 +41,22 @@ export function CollapsibleNavItem({
         className={cn(
           "flex items-center gap-2.5 w-full rounded-lg px-2.5 py-2 text-sm transition-colors duration-150 text-left group",
           isActive
-            ? "bg-[#F5C72C]/15 text-[#111111] font-semibold"
-            : "text-[#888888] hover:bg-[#F5F5F5] hover:text-[#111111]"
+            ? "bg-[#F2DD48]/15 text-[#222222] font-semibold"
+            : "text-[#888888] hover:bg-[#F1F1EF] hover:text-[#222222]"
         )}
         title={isCollapsed ? item.label : undefined}
       >
         <item.icon
           className={cn(
             "h-4 w-4 shrink-0 transition-colors",
-            isActive ? "text-[#111111]" : "text-[#AAAAAA] group-hover:text-[#888888]"
+            isActive ? "text-[#222222]" : "text-[#AAAAAA] group-hover:text-[#888888]"
           )}
         />
         {!isCollapsed && (
           <>
             <span className="flex-1 truncate">{item.label}</span>
             {isActive && (
-              <span className="w-1.5 h-1.5 rounded-full bg-[#F5C72C] shrink-0" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#F2DD48] shrink-0" />
             )}
           </>
         )}
@@ -74,8 +74,8 @@ export function CollapsibleNavItem({
         className={cn(
           "flex items-center gap-2.5 w-full rounded-lg px-2.5 py-2 text-sm transition-colors duration-150 text-left group",
           isActive || isChildActive
-            ? "text-[#111111] font-semibold"
-            : "text-[#888888] hover:bg-[#F5F5F5] hover:text-[#111111]"
+            ? "text-[#222222] font-semibold"
+            : "text-[#888888] hover:bg-[#F1F1EF] hover:text-[#222222]"
         )}
         title={isCollapsed ? item.label : undefined}
       >
@@ -83,7 +83,7 @@ export function CollapsibleNavItem({
           className={cn(
             "h-4 w-4 shrink-0",
             isActive || isChildActive
-              ? "text-[#111111]"
+              ? "text-[#222222]"
               : "text-[#AAAAAA] group-hover:text-[#888888]"
           )}
         />
@@ -109,14 +109,14 @@ export function CollapsibleNavItem({
                 className={cn(
                   "flex items-center gap-2 w-full rounded-md px-2 py-1.5 text-[13px] transition-colors duration-150 text-left",
                   childActive
-                    ? "text-[#111111] font-semibold bg-[#F5C72C]/10"
-                    : "text-[#888888] hover:text-[#111111] hover:bg-[#F5F5F5]"
+                    ? "text-[#222222] font-semibold bg-[#F2DD48]/10"
+                    : "text-[#888888] hover:text-[#222222] hover:bg-[#F1F1EF]"
                 )}
               >
                 <child.icon
                   className={cn(
                     "h-3.5 w-3.5 shrink-0",
-                    childActive ? "text-[#111111]" : "text-[#CCCCCC]"
+                    childActive ? "text-[#222222]" : "text-[#CCCCCC]"
                   )}
                 />
                 <span className="truncate">{child.label}</span>

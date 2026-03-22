@@ -45,7 +45,7 @@ export function OutreachTab() {
   const kpis = summary ? [
     { label: "Total Requests", value: String(summary.total), icon: <Megaphone size={16} />, color: "text-blue-400" },
     { label: "Cash Donated", value: fmt$(summary.totalCashValue), icon: <DollarSign size={16} />, color: "text-[#E8453C]" },
-    { label: "Perceived Value", value: fmt$(summary.totalPerceivedValue), icon: <Star size={16} />, color: "text-[#F5C72C]" },
+    { label: "Perceived Value", value: fmt$(summary.totalPerceivedValue), icon: <Star size={16} />, color: "text-[#F2DD48]" },
     { label: "Est. Total Reach", value: fmtNum(summary.totalEstimatedReach), icon: <Eye size={16} />, color: "text-green-400" },
   ] : [];
 
@@ -220,7 +220,7 @@ export function OutreachTab() {
                         onClick={() => updateStatus.mutate({ id: r.id, status: "approved" })}>
                         <CheckCircle2 size={11} /> Approve
                       </Button>
-                      <Button size="sm" variant="outline" className="text-xs h-7 gap-1 text-[#F5C72C] border-yellow-500/30 hover:bg-yellow-500/10"
+                      <Button size="sm" variant="outline" className="text-xs h-7 gap-1 text-[#F2DD48] border-yellow-500/30 hover:bg-yellow-500/10"
                         onClick={() => updateStatus.mutate({ id: r.id, status: "under_review" })}>
                         <AlertCircle size={11} /> Under Review
                       </Button>

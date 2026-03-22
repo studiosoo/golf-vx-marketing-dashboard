@@ -44,15 +44,15 @@ export default function Performance() {
             label: "Revenue (MTD)",
             value: revLoading ? "—" : revSummary == null ? "N/A" : formatCurrency(totalRevenue),
             icon: DollarSign,
-            color: "text-[#3DB855]",
-            bg: "bg-[#3DB855]/10",
+            color: "text-[#72B84A]",
+            bg: "bg-[#72B84A]/10",
           },
           {
             label: "Ad Spend",
             value: campaignsLoading ? "—" : campaigns == null ? "N/A" : formatCurrency(totalSpend),
             icon: TrendingUp,
-            color: "text-[#F5C72C]",
-            bg: "bg-[#F5C72C]/10",
+            color: "text-[#F2DD48]",
+            bg: "bg-[#F2DD48]/10",
           },
           {
             label: "Active Campaigns",
@@ -66,17 +66,17 @@ export default function Performance() {
             value: kpiLoading ? "—" : (roas !== null ? `${roas.toFixed(2)}×` : "—"),
             icon: BarChart3,
             color: "text-[#888888]",
-            bg: "bg-[#F5F5F5]",
+            bg: "bg-[#F1F1EF]",
           },
         ].map(({ label, value, icon: Icon, color, bg }) => (
-          <Card key={label} className="bg-white border-[#E0E0E0] shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+          <Card key={label} className="bg-white border-[#DEDEDA] shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
             <CardContent className="p-4 flex items-center gap-3">
               <div className={`w-9 h-9 rounded-lg ${bg} flex items-center justify-center shrink-0`}>
                 <Icon className={`h-4 w-4 ${color}`} />
               </div>
               <div>
                 <p className="text-xs text-[#AAAAAA]">{label}</p>
-                <p className="text-lg font-bold text-[#111111] leading-tight">{value}</p>
+                <p className="text-lg font-bold text-[#222222] leading-tight">{value}</p>
               </div>
             </CardContent>
           </Card>
@@ -171,12 +171,12 @@ export default function Performance() {
           {/* Meta Ads callout */}
           <button
             onClick={() => navigate("/advertising")}
-            className="w-full flex items-center justify-between px-4 py-3 mt-4 bg-[#F5C72C]/10 border border-[#F5C72C]/30 rounded-[10px] hover:bg-[#F5C72C]/20 transition-colors"
+            className="w-full flex items-center justify-between px-4 py-3 mt-4 bg-[#F2DD48]/10 border border-[#F2DD48]/30 rounded-[10px] hover:bg-[#F2DD48]/20 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <BarChart3 className="h-4 w-4 text-[#F5C72C]" />
+              <BarChart3 className="h-4 w-4 text-[#F2DD48]" />
               <div className="text-left">
-                <p className="text-sm font-semibold text-[#111111]">Meta Ads Campaigns</p>
+                <p className="text-sm font-semibold text-[#222222]">Meta Ads Campaigns</p>
                 <p className="text-xs text-[#888888]">Facebook & Instagram 캠페인 상세 데이터는 Advertising에서 확인하세요</p>
               </div>
             </div>

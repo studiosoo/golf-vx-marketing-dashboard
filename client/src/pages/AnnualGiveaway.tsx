@@ -78,7 +78,7 @@ export default function AnnualGiveaway() {
 
   const entryProgress = (ENTRY_PAGE_UV / ENTRY_GOAL) * 100;
   const healthStatus = entryProgress >= 80 ? "on_track" : entryProgress >= 40 ? "behind" : "critical";
-  const healthColor = healthStatus === "on_track" ? "#3DB855" : healthStatus === "behind" ? "#F5C72C" : "#888888";
+  const healthColor = healthStatus === "on_track" ? "#72B84A" : healthStatus === "behind" ? "#F2DD48" : "#888888";
   const healthLabel = healthStatus === "on_track" ? "On Track" : healthStatus === "behind" ? "Behind" : "Critical";
 
   if (loadingApps || loadingStats) {
@@ -95,7 +95,7 @@ export default function AnnualGiveaway() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#111111] tracking-tight">Annual Membership Giveaway</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#222222] tracking-tight">Annual Membership Giveaway</h1>
             <span
               className="text-xs font-semibold px-2 py-0.5 rounded-full"
               style={{ backgroundColor: `${healthColor}20`, color: healthColor }}
@@ -116,7 +116,7 @@ export default function AnnualGiveaway() {
           onClick={() => syncMutation.mutate()}
           disabled={syncMutation.isPending}
           size="sm"
-          className="bg-[#F5C72C] hover:bg-[#e6b820] text-[#111111] font-semibold"
+          className="bg-[#F2DD48] hover:bg-[#e6b820] text-[#222222] font-semibold"
         >
           {syncMutation.isPending
             ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Syncing...</>
@@ -126,10 +126,10 @@ export default function AnnualGiveaway() {
       </div>
 
       {/* Goal Progress */}
-      <Card className="border border-[#E0E0E0] shadow-none">
+      <Card className="border border-[#DEDEDA] shadow-none">
         <CardContent className="pt-4 pb-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <ProgressBar value={ENTRY_PAGE_UV} max={ENTRY_GOAL} label="Entry Goal (Short-Form)" color="#F5C72C" />
+            <ProgressBar value={ENTRY_PAGE_UV} max={ENTRY_GOAL} label="Entry Goal (Short-Form)" color="#F2DD48" />
             <ProgressBar value={totalApplications} max={LONG_FORM_GOAL} label="Application Goal (Long-Form)" color="#545A60" />
           </div>
         </CardContent>
@@ -166,11 +166,11 @@ export default function AnnualGiveaway() {
 
       {/* Applicant Timeline Chart */}
       {timeline && timeline.length > 0 && (
-        <Card className="border border-[#E0E0E0] shadow-none">
+        <Card className="border border-[#DEDEDA] shadow-none">
           <CardHeader className="pb-2 pt-4 px-4">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-[#AAAAAA]" />
-              <CardTitle className="text-sm font-semibold text-[#111111]">Applications Over Time</CardTitle>
+              <CardTitle className="text-sm font-semibold text-[#222222]">Applications Over Time</CardTitle>
               <span className="text-xs text-[#AAAAAA] ml-1">— Cumulative applicant count</span>
             </div>
           </CardHeader>
@@ -179,8 +179,8 @@ export default function AnnualGiveaway() {
               <AreaChart data={timeline} margin={{ left: 0, right: 8, top: 4, bottom: 0 }}>
                 <defs>
                   <linearGradient id="timelineGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#F5C72C" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#F5C72C" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#F2DD48" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#F2DD48" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" vertical={false} />
@@ -199,9 +199,9 @@ export default function AnnualGiveaway() {
                 <Tooltip
                   formatter={(value: number, name: string) => [value, name === "cumulative" ? "Total applicants" : "New today"]}
                   labelFormatter={(d: string) => new Date(d + "T00:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
-                  contentStyle={{ fontSize: 12, border: "1px solid #E0E0E0", borderRadius: 8, boxShadow: "none" }}
+                  contentStyle={{ fontSize: 12, border: "1px solid #DEDEDA", borderRadius: 8, boxShadow: "none" }}
                 />
-                <Area type="monotone" dataKey="cumulative" stroke="#F5C72C" strokeWidth={2} fill="url(#timelineGradient)" dot={false} />
+                <Area type="monotone" dataKey="cumulative" stroke="#F2DD48" strokeWidth={2} fill="url(#timelineGradient)" dot={false} />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
@@ -217,7 +217,7 @@ export default function AnnualGiveaway() {
       {/* AI Intelligence scroll anchor */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="text-sm font-semibold text-[#111111]">Campaign Analysis</div>
+          <div className="text-sm font-semibold text-[#222222]">Campaign Analysis</div>
           <MetaAdsStatusBadge />
         </div>
         <button
@@ -227,8 +227,8 @@ export default function AnnualGiveaway() {
           }}
           className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all"
           style={{
-            background: "linear-gradient(135deg, #F5C72C 0%, #e6b820 100%)",
-            color: "#111111",
+            background: "linear-gradient(135deg, #F2DD48 0%, #e6b820 100%)",
+            color: "#222222",
             boxShadow: "0 2px 8px rgba(245,199,44,0.4)",
           }}
         >
@@ -239,16 +239,16 @@ export default function AnnualGiveaway() {
 
       {/* Tabs: Demographics / Applications */}
       <Tabs defaultValue="demographics" className="space-y-4">
-        <TabsList className="bg-[#F2F2F7] border border-[#E0E0E0]">
+        <TabsList className="bg-[#F1F1EF] border border-[#DEDEDA]">
           <TabsTrigger
             value="demographics"
-            className="data-[state=active]:bg-white data-[state=active]:text-[#111111] data-[state=active]:shadow-none text-[#888888]"
+            className="data-[state=active]:bg-white data-[state=active]:text-[#222222] data-[state=active]:shadow-none text-[#888888]"
           >
             Demographics
           </TabsTrigger>
           <TabsTrigger
             value="applications"
-            className="data-[state=active]:bg-white data-[state=active]:text-[#111111] data-[state=active]:shadow-none text-[#888888]"
+            className="data-[state=active]:bg-white data-[state=active]:text-[#222222] data-[state=active]:shadow-none text-[#888888]"
           >
             Applications ({totalApplications})
           </TabsTrigger>
@@ -272,13 +272,13 @@ export default function AnnualGiveaway() {
         id="giveaway-ai-section"
         className="border-2 rounded-xl p-1"
         style={{
-          borderColor: "#F5C72C",
+          borderColor: "#F2DD48",
           background: "linear-gradient(135deg, rgba(245,199,44,0.05) 0%, rgba(245,199,44,0.02) 100%)",
         }}
       >
         <div className="flex items-center gap-2 px-4 pt-3 pb-2">
-          <Sparkles className="h-5 w-5" style={{ color: "#F5C72C" }} />
-          <span className="text-base font-bold text-[#111111]">AI Intelligence</span>
+          <Sparkles className="h-5 w-5" style={{ color: "#F2DD48" }} />
+          <span className="text-base font-bold text-[#222222]">AI Intelligence</span>
           <span className="text-xs text-[#888888] ml-1">— Powered by Golf VX Marketing Engine</span>
         </div>
         <div className="px-1 pb-1">

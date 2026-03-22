@@ -129,7 +129,7 @@ function PostCard({ post }: { post: any }) {
       href={post.permalink}
       target="_blank"
       rel="noopener noreferrer"
-      className="group relative block rounded-xl overflow-hidden bg-card border border-border hover:border-[#F5C72C]/50 transition-all"
+      className="group relative block rounded-xl overflow-hidden bg-card border border-border hover:border-[#F2DD48]/50 transition-all"
     >
       <div className="relative aspect-square bg-muted">
         {imgSrc ? (
@@ -198,7 +198,7 @@ function DailyAnalysisTab() {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-3 p-4 bg-card rounded-xl border border-border">
-          <Sparkles className="h-5 w-5 text-[#F5C72C] animate-pulse" />
+          <Sparkles className="h-5 w-5 text-[#F2DD48] animate-pulse" />
           <div>
             <p className="text-sm font-semibold text-foreground">Analyzing your Instagram performance...</p>
             <p className="text-xs text-[#888] mt-0.5">Fetching live data and generating AI insights</p>
@@ -230,14 +230,14 @@ function DailyAnalysisTab() {
   const followerPct = Math.min(100, Math.round((metrics.followers / followerGoal) * 100));
   const engagementNum = parseFloat(metrics.avgEngagement);
   const engagementLabel = engagementNum >= 3 ? "Excellent" : engagementNum >= 1 ? "Good" : "Needs Work";
-  const engagementColor = engagementNum >= 3 ? "text-[#3DB855]" : engagementNum >= 1 ? "text-[#F5C72C]" : "text-[#FF3B30]";
+  const engagementColor = engagementNum >= 3 ? "text-[#72B84A]" : engagementNum >= 1 ? "text-[#F2DD48]" : "text-[#FF3B30]";
 
   return (
     <div className="space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-[#F5C72C]" />
+          <Sparkles className="h-4 w-4 text-[#F2DD48]" />
           <span className="text-xs text-[#888]">
             Generated {new Date(generatedAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
           </span>
@@ -259,7 +259,7 @@ function DailyAnalysisTab() {
         <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-1">
-              <Users className="h-3.5 w-3.5 text-[#F5C72C]" />
+              <Users className="h-3.5 w-3.5 text-[#F2DD48]" />
               <span className="text-[10px] text-[#888] uppercase tracking-wide">Followers</span>
             </div>
             <p className="text-2xl font-bold text-foreground">{metrics.followers.toLocaleString()}</p>
@@ -270,7 +270,7 @@ function DailyAnalysisTab() {
               </div>
               <div className="h-1 bg-muted rounded-full">
                 <div
-                  className="h-1 bg-[#F5C72C] rounded-full transition-all"
+                  className="h-1 bg-[#F2DD48] rounded-full transition-all"
                   style={{ width: `${followerPct}%` }}
                 />
               </div>
@@ -281,7 +281,7 @@ function DailyAnalysisTab() {
         <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-1">
-              <Target className="h-3.5 w-3.5 text-[#F5C72C]" />
+              <Target className="h-3.5 w-3.5 text-[#F2DD48]" />
               <span className="text-[10px] text-[#888] uppercase tracking-wide">Engagement</span>
             </div>
             <p className="text-2xl font-bold text-foreground">{metrics.avgEngagement}%</p>
@@ -292,7 +292,7 @@ function DailyAnalysisTab() {
         <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-1">
-              <Heart className="h-3.5 w-3.5 text-[#F5C72C]" />
+              <Heart className="h-3.5 w-3.5 text-[#F2DD48]" />
               <span className="text-[10px] text-[#888] uppercase tracking-wide">Avg Likes</span>
             </div>
             <p className="text-2xl font-bold text-foreground">{metrics.avgLikes}</p>
@@ -303,7 +303,7 @@ function DailyAnalysisTab() {
         <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-1">
-              <BarChart3 className="h-3.5 w-3.5 text-[#F5C72C]" />
+              <BarChart3 className="h-3.5 w-3.5 text-[#F2DD48]" />
               <span className="text-[10px] text-[#888] uppercase tracking-wide">Content Mix</span>
             </div>
             <div className="space-y-1 mt-1">
@@ -322,7 +322,7 @@ function DailyAnalysisTab() {
       <Card className="bg-card border-border">
         <CardHeader className="pb-3 pt-4 px-4">
           <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
-            <Zap className="h-4 w-4 text-[#F5C72C]" />
+            <Zap className="h-4 w-4 text-[#F2DD48]" />
             Today's Post Idea
             <Badge variant="secondary" className="ml-auto text-[10px] font-normal">
               {analysis.todayPostIdea.contentType}
@@ -335,7 +335,7 @@ function DailyAnalysisTab() {
             <Button
               size="sm"
               variant="ghost"
-              className="absolute top-2 right-2 h-6 w-6 p-0 text-[#555] hover:text-[#F5C72C]"
+              className="absolute top-2 right-2 h-6 w-6 p-0 text-[#555] hover:text-[#F2DD48]"
               onClick={() => copyCaption(analysis.todayPostIdea.captionDraft)}
             >
               <Copy className="h-3 w-3" />
@@ -347,7 +347,7 @@ function DailyAnalysisTab() {
               <Button
                 size="sm"
                 variant="ghost"
-                className="absolute top-2 right-2 h-6 w-6 p-0 text-[#555] hover:text-[#F5C72C]"
+                className="absolute top-2 right-2 h-6 w-6 p-0 text-[#555] hover:text-[#F2DD48]"
                 onClick={() => copyCaption(analysis.todayPostIdea.hashtags)}
               >
                 <Copy className="h-3 w-3" />
@@ -356,7 +356,7 @@ function DailyAnalysisTab() {
           )}
           <div className="flex items-center gap-2 text-xs text-[#888]">
             <Clock className="h-3.5 w-3.5" />
-            Best time to post: <span className="text-[#F5C72C] font-medium">{analysis.todayPostIdea.bestTime}</span>
+            Best time to post: <span className="text-[#F2DD48] font-medium">{analysis.todayPostIdea.bestTime}</span>
           </div>
         </CardContent>
       </Card>
@@ -367,7 +367,7 @@ function DailyAnalysisTab() {
         <Card className="bg-card border-border">
           <CardHeader className="pb-2 pt-4 px-4">
             <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-[#F5C72C]" />
+              <TrendingUp className="h-4 w-4 text-[#F2DD48]" />
               Key Insight
             </CardTitle>
           </CardHeader>
@@ -380,7 +380,7 @@ function DailyAnalysisTab() {
         <Card className="bg-card border-border">
           <CardHeader className="pb-2 pt-4 px-4">
             <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-[#3DB855]" />
+              <CheckCircle2 className="h-4 w-4 text-[#72B84A]" />
               Quick Win (15 min)
             </CardTitle>
           </CardHeader>
@@ -393,9 +393,9 @@ function DailyAnalysisTab() {
       {/* Follower Progress */}
       <Card className="bg-card border-border">
         <CardContent className="p-4 flex items-start gap-3">
-          <Users className="h-4 w-4 text-[#F5C72C] mt-0.5 flex-shrink-0" />
+          <Users className="h-4 w-4 text-[#F2DD48] mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-xs font-semibold text-[#F5C72C] mb-1">Follower Goal Progress</p>
+            <p className="text-xs font-semibold text-[#F2DD48] mb-1">Follower Goal Progress</p>
             <p className="text-sm text-[#ccc] leading-relaxed">{analysis.followerProgress}</p>
           </div>
         </CardContent>
@@ -408,7 +408,7 @@ function DailyAnalysisTab() {
           <div className="space-y-2">
             {metrics.topPosts.map((post: any, i: number) => (
               <div key={i} className="flex items-center gap-3 p-3 bg-card rounded-lg border border-border">
-                <div className="w-6 h-6 rounded-full bg-[#F5C72C]/10 flex items-center justify-center text-[#F5C72C] text-xs font-bold flex-shrink-0">
+                <div className="w-6 h-6 rounded-full bg-[#F2DD48]/10 flex items-center justify-center text-[#F2DD48] text-xs font-bold flex-shrink-0">
                   {i + 1}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -482,8 +482,8 @@ function SchedulerForm({ onClose }: { onClose: () => void }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="bg-[#F5C72C]/5 border border-[#F5C72C]/20 rounded-lg p-4">
-        <p className="text-xs font-semibold text-[#F5C72C] mb-3 flex items-center gap-1.5">
+      <div className="bg-[#F2DD48]/5 border border-[#F2DD48]/20 rounded-lg p-4">
+        <p className="text-xs font-semibold text-[#F2DD48] mb-3 flex items-center gap-1.5">
           <Sparkles className="h-3.5 w-3.5" />
           AI Caption Generator
         </p>
@@ -511,7 +511,7 @@ function SchedulerForm({ onClose }: { onClose: () => void }) {
             variant="outline"
             disabled={!form.topic || captionMutation.isPending}
             onClick={() => captionMutation.mutate({ topic: form.topic, tone: form.tone, includeHashtags: true })}
-            className="border-[#F5C72C]/40 text-[#F5C72C] hover:bg-[#F5C72C]/10"
+            className="border-[#F2DD48]/40 text-[#F2DD48] hover:bg-[#F2DD48]/10"
           >
             {captionMutation.isPending ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
           </Button>
@@ -582,7 +582,7 @@ function SchedulerForm({ onClose }: { onClose: () => void }) {
         <Button
           type="submit"
           disabled={scheduleMutation.isPending}
-          className="flex-1 bg-[#F5C72C] text-black hover:bg-[#F5C72C]/90"
+          className="flex-1 bg-[#F2DD48] text-black hover:bg-[#F2DD48]/90"
         >
           {scheduleMutation.isPending ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <Calendar className="h-4 w-4 mr-2" />}
           Schedule Post
@@ -621,7 +621,7 @@ function ScheduledPostRow({ post, onRefresh }: { post: any; onRefresh: () => voi
       <div className="flex-1 min-w-0">
         <p className="text-sm text-foreground line-clamp-2">{post.caption}</p>
         {post.hashtags && (
-          <p className="text-xs text-[#F5C72C]/70 mt-0.5 line-clamp-1">{post.hashtags}</p>
+          <p className="text-xs text-[#F2DD48]/70 mt-0.5 line-clamp-1">{post.hashtags}</p>
         )}
         <div className="flex items-center gap-2 mt-1.5">
           <Badge variant="outline" className="text-[10px] border-border text-[#888]">
@@ -643,7 +643,7 @@ function ScheduledPostRow({ post, onRefresh }: { post: any; onRefresh: () => voi
             variant="outline"
             disabled={publishMutation.isPending}
             onClick={() => publishMutation.mutate({ id: post.id })}
-            className="h-7 px-2 text-xs border-[#F5C72C]/40 text-[#F5C72C] hover:bg-[#F5C72C]/10"
+            className="h-7 px-2 text-xs border-[#F2DD48]/40 text-[#F2DD48] hover:bg-[#F2DD48]/10"
           >
             {publishMutation.isPending ? <RefreshCw className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
           </Button>
@@ -700,7 +700,7 @@ export default function InstagramDashboard() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <Instagram className="h-6 w-6 text-[#F5C72C]" />
+            <Instagram className="h-6 w-6 text-[#F2DD48]" />
             Instagram
           </h1>
           <p className="text-sm text-[#888] mt-1">
@@ -720,7 +720,7 @@ export default function InstagramDashboard() {
           <Button
             size="sm"
             onClick={() => setScheduleOpen(true)}
-            className="bg-[#F5C72C] text-black hover:bg-[#F5C72C]/90"
+            className="bg-[#F2DD48] text-black hover:bg-[#F2DD48]/90"
           >
             <Plus className="h-4 w-4 mr-1.5" />
             Schedule Post
@@ -740,13 +740,13 @@ export default function InstagramDashboard() {
               </p>
             </div>
           </div>
-          <div className="bg-white rounded-lg border border-[#E0E0E0] p-4 space-y-3 text-[13px]">
-            <p className="font-semibold text-[#111111]">How to renew your token:</p>
+          <div className="bg-white rounded-lg border border-[#DEDEDA] p-4 space-y-3 text-[13px]">
+            <p className="font-semibold text-[#222222]">How to renew your token:</p>
             <ol className="space-y-2 text-[#555555] list-decimal list-inside">
               <li>Open <a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noopener noreferrer" className="text-[#007AFF] underline">Meta Graph API Explorer</a></li>
-              <li>Select your app and generate a new <strong>User Access Token</strong> with <code className="bg-[#F5F5F5] px-1 rounded text-[11px]">instagram_basic</code>, <code className="bg-[#F5F5F5] px-1 rounded text-[11px]">pages_read_engagement</code> permissions</li>
+              <li>Select your app and generate a new <strong>User Access Token</strong> with <code className="bg-[#F1F1EF] px-1 rounded text-[11px]">instagram_basic</code>, <code className="bg-[#F1F1EF] px-1 rounded text-[11px]">pages_read_engagement</code> permissions</li>
               <li>Exchange for a long-lived token (60 days) via the Token Debugger</li>
-              <li>Update <code className="bg-[#F5F5F5] px-1 rounded text-[11px]">INSTAGRAM_ACCESS_TOKEN</code> in your environment variables</li>
+              <li>Update <code className="bg-[#F1F1EF] px-1 rounded text-[11px]">INSTAGRAM_ACCESS_TOKEN</code> in your environment variables</li>
               <li>Restart the server and return here</li>
             </ol>
           </div>
@@ -779,8 +779,8 @@ export default function InstagramDashboard() {
           <Card className="bg-card border-border">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-[#F5C72C]/10 flex items-center justify-center">
-                  <Users className="h-4 w-4 text-[#F5C72C]" />
+                <div className="w-9 h-9 rounded-full bg-[#F2DD48]/10 flex items-center justify-center">
+                  <Users className="h-4 w-4 text-[#F2DD48]" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-foreground">{formatCount(accountStats.followers_count)}</p>
@@ -792,8 +792,8 @@ export default function InstagramDashboard() {
           <Card className="bg-card border-border">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-[#F5C72C]/10 flex items-center justify-center">
-                  <Image className="h-4 w-4 text-[#F5C72C]" />
+                <div className="w-9 h-9 rounded-full bg-[#F2DD48]/10 flex items-center justify-center">
+                  <Image className="h-4 w-4 text-[#F2DD48]" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-foreground">{accountStats.media_count}</p>
@@ -805,8 +805,8 @@ export default function InstagramDashboard() {
           <Card className="bg-card border-border">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-[#F5C72C]/10 flex items-center justify-center">
-                  <Calendar className="h-4 w-4 text-[#F5C72C]" />
+                <div className="w-9 h-9 rounded-full bg-[#F2DD48]/10 flex items-center justify-center">
+                  <Calendar className="h-4 w-4 text-[#F2DD48]" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-foreground">{scheduledPosts?.length ?? 0}</p>
@@ -864,7 +864,7 @@ export default function InstagramDashboard() {
         <DialogContent className="bg-muted border-border text-foreground max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-[#F5C72C]" />
+              <Calendar className="h-5 w-5 text-[#F2DD48]" />
               Schedule Instagram Post
             </DialogTitle>
           </DialogHeader>

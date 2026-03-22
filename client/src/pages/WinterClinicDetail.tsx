@@ -108,7 +108,7 @@ function WinterClinicAttendeeModal({
                       </button>
                     )}
                     {parseFloat(a.amountPaid || '0') > 0 && (
-                      <span className="text-xs font-medium text-[#3DB855]">${parseFloat(a.amountPaid || '0').toFixed(0)}</span>
+                      <span className="text-xs font-medium text-[#72B84A]">${parseFloat(a.amountPaid || '0').toFixed(0)}</span>
                     )}
                   </div>
                 </div>
@@ -209,8 +209,8 @@ export default function WinterClinicDetail({ embedded = false }: { embedded?: bo
 
   // Source colors — Golf VX palette
   const sourceColors: Record<string, string> = {
-    "PBGA Links & Tees": "bg-[#F5C72C]",
-    "Social Media": "bg-[#111111]",
+    "PBGA Links & Tees": "bg-[#F2DD48]",
+    "Social Media": "bg-[#222222]",
     "Golf VX": "bg-primary",
     "Google Search": "bg-[#888888]",
     "Friend / Family": "bg-[#888888]",
@@ -220,12 +220,12 @@ export default function WinterClinicDetail({ embedded = false }: { embedded?: bo
 
   // Experience colors — Golf VX palette
   const experienceColors: Record<string, string> = {
-    "Beginner": "bg-[#3DB855]",
-    "Intermediate": "bg-[#F5C72C]",
-    "Advanced": "bg-[#111111]",
-    "beginner": "bg-[#3DB855]",
-    "intermediate": "bg-[#F5C72C]",
-    "advanced": "bg-[#111111]",
+    "Beginner": "bg-[#72B84A]",
+    "Intermediate": "bg-[#F2DD48]",
+    "Advanced": "bg-[#222222]",
+    "beginner": "bg-[#72B84A]",
+    "intermediate": "bg-[#F2DD48]",
+    "advanced": "bg-[#222222]",
   };
 
   const getCategoryIcon = (category: string) => {
@@ -239,10 +239,10 @@ export default function WinterClinicDetail({ embedded = false }: { embedded?: bo
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'kids': return 'bg-[#FFFBEA] text-[#111111] border-[#F5C72C]/40';
-      case 'adults': return 'bg-[#F5F5F5] text-[#111111] border-[#E0E0E0]';
-      case 'family': return 'bg-[#F5F5F5] text-[#888888] border-[#E0E0E0]';
-      default: return 'bg-[#F5F5F5] text-[#888888] border-[#E0E0E0]';
+      case 'kids': return 'bg-[#FFFBEA] text-[#222222] border-[#F2DD48]/40';
+      case 'adults': return 'bg-[#F1F1EF] text-[#222222] border-[#DEDEDA]';
+      case 'family': return 'bg-[#F1F1EF] text-[#888888] border-[#DEDEDA]';
+      default: return 'bg-[#F1F1EF] text-[#888888] border-[#DEDEDA]';
     }
   };
 
@@ -262,7 +262,7 @@ export default function WinterClinicDetail({ embedded = false }: { embedded?: bo
             4-Week Golf Clinic Programs — Jan to Mar 2026
           </p>
         </div>
-        <span className="px-3 py-1 text-xs font-medium bg-[#F0FAF3] text-[#3DB855] rounded-full border border-[#3DB855]/30">
+        <span className="px-3 py-1 text-xs font-medium bg-[#F0FAF3] text-[#72B84A] rounded-full border border-[#72B84A]/30">
           Active
         </span>
       </div>}
@@ -283,7 +283,7 @@ export default function WinterClinicDetail({ embedded = false }: { embedded?: bo
             <span className="text-sm text-muted-foreground">Total Revenue</span>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </div>
-          <p className="text-2xl font-bold text-[#3DB855]">${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+          <p className="text-2xl font-bold text-[#72B84A]">${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
           <p className="text-xs text-muted-foreground mt-1">
             ${uniqueStudents > 0 ? (totalRevenue / uniqueStudents).toFixed(2) : '0'} avg/student
           </p>
@@ -427,7 +427,7 @@ export default function WinterClinicDetail({ embedded = false }: { embedded?: bo
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Revenue</p>
-                    <p className="text-lg font-bold text-[#3DB855]">${totalRev.toLocaleString('en-US', { minimumFractionDigits: 0 })}</p>
+                    <p className="text-lg font-bold text-[#72B84A]">${totalRev.toLocaleString('en-US', { minimumFractionDigits: 0 })}</p>
                   </div>
                 </div>
               </div>
@@ -486,7 +486,7 @@ export default function WinterClinicDetail({ embedded = false }: { embedded?: bo
                   </div>
                   <div className="bg-muted/50 rounded-lg p-3">
                     <p className="text-xs text-muted-foreground">Revenue</p>
-                    <p className="text-lg font-bold text-[#3DB855]">${clinic.totalRevenue.toFixed(0)}</p>
+                    <p className="text-lg font-bold text-[#72B84A]">${clinic.totalRevenue.toFixed(0)}</p>
                     <p className="text-xs text-muted-foreground">${clinic.avgRevenuePerStudent.toFixed(0)} avg</p>
                   </div>
                   <div className="bg-muted/50 rounded-lg p-3">
@@ -498,7 +498,7 @@ export default function WinterClinicDetail({ embedded = false }: { embedded?: bo
                   </div>
                   <div className="bg-muted/50 rounded-lg p-3">
                     <p className="text-xs text-muted-foreground">Rev/Student</p>
-                    <p className="text-lg font-bold text-[#3DB855]">
+                    <p className="text-lg font-bold text-[#72B84A]">
                       ${clinic.uniqueStudents > 0 ? (clinic.totalRevenue / clinic.uniqueStudents).toFixed(0) : '0'}
                     </p>
                     <p className="text-xs text-muted-foreground">per unique</p>
@@ -571,7 +571,7 @@ export default function WinterClinicDetail({ embedded = false }: { embedded?: bo
       <div className="space-y-4">
         <div>
           <h2 className="text-lg font-semibold flex items-center gap-2">
-            <span className="text-[#F5C72C]">✦</span> AI Marketing Intelligence
+            <span className="text-[#F2DD48]">✦</span> AI Marketing Intelligence
           </h2>
           <p className="text-sm text-muted-foreground mt-1">AI-generated multi-channel marketing strategy based on program performance data.</p>
         </div>

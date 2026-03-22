@@ -112,7 +112,7 @@ export default function AnnualGiveawayActions() {
                   )}
                   {urgentActions.length === 0 && (
                     <>
-                      <CheckCircle2 className="h-5 w-5 text-[#3DB855]" />
+                      <CheckCircle2 className="h-5 w-5 text-[#72B84A]" />
                       All urgent actions completed
                     </>
                   )}
@@ -181,7 +181,7 @@ export default function AnnualGiveawayActions() {
                             <Badge variant="outline">{typeLabels[action.type as keyof typeof typeLabels]}</Badge>
                             <span className="text-xs text-muted-foreground">{action.effortRequired}</span>
                             {isCompleted && (
-                              <Badge variant="outline" className="bg-[#3DB855]/10 text-[#3DB855] border-[#3DB855]/30">
+                              <Badge variant="outline" className="bg-[#72B84A]/10 text-[#72B84A] border-[#72B84A]/30">
                                 <CheckCircle2 className="h-3 w-3 mr-1" />
                                 Completed
                               </Badge>
@@ -197,7 +197,7 @@ export default function AnnualGiveawayActions() {
                           <CardDescription className="mt-1">{action.description}</CardDescription>
                           {action.expectedImpact && (
                             <div className="mt-2 flex items-center gap-2 text-sm">
-                              <TrendingUp className="h-4 w-4 text-[#3DB855]" />
+                              <TrendingUp className="h-4 w-4 text-[#72B84A]" />
                               <span className="text-muted-foreground">Expected: {action.expectedImpact}</span>
                             </div>
                           )}
@@ -249,7 +249,7 @@ export default function AnnualGiveawayActions() {
 
                         {/* Result */}
                         {action.result && (
-                          <div className="bg-[#3DB855]/10 p-3 rounded-lg border border-[#3DB855]/20">
+                          <div className="bg-[#72B84A]/10 p-3 rounded-lg border border-[#72B84A]/20">
                             <p className="text-xs font-medium mb-1">Result:</p>
                             <p className="text-sm text-muted-foreground">{action.result}</p>
                           </div>

@@ -55,8 +55,8 @@ export default function PromoLanding() {
   // ── Loading ──────────────────────────────────────────────────────────────
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#111111] flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-[#F5C72C]" />
+      <div className="min-h-screen bg-[#222222] flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[#F2DD48]" />
       </div>
     );
   }
@@ -64,8 +64,8 @@ export default function PromoLanding() {
   // ── Not found / expired ──────────────────────────────────────────────────
   if (isError || !promo) {
     return (
-      <div className="min-h-screen bg-[#111111] flex flex-col items-center justify-center px-6 text-center">
-        <AlertCircle className="h-12 w-12 text-[#F5C72C] mb-4" />
+      <div className="min-h-screen bg-[#222222] flex flex-col items-center justify-center px-6 text-center">
+        <AlertCircle className="h-12 w-12 text-[#F2DD48] mb-4" />
         <h1 className="text-xl font-bold text-white mb-2">Promotion Not Found</h1>
         <p className="text-[#888888] text-sm">This promotion may have ended or the link is invalid.</p>
       </div>
@@ -75,14 +75,14 @@ export default function PromoLanding() {
   // ── Success ──────────────────────────────────────────────────────────────
   if (submitted) {
     return (
-      <div className="min-h-screen bg-[#111111] flex flex-col items-center justify-center px-6 text-center">
+      <div className="min-h-screen bg-[#222222] flex flex-col items-center justify-center px-6 text-center">
         {/* Logo */}
         <div className="mb-8">
-          <div className="text-[#F5C72C] text-3xl font-black tracking-tight">
+          <div className="text-[#F2DD48] text-3xl font-black tracking-tight">
             GOLF <span className="text-white">VX</span>
           </div>
         </div>
-        <CheckCircle2 className="h-16 w-16 text-[#3DB855] mb-5" />
+        <CheckCircle2 className="h-16 w-16 text-[#72B84A] mb-5" />
         <h1 className="text-2xl font-bold text-white mb-2">You're all set!</h1>
         <p className="text-[#888888] text-sm leading-relaxed max-w-xs">
           We've saved your offer. Our team will be in touch with details. See you at Golf VX!
@@ -96,10 +96,10 @@ export default function PromoLanding() {
 
   // ── Form ─────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[#111111] flex flex-col items-center justify-center px-5 py-10">
+    <div className="min-h-screen bg-[#222222] flex flex-col items-center justify-center px-5 py-10">
       {/* Logo */}
       <div className="mb-7">
-        <div className="text-[#F5C72C] text-3xl font-black tracking-tight">
+        <div className="text-[#F2DD48] text-3xl font-black tracking-tight">
           GOLF <span className="text-white">VX</span>
         </div>
       </div>
@@ -107,11 +107,11 @@ export default function PromoLanding() {
       {/* Card */}
       <div className="w-full max-w-sm bg-[#1A1A1A] rounded-2xl overflow-hidden shadow-2xl border border-[#2A2A2A]">
         {/* Offer banner */}
-        <div className="bg-[#F5C72C] px-5 py-4 flex items-center gap-3">
-          <Tag className="h-5 w-5 text-[#111111] shrink-0" />
+        <div className="bg-[#F2DD48] px-5 py-4 flex items-center gap-3">
+          <Tag className="h-5 w-5 text-[#222222] shrink-0" />
           <div>
-            <p className="text-[11px] font-bold text-[#111111]/60 uppercase tracking-wide">{offerLabel}</p>
-            <h1 className="text-[18px] font-black text-[#111111] leading-tight">{promo.title}</h1>
+            <p className="text-[11px] font-bold text-[#222222]/60 uppercase tracking-wide">{offerLabel}</p>
+            <h1 className="text-[18px] font-black text-[#222222] leading-tight">{promo.title}</h1>
           </div>
         </div>
 
@@ -131,7 +131,7 @@ export default function PromoLanding() {
                 required
                 value={form.firstName}
                 onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-                className="w-full h-10 bg-[#111111] border border-[#333333] rounded-lg px-3 text-[13px] text-white placeholder:text-[#444444] focus:outline-none focus:border-[#F5C72C]"
+                className="w-full h-10 bg-[#222222] border border-[#333333] rounded-lg px-3 text-[13px] text-white placeholder:text-[#444444] focus:outline-none focus:border-[#F2DD48]"
               />
             </div>
             <div>
@@ -142,7 +142,7 @@ export default function PromoLanding() {
                 required
                 value={form.lastName}
                 onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-                className="w-full h-10 bg-[#111111] border border-[#333333] rounded-lg px-3 text-[13px] text-white placeholder:text-[#444444] focus:outline-none focus:border-[#F5C72C]"
+                className="w-full h-10 bg-[#222222] border border-[#333333] rounded-lg px-3 text-[13px] text-white placeholder:text-[#444444] focus:outline-none focus:border-[#F2DD48]"
               />
             </div>
           </div>
@@ -155,7 +155,7 @@ export default function PromoLanding() {
               value={form.phone}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
               placeholder="+1 (847) ..."
-              className="w-full h-10 bg-[#111111] border border-[#333333] rounded-lg px-3 text-[13px] text-white placeholder:text-[#444444] focus:outline-none focus:border-[#F5C72C]"
+              className="w-full h-10 bg-[#222222] border border-[#333333] rounded-lg px-3 text-[13px] text-white placeholder:text-[#444444] focus:outline-none focus:border-[#F2DD48]"
             />
           </div>
 
@@ -169,7 +169,7 @@ export default function PromoLanding() {
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               placeholder="you@example.com"
-              className="w-full h-10 bg-[#111111] border border-[#333333] rounded-lg px-3 text-[13px] text-white placeholder:text-[#444444] focus:outline-none focus:border-[#F5C72C]"
+              className="w-full h-10 bg-[#222222] border border-[#333333] rounded-lg px-3 text-[13px] text-white placeholder:text-[#444444] focus:outline-none focus:border-[#F2DD48]"
             />
           </div>
 
@@ -180,10 +180,10 @@ export default function PromoLanding() {
                 type="checkbox"
                 checked={form.termsAccepted}
                 onChange={(e) => setForm({ ...form, termsAccepted: e.target.checked })}
-                className="mt-0.5 accent-[#F5C72C]"
+                className="mt-0.5 accent-[#F2DD48]"
               />
               <span className="text-[11px] text-[#888888] leading-relaxed">
-                I have read and accept the <span className="text-[#F5C72C]">terms of use</span>.
+                I have read and accept the <span className="text-[#F2DD48]">terms of use</span>.
               </span>
             </label>
             <label className="flex items-start gap-2.5 cursor-pointer">
@@ -191,7 +191,7 @@ export default function PromoLanding() {
                 type="checkbox"
                 checked={form.marketingConsent}
                 onChange={(e) => setForm({ ...form, marketingConsent: e.target.checked })}
-                className="mt-0.5 accent-[#F5C72C]"
+                className="mt-0.5 accent-[#F2DD48]"
               />
               <span className="text-[11px] text-[#888888] leading-relaxed">
                 I agree that my personal data can be used for direct marketing purposes.
@@ -209,7 +209,7 @@ export default function PromoLanding() {
           <button
             type="submit"
             disabled={!form.termsAccepted || submitMutation.isPending}
-            className="w-full h-12 bg-[#F5C72C] rounded-xl text-[#111111] text-[15px] font-bold hover:brightness-95 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-1"
+            className="w-full h-12 bg-[#F2DD48] rounded-xl text-[#222222] text-[15px] font-bold hover:brightness-95 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-1"
           >
             {submitMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
             Get the offer

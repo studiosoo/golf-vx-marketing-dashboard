@@ -17,14 +17,14 @@ export default function Integrations() {
   ];
 
   const getStatusBadge = (s: string) => {
-    if (s === "connected" || s === "ok") return <Badge className="bg-[#3DB855]/20 text-[#3DB855] border-[#3DB855]/30 text-xs">Connected</Badge>;
+    if (s === "connected" || s === "ok") return <Badge className="bg-[#72B84A]/20 text-[#72B84A] border-[#72B84A]/30 text-xs">Connected</Badge>;
     if (s === "error") return <Badge className="bg-[#E8453C]/20 text-[#E8453C] border-[#E8453C]/30 text-xs">Error</Badge>;
     if (s === "syncing") return <Badge className="bg-[#888888]/100/20 text-[#888888] border-blue-500/30 text-xs">Syncing</Badge>;
     return <Badge variant="secondary" className="text-xs">Unknown</Badge>;
   };
 
   const getStatusIcon = (s: string) => {
-    if (s === "connected" || s === "ok") return <CheckCircle size={16} className="text-[#3DB855]" />;
+    if (s === "connected" || s === "ok") return <CheckCircle size={16} className="text-[#72B84A]" />;
     if (s === "error") return <AlertCircle size={16} className="text-[#E8453C]" />;
     return <Clock size={16} className="text-muted-foreground" />;
   };

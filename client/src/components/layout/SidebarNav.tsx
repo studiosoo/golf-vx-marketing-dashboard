@@ -24,7 +24,7 @@ export function SidebarNav({ isCollapsed, location, setLocation, onNavigate }: S
                 </p>
               )}
               {isCollapsed && idx > 0 && (
-                <div className="mx-2 my-2 h-px bg-[#E0E0E0]" />
+                <div className="mx-2 my-2 h-px bg-[#DEDEDA]" />
               )}
               <div className="space-y-0.5">
                 {item.items.map((subItem) => (

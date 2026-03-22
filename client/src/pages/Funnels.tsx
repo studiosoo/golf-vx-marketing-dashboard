@@ -299,7 +299,7 @@ function FunnelCard({ funnel, onRefetch }: { funnel: FunnelSummary; onRefetch: (
               <span className={`text-xs px-2 py-0.5 rounded-full ${
                 funnel.archived
                   ? "bg-muted text-muted-foreground"
-                  : "bg-green-500/10 text-[#3DB855]"
+                  : "bg-green-500/10 text-[#72B84A]"
               }`}>
                 {funnel.archived ? "Archived" : "Active"}
               </span>
