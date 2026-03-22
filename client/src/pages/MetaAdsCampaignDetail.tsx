@@ -165,11 +165,11 @@ export default function MetaAdsCampaignDetail() {
         ) : null}
 
         {/* AI Optimization Panel */}
-        <Card className="border-l-4 border-l-[#F5C72C]">
+        <Card className="border-l-4 border-l-[#F2DD48]">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-[#F5C72C]" />
+                <Sparkles className="h-5 w-5 text-[#F2DD48]" />
                 AI Optimization Analysis
               </CardTitle>
               <CardDescription>AI-powered recommendations based on your campaign performance data</CardDescription>
@@ -177,7 +177,7 @@ export default function MetaAdsCampaignDetail() {
             <Button
               onClick={() => { setAiLoading(true); generateInsights.mutate({ campaignId, datePreset: "last_30d" }); }}
               disabled={aiLoading}
-              className="bg-[#F5C72C] text-[#111111] hover:bg-[#e6b820] font-semibold"
+              className="bg-[#F2DD48] text-[#222222] hover:bg-[#e6b820] font-semibold"
             >
               {aiLoading ? (
                 <><span className="animate-spin mr-2">⟳</span> Analyzing...</>

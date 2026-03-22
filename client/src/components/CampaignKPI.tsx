@@ -29,7 +29,7 @@ export function CampaignKPI({ campaign, className = "" }: CampaignKPIProps) {
       <div className={className}>
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-muted-foreground">ROI</span>
-          <div className={`flex items-center gap-1.5 text-sm font-bold ${roi >= 0 ? 'text-[#3DB855] dark:text-[#3DB855]' : 'text-red-600 dark:text-[#E8453C]'}`}>
+          <div className={`flex items-center gap-1.5 text-sm font-bold ${roi >= 0 ? 'text-[#72B84A] dark:text-[#72B84A]' : 'text-red-600 dark:text-[#E8453C]'}`}>
             {roi >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
             {roi >= 0 ? "+" : ""}{roi.toFixed(1)}%
           </div>
@@ -46,7 +46,7 @@ export function CampaignKPI({ campaign, className = "" }: CampaignKPIProps) {
         <div className={`space-y-2 ${className}`}>
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-muted-foreground">ROI</span>
-            <div className={`flex items-center gap-1.5 text-sm font-bold ${roi >= 0 ? 'text-[#3DB855] dark:text-[#3DB855]' : 'text-red-600 dark:text-[#E8453C]'}`}>
+            <div className={`flex items-center gap-1.5 text-sm font-bold ${roi >= 0 ? 'text-[#72B84A] dark:text-[#72B84A]' : 'text-red-600 dark:text-[#E8453C]'}`}>
               {roi >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
               {roi >= 0 ? "+" : ""}{roi.toFixed(1)}%
             </div>
@@ -166,7 +166,7 @@ export function CampaignKPI({ campaign, className = "" }: CampaignKPIProps) {
                 ⚠️ Churn season — expect net {monthlyTarget} members
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 text-xs text-[#3DB855] dark:text-[#3DB855] font-medium">
+              <div className="flex items-center gap-1.5 text-xs text-[#72B84A] dark:text-[#72B84A] font-medium">
                 📈 Target: +{monthlyTarget} new members this month
               </div>
             )}
@@ -191,7 +191,7 @@ export function CampaignKPI({ campaign, className = "" }: CampaignKPIProps) {
         <div className={`space-y-2 ${className}`}>
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-muted-foreground">Retention Rate</span>
-            <span className={`text-sm font-bold ${current >= target ? 'text-[#3DB855] dark:text-[#3DB855]' : 'text-orange-600 dark:text-[#F5C72C]'}`}>
+            <span className={`text-sm font-bold ${current >= target ? 'text-[#72B84A] dark:text-[#72B84A]' : 'text-orange-600 dark:text-[#F2DD48]'}`}>
               {current}% / {target}%
             </span>
           </div>

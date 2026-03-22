@@ -62,10 +62,10 @@ export default function CategoryDetail() {
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      active: "bg-green-500/10 text-[#3DB855] dark:text-[#3DB855] border-green-500/20",
+      active: "bg-green-500/10 text-[#72B84A] dark:text-[#72B84A] border-green-500/20",
       completed: "bg-[#888888]/100/10 text-[#888888] dark:text-[#888888] border-blue-500/20",
-      planned: "bg-yellow-500/10 text-yellow-700 dark:text-[#F5C72C] border-yellow-500/20",
-      paused: "bg-[#F5F5F5] text-[#888888] border-[#E0E0E0]",
+      planned: "bg-yellow-500/10 text-yellow-700 dark:text-[#F2DD48] border-yellow-500/20",
+      paused: "bg-[#F1F1EF] text-[#888888] border-[#DEDEDA]",
     };
     return colors[status] || colors.planned;
   };
@@ -178,13 +178,13 @@ export default function CategoryDetail() {
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Category ROI</CardTitle>
               {roi >= 0 ? (
-                <TrendingUp className="h-4 w-4 text-[#3DB855] dark:text-[#3DB855]" />
+                <TrendingUp className="h-4 w-4 text-[#72B84A] dark:text-[#72B84A]" />
               ) : (
                 <TrendingDown className="h-4 w-4 text-red-600 dark:text-[#E8453C]" />
               )}
             </CardHeader>
             <CardContent>
-              <div className={`text-2xl font-bold ${roi >= 0 ? 'text-[#3DB855] dark:text-[#3DB855]' : 'text-red-600 dark:text-[#E8453C]'}`}>
+              <div className={`text-2xl font-bold ${roi >= 0 ? 'text-[#72B84A] dark:text-[#72B84A]' : 'text-red-600 dark:text-[#E8453C]'}`}>
                 {formatPercent(roi)}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
@@ -316,7 +316,7 @@ export default function CategoryDetail() {
                         </div>
                         <div>
                           <div className="text-xs text-muted-foreground mb-1">ROI</div>
-                          <div className={`text-sm font-semibold ${campaignRoi >= 0 ? 'text-[#3DB855] dark:text-[#3DB855]' : 'text-red-600 dark:text-[#E8453C]'}`}>
+                          <div className={`text-sm font-semibold ${campaignRoi >= 0 ? 'text-[#72B84A] dark:text-[#72B84A]' : 'text-red-600 dark:text-[#E8453C]'}`}>
                             {formatPercent(campaignRoi)}
                           </div>
                         </div>

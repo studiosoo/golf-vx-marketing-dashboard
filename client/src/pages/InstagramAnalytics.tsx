@@ -52,7 +52,7 @@ function DailyAnalysisTab() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
-        <Loader2 className="h-8 w-8 animate-spin text-[#F5C72C]" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#F2DD48]" />
         <p className="text-sm text-muted-foreground">Analyzing your recent posts with AI…</p>
       </div>
     );
@@ -71,7 +71,7 @@ function DailyAnalysisTab() {
   }
 
   const engagementNum = parseFloat(analysis.metrics.avgEngagement);
-  const engagementColor = engagementNum >= 3 ? 'text-[#3DB855]' : engagementNum >= 1 ? 'text-[#F5C72C]' : 'text-[#E8453C]';
+  const engagementColor = engagementNum >= 3 ? 'text-[#72B84A]' : engagementNum >= 1 ? 'text-[#F2DD48]' : 'text-[#E8453C]';
   const engagementLabel = engagementNum >= 3 ? 'Excellent' : engagementNum >= 1 ? 'Good' : 'Needs Work';
   const followerGoal = 500;
   const followerPct = Math.min(100, Math.round((analysis.metrics.followers / followerGoal) * 100));
@@ -93,7 +93,7 @@ function DailyAnalysisTab() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-[#F5C72C]" />
+            <Sparkles className="h-5 w-5 text-[#F2DD48]" />
             Daily AI Analysis
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -105,7 +105,7 @@ function DailyAnalysisTab() {
           variant="outline"
           onClick={() => refetch()}
           disabled={isFetching}
-          className="border-[#E0E0E0] text-[#555]"
+          className="border-[#DEDEDA] text-[#555]"
         >
           {isFetching ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
           <span className="ml-1.5 hidden sm:inline">Refresh</span>
@@ -124,7 +124,7 @@ function DailyAnalysisTab() {
                 <span>{followerPct}%</span>
               </div>
               <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                <div className="h-full bg-[#F5C72C] rounded-full transition-all" style={{ width: `${followerPct}%` }} />
+                <div className="h-full bg-[#F2DD48] rounded-full transition-all" style={{ width: `${followerPct}%` }} />
               </div>
             </div>
           </CardContent>
@@ -156,22 +156,22 @@ function DailyAnalysisTab() {
       <Card className="bg-card border-border">
         <CardHeader className="pb-2 pt-4 px-4">
           <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-[#F5C72C]" />
+            <Sparkles className="h-4 w-4 text-[#F2DD48]" />
             Today's Post Idea
           </CardTitle>
         </CardHeader>
         <CardContent className="px-4 pb-4 space-y-3">
-          <div className="bg-[#FFFBEA] border border-[#F5C72C]/30 rounded-lg p-3">
-            <p className="text-sm text-[#111111] leading-relaxed whitespace-pre-wrap">{todayCaption}</p>
+          <div className="bg-[#FFFBEA] border border-[#F2DD48]/30 rounded-lg p-3">
+            <p className="text-sm text-[#222222] leading-relaxed whitespace-pre-wrap">{todayCaption}</p>
           </div>
           <div className="flex items-center gap-2">
             <Button
               size="sm"
               variant="outline"
               onClick={() => handleCopyCaption(todayCaption)}
-              className="border-[#E0E0E0] text-[#555] hover:text-[#111]"
+              className="border-[#DEDEDA] text-[#555] hover:text-[#111]"
             >
-              {copiedCaption ? <CheckCircle2 className="h-3.5 w-3.5 mr-1 text-[#3DB855]" /> : <Copy className="h-3.5 w-3.5 mr-1" />}
+              {copiedCaption ? <CheckCircle2 className="h-3.5 w-3.5 mr-1 text-[#72B84A]" /> : <Copy className="h-3.5 w-3.5 mr-1" />}
               {copiedCaption ? 'Copied!' : 'Copy Caption'}
             </Button>
             <span className="text-xs text-muted-foreground flex items-center gap-1">
@@ -187,7 +187,7 @@ function DailyAnalysisTab() {
         <Card className="bg-card border-border">
           <CardHeader className="pb-2 pt-4 px-4">
             <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-[#F5C72C]" />
+              <BarChart3 className="h-4 w-4 text-[#F2DD48]" />
               Key Insights
             </CardTitle>
           </CardHeader>
@@ -195,7 +195,7 @@ function DailyAnalysisTab() {
             <ul className="space-y-2">
               {insights.map((insight, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm text-foreground">
-                  <span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-[#F5C72C] flex-shrink-0" />
+                  <span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-[#F2DD48] flex-shrink-0" />
                   {insight}
                 </li>
               ))}
@@ -206,7 +206,7 @@ function DailyAnalysisTab() {
         <Card className="bg-card border-border">
           <CardHeader className="pb-2 pt-4 px-4">
             <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-[#3DB855]" />
+              <CheckCircle2 className="h-4 w-4 text-[#72B84A]" />
               Quick Win (15 min)
             </CardTitle>
           </CardHeader>
@@ -221,7 +221,7 @@ function DailyAnalysisTab() {
         <Card className="bg-card border-border">
           <CardHeader className="pb-2 pt-4 px-4">
             <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-[#F5C72C]" />
+              <TrendingUp className="h-4 w-4 text-[#F2DD48]" />
               Top Performing Posts
             </CardTitle>
           </CardHeader>
@@ -286,13 +286,13 @@ function SchedulerForm({ onClose }: { onClose: () => void }) {
             value={form.topic}
             onChange={(e) => setForm((f) => ({ ...f, topic: e.target.value }))}
             placeholder="e.g. Sunday Clinic"
-            className="mt-1 border-[#E0E0E0]"
+            className="mt-1 border-[#DEDEDA]"
           />
         </div>
         <div>
           <Label className="text-xs text-muted-foreground">Tone</Label>
           <Select value={form.tone} onValueChange={(v) => setForm((f) => ({ ...f, tone: v as any }))}>
-            <SelectTrigger className="mt-1 border-[#E0E0E0]"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="mt-1 border-[#DEDEDA]"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="casual">Casual</SelectItem>
               <SelectItem value="professional">Professional</SelectItem>
@@ -307,9 +307,9 @@ function SchedulerForm({ onClose }: { onClose: () => void }) {
         variant="outline"
         onClick={() => generateMutation.mutate({ topic: form.topic || 'golf', tone: form.tone })}
         disabled={generateMutation.isPending}
-        className="w-full border-[#F5C72C]/50 text-[#111] hover:bg-[#FFFBEA]"
+        className="w-full border-[#F2DD48]/50 text-[#111] hover:bg-[#FFFBEA]"
       >
-        {generateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Sparkles className="h-4 w-4 mr-1.5 text-[#F5C72C]" />}
+        {generateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Sparkles className="h-4 w-4 mr-1.5 text-[#F2DD48]" />}
         Generate Caption with AI
       </Button>
       <div>
@@ -319,7 +319,7 @@ function SchedulerForm({ onClose }: { onClose: () => void }) {
           onChange={(e) => setForm((f) => ({ ...f, caption: e.target.value }))}
           placeholder="Write your caption…"
           rows={4}
-          className="mt-1 border-[#E0E0E0] resize-none"
+          className="mt-1 border-[#DEDEDA] resize-none"
         />
       </div>
       <div>
@@ -328,7 +328,7 @@ function SchedulerForm({ onClose }: { onClose: () => void }) {
           value={form.hashtags}
           onChange={(e) => setForm((f) => ({ ...f, hashtags: e.target.value }))}
           placeholder="#golf #golfvx #arlingtonheights"
-          className="mt-1 border-[#E0E0E0]"
+          className="mt-1 border-[#DEDEDA]"
         />
       </div>
       <div>
@@ -337,14 +337,14 @@ function SchedulerForm({ onClose }: { onClose: () => void }) {
           value={form.imageUrl}
           onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))}
           placeholder="https://…"
-          className="mt-1 border-[#E0E0E0]"
+          className="mt-1 border-[#DEDEDA]"
         />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <Label className="text-xs text-muted-foreground">Content Type</Label>
           <Select value={form.contentType} onValueChange={(v) => setForm((f) => ({ ...f, contentType: v as any }))}>
-            <SelectTrigger className="mt-1 border-[#E0E0E0]"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="mt-1 border-[#DEDEDA]"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="feed_post">Feed Post</SelectItem>
               <SelectItem value="story">Story</SelectItem>
@@ -359,13 +359,13 @@ function SchedulerForm({ onClose }: { onClose: () => void }) {
             type="datetime-local"
             value={form.scheduledFor}
             onChange={(e) => setForm((f) => ({ ...f, scheduledFor: e.target.value }))}
-            className="mt-1 border-[#E0E0E0]"
+            className="mt-1 border-[#DEDEDA]"
           />
         </div>
       </div>
       <div className="flex gap-2 pt-2">
         <Button
-          className="flex-1 bg-[#F5C72C] text-black hover:bg-[#F5C72C]/90"
+          className="flex-1 bg-[#F2DD48] text-black hover:bg-[#F2DD48]/90"
           onClick={() => scheduleMutation.mutate({
             caption: form.caption,
             hashtags: form.hashtags,
@@ -378,7 +378,7 @@ function SchedulerForm({ onClose }: { onClose: () => void }) {
           {scheduleMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Calendar className="h-4 w-4 mr-1.5" />}
           Schedule Post
         </Button>
-        <Button variant="outline" onClick={onClose} className="border-[#E0E0E0]">Cancel</Button>
+        <Button variant="outline" onClick={onClose} className="border-[#DEDEDA]">Cancel</Button>
       </div>
     </div>
   );
@@ -399,7 +399,7 @@ function ScheduledPostRow({ post, onRefresh }: { post: any; onRefresh: () => voi
   });
 
   return (
-    <div className="flex items-start gap-3 p-4 rounded-xl bg-card border border-border hover:border-[#F5C72C]/40 transition-colors">
+    <div className="flex items-start gap-3 p-4 rounded-xl bg-card border border-border hover:border-[#F2DD48]/40 transition-colors">
       {post.imageUrl ? (
         <img src={post.imageUrl} alt="" className="w-14 h-14 rounded-lg object-cover flex-shrink-0 border border-border" />
       ) : (
@@ -410,9 +410,9 @@ function ScheduledPostRow({ post, onRefresh }: { post: any; onRefresh: () => voi
       <div className="flex-1 min-w-0">
         <p className="text-sm text-foreground line-clamp-2">{post.caption}</p>
         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-          <Badge variant="outline" className="text-[10px] border-[#E0E0E0] text-[#888]">{post.contentType}</Badge>
+          <Badge variant="outline" className="text-[10px] border-[#DEDEDA] text-[#888]">{post.contentType}</Badge>
           {post.status === 'posted' ? (
-            <Badge className="text-[10px] bg-[#F0FAF3] text-[#3DB855] border-[#3DB855]/30">Posted</Badge>
+            <Badge className="text-[10px] bg-[#F0FAF3] text-[#72B84A] border-[#72B84A]/30">Posted</Badge>
           ) : (
             <span className={`flex items-center gap-1 text-[10px] ${isOverdue ? 'text-[#E8453C]' : 'text-[#888]'}`}>
               <Clock className="h-3 w-3" />
@@ -429,7 +429,7 @@ function ScheduledPostRow({ post, onRefresh }: { post: any; onRefresh: () => voi
             variant="outline"
             disabled={publishMutation.isPending}
             onClick={() => publishMutation.mutate({ id: post.id })}
-            className="h-7 px-2 text-xs border-[#F5C72C]/40 text-[#F5C72C] hover:bg-[#FFFBEA]"
+            className="h-7 px-2 text-xs border-[#F2DD48]/40 text-[#F2DD48] hover:bg-[#FFFBEA]"
           >
             {publishMutation.isPending ? <RefreshCw className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
           </Button>
@@ -458,7 +458,7 @@ function SchedulerTab() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-[#F5C72C]" />
+            <Calendar className="h-5 w-5 text-[#F2DD48]" />
             Content Scheduler
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -468,7 +468,7 @@ function SchedulerTab() {
         <Button
           size="sm"
           onClick={() => setScheduleOpen(true)}
-          className="bg-[#F5C72C] text-black hover:bg-[#F5C72C]/90"
+          className="bg-[#F2DD48] text-black hover:bg-[#F2DD48]/90"
         >
           <Plus className="h-4 w-4 mr-1.5" />
           Schedule Post
@@ -483,13 +483,13 @@ function SchedulerTab() {
         </div>
       ) : (
         <div className="text-center py-16 text-muted-foreground">
-          <Calendar className="h-10 w-10 mx-auto mb-3 text-[#E0E0E0]" />
+          <Calendar className="h-10 w-10 mx-auto mb-3 text-[#DEDEDA]" />
           <p className="font-medium text-foreground">No scheduled posts yet</p>
           <p className="text-sm mt-1 mb-4">Plan your content in advance to stay consistent.</p>
           <Button
             size="sm"
             onClick={() => setScheduleOpen(true)}
-            className="bg-[#F5C72C] text-black hover:bg-[#F5C72C]/90"
+            className="bg-[#F2DD48] text-black hover:bg-[#F2DD48]/90"
           >
             <Plus className="h-4 w-4 mr-1.5" />
             Schedule First Post
@@ -501,7 +501,7 @@ function SchedulerTab() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-[#F5C72C]" />
+              <Calendar className="h-5 w-5 text-[#F2DD48]" />
               Schedule Instagram Post
             </DialogTitle>
           </DialogHeader>
@@ -539,7 +539,7 @@ function AnalyticsTab() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Loader2 className="h-6 w-6 animate-spin text-[#F5C72C]" />
+        <Loader2 className="h-6 w-6 animate-spin text-[#F2DD48]" />
       </div>
     );
   }
@@ -547,7 +547,7 @@ function AnalyticsTab() {
   if (!insights || insights.length === 0) {
     return (
       <div className="text-center py-16">
-        <BarChart3 className="h-10 w-10 mx-auto mb-3 text-[#E0E0E0]" />
+        <BarChart3 className="h-10 w-10 mx-auto mb-3 text-[#DEDEDA]" />
         <p className="font-medium text-foreground">No Analytics Data Yet</p>
         <p className="text-sm text-muted-foreground mt-1 mb-4">Sync your Instagram insights to see performance trends.</p>
       </div>
@@ -582,7 +582,7 @@ function AnalyticsTab() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="text-2xl font-bold text-foreground">{latest.followersCount.toLocaleString()}</div>
-          <div className={`flex items-center text-xs mt-1 ${followerGrowth >= 0 ? 'text-[#3DB855]' : 'text-[#E8453C]'}`}>
+          <div className={`flex items-center text-xs mt-1 ${followerGrowth >= 0 ? 'text-[#72B84A]' : 'text-[#E8453C]'}`}>
             {followerGrowth >= 0 ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
             {followerGrowth >= 0 ? '+' : ''}{followerGrowth} ({followerGrowthPercent}%)
           </div>
@@ -620,11 +620,11 @@ function AnalyticsTab() {
         <h3 className="text-sm font-semibold text-foreground mb-4">Follower Growth</h3>
         <ResponsiveContainer width="100%" height={240}>
           <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#E0E0E0" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#DEDEDA" />
             <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#888' }} />
             <YAxis tick={{ fontSize: 11, fill: '#888' }} />
             <Tooltip />
-            <Line type="monotone" dataKey="followers" stroke="#F5C72C" strokeWidth={2} dot={{ fill: '#F5C72C' }} />
+            <Line type="monotone" dataKey="followers" stroke="#F2DD48" strokeWidth={2} dot={{ fill: '#F2DD48' }} />
           </LineChart>
         </ResponsiveContainer>
       </Card>
@@ -634,14 +634,14 @@ function AnalyticsTab() {
         <h3 className="text-sm font-semibold text-foreground mb-4">Engagement Rate (%)</h3>
         <ResponsiveContainer width="100%" height={200}>
           <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#E0E0E0" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#DEDEDA" />
             <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#888' }} />
             <YAxis tick={{ fontSize: 11, fill: '#888' }} />
             <Tooltip />
-            <Line type="monotone" dataKey="engagement" stroke="#111111" strokeWidth={2} name="Engagement Rate" />
+            <Line type="monotone" dataKey="engagement" stroke="#222222" strokeWidth={2} name="Engagement Rate" />
           </LineChart>
         </ResponsiveContainer>
-        <div className="mt-3 p-3 bg-[#F5F5F5] rounded-lg text-xs text-[#555] space-y-1">
+        <div className="mt-3 p-3 bg-[#F1F1EF] rounded-lg text-xs text-[#555] space-y-1">
           <p><strong className="text-[#111]">Excellent:</strong> &gt;3% — Highly engaging content</p>
           <p><strong className="text-[#111]">Good:</strong> 1–3% — Industry average</p>
           <p><strong className="text-[#111]">Needs Improvement:</strong> &lt;1% — Focus on content quality and timing</p>
@@ -652,7 +652,7 @@ function AnalyticsTab() {
       <Card className="p-5 bg-card border-border">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-[#F5C72C]" />
+            <Sparkles className="h-4 w-4 text-[#F2DD48]" />
             AI Content Recommendations
           </h3>
           <Button
@@ -660,16 +660,16 @@ function AnalyticsTab() {
             variant="outline"
             onClick={() => generateMutation.mutate()}
             disabled={generateMutation.isPending}
-            className="border-[#E0E0E0] text-[#555]"
+            className="border-[#DEDEDA] text-[#555]"
           >
-            {generateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Sparkles className="h-4 w-4 mr-1.5 text-[#F5C72C]" />}
+            {generateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Sparkles className="h-4 w-4 mr-1.5 text-[#F2DD48]" />}
             Generate
           </Button>
         </div>
         {recommendations && recommendations.length > 0 ? (
           <div className="space-y-3">
             {recommendations.map((rec) => (
-              <div key={rec.id} className="border border-[#E0E0E0] rounded-lg p-4 hover:border-[#F5C72C]/40 transition-colors">
+              <div key={rec.id} className="border border-[#DEDEDA] rounded-lg p-4 hover:border-[#F2DD48]/40 transition-colors">
                 <div className="flex items-start gap-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1.5 flex-wrap">
@@ -677,10 +677,10 @@ function AnalyticsTab() {
                       <Badge variant={rec.priority === 'high' ? 'destructive' : rec.priority === 'medium' ? 'default' : 'secondary'} className="text-[10px]">
                         {rec.priority}
                       </Badge>
-                      <Badge variant="outline" className="text-[10px] border-[#E0E0E0] text-[#888]">{rec.type}</Badge>
+                      <Badge variant="outline" className="text-[10px] border-[#DEDEDA] text-[#888]">{rec.type}</Badge>
                     </div>
                     <p className="text-xs text-muted-foreground mb-2">{rec.description}</p>
-                    <div className="bg-[#FFFBEA] border border-[#F5C72C]/20 p-2.5 rounded text-xs text-[#111] mb-2">
+                    <div className="bg-[#FFFBEA] border border-[#F2DD48]/20 p-2.5 rounded text-xs text-[#111] mb-2">
                       <strong>Content Idea:</strong> {rec.contentIdea}
                     </div>
                     <div className="flex gap-4 text-xs text-muted-foreground">
@@ -693,9 +693,9 @@ function AnalyticsTab() {
                     variant="outline"
                     onClick={() => implementMutation.mutate({ id: rec.id })}
                     disabled={rec.status === 'implemented'}
-                    className="flex-shrink-0 border-[#E0E0E0] text-[#555] text-xs"
+                    className="flex-shrink-0 border-[#DEDEDA] text-[#555] text-xs"
                   >
-                    {rec.status === 'implemented' ? <CheckCircle2 className="h-3.5 w-3.5 text-[#3DB855]" /> : 'Done'}
+                    {rec.status === 'implemented' ? <CheckCircle2 className="h-3.5 w-3.5 text-[#72B84A]" /> : 'Done'}
                   </Button>
                 </div>
               </div>
@@ -725,7 +725,7 @@ export default function InstagramAnalytics() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-          <BarChart3 className="h-6 w-6 text-[#F5C72C]" />
+          <BarChart3 className="h-6 w-6 text-[#F2DD48]" />
           Instagram Analytics
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -745,12 +745,12 @@ export default function InstagramAnalytics() {
               </p>
             </div>
           </div>
-          <div className="bg-white rounded-lg border border-[#E0E0E0] p-4 text-[13px] space-y-2">
-            <p className="font-semibold text-[#111111]">To renew:</p>
+          <div className="bg-white rounded-lg border border-[#DEDEDA] p-4 text-[13px] space-y-2">
+            <p className="font-semibold text-[#222222]">To renew:</p>
             <ol className="space-y-1.5 text-[#555555] list-decimal list-inside">
               <li>Go to <a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noopener noreferrer" className="text-[#007AFF] underline">Meta Graph API Explorer</a></li>
               <li>Generate a User Access Token with Instagram permissions</li>
-              <li>Exchange for a long-lived token and update <code className="bg-[#F5F5F5] px-1 rounded text-[11px]">INSTAGRAM_ACCESS_TOKEN</code> in your environment</li>
+              <li>Exchange for a long-lived token and update <code className="bg-[#F1F1EF] px-1 rounded text-[11px]">INSTAGRAM_ACCESS_TOKEN</code> in your environment</li>
             </ol>
           </div>
         </div>
@@ -758,24 +758,24 @@ export default function InstagramAnalytics() {
 
       {/* Tabs — show Scheduler always, hide data tabs when token invalid */}
       <Tabs defaultValue={tokenInvalid ? "scheduler" : "daily"} className="space-y-4">
-        <TabsList className="bg-[#F5F5F5] border border-[#E0E0E0]">
+        <TabsList className="bg-[#F1F1EF] border border-[#DEDEDA]">
           <TabsTrigger
             value="daily"
-            className="data-[state=active]:bg-[#F5C72C] data-[state=active]:text-black data-[state=active]:shadow-none"
+            className="data-[state=active]:bg-[#F2DD48] data-[state=active]:text-black data-[state=active]:shadow-none"
           >
             <Sparkles className="h-3.5 w-3.5 mr-1.5" />
             Daily Analysis
           </TabsTrigger>
           <TabsTrigger
             value="analytics"
-            className="data-[state=active]:bg-[#F5C72C] data-[state=active]:text-black data-[state=active]:shadow-none"
+            className="data-[state=active]:bg-[#F2DD48] data-[state=active]:text-black data-[state=active]:shadow-none"
           >
             <BarChart3 className="h-3.5 w-3.5 mr-1.5" />
             Analytics
           </TabsTrigger>
           <TabsTrigger
             value="scheduler"
-            className="data-[state=active]:bg-[#F5C72C] data-[state=active]:text-black data-[state=active]:shadow-none"
+            className="data-[state=active]:bg-[#F2DD48] data-[state=active]:text-black data-[state=active]:shadow-none"
           >
             <Calendar className="h-3.5 w-3.5 mr-1.5" />
             Scheduler

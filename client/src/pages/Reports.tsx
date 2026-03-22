@@ -82,7 +82,7 @@ const MONTHLY_REVENUE = [
 const REVENUE_MIX = [
   { category: "Bay Usage", value: 193608.98, pct: 70.1, color: "#F2DD48" },
   { category: "F&B",       value: 80444.43,  pct: 29.2, color: "#72B84A" },
-  { category: "Other",     value: 1922.58,   pct: 0.7,  color: "#E0E0E0" },
+  { category: "Other",     value: 1922.58,   pct: 0.7,  color: "#DEDEDA" },
 ];
 
 // ─── Studio Soo Production Timeline ──────────────────────────────────────────
@@ -232,7 +232,7 @@ function RevenueOperations({ snapshot, toastSummary }: { snapshot: any; toastSum
                 />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                   {MONTHLY_REVENUE.map((entry, index) => (
-                    <Cell key={index} fill={entry.partial ? "#A8A8A3" : "#F5C72C"} />
+                    <Cell key={index} fill={entry.partial ? "#A8A8A3" : "#F2DD48"} />
                   ))}
                 </Bar>
               </BarChart>

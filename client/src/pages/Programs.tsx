@@ -77,17 +77,17 @@ interface Program {
 // Constants
 // ─────────────────────────────────────────────
 const STATUS_META: Record<CampaignStatus, { label: string; color: string; bg: string; icon: React.ElementType }> = {
-  active: { label: "Active", color: "#3DB855", bg: "#F0FAF3", icon: PlayCircle },
-  planned: { label: "Planned", color: "#888888", bg: "#F5F5F5", icon: Clock },
-  completed: { label: "Completed", color: "#AAAAAA", bg: "#F5F5F5", icon: CheckCircle },
-  paused: { label: "Paused", color: "#AAAAAA", bg: "#F5F5F5", icon: PauseCircle },
+  active: { label: "Active", color: "#72B84A", bg: "#F0FAF3", icon: PlayCircle },
+  planned: { label: "Planned", color: "#888888", bg: "#F1F1EF", icon: Clock },
+  completed: { label: "Completed", color: "#AAAAAA", bg: "#F1F1EF", icon: CheckCircle },
+  paused: { label: "Paused", color: "#AAAAAA", bg: "#F1F1EF", icon: PauseCircle },
 };
 
 const STRATEGIC_META: Record<StrategicCampaign, { label: string; color: string }> = {
-  trial_conversion: { label: "Trial Conversion", color: "#3DB855" },
-  membership_acquisition: { label: "Membership Acquisition", color: "#F5C72C" },
+  trial_conversion: { label: "Trial Conversion", color: "#72B84A" },
+  membership_acquisition: { label: "Membership Acquisition", color: "#F2DD48" },
   member_retention: { label: "Member Retention", color: "#888888" },
-  corporate_events: { label: "B2B Sales", color: "#111111" },
+  corporate_events: { label: "B2B Sales", color: "#222222" },
 };
 
 function getProgramRoute(program: Program): string {
@@ -151,7 +151,7 @@ function ProgramCard({ program, onClick }: { program: Program; onClick: () => vo
   return (
     <button
       onClick={onClick}
-      className="text-left w-full bg-white rounded-xl border border-[#E0E0E0] p-4 hover:shadow-[0_2px_16px_rgba(245,199,44,0.18)] hover:border-[#F5C72C] transition-all duration-200 group flex flex-col gap-3 border-l-4 border-l-[#F5C72C]"
+      className="text-left w-full bg-white rounded-xl border border-[#DEDEDA] p-4 hover:shadow-[0_2px_16px_rgba(245,199,44,0.18)] hover:border-[#F2DD48] transition-all duration-200 group flex flex-col gap-3 border-l-4 border-l-[#F2DD48]"
     >
       {/* Top row: status + strategic tag */}
       <div className="flex items-start justify-between gap-2">
@@ -161,15 +161,15 @@ function ProgramCard({ program, onClick }: { program: Program; onClick: () => vo
             <span className="text-[10px] font-semibold" style={{ color: status.color }}>{status.label}</span>
           </div>
           {hasMetaAds && (
-            <div className="h-5 px-2 rounded-full bg-[#F5F5F5] border border-[#E0E0E0] flex items-center gap-1">
+            <div className="h-5 px-2 rounded-full bg-[#F1F1EF] border border-[#DEDEDA] flex items-center gap-1">
               <BarChart3 className="h-3 w-3 text-[#888888]" />
               <span className="text-[10px] font-semibold text-[#888888]">Meta</span>
             </div>
           )}
           {adEndedButRunning && (
             <div className="h-5 px-2 rounded-full bg-[#F0FAF3] flex items-center gap-1">
-              <PlayCircle className="h-3 w-3 text-[#3DB855]" />
-              <span className="text-[10px] font-semibold text-[#3DB855]">Still Running</span>
+              <PlayCircle className="h-3 w-3 text-[#72B84A]" />
+              <span className="text-[10px] font-semibold text-[#72B84A]">Still Running</span>
             </div>
           )}
         </div>
@@ -178,7 +178,7 @@ function ProgramCard({ program, onClick }: { program: Program; onClick: () => vo
 
       {/* Program name */}
       <div>
-        <h3 className="text-[14px] font-bold text-[#111111] leading-tight line-clamp-2">{program.name}</h3>
+        <h3 className="text-[14px] font-bold text-[#222222] leading-tight line-clamp-2">{program.name}</h3>
         {program.description && (
           <p className="text-[12px] text-[#888888] mt-1 line-clamp-2">{program.description}</p>
         )}
@@ -195,28 +195,28 @@ function ProgramCard({ program, onClick }: { program: Program; onClick: () => vo
         <div className="flex flex-col gap-2">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <div>
-              <p className="text-[14px] font-bold text-[#111111] leading-none">{fmtCurrency(spend)}</p>
+              <p className="text-[14px] font-bold text-[#222222] leading-none">{fmtCurrency(spend)}</p>
               <p className="text-[10px] text-[#AAAAAA] mt-0.5">Spend</p>
             </div>
             {isTrialBookings ? (
               <>
                 <div>
-                  <p className="text-[14px] font-bold text-[#111111] leading-none">{kpiActual > 0 ? kpiActual.toFixed(0) : '—'}</p>
+                  <p className="text-[14px] font-bold text-[#222222] leading-none">{kpiActual > 0 ? kpiActual.toFixed(0) : '—'}</p>
                   <p className="text-[10px] text-[#AAAAAA] mt-0.5">Bookings</p>
                 </div>
                 <div>
-                  <p className="text-[14px] font-bold text-[#111111] leading-none">{fmtCurrency(revenue)}</p>
+                  <p className="text-[14px] font-bold text-[#222222] leading-none">{fmtCurrency(revenue)}</p>
                   <p className="text-[10px] text-[#AAAAAA] mt-0.5">Revenue</p>
                 </div>
               </>
             ) : isEngagements ? (
               <>
                 <div>
-                  <p className="text-[14px] font-bold text-[#111111] leading-none">{kpiActual > 0 ? kpiActual.toLocaleString() : '—'}</p>
+                  <p className="text-[14px] font-bold text-[#222222] leading-none">{kpiActual > 0 ? kpiActual.toLocaleString() : '—'}</p>
                   <p className="text-[10px] text-[#AAAAAA] mt-0.5">Engagements</p>
                 </div>
                 <div>
-                  <p className={cn("text-[14px] font-bold leading-none", "text-[#3DB855]")}>  
+                  <p className={cn("text-[14px] font-bold leading-none", "text-[#72B84A]")}>  
                     {toNum(program.kpiActual) > 0 ? `$${(spend / kpiActual).toFixed(4)}` : '—'}
                   </p>
                   <p className="text-[10px] text-[#AAAAAA] mt-0.5">Cost/Engage</p>
@@ -225,12 +225,12 @@ function ProgramCard({ program, onClick }: { program: Program; onClick: () => vo
             ) : (
               <>
                 <div>
-                  <p className="text-[14px] font-bold text-[#111111] leading-none">{goalActual > 0 ? goalActual.toLocaleString() : '—'}</p>
+                  <p className="text-[14px] font-bold text-[#222222] leading-none">{goalActual > 0 ? goalActual.toLocaleString() : '—'}</p>
                   <p className="text-[10px] text-[#AAAAAA] mt-0.5 capitalize">{program.goalUnit || 'Progress'}</p>
                 </div>
                 <div>
                   <p className={cn("text-[14px] font-bold leading-none",
-                    toNum(program.kpiActual) > 0 && toNum(program.kpiTarget) > 0 && toNum(program.kpiActual) <= toNum(program.kpiTarget) ? "text-[#3DB855]"
+                    toNum(program.kpiActual) > 0 && toNum(program.kpiTarget) > 0 && toNum(program.kpiActual) <= toNum(program.kpiTarget) ? "text-[#72B84A]"
                     : toNum(program.kpiActual) > 0 ? "text-[#F5A623]" : "text-[#AAAAAA]")}>  
                     {toNum(program.kpiActual) > 0 ? `$${toNum(program.kpiActual).toFixed(2)}` : '—'}
                   </p>
@@ -247,20 +247,20 @@ function ProgramCard({ program, onClick }: { program: Program; onClick: () => vo
               <>
                 <div className="flex justify-between items-center mb-1">
                   <span className="text-[10px] text-[#AAAAAA]">{kpiActual.toFixed(0)} / {kpiTarget.toFixed(0)} bookings</span>
-                  <span className="text-[10px] font-semibold text-[#111111]">{kpiPct.toFixed(0)}%</span>
+                  <span className="text-[10px] font-semibold text-[#222222]">{kpiPct.toFixed(0)}%</span>
                 </div>
-                <div className="h-1.5 bg-[#F2F2F7] rounded-full overflow-hidden">
-                  <div className="h-full rounded-full bg-[#F5C72C]" style={{ width: `${kpiPct}%` }} />
+                <div className="h-1.5 bg-[#F1F1EF] rounded-full overflow-hidden">
+                  <div className="h-full rounded-full bg-[#F2DD48]" style={{ width: `${kpiPct}%` }} />
                 </div>
               </>
             ) : isEngagements ? (
               <>
                 <div className="flex justify-between items-center mb-1">
                   <span className="text-[10px] text-[#AAAAAA]">{kpiActual.toLocaleString()} engagements · Jan–Mar 2026</span>
-                  <span className="text-[10px] font-semibold text-[#3DB855]">Live</span>
+                  <span className="text-[10px] font-semibold text-[#72B84A]">Live</span>
                 </div>
-                <div className="h-1.5 bg-[#F2F2F7] rounded-full overflow-hidden">
-                  <div className="h-full rounded-full bg-[#3DB855]" style={{ width: '100%' }} />
+                <div className="h-1.5 bg-[#F1F1EF] rounded-full overflow-hidden">
+                  <div className="h-full rounded-full bg-[#72B84A]" style={{ width: '100%' }} />
                 </div>
               </>
             ) : (
@@ -269,10 +269,10 @@ function ProgramCard({ program, onClick }: { program: Program; onClick: () => vo
                   <span className="text-[10px] text-[#AAAAAA]">
                     {goalActual.toLocaleString()} / {goalTarget.toLocaleString()} {program.goalUnit}
                   </span>
-                  <span className="text-[10px] font-semibold text-[#111111]">{goalPct.toFixed(0)}%</span>
+                  <span className="text-[10px] font-semibold text-[#222222]">{goalPct.toFixed(0)}%</span>
                 </div>
-                <div className="h-1.5 bg-[#F2F2F7] rounded-full overflow-hidden">
-                  <div className="h-full rounded-full bg-[#F5C72C]" style={{ width: `${goalPct}%` }} />
+                <div className="h-1.5 bg-[#F1F1EF] rounded-full overflow-hidden">
+                  <div className="h-full rounded-full bg-[#F2DD48]" style={{ width: `${goalPct}%` }} />
                 </div>
               </>
             )}
@@ -281,15 +281,15 @@ function ProgramCard({ program, onClick }: { program: Program; onClick: () => vo
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           <div>
-            <p className="text-[14px] font-bold text-[#111111] leading-none">{fmtCurrency(spend)}</p>
+            <p className="text-[14px] font-bold text-[#222222] leading-none">{fmtCurrency(spend)}</p>
             <p className="text-[10px] text-[#AAAAAA] mt-0.5">Spend</p>
           </div>
           <div>
-            <p className="text-[14px] font-bold text-[#111111] leading-none">{fmtCurrency(revenue)}</p>
+            <p className="text-[14px] font-bold text-[#222222] leading-none">{fmtCurrency(revenue)}</p>
             <p className="text-[10px] text-[#AAAAAA] mt-0.5">Revenue</p>
           </div>
           <div>
-            <p className={cn("text-[14px] font-bold leading-none", roi >= 0 ? "text-[#3DB855]" : "text-[#E8453C]")}>
+            <p className={cn("text-[14px] font-bold leading-none", roi >= 0 ? "text-[#72B84A]" : "text-[#E8453C]")}>
               {spend > 0 ? (roi >= 0 ? "+" : "") + roi.toFixed(0) + "%" : "—"}
             </p>
             <p className="text-[10px] text-[#AAAAAA] mt-0.5">ROI</p>
@@ -302,14 +302,14 @@ function ProgramCard({ program, onClick }: { program: Program; onClick: () => vo
         <div className="flex justify-between items-center mb-1">
           <span className="text-[10px] text-[#AAAAAA]">Budget: {fmtCurrency(budget)}</span>
           {score !== null && score !== undefined && (
-            <span className="text-[10px] font-semibold" style={{ color: score >= 70 ? "#3DB855" : score >= 40 ? "#F5C72C" : "#AAAAAA" }}>
+            <span className="text-[10px] font-semibold" style={{ color: score >= 70 ? "#72B84A" : score >= 40 ? "#F2DD48" : "#AAAAAA" }}>
               Score: {score}/100
             </span>
           )}
         </div>
-        <div className="h-1.5 bg-[#F2F2F7] rounded-full overflow-hidden">
+        <div className="h-1.5 bg-[#F1F1EF] rounded-full overflow-hidden">
           <div
-            className="h-full rounded-full bg-[#F5C72C]"
+            className="h-full rounded-full bg-[#F2DD48]"
             style={{ width: `${budgetPct}%` }}
           />
         </div>
@@ -369,14 +369,14 @@ function AddProgramDialog({ onSuccess }: { onSuccess: () => void }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-[#F5C72C] text-[#111111] font-semibold hover:brightness-95 active:scale-95 transition-all h-9 px-4 text-[13px]">
+        <Button className="bg-[#F2DD48] text-[#222222] font-semibold hover:brightness-95 active:scale-95 transition-all h-9 px-4 text-[13px]">
           <Plus className="h-4 w-4 mr-1.5" />
           New Program
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md bg-white border border-[#E0E0E0]">
+      <DialogContent className="max-w-md bg-white border border-[#DEDEDA]">
         <DialogHeader>
-          <DialogTitle className="text-[16px] font-bold text-[#111111]">Add New Program</DialogTitle>
+          <DialogTitle className="text-[16px] font-bold text-[#222222]">Add New Program</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div>
@@ -385,7 +385,7 @@ function AddProgramDialog({ onSuccess }: { onSuccess: () => void }) {
           </div>
           <div>
             <Label className="text-[12px] font-semibold text-[#888888]">Strategic Campaign</Label>
-            <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value as StrategicCampaign }))} className="mt-1 w-full border border-[#E0E0E0] rounded-md px-3 py-2 text-[13px] text-[#111111] bg-white">
+            <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value as StrategicCampaign }))} className="mt-1 w-full border border-[#DEDEDA] rounded-md px-3 py-2 text-[13px] text-[#222222] bg-white">
               <option value="trial_conversion">Trial Conversion</option>
               <option value="membership_acquisition">Membership Acquisition</option>
               <option value="member_retention">Member Retention</option>
@@ -408,11 +408,11 @@ function AddProgramDialog({ onSuccess }: { onSuccess: () => void }) {
           </div>
           <div>
             <Label className="text-[12px] font-semibold text-[#888888]">Description</Label>
-            <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Brief description of the program..." className="mt-1 w-full border border-[#E0E0E0] rounded-md px-3 py-2 text-[13px] text-[#111111] resize-none h-20" />
+            <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Brief description of the program..." className="mt-1 w-full border border-[#DEDEDA] rounded-md px-3 py-2 text-[13px] text-[#222222] resize-none h-20" />
           </div>
           <div className="flex gap-2 pt-1">
             <Button type="button" variant="outline" onClick={() => setOpen(false)} className="flex-1 text-[13px] h-9">Cancel</Button>
-            <Button type="submit" disabled={createMutation.isPending} className="flex-1 bg-[#F5C72C] text-[#111111] font-semibold hover:brightness-95 text-[13px] h-9">
+            <Button type="submit" disabled={createMutation.isPending} className="flex-1 bg-[#F2DD48] text-[#222222] font-semibold hover:brightness-95 text-[13px] h-9">
               {createMutation.isPending ? "Creating..." : "Create Program"}
             </Button>
           </div>
@@ -477,7 +477,7 @@ export default function Programs() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-[22px] font-bold text-[#111111] leading-tight">Programs & Events</h1>
+          <h1 className="text-[22px] font-bold text-[#222222] leading-tight">Programs & Events</h1>
           <p className="text-[13px] text-[#888888] mt-0.5">
             {programs?.length ?? 0} programs · {counts.active} active · {counts.planned} planned
           </p>
@@ -502,11 +502,11 @@ export default function Programs() {
               className={cn(
                 "flex items-center gap-1.5 h-7 px-3 rounded-full text-[12px] font-semibold transition-all border",
                 isActive
-                  ? "bg-[#111111] text-white border-[#111111]"
-                  : "bg-white text-[#888888] border-[#E0E0E0] hover:border-[#CCCCCC]"
+                  ? "bg-[#222222] text-white border-[#222222]"
+                  : "bg-white text-[#888888] border-[#DEDEDA] hover:border-[#CCCCCC]"
               )}
             >
-              {s === "running" && <PlayCircle className="h-3 w-3" style={{ color: isActive ? "white" : "#3DB855" }} />}
+              {s === "running" && <PlayCircle className="h-3 w-3" style={{ color: isActive ? "white" : "#72B84A" }} />}
               {meta && <meta.icon className="h-3 w-3" style={{ color: isActive ? "white" : meta.color }} />}
               {s === "all" ? "All" : s === "running" ? "Running" : meta!.label}
               <span className={cn("text-[10px]", isActive ? "text-white/70" : "text-[#AAAAAA]")}>{count}</span>
@@ -518,7 +518,7 @@ export default function Programs() {
           <select
             value={categoryFilter}
             onChange={e => setCategoryFilter(e.target.value as any)}
-            className="h-7 border border-[#E0E0E0] rounded-full px-3 text-[12px] text-[#888888] bg-white"
+            className="h-7 border border-[#DEDEDA] rounded-full px-3 text-[12px] text-[#888888] bg-white"
           >
             <option value="all">All Campaigns</option>
             <option value="trial_conversion">Trial Conversion</option>
@@ -536,7 +536,7 @@ export default function Programs() {
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search programs..."
-          className="pl-9 h-9 text-[13px] border-[#E0E0E0] bg-white"
+          className="pl-9 h-9 text-[13px] border-[#DEDEDA] bg-white"
         />
       </div>
 
@@ -544,7 +544,7 @@ export default function Programs() {
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {[0,1,2,3,4,5].map(i => (
-            <div key={i} className="h-52 bg-[#F5F5F5] rounded-xl animate-pulse" />
+            <div key={i} className="h-52 bg-[#F1F1EF] rounded-xl animate-pulse" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
@@ -569,7 +569,7 @@ export default function Programs() {
           {/* Add new card */}
           <button
             onClick={() => document.querySelector<HTMLButtonElement>("[data-add-program]")?.click()}
-            className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-[#E0E0E0] rounded-xl p-6 text-[#AAAAAA] hover:border-[#F5C72C] hover:text-[#888888] transition-colors min-h-[200px]"
+            className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-[#DEDEDA] rounded-xl p-6 text-[#AAAAAA] hover:border-[#F2DD48] hover:text-[#888888] transition-colors min-h-[200px]"
           >
             <Plus className="h-8 w-8" />
             <span className="text-[13px] font-medium">Add Program</span>

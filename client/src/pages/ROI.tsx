@@ -25,19 +25,19 @@ function fmtPercent(n: number, prefix = true) {
 // ─── Campaign type meta ────────────────────────────────────────────────────────
 
 const CAMPAIGN_META: Record<string, { label: string; color: string; bg: string; icon: React.ElementType }> = {
-  trial_conversion:      { label: "Trial Conversion",      color: "#3DB855", bg: "#F0FAF3", icon: Target },
-  membership_acquisition:{ label: "Membership Acquisition", color: "#F5C72C", bg: "#FFFBEB", icon: UserCheck },
-  member_retention:      { label: "Member Retention",       color: "#888888", bg: "#F5F5F5", icon: Users },
-  corporate_events:      { label: "B2B Sales",              color: "#111111", bg: "#F5F5F5", icon: Flag },
+  trial_conversion:      { label: "Trial Conversion",      color: "#72B84A", bg: "#F0FAF3", icon: Target },
+  membership_acquisition:{ label: "Membership Acquisition", color: "#F2DD48", bg: "#FFFBEB", icon: UserCheck },
+  member_retention:      { label: "Member Retention",       color: "#888888", bg: "#F1F1EF", icon: Users },
+  corporate_events:      { label: "B2B Sales",              color: "#222222", bg: "#F1F1EF", icon: Flag },
 };
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function StatCard({ label, value, sub, highlight }: { label: string; value: string; sub?: string; highlight?: boolean }) {
   return (
-    <div className="bg-white border border-[#E0E0E0] rounded-[10px] p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+    <div className="bg-white border border-[#DEDEDA] rounded-[10px] p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
       <p className="text-xs text-[#AAAAAA] mb-1">{label}</p>
-      <p className={cn("text-2xl font-bold tracking-tight", highlight ? "text-[#F5C72C]" : "text-[#111111]")}>{value}</p>
+      <p className={cn("text-2xl font-bold tracking-tight", highlight ? "text-[#F2DD48]" : "text-[#222222]")}>{value}</p>
       {sub && <p className="text-xs text-[#888888] mt-0.5">{sub}</p>}
     </div>
   );
@@ -45,7 +45,7 @@ function StatCard({ label, value, sub, highlight }: { label: string; value: stri
 
 function ProgressBar({ pct, color }: { pct: number; color: string }) {
   return (
-    <div className="h-1.5 bg-[#F5F5F5] rounded-full overflow-hidden">
+    <div className="h-1.5 bg-[#F1F1EF] rounded-full overflow-hidden">
       <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: color }} />
     </div>
   );
@@ -141,15 +141,15 @@ export default function ROI() {
     <div className="max-w-5xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <TrendingUp className="h-5 w-5 text-[#F5C72C]" />
+        <TrendingUp className="h-5 w-5 text-[#F2DD48]" />
         <div>
-          <h1 className="text-lg font-semibold text-[#111111]">ROI & KPI Dashboard</h1>
+          <h1 className="text-lg font-semibold text-[#222222]">ROI & KPI Dashboard</h1>
           <p className="text-xs text-[#888888]">Meta Ads performance by program · Goal tracking · Channel metrics</p>
         </div>
       </div>
 
       {/* Tab bar */}
-      <div className="h-11 flex border-b border-[#E0E0E0] bg-white overflow-x-auto">
+      <div className="h-11 flex border-b border-[#DEDEDA] bg-white overflow-x-auto">
         {TABS.map((tab) => (
           <button
             key={tab}
@@ -157,8 +157,8 @@ export default function ROI() {
             className={cn(
               "px-5 text-sm transition-all duration-200",
               activeTab === tab
-                ? "text-[#111111] font-semibold border-b-2 border-[#F5C72C]"
-                : "text-[#888888] hover:text-[#111111]"
+                ? "text-[#222222] font-semibold border-b-2 border-[#F2DD48]"
+                : "text-[#888888] hover:text-[#222222]"
             )}
           >
             {tab}
@@ -194,11 +194,11 @@ export default function ROI() {
           {metaInsights.isLoading || campaigns.isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-36 bg-[#F5F5F5] rounded-[10px] animate-pulse" />
+                <div key={i} className="h-36 bg-[#F1F1EF] rounded-[10px] animate-pulse" />
               ))}
             </div>
           ) : programsWithAds.length === 0 && programROI.length === 0 ? (
-            <div className="py-12 text-center bg-white border border-[#E0E0E0] rounded-[10px]">
+            <div className="py-12 text-center bg-white border border-[#DEDEDA] rounded-[10px]">
               <AlertCircle className="h-8 w-8 text-[#AAAAAA] mx-auto mb-2" />
               <p className="text-sm text-[#888888]">No program data available.</p>
             </div>
@@ -215,9 +215,9 @@ export default function ROI() {
                       const meta = CAMPAIGN_META[p.category] ?? CAMPAIGN_META.member_retention;
                       const Icon = meta.icon;
                       const kpiPct = p.kpiTarget > 0 ? Math.min(100, (p.kpiActual / p.kpiTarget) * 100) : 0;
-                      const kpiColor = kpiPct >= 80 ? "#3DB855" : kpiPct >= 50 ? "#F5C72C" : "#FF3B30";
+                      const kpiColor = kpiPct >= 80 ? "#72B84A" : kpiPct >= 50 ? "#F2DD48" : "#FF3B30";
                       return (
-                        <div key={p.id} className="bg-white border border-[#E0E0E0] rounded-[10px] p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+                        <div key={p.id} className="bg-white border border-[#DEDEDA] rounded-[10px] p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
                           {/* Program header */}
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex items-center gap-2">
@@ -225,13 +225,13 @@ export default function ROI() {
                                 <Icon className="h-3.5 w-3.5" style={{ color: meta.color }} />
                               </div>
                               <div>
-                                <p className="text-[13px] font-semibold text-[#111111] leading-tight">{p.name}</p>
+                                <p className="text-[13px] font-semibold text-[#222222] leading-tight">{p.name}</p>
                                 <p className="text-[10px] text-[#AAAAAA]">{meta.label}</p>
                               </div>
                             </div>
                             <span className={cn(
                               "text-[10px] font-semibold px-1.5 py-0.5 rounded-full",
-                              p.status === "active" ? "bg-[#F0FAF3] text-[#3DB855]" : "bg-[#F5F5F5] text-[#888888]"
+                              p.status === "active" ? "bg-[#F0FAF3] text-[#72B84A]" : "bg-[#F1F1EF] text-[#888888]"
                             )}>
                               {p.status}
                             </span>
@@ -240,17 +240,17 @@ export default function ROI() {
                           {/* Metrics */}
                           <div className="grid grid-cols-3 gap-2 mb-3">
                             <div>
-                              <p className="text-[15px] font-bold text-[#111111]">{fmtCurrency(p.metaSpend)}</p>
+                              <p className="text-[15px] font-bold text-[#222222]">{fmtCurrency(p.metaSpend)}</p>
                               <p className="text-[10px] text-[#AAAAAA]">Meta Spend</p>
                             </div>
                             <div>
-                              <p className="text-[15px] font-bold text-[#111111]">
+                              <p className="text-[15px] font-bold text-[#222222]">
                                 {p.kpiActual > 0 ? fmt(p.kpiActual) : "—"}
                               </p>
                               <p className="text-[10px] text-[#AAAAAA]">{p.kpiLabel}</p>
                             </div>
                             <div>
-                              <p className="text-[15px] font-bold text-[#111111]">
+                              <p className="text-[15px] font-bold text-[#222222]">
                                 {p.costPerConversion > 0 ? fmtCurrency(p.costPerConversion) : "—"}
                               </p>
                               <p className="text-[10px] text-[#AAAAAA]">Cost/Booking</p>
@@ -264,7 +264,7 @@ export default function ROI() {
                               <span className="text-[11px] text-[#888888]">CTR:</span>
                               <span className={cn(
                                 "text-[11px] font-semibold",
-                                p.ctr >= 2 ? "text-[#3DB855]" : p.ctr >= 1 ? "text-[#F5C72C]" : "text-[#FF3B30]"
+                                p.ctr >= 2 ? "text-[#72B84A]" : p.ctr >= 1 ? "text-[#F2DD48]" : "text-[#FF3B30]"
                               )}>
                                 {fmt(p.ctr, 2)}%
                               </span>
@@ -298,10 +298,10 @@ export default function ROI() {
                   <p className="text-[12px] font-semibold text-[#888888] uppercase tracking-wide mb-3">
                     Organic / No Ad Spend ({programsNoAds.length})
                   </p>
-                  <div className="bg-white border border-[#E0E0E0] rounded-[10px] overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+                  <div className="bg-white border border-[#DEDEDA] rounded-[10px] overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
                     <table className="w-full">
                       <thead>
-                        <tr className="border-b border-[#E0E0E0]">
+                        <tr className="border-b border-[#DEDEDA]">
                           {["Program", "Type", "Status", "KPI Actual", "KPI Target"].map((h, i) => (
                             <th key={h} className={cn("text-xs text-[#AAAAAA] font-normal px-4 py-2", i > 0 ? "text-right" : "text-left")}>
                               {h}
@@ -313,15 +313,15 @@ export default function ROI() {
                         {programsNoAds.slice(0, 10).map((p) => {
                           const meta = CAMPAIGN_META[p.category] ?? CAMPAIGN_META.member_retention;
                           return (
-                            <tr key={p.id} className="h-11 border-b border-[#E0E0E0] last:border-0 hover:bg-[#FAFAFA]">
-                              <td className="px-4 text-sm font-medium text-[#111111] max-w-[180px] truncate">{p.name}</td>
+                            <tr key={p.id} className="h-11 border-b border-[#DEDEDA] last:border-0 hover:bg-[#FAFAFA]">
+                              <td className="px-4 text-sm font-medium text-[#222222] max-w-[180px] truncate">{p.name}</td>
                               <td className="px-4 text-right text-xs text-[#888888]">{meta.label}</td>
                               <td className="px-4 text-right">
-                                <span className={cn("text-xs font-medium", p.status === "active" ? "text-[#3DB855]" : "text-[#AAAAAA]")}>
+                                <span className={cn("text-xs font-medium", p.status === "active" ? "text-[#72B84A]" : "text-[#AAAAAA]")}>
                                   {p.status}
                                 </span>
                               </td>
-                              <td className="px-4 text-right text-sm text-[#111111]">{p.kpiActual > 0 ? fmt(p.kpiActual) : "—"}</td>
+                              <td className="px-4 text-right text-sm text-[#222222]">{p.kpiActual > 0 ? fmt(p.kpiActual) : "—"}</td>
                               <td className="px-4 text-right text-sm text-[#AAAAAA]">{p.kpiTarget > 0 ? fmt(p.kpiTarget) : "—"}</td>
                             </tr>
                           );
@@ -368,10 +368,10 @@ export default function ROI() {
             if (typeCampaigns.length === 0) return null;
             const Icon = meta.icon;
             return (
-              <div key={key} className="bg-white border border-[#E0E0E0] rounded-[10px] shadow-[0_1px_4px_rgba(0,0,0,0.06)] overflow-hidden">
-                <div className="px-4 py-3 border-b border-[#E0E0E0] flex items-center gap-2" style={{ background: meta.bg }}>
+              <div key={key} className="bg-white border border-[#DEDEDA] rounded-[10px] shadow-[0_1px_4px_rgba(0,0,0,0.06)] overflow-hidden">
+                <div className="px-4 py-3 border-b border-[#DEDEDA] flex items-center gap-2" style={{ background: meta.bg }}>
                   <Icon className="h-4 w-4" style={{ color: meta.color }} />
-                  <h2 className="text-sm font-semibold text-[#111111]">{meta.label}</h2>
+                  <h2 className="text-sm font-semibold text-[#222222]">{meta.label}</h2>
                   <span className="text-xs text-[#888888] ml-auto">{typeCampaigns.length} programs</span>
                 </div>
                 <div className="px-4 py-2">
@@ -379,11 +379,11 @@ export default function ROI() {
                     const actual = parseFloat(String(c.kpiActual ?? 0));
                     const target = parseFloat(String(c.kpiTarget ?? 1));
                     const pct = Math.min(100, Math.round((actual / target) * 100));
-                    const color = pct >= 80 ? "#3DB855" : pct >= 50 ? "#F5C72C" : "#FF3B30";
+                    const color = pct >= 80 ? "#72B84A" : pct >= 50 ? "#F2DD48" : "#FF3B30";
                     return (
                       <div key={c.id} className="py-3 border-b border-[#F0F0F0] last:border-0">
                         <div className="flex items-center justify-between mb-1.5">
-                          <span className="text-sm font-medium text-[#111111]">{c.name}</span>
+                          <span className="text-sm font-medium text-[#222222]">{c.name}</span>
                           <div className="flex items-center gap-3">
                             <span className="text-xs text-[#888888]">{fmt(actual)} / {fmt(target)}</span>
                             <span className="text-xs font-bold" style={{ color }}>{pct}%</span>
@@ -399,7 +399,7 @@ export default function ROI() {
           })}
 
           {kpiPrograms.length === 0 && !campaigns.isLoading && (
-            <div className="py-10 text-center bg-white border border-[#E0E0E0] rounded-[10px]">
+            <div className="py-10 text-center bg-white border border-[#DEDEDA] rounded-[10px]">
               <Crosshair className="h-8 w-8 text-[#AAAAAA] mx-auto mb-2" />
               <p className="text-sm text-[#888888]">No KPI targets set on programs.</p>
               <p className="text-xs text-[#AAAAAA] mt-1">Set kpiTarget on programs to track goals here.</p>
@@ -415,11 +415,11 @@ export default function ROI() {
           {metaInsights.isLoading ? (
             <div className="space-y-2">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-12 bg-[#F5F5F5] rounded animate-pulse" />
+                <div key={i} className="h-12 bg-[#F1F1EF] rounded animate-pulse" />
               ))}
             </div>
           ) : metaList.length === 0 ? (
-            <div className="py-12 text-center bg-white border border-[#E0E0E0] rounded-[10px]">
+            <div className="py-12 text-center bg-white border border-[#DEDEDA] rounded-[10px]">
               <BarChart2 className="h-8 w-8 text-[#AAAAAA] mx-auto mb-2" />
               <p className="text-sm text-[#888888]">No Meta Ads data.</p>
               <p className="text-xs text-[#AAAAAA] mt-1">Data loads from Meta Ads API when connected.</p>
@@ -449,14 +449,14 @@ export default function ROI() {
               </div>
 
               {/* Campaign table */}
-              <div className="bg-white border border-[#E0E0E0] rounded-[10px] shadow-[0_1px_4px_rgba(0,0,0,0.06)] overflow-hidden">
-                <div className="px-4 py-3 border-b border-[#E0E0E0] flex items-center gap-2">
+              <div className="bg-white border border-[#DEDEDA] rounded-[10px] shadow-[0_1px_4px_rgba(0,0,0,0.06)] overflow-hidden">
+                <div className="px-4 py-3 border-b border-[#DEDEDA] flex items-center gap-2">
                   <BarChart2 className="h-4 w-4 text-[#AAAAAA]" />
-                  <h2 className="text-sm font-semibold text-[#111111]">All Meta Campaigns — Last 30 Days</h2>
+                  <h2 className="text-sm font-semibold text-[#222222]">All Meta Campaigns — Last 30 Days</h2>
                 </div>
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-[#E0E0E0]">
+                    <tr className="border-b border-[#DEDEDA]">
                       {["Campaign", "Spend", "Clicks", "CTR", "CPC", "Reach"].map((h, i) => (
                         <th key={h} className={cn("text-xs text-[#AAAAAA] font-normal px-4 py-2", i > 0 ? "text-right" : "text-left")}>
                           {h}
@@ -473,13 +473,13 @@ export default function ROI() {
                       const cpc = parseFloat(String(ins.cpc ?? 0));
                       const reach = parseInt(String(ins.reach ?? 0));
                       return (
-                        <tr key={c.id} className="h-12 border-b border-[#E0E0E0] last:border-0 hover:bg-[#FAFAFA]">
-                          <td className="px-4 text-sm font-medium text-[#111111] max-w-[200px] truncate">{c.name}</td>
-                          <td className="px-4 text-right text-sm text-[#111111]">{spend > 0 ? fmtCurrency(spend) : "—"}</td>
+                        <tr key={c.id} className="h-12 border-b border-[#DEDEDA] last:border-0 hover:bg-[#FAFAFA]">
+                          <td className="px-4 text-sm font-medium text-[#222222] max-w-[200px] truncate">{c.name}</td>
+                          <td className="px-4 text-right text-sm text-[#222222]">{spend > 0 ? fmtCurrency(spend) : "—"}</td>
                           <td className="px-4 text-right text-sm text-[#888888]">{clicks > 0 ? fmt(clicks) : "—"}</td>
                           <td className="px-4 text-right text-sm">
                             {ctr > 0 ? (
-                              <span className={cn(ctr >= 2 ? "text-[#3DB855]" : ctr >= 1 ? "text-[#F5C72C]" : "text-[#FF3B30]")}>
+                              <span className={cn(ctr >= 2 ? "text-[#72B84A]" : ctr >= 1 ? "text-[#F2DD48]" : "text-[#FF3B30]")}>
                                 {fmt(ctr, 2)}%
                               </span>
                             ) : "—"}
@@ -494,15 +494,15 @@ export default function ROI() {
               </div>
 
               {/* Revenue trend */}
-              <div className="bg-white border border-[#E0E0E0] rounded-[10px] p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+              <div className="bg-white border border-[#DEDEDA] rounded-[10px] p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
                 {toastDaily.isLoading ? (
-                  <div className="h-48 bg-[#F5F5F5] rounded animate-pulse" />
+                  <div className="h-48 bg-[#F1F1EF] rounded animate-pulse" />
                 ) : (
                   <TrendChart
                     data={trendData}
                     title="Daily Revenue Trend (Toast POS)"
                     valueLabel="Revenue ($)"
-                    color="#F5C72C"
+                    color="#F2DD48"
                     height={220}
                   />
                 )}

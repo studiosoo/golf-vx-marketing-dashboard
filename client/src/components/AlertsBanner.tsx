@@ -36,19 +36,19 @@ export default function AlertsBanner() {
         return {
           border: "border-l-orange-500",
           badge: "bg-orange-100 text-orange-700 border-orange-300",
-          icon: <AlertTriangle className="h-4 w-4 text-[#F5C72C]" />,
+          icon: <AlertTriangle className="h-4 w-4 text-[#F2DD48]" />,
         };
       case "medium":
         return {
-          border: "border-l-[#F5C72C]",
+          border: "border-l-[#F2DD48]",
           badge: "bg-yellow-100 text-yellow-700 border-yellow-300",
           icon: <Info className="h-4 w-4 text-yellow-500" />,
         };
       case "opportunity":
         return {
-          border: "border-l-[#3DB855]",
-          badge: "bg-[#3DB855]/10 text-[#3DB855] border-[#3DB855]/30",
-          icon: <TrendingUp className="h-4 w-4 text-[#3DB855]" />,
+          border: "border-l-[#72B84A]",
+          badge: "bg-[#72B84A]/10 text-[#72B84A] border-[#72B84A]/30",
+          icon: <TrendingUp className="h-4 w-4 text-[#72B84A]" />,
         };
       default:
         return {
@@ -92,7 +92,7 @@ export default function AlertsBanner() {
                       <div className="mt-3 space-y-2">
                         {alert.action && (
                           <div className="flex items-start gap-2 p-2 rounded-md bg-muted/50">
-                            <Zap className="h-4 w-4 text-[#F5C72C] mt-0.5 shrink-0" />
+                            <Zap className="h-4 w-4 text-[#F2DD48] mt-0.5 shrink-0" />
                             <div>
                               <span className="text-xs font-semibold text-foreground">Recommended Action: </span>
                               <span className="text-xs text-muted-foreground">{alert.action}</span>

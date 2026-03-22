@@ -16,7 +16,7 @@ import { RefreshCw } from "lucide-react";
 
 const TIER_STYLE: Record<string, { bg: string; text: string }> = {
   "Golf VX Pro":   { bg: "bg-[#F2DD48]/10", text: "text-[#B8A000]" },
-  "All Access Ace":{ bg: "bg-[#F5C72C]/10", text: "text-[#c49a00]" },
+  "All Access Ace":{ bg: "bg-[#F2DD48]/10", text: "text-[#c49a00]" },
   "Swing Saver":   { bg: "bg-[#72B84A]/10", text: "text-[#72B84A]" },
   "Legacy / Other":{ bg: "bg-[#DEDEDA]/40", text: "text-[#6F6F6B]" },
   "Comped / Staff":{ bg: "bg-[#DEDEDA]/40", text: "text-[#6F6F6B]" },
@@ -146,7 +146,7 @@ export function StripeTierTable() {
                   <div className="flex items-center justify-end gap-2">
                     <div className="w-16 h-1.5 rounded-full bg-[#F1F1EF] overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-[#F5C72C]"
+                        className="h-full rounded-full bg-[#F2DD48]"
                         style={{ width: `${Math.min(pct, 100)}%` }}
                       />
                     </div>

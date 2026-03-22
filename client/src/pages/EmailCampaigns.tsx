@@ -43,7 +43,7 @@ function StatusBadge({ status }: { status: BroadcastStatus }) {
   const config: Record<BroadcastStatus, { label: string; className: string; icon: React.ReactNode }> = {
     sent: {
       label: "Sent",
-      className: "bg-green-500/10 text-[#3DB855] border-green-500/20",
+      className: "bg-green-500/10 text-[#72B84A] border-green-500/20",
       icon: <CheckCircle size={10} />,
     },
     sending: {
@@ -53,7 +53,7 @@ function StatusBadge({ status }: { status: BroadcastStatus }) {
     },
     scheduled: {
       label: "Scheduled",
-      className: "bg-yellow-500/10 text-[#F5C72C] border-yellow-500/20",
+      className: "bg-yellow-500/10 text-[#F2DD48] border-yellow-500/20",
       icon: <Clock size={10} />,
     },
     draft: {
@@ -113,7 +113,7 @@ function BroadcastCard({ broadcast }: { broadcast: Broadcast }) {
           <div className="flex items-center gap-2 mb-1">
             <StatusBadge status={broadcast.status} />
             {broadcast.metricsStale && (
-              <span className="text-xs text-[#F5C72C] flex items-center gap-1">
+              <span className="text-xs text-[#F2DD48] flex items-center gap-1">
                 <AlertCircle size={10} />
                 Stale
               </span>

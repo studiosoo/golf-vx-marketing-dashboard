@@ -35,7 +35,7 @@ export function MetaAdsStatusBadge() {
   }
 
   return (
-    <span className="inline-flex items-center gap-1 text-xs text-[#3DB855]">
+    <span className="inline-flex items-center gap-1 text-xs text-[#72B84A]">
       <Wifi className="h-3 w-3" />
       Meta Ads live
     </span>

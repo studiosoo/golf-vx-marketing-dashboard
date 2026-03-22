@@ -2,6 +2,18 @@ import { z } from "zod";
 import { router, protectedProcedure } from "../_core/trpc";
 import { getTimelineTasks, createAsanaTask, getProjectUrl, getProjectTasks, getProjectBudget, CAMPAIGN_SECTIONS, MARKETING_TIMELINE_PROJECT_ID } from "../asana";
 
+// ─── Production-linked Asana project GIDs ─────────────────────────────────────
+export const PRODUCTION_PROJECTS: Record<string, string> = {
+  "PBGA Programs":               "1212078499567959",
+  "Trial Conversion Campaign":   "1212077269419925",
+  "Membership Acquisition":      "1212077289242708",
+  "Member Retention":            "1211736985531595",
+  "Corporate Events & B2B":      "1212077289242724",
+  "Venue Display / Local Media": "1211917285471271",
+  "AH Social Media Content":     "1211673464711096",
+  "Stroll Magazine":             "1211912937095581",
+};
+
 export const asanaRouter = router({
   getProjectTasks: protectedProcedure
     .input(z.object({ projectGid: z.string().min(1) }))
@@ -39,6 +51,60 @@ export const asanaRouter = router({
       fetchedAt: new Date().toISOString(),
     };
   }),
+
+  // ── Production page: fetch tasks from one or all production projects ─────────
+  getProductionTasks: protectedProcedure
+    .input(z.object({
+      projectName: z.string().optional(),
+    }))
+    .query(async ({ input }) => {
+      const projectsToFetch = input.projectName && PRODUCTION_PROJECTS[input.projectName]
+        ? { [input.projectName]: PRODUCTION_PROJECTS[input.projectName] }
+        : PRODUCTION_PROJECTS;
+
+      const results: Array<{
+        projectName: string;
+        projectGid: string;
+        tasks: Array<{ gid: string; name: string; assignee: string | null; due_on: string | null; completed: boolean }>;
+      }> = [];
+
+      for (const [name, gid] of Object.entries(projectsToFetch)) {
+        if (!gid) continue;
+        try {
+          const tasks = await getProjectTasks(gid);
+          results.push({ projectName: name, projectGid: gid, tasks });
+        } catch {
+          results.push({ projectName: name, projectGid: gid, tasks: [] });
+        }
+      }
+
+      return {
+        projects: results,
+        projectNames: Object.keys(PRODUCTION_PROJECTS),
+        fetchedAt: new Date().toISOString(),
+      };
+    }),
+
+  // ── Production page: create a task in a named production project ─────────────
+  createProductionTask: protectedProcedure
+    .input(z.object({
+      name: z.string().min(1).max(200),
+      projectName: z.string().min(1),
+      notes: z.string().optional(),
+      due_on: z.string().optional(),
+    }))
+    .mutation(async ({ input }) => {
+      if (!PRODUCTION_PROJECTS[input.projectName]) {
+        throw new Error(`Unknown production project: ${input.projectName}`);
+      }
+      const task = await createAsanaTask({
+        name: input.name,
+        notes: input.notes,
+        due_on: input.due_on,
+        campaignSection: input.projectName,
+      });
+      return { success: true, task, projectName: input.projectName };
+    }),
 
   createTask: protectedProcedure
     .input(z.object({

@@ -42,7 +42,7 @@ type SyncStatusEntry = { status: string; lastSync?: string | number | null };
 
 function RiskBadge({ level }: { level: string }) {
   const cls: Record<string, string> = {
-    low:    "bg-[#3DB855]/10 text-[#3DB855] border border-[#3DB855]/30",
+    low:    "bg-[#72B84A]/10 text-[#72B84A] border border-[#72B84A]/30",
     medium: "bg-yellow-50 text-yellow-700 border border-yellow-200",
     high:   "bg-red-50 text-red-700 border border-red-200",
   };
@@ -54,10 +54,10 @@ function RiskBadge({ level }: { level: string }) {
 }
 
 const STATUS_MAP: Record<ActionStatus, { label: string; cls: string }> = {
-  auto_executed:    { label: "Auto-Executed",     cls: "bg-[#F5C72C]/10 text-[#8B6E00] border border-[#F5C72C]/40" },
-  pending_approval: { label: "Awaiting Approval", cls: "bg-[#F5C72C]/10 text-[#111111] border border-[#F5C72C]/40" },
+  auto_executed:    { label: "Auto-Executed",     cls: "bg-[#F2DD48]/10 text-[#8B6E00] border border-[#F2DD48]/40" },
+  pending_approval: { label: "Awaiting Approval", cls: "bg-[#F2DD48]/10 text-[#222222] border border-[#F2DD48]/40" },
   monitoring:       { label: "Monitoring",        cls: "bg-gray-50 text-gray-600 border border-gray-200" },
-  approved:         { label: "Approved",          cls: "bg-[#3DB855]/10 text-[#3DB855] border border-[#3DB855]/30" },
+  approved:         { label: "Approved",          cls: "bg-[#72B84A]/10 text-[#72B84A] border border-[#72B84A]/30" },
   rejected:         { label: "Rejected",          cls: "bg-red-50 text-red-700 border border-red-200" },
   undone:           { label: "Undone",            cls: "bg-gray-50 text-gray-500 border border-gray-200" },
   dismissed:        { label: "Dismissed",         cls: "bg-gray-50 text-[#888] border border-gray-200" },
@@ -92,23 +92,23 @@ function ActionCard({
   });
 
   return (
-    <div className="bg-white border border-[#E0E0E0] rounded-xl p-4 space-y-3 shadow-[0_1px_4px_rgba(0,0,0,0.06)] hover:border-[#F5C72C]/50 transition-colors">
+    <div className="bg-white border border-[#DEDEDA] rounded-xl p-4 space-y-3 shadow-[0_1px_4px_rgba(0,0,0,0.06)] hover:border-[#F2DD48]/50 transition-colors">
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2 mb-1.5">
             <StatusBadge status={action.status} />
             <RiskBadge level={action.riskLevel || "medium"} />
-            <span className="text-xs text-[#888] bg-[#F5F5F5] px-2 py-0.5 rounded font-mono">
+            <span className="text-xs text-[#888] bg-[#F1F1EF] px-2 py-0.5 rounded font-mono">
               {action.actionType.replace(/_/g, " ")}
             </span>
             {action.campaignName && (
-              <span className="text-xs text-[#666] bg-[#F5F5F5] px-2 py-0.5 rounded">{action.campaignName}</span>
+              <span className="text-xs text-[#666] bg-[#F1F1EF] px-2 py-0.5 rounded">{action.campaignName}</span>
             )}
           </div>
           <p className="text-sm font-semibold text-[#111] leading-snug">{displayText}</p>
           {detailText && <p className="text-xs text-[#666] mt-0.5">{detailText}</p>}
           {action.expectedImpact && (
-            <p className="text-xs text-[#8B6E00] bg-[#F5C72C]/5 border border-[#F5C72C]/20 px-2 py-1 rounded mt-1.5">
+            <p className="text-xs text-[#8B6E00] bg-[#F2DD48]/5 border border-[#F2DD48]/20 px-2 py-1 rounded mt-1.5">
               Expected: {action.expectedImpact}
             </p>
           )}
@@ -117,7 +117,7 @@ function ActionCard({
           {section === "approval" && (
             <>
               <button onClick={() => onApprove?.(action.id)} disabled={isLoading}
-                className="flex items-center gap-1 px-2.5 py-1.5 bg-[#3DB855]/10 text-[#3DB855] hover:bg-[#3DB855]/20 border border-[#3DB855]/30 rounded text-xs font-medium transition-colors disabled:opacity-50">
+                className="flex items-center gap-1 px-2.5 py-1.5 bg-[#72B84A]/10 text-[#72B84A] hover:bg-[#72B84A]/20 border border-[#72B84A]/30 rounded text-xs font-medium transition-colors disabled:opacity-50">
                 <CheckCircle className="w-3.5 h-3.5" />Approve
               </button>
               <button onClick={() => onReject?.(action.id)} disabled={isLoading}
@@ -128,7 +128,7 @@ function ActionCard({
           )}
           {section === "auto" && (action.status === "auto_executed" || action.status === "approved") && (
             <button onClick={() => onUndo?.(action.id)} disabled={isLoading}
-              className="flex items-center gap-1 px-2.5 py-1.5 bg-[#F5F5F5] text-[#555] hover:bg-[#EBEBEB] border border-[#E0E0E0] rounded text-xs font-medium transition-colors disabled:opacity-50">
+              className="flex items-center gap-1 px-2.5 py-1.5 bg-[#F1F1EF] text-[#555] hover:bg-[#EBEBEB] border border-[#DEDEDA] rounded text-xs font-medium transition-colors disabled:opacity-50">
               <RotateCcw className="w-3.5 h-3.5" />Undo
             </button>
           )}
@@ -137,7 +137,7 @@ function ActionCard({
             <Trash2 className="w-3.5 h-3.5" />
           </button>
           <button onClick={() => setExpanded(e => !e)}
-            className="p-1.5 text-[#999] hover:text-[#111] hover:bg-[#F5F5F5] rounded transition-colors">
+            className="p-1.5 text-[#999] hover:text-[#111] hover:bg-[#F1F1EF] rounded transition-colors">
             {expanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
         </div>
@@ -147,7 +147,7 @@ function ActionCard({
         <div className="flex items-center gap-2 text-xs">
           {action.previousValue && <span className="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded font-mono">{action.previousValue}</span>}
           {action.previousValue && action.newValue && <TrendingUp className="w-3 h-3 text-[#999]" />}
-          {action.newValue && <span className="px-2 py-1 bg-[#3DB855]/10 text-[#3DB855] border border-[#3DB855]/30 rounded font-mono">{action.newValue}</span>}
+          {action.newValue && <span className="px-2 py-1 bg-[#72B84A]/10 text-[#72B84A] border border-[#72B84A]/30 rounded font-mono">{action.newValue}</span>}
         </div>
       )}
 
@@ -159,7 +159,7 @@ function ActionCard({
 
       {hasMetaError && (
         <div className="flex items-start gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded text-xs">
-          <AlertTriangle className="w-3.5 h-3.5 text-[#F5C72C] flex-shrink-0 mt-0.5" />
+          <AlertTriangle className="w-3.5 h-3.5 text-[#F2DD48] flex-shrink-0 mt-0.5" />
           <div>
             <span className="text-amber-700 font-medium">Meta Ads API Error — </span>
             <span className="text-[#666]">Apply manually in </span>
@@ -186,7 +186,7 @@ function ActionCard({
           {action.confidence != null && (
             <div className="flex items-center gap-2 text-xs">
               <span className="text-[#888]">Confidence:</span>
-              <span className="px-2 py-0.5 bg-[#F5C72C]/10 text-[#8B6E00] border border-[#F5C72C]/30 rounded font-mono">{action.confidence}%</span>
+              <span className="px-2 py-0.5 bg-[#F2DD48]/10 text-[#8B6E00] border border-[#F2DD48]/30 rounded font-mono">{action.confidence}%</span>
             </div>
           )}
           <div className="flex items-center gap-4 text-xs text-[#999]">
@@ -218,7 +218,7 @@ function SectionHeader({ icon: Icon, iconBg, iconColor, title, count, subtitle }
       <div>
         <div className="flex items-center gap-2">
           <h2 className="text-base font-semibold text-[#111]">{title}</h2>
-          <span className="text-xs bg-[#F5F5F5] border border-[#E0E0E0] text-[#666] px-2 py-0.5 rounded-full font-medium">{count}</span>
+          <span className="text-xs bg-[#F1F1EF] border border-[#DEDEDA] text-[#666] px-2 py-0.5 rounded-full font-medium">{count}</span>
         </div>
         <p className="text-xs text-[#888]">{subtitle}</p>
       </div>
@@ -257,7 +257,7 @@ function InsightsTab({ actions, archived, syncStatus, isSyncStatusLoading }: {
           { label: "Rejected",          value: rejected.length,     color: "text-red-600" },
           { label: "Dismissed",         value: dismissed.length,    color: "text-[#999]" },
         ].map(({ label, value, color }) => (
-          <div key={label} className="bg-white border border-[#E0E0E0] rounded-xl p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+          <div key={label} className="bg-white border border-[#DEDEDA] rounded-xl p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
             <div className={`text-2xl font-bold tracking-tight ${color}`}>{value}</div>
             <div className="text-xs text-[#888] mt-0.5">{label}</div>
           </div>
@@ -265,7 +265,7 @@ function InsightsTab({ actions, archived, syncStatus, isSyncStatusLoading }: {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-white border border-[#E0E0E0] rounded-xl p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+        <div className="bg-white border border-[#DEDEDA] rounded-xl p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
           <h3 className="text-sm font-semibold text-[#111] mb-3">Risk Distribution</h3>
           {Object.keys(riskCounts).length === 0 ? (
             <p className="text-xs text-[#999]">No active actions</p>
@@ -274,14 +274,14 @@ function InsightsTab({ actions, archived, syncStatus, isSyncStatusLoading }: {
               {(["low", "medium", "high"] as const).map(level => {
                 const count = riskCounts[level] ?? 0;
                 const pct = Math.round((count / activeTotal) * 100);
-                const bar = level === "low" ? "bg-[#3DB855]" : level === "high" ? "bg-red-500" : "bg-yellow-400";
+                const bar = level === "low" ? "bg-[#72B84A]" : level === "high" ? "bg-red-500" : "bg-yellow-400";
                 return (
                   <div key={level}>
                     <div className="flex justify-between text-xs mb-1">
                       <span className="text-[#555] capitalize">{level} risk</span>
                       <span className="text-[#888] font-mono">{count}</span>
                     </div>
-                    <div className="h-1.5 bg-[#F5F5F5] rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-[#F1F1EF] rounded-full overflow-hidden">
                       <div className={`h-full ${bar} rounded-full transition-all duration-300`} style={{ width: `${pct}%` }} />
                     </div>
                   </div>
@@ -291,7 +291,7 @@ function InsightsTab({ actions, archived, syncStatus, isSyncStatusLoading }: {
           )}
         </div>
 
-        <div className="bg-white border border-[#E0E0E0] rounded-xl p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+        <div className="bg-white border border-[#DEDEDA] rounded-xl p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
           <h3 className="text-sm font-semibold text-[#111] mb-3">Engine Overview</h3>
           <div className="space-y-0">
             {[
@@ -300,7 +300,7 @@ function InsightsTab({ actions, archived, syncStatus, isSyncStatusLoading }: {
               { label: "Monitoring queue",  value: String(monitoring.length) },
               { label: "Auto-execute rate", value: `${Math.round((autoExecuted.length / decisionTotal) * 100)}%` },
             ].map(({ label, value }, i, arr) => (
-              <div key={label} className={`flex items-center justify-between py-1.5 text-xs ${i < arr.length - 1 ? "border-b border-[#F5F5F5]" : ""}`}>
+              <div key={label} className={`flex items-center justify-between py-1.5 text-xs ${i < arr.length - 1 ? "border-b border-[#F1F1EF]" : ""}`}>
                 <span className="text-[#888]">{label}</span>
                 <span className="font-semibold text-[#111]">{value}</span>
               </div>
@@ -317,9 +317,9 @@ function InsightsTab({ actions, archived, syncStatus, isSyncStatusLoading }: {
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {Object.entries(syncStatus).map(([key, entry]) => {
-                const color = entry?.status === "ok" ? "text-[#3DB855]" : entry?.status === "error" ? "text-red-600" : "text-yellow-600";
+                const color = entry?.status === "ok" ? "text-[#72B84A]" : entry?.status === "error" ? "text-red-600" : "text-yellow-600";
                 return (
-                  <div key={key} className="bg-white border border-[#E0E0E0] rounded-xl p-3 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+                  <div key={key} className="bg-white border border-[#DEDEDA] rounded-xl p-3 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
                     <div className="text-xs text-[#888] capitalize mb-1">{key.replace(/([A-Z])/g, " $1").trim()}</div>
                     <div className={`text-xs font-semibold ${color}`}>{entry?.status ?? "unknown"}</div>
                     {entry?.lastSync && <div className="text-xs text-[#AAA] mt-0.5">{new Date(entry.lastSync).toLocaleTimeString()}</div>}
@@ -379,8 +379,8 @@ export default function Autopilot() {
             <h1 className="text-2xl font-bold text-[#111] tracking-tight">Autopilot</h1>
             <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium border ${
               !isLoading && allActions.length > 0
-                ? "bg-[#3DB855]/10 text-[#3DB855] border-[#3DB855]/30"
-                : "bg-[#F5F5F5] text-[#999] border-[#E0E0E0]"
+                ? "bg-[#72B84A]/10 text-[#72B84A] border-[#72B84A]/30"
+                : "bg-[#F1F1EF] text-[#999] border-[#DEDEDA]"
             }`}>
               <Activity className="w-3 h-3" />
               {!isLoading && allActions.length > 0 ? "Engine running" : "Engine idle"}
@@ -398,19 +398,19 @@ export default function Autopilot() {
               <>
                 <button onClick={() => { if (confirm("Dismiss pending actions older than 3 days?")) clearStaleMutation.mutate(); }}
                   disabled={clearStaleMutation.isPending}
-                  className="flex items-center gap-1.5 px-3 py-2 text-xs text-[#666] border border-[#E0E0E0] bg-white hover:bg-[#F5F5F5] rounded-lg transition-colors disabled:opacity-50">
+                  className="flex items-center gap-1.5 px-3 py-2 text-xs text-[#666] border border-[#DEDEDA] bg-white hover:bg-[#F1F1EF] rounded-lg transition-colors disabled:opacity-50">
                   {clearStaleMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
                   Clear Stale
                 </button>
                 <Button onClick={() => { if (confirm("Clear all active AI actions?")) clearAllMutation.mutate(); }} disabled={clearAllMutation.isPending}
-                  variant="outline" className="flex items-center gap-2 text-sm px-4 py-2 rounded-lg border border-[#E0E0E0] text-[#666] hover:text-red-600 hover:border-red-200">
+                  variant="outline" className="flex items-center gap-2 text-sm px-4 py-2 rounded-lg border border-[#DEDEDA] text-[#666] hover:text-red-600 hover:border-red-200">
                   {clearAllMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                   Clear All
                 </Button>
               </>
             )}
             <Button onClick={() => syncMutation.mutate()} disabled={syncMutation.isPending}
-              className="flex items-center gap-2 bg-[#F5C72C] hover:bg-[#E6B800] text-[#111] font-semibold text-sm px-4 py-2 rounded-lg border-0">
+              className="flex items-center gap-2 bg-[#F2DD48] hover:bg-[#E6B800] text-[#111] font-semibold text-sm px-4 py-2 rounded-lg border-0">
               {syncMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
               {syncMutation.isPending ? "Syncing…" : "Sync Now"}
             </Button>
@@ -425,11 +425,11 @@ export default function Autopilot() {
       </div>
 
       {/* Tab bar */}
-      <div className="h-11 flex border-b border-[#E0E0E0] -mx-6 px-6">
+      <div className="h-11 flex border-b border-[#DEDEDA] -mx-6 px-6">
         {(["actions", "insights"] as Tab[]).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={`px-4 text-sm capitalize transition-all duration-200 border-b-2 ${
-              tab === t ? "text-[#111] font-semibold border-[#F5C72C]" : "text-[#888] font-normal border-transparent hover:text-[#111]"
+              tab === t ? "text-[#111] font-semibold border-[#F2DD48]" : "text-[#888] font-normal border-transparent hover:text-[#111]"
             }`}>
             {t === "actions" ? "Actions" : "Insights"}
           </button>
@@ -442,11 +442,11 @@ export default function Autopilot() {
           {/* Summary counters */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
-              { label: "Auto-Executed",     value: autoExecuted.length,   icon: Zap,   color: "text-[#F5C72C]", bg: "bg-[#F5C72C]/10" },
-              { label: "Awaiting Approval", value: pendingApproval.length, icon: Clock, color: "text-[#F5C72C]", bg: "bg-[#F5C72C]/10" },
-              { label: "Monitoring",        value: monitoring.length,      icon: Eye,   color: "text-[#666]",    bg: "bg-[#F5F5F5]" },
+              { label: "Auto-Executed",     value: autoExecuted.length,   icon: Zap,   color: "text-[#F2DD48]", bg: "bg-[#F2DD48]/10" },
+              { label: "Awaiting Approval", value: pendingApproval.length, icon: Clock, color: "text-[#F2DD48]", bg: "bg-[#F2DD48]/10" },
+              { label: "Monitoring",        value: monitoring.length,      icon: Eye,   color: "text-[#666]",    bg: "bg-[#F1F1EF]" },
             ].map(({ label, value, icon: Icon, color, bg }) => (
-              <div key={label} className="bg-white border border-[#E0E0E0] rounded-xl p-4 flex items-center gap-3 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+              <div key={label} className="bg-white border border-[#DEDEDA] rounded-xl p-4 flex items-center gap-3 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
                 <div className={`w-10 h-10 rounded-lg ${bg} flex items-center justify-center`}><Icon className={`w-5 h-5 ${color}`} /></div>
                 <div>
                   <div className="text-2xl font-bold text-[#111] tracking-tight">{value}</div>
@@ -458,7 +458,7 @@ export default function Autopilot() {
 
           {/* Active / Archive toggle */}
           <div className="flex items-center">
-            <div className="flex items-center bg-white border border-[#E0E0E0] rounded-lg p-1">
+            <div className="flex items-center bg-white border border-[#DEDEDA] rounded-lg p-1">
               {(["active", "archive"] as const).map(v => (
                 <button key={v} onClick={() => setView(v)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
@@ -480,7 +480,7 @@ export default function Autopilot() {
                 title="Archived Actions" count={archivedActions.length}
                 subtitle="Historical actions — older entries and duplicates moved here automatically" />
               {isArchiveLoading ? (
-                <div className="flex items-center justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-[#F5C72C]" /><span className="ml-2 text-[#666] text-sm">Loading archive…</span></div>
+                <div className="flex items-center justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-[#F2DD48]" /><span className="ml-2 text-[#666] text-sm">Loading archive…</span></div>
               ) : archivedActions.length === 0 ? (
                 <div className="text-center py-16 text-[#999]"><Archive className="w-10 h-10 mx-auto mb-3 opacity-30" /><p className="text-sm font-medium">Archive is empty</p></div>
               ) : (
@@ -490,7 +490,7 @@ export default function Autopilot() {
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-center gap-2 flex-wrap">
                           <StatusBadge status={action.status} />
-                          {action.campaignName && <span className="text-xs font-mono bg-[#F5F5F5] text-[#555] px-2 py-0.5 rounded border border-[#E8E8E8]">{action.campaignName}</span>}
+                          {action.campaignName && <span className="text-xs font-mono bg-[#F1F1EF] text-[#555] px-2 py-0.5 rounded border border-[#E8E8E8]">{action.campaignName}</span>}
                         </div>
                         <span className="text-xs text-[#AAA] whitespace-nowrap">{new Date(action.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
                       </div>
@@ -501,12 +501,12 @@ export default function Autopilot() {
               )}
             </div>
           ) : isLoading ? (
-            <div className="flex items-center justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-[#F5C72C]" /><span className="ml-2 text-[#666] text-sm">Loading actions…</span></div>
+            <div className="flex items-center justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-[#F2DD48]" /><span className="ml-2 text-[#666] text-sm">Loading actions…</span></div>
           ) : (
             <div className="space-y-10">
               {pendingApproval.length > 0 && (
                 <section>
-                  <SectionHeader icon={Clock} iconBg="bg-[#F5C72C]/10" iconColor="text-[#F5C72C]"
+                  <SectionHeader icon={Clock} iconBg="bg-[#F2DD48]/10" iconColor="text-[#F2DD48]"
                     title="Awaiting Your Approval" count={pendingApproval.length}
                     subtitle="Medium-to-high risk actions that require your sign-off before execution" />
                   <div className="space-y-3">
@@ -522,7 +522,7 @@ export default function Autopilot() {
               )}
               {autoExecuted.length > 0 && (
                 <section>
-                  <SectionHeader icon={Zap} iconBg="bg-[#F5C72C]/10" iconColor="text-[#8B6E00]"
+                  <SectionHeader icon={Zap} iconBg="bg-[#F2DD48]/10" iconColor="text-[#8B6E00]"
                     title="Auto-Executed" count={autoExecuted.length}
                     subtitle="Low-risk optimizations applied automatically — undo any within 24 hours" />
                   <div className="space-y-3">
@@ -537,7 +537,7 @@ export default function Autopilot() {
               )}
               {monitoring.length > 0 && (
                 <section>
-                  <SectionHeader icon={TrendingUp} iconBg="bg-[#F5F5F5]" iconColor="text-[#666]"
+                  <SectionHeader icon={TrendingUp} iconBg="bg-[#F1F1EF]" iconColor="text-[#666]"
                     title="Monitoring" count={monitoring.length}
                     subtitle="Items being tracked — insufficient data for action or awaiting next sync" />
                   <div className="space-y-3">

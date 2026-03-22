@@ -17,15 +17,15 @@ type Category = "blog" | "announcement" | "promotion" | "program" | "event";
 const CATEGORY_META: Record<Category, { label: string; color: string }> = {
   blog:         { label: "Blog",         color: "#888888" },
   announcement: { label: "Announcement", color: "#007AFF" },
-  promotion:    { label: "Promotion",    color: "#F5C72C" },
-  program:      { label: "Program",      color: "#3DB855" },
+  promotion:    { label: "Promotion",    color: "#F2DD48" },
+  program:      { label: "Program",      color: "#72B84A" },
   event:        { label: "Event",        color: "#E8453C" },
 };
 
 const STATUS_META: Record<Status, { label: string; icon: React.ElementType; color: string }> = {
   inbox:       { label: "Inbox",       icon: Inbox,        color: "#888888" },
-  in_progress: { label: "In Progress", icon: Clock,        color: "#F5C72C" },
-  published:   { label: "Published",   icon: CheckCircle2, color: "#3DB855" },
+  in_progress: { label: "In Progress", icon: Clock,        color: "#F2DD48" },
+  published:   { label: "Published",   icon: CheckCircle2, color: "#72B84A" },
 };
 
 const TABS: { key: Status; label: string; icon: React.ElementType }[] = [
@@ -73,9 +73,9 @@ function AddItemDialog({ onClose, onCreated }: {
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/30" onClick={onClose} />
       <div className="relative bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md sm:mx-4 shadow-2xl">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#E0E0E0]">
-          <h2 className="text-[15px] font-bold text-[#111111]">Add Content Item</h2>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#F5F5F5]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#DEDEDA]">
+          <h2 className="text-[15px] font-bold text-[#222222]">Add Content Item</h2>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#F1F1EF]">
             <X className="h-4 w-4 text-[#888888]" />
           </button>
         </div>
@@ -90,7 +90,7 @@ function AddItemDialog({ onClose, onCreated }: {
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
               placeholder="e.g. Spring Membership Blog Post"
-              className="w-full border border-[#E0E0E0] rounded-lg px-3 py-2 text-[13px] text-[#111111] placeholder:text-[#AAAAAA] focus:outline-none focus:ring-1 focus:ring-[#F5C72C]"
+              className="w-full border border-[#DEDEDA] rounded-lg px-3 py-2 text-[13px] text-[#222222] placeholder:text-[#AAAAAA] focus:outline-none focus:ring-1 focus:ring-[#F2DD48]"
             />
           </div>
 
@@ -102,7 +102,7 @@ function AddItemDialog({ onClose, onCreated }: {
               <select
                 value={form.source}
                 onChange={(e) => setForm({ ...form, source: e.target.value as Source })}
-                className="w-full border border-[#E0E0E0] rounded-lg px-3 py-2 text-[13px] text-[#111111] bg-white focus:outline-none"
+                className="w-full border border-[#DEDEDA] rounded-lg px-3 py-2 text-[13px] text-[#222222] bg-white focus:outline-none"
               >
                 <option value="studio_soo">Studio Soo</option>
                 <option value="hq">HQ Request</option>
@@ -115,7 +115,7 @@ function AddItemDialog({ onClose, onCreated }: {
               <select
                 value={form.category}
                 onChange={(e) => setForm({ ...form, category: e.target.value as Category })}
-                className="w-full border border-[#E0E0E0] rounded-lg px-3 py-2 text-[13px] text-[#111111] bg-white focus:outline-none"
+                className="w-full border border-[#DEDEDA] rounded-lg px-3 py-2 text-[13px] text-[#222222] bg-white focus:outline-none"
               >
                 {Object.entries(CATEGORY_META).map(([k, v]) => (
                   <option key={k} value={k}>{v.label}</option>
@@ -140,8 +140,8 @@ function AddItemDialog({ onClose, onCreated }: {
                     className={cn(
                       "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border text-[12px] font-semibold transition-all",
                       form.status === s
-                        ? "bg-[#111111] text-white border-[#111111]"
-                        : "bg-white text-[#888888] border-[#E0E0E0] hover:border-[#CCCCCC]"
+                        ? "bg-[#222222] text-white border-[#222222]"
+                        : "bg-white text-[#888888] border-[#DEDEDA] hover:border-[#CCCCCC]"
                     )}
                   >
                     <Icon className="h-3 w-3" />
@@ -161,7 +161,7 @@ function AddItemDialog({ onClose, onCreated }: {
               onChange={(e) => setForm({ ...form, notes: e.target.value })}
               placeholder="Context, deadline, or instructions..."
               rows={3}
-              className="w-full border border-[#E0E0E0] rounded-lg px-3 py-2 text-[13px] text-[#111111] placeholder:text-[#AAAAAA] focus:outline-none focus:ring-1 focus:ring-[#F5C72C] resize-none"
+              className="w-full border border-[#DEDEDA] rounded-lg px-3 py-2 text-[13px] text-[#222222] placeholder:text-[#AAAAAA] focus:outline-none focus:ring-1 focus:ring-[#F2DD48] resize-none"
             />
           </div>
 
@@ -173,7 +173,7 @@ function AddItemDialog({ onClose, onCreated }: {
               value={form.link}
               onChange={(e) => setForm({ ...form, link: e.target.value })}
               placeholder="https://..."
-              className="w-full border border-[#E0E0E0] rounded-lg px-3 py-2 text-[13px] text-[#111111] placeholder:text-[#AAAAAA] focus:outline-none focus:ring-1 focus:ring-[#F5C72C]"
+              className="w-full border border-[#DEDEDA] rounded-lg px-3 py-2 text-[13px] text-[#222222] placeholder:text-[#AAAAAA] focus:outline-none focus:ring-1 focus:ring-[#F2DD48]"
             />
           </div>
 
@@ -181,14 +181,14 @@ function AddItemDialog({ onClose, onCreated }: {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 h-10 border border-[#E0E0E0] rounded-lg text-[13px] font-semibold text-[#888888] hover:bg-[#F5F5F5] transition-colors"
+              className="flex-1 h-10 border border-[#DEDEDA] rounded-lg text-[13px] font-semibold text-[#888888] hover:bg-[#F1F1EF] transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={createMutation.isPending}
-              className="flex-1 h-10 bg-[#F5C72C] rounded-lg text-[13px] font-semibold text-[#111111] hover:brightness-95 active:scale-95 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+              className="flex-1 h-10 bg-[#F2DD48] rounded-lg text-[13px] font-semibold text-[#222222] hover:brightness-95 active:scale-95 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {createMutation.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
               Add Item
@@ -226,12 +226,12 @@ function ContentCard({
     : "";
 
   return (
-    <div className={cn("bg-white rounded-xl border border-[#E0E0E0] p-4 hover:shadow-sm transition-shadow", isPending && "opacity-60")}>
+    <div className={cn("bg-white rounded-xl border border-[#DEDEDA] p-4 hover:shadow-sm transition-shadow", isPending && "opacity-60")}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           {/* Source + Category */}
           <div className="flex items-center gap-1.5 mb-2 flex-wrap">
-            <div className="flex items-center gap-1 h-5 px-2 rounded-full bg-[#F5F5F5]">
+            <div className="flex items-center gap-1 h-5 px-2 rounded-full bg-[#F1F1EF]">
               {item.source === "hq"
                 ? <Building2 className="h-3 w-3 text-[#888888]" />
                 : <User className="h-3 w-3 text-[#888888]" />
@@ -252,7 +252,7 @@ function ContentCard({
           </div>
 
           {/* Title */}
-          <p className="text-[14px] font-semibold text-[#111111] leading-snug mb-1.5">
+          <p className="text-[14px] font-semibold text-[#222222] leading-snug mb-1.5">
             {item.title}
           </p>
 
@@ -281,7 +281,7 @@ function ContentCard({
             <button
               onClick={() => onStatusChange(item.id, next!)}
               disabled={isPending}
-              className="flex items-center gap-1 h-7 px-2.5 rounded-lg bg-[#F5C72C] text-[#111111] text-[11px] font-semibold hover:brightness-95 transition-all whitespace-nowrap disabled:opacity-60"
+              className="flex items-center gap-1 h-7 px-2.5 rounded-lg bg-[#F2DD48] text-[#222222] text-[11px] font-semibold hover:brightness-95 transition-all whitespace-nowrap disabled:opacity-60"
             >
               {nextLabel}
               <ChevronRight className="h-3 w-3" />
@@ -290,7 +290,7 @@ function ContentCard({
           <button
             onClick={() => onDelete(item.id)}
             disabled={isPending}
-            className="h-7 px-2.5 rounded-lg border border-[#E0E0E0] text-[#AAAAAA] text-[11px] hover:border-red-200 hover:text-red-400 transition-colors disabled:opacity-60"
+            className="h-7 px-2.5 rounded-lg border border-[#DEDEDA] text-[#AAAAAA] text-[11px] hover:border-red-200 hover:text-red-400 transition-colors disabled:opacity-60"
           >
             Remove
           </button>
@@ -323,7 +323,7 @@ function EmptyState({ tab }: { tab: Status }) {
   const { icon: Icon, title, desc } = configs[tab];
   return (
     <div className="py-14 text-center">
-      <div className="h-12 w-12 rounded-2xl bg-[#F5F5F5] flex items-center justify-center mx-auto mb-3">
+      <div className="h-12 w-12 rounded-2xl bg-[#F1F1EF] flex items-center justify-center mx-auto mb-3">
         <Icon className="h-6 w-6 text-[#CCCCCC]" />
       </div>
       <p className="text-[14px] font-semibold text-[#888888]">{title}</p>
@@ -363,15 +363,15 @@ export default function NewsManager() {
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <Newspaper className="h-5 w-5 text-[#F5C72C]" />
+          <Newspaper className="h-5 w-5 text-[#F2DD48]" />
           <div>
-            <h1 className="text-lg font-semibold text-[#111111]">News & Content Manager</h1>
+            <h1 className="text-lg font-semibold text-[#222222]">News & Content Manager</h1>
             <p className="text-xs text-[#888888]">Track HQ requests, content drafts, and published pieces</p>
           </div>
         </div>
         <button
           onClick={() => setShowAdd(true)}
-          className="flex items-center gap-1.5 h-9 px-4 bg-[#F5C72C] rounded-lg text-[13px] font-semibold text-[#111111] hover:brightness-95 active:scale-95 transition-all shrink-0"
+          className="flex items-center gap-1.5 h-9 px-4 bg-[#F2DD48] rounded-lg text-[13px] font-semibold text-[#222222] hover:brightness-95 active:scale-95 transition-all shrink-0"
         >
           <Plus className="h-3.5 w-3.5" />
           Add
@@ -379,7 +379,7 @@ export default function NewsManager() {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-[#E0E0E0]">
+      <div className="flex border-b border-[#DEDEDA]">
         {TABS.map(({ key, label, icon: Icon }) => {
           const isActive = activeTab === key;
           return (
@@ -389,8 +389,8 @@ export default function NewsManager() {
               className={cn(
                 "flex items-center gap-1.5 px-4 h-11 text-[13px] font-semibold transition-all border-b-2 -mb-px",
                 isActive
-                  ? "text-[#111111] border-[#F5C72C]"
-                  : "text-[#888888] border-transparent hover:text-[#111111]"
+                  ? "text-[#222222] border-[#F2DD48]"
+                  : "text-[#888888] border-transparent hover:text-[#222222]"
               )}
             >
               <Icon className="h-3.5 w-3.5" />
@@ -398,7 +398,7 @@ export default function NewsManager() {
               {counts[key] > 0 && (
                 <span className={cn(
                   "text-[10px] font-bold h-4 min-w-4 px-1 rounded-full flex items-center justify-center",
-                  isActive ? "bg-[#F5C72C] text-[#111111]" : "bg-[#F0F0F0] text-[#888888]"
+                  isActive ? "bg-[#F2DD48] text-[#222222]" : "bg-[#F0F0F0] text-[#888888]"
                 )}>
                   {counts[key]}
                 </span>
@@ -411,7 +411,7 @@ export default function NewsManager() {
       {/* Content list */}
       {isLoading ? (
         <div className="flex items-center justify-center py-16 gap-3">
-          <Loader2 className="h-5 w-5 animate-spin text-[#F5C72C]" />
+          <Loader2 className="h-5 w-5 animate-spin text-[#F2DD48]" />
           <span className="text-[13px] text-[#888888]">Loading…</span>
         </div>
       ) : (

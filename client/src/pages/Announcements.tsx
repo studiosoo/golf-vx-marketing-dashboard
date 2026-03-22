@@ -28,7 +28,7 @@ export default function Announcements() {
         </div>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" className="bg-[#F5C72C] text-black hover:bg-yellow-500">
+            <Button size="sm" className="bg-[#F2DD48] text-black hover:bg-yellow-500">
               <Plus size={14} />
               New Announcement
             </Button>
@@ -51,7 +51,7 @@ export default function Announcements() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-              <Button className="bg-[#F5C72C] text-black hover:bg-yellow-500" onClick={() => setIsOpen(false)}>Send</Button>
+              <Button className="bg-[#F2DD48] text-black hover:bg-yellow-500" onClick={() => setIsOpen(false)}>Send</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -69,7 +69,7 @@ export default function Announcements() {
                     <span className="text-xs text-muted-foreground">To: {ann.recipients}</span>
                   </div>
                 </div>
-                <Badge className="bg-[#3DB855]/20 text-[#3DB855] border-[#3DB855]/30 text-xs">{ann.status}</Badge>
+                <Badge className="bg-[#72B84A]/20 text-[#72B84A] border-[#72B84A]/30 text-xs">{ann.status}</Badge>
               </div>
             </CardContent>
           </Card>

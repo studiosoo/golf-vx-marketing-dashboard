@@ -121,7 +121,7 @@ export default function DashboardLayout({
                 placeholder="Enter dashboard password"
                 value={loginPassword}
                 onChange={e => setLoginPassword(e.target.value)}
-                className="pl-9 border-[#E0E0E0] focus:border-[#F5C72C] focus:ring-[#F5C72C] bg-white"
+                className="pl-9 border-[#DEDEDA] focus:border-[#F2DD48] focus:ring-[#F2DD48] bg-white"
                 autoFocus
               />
             </div>
@@ -131,7 +131,7 @@ export default function DashboardLayout({
             <Button
               type="submit"
               disabled={loginLoading || !loginPassword}
-              className="bg-[#F5C72C] text-[#111111] font-semibold hover:brightness-95 active:scale-95 transition-all w-full"
+              className="bg-[#F2DD48] text-[#222222] font-semibold hover:brightness-95 active:scale-95 transition-all w-full"
             >
               {loginLoading ? "Signing in..." : "Sign In"}
             </Button>
@@ -165,15 +165,15 @@ export default function DashboardLayout({
       {!isMobile && (
         <div
           className={cn(
-            "relative flex flex-col bg-white border-r border-[#E0E0E0] h-screen shrink-0 overflow-hidden",
+            "relative flex flex-col bg-white border-r border-[#DEDEDA] h-screen shrink-0 overflow-hidden",
             isCollapsed ? "w-14" : ""
           )}
           style={sidebarStyle}
         >
-          <div className="flex items-center gap-2.5 px-3 h-14 border-b border-[#E0E0E0] shrink-0">
+          <div className="flex items-center gap-2.5 px-3 h-14 border-b border-[#DEDEDA] shrink-0">
             <button
               onClick={() => setIsCollapsed((c) => !c)}
-              className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-[#F5F5F5] transition-colors shrink-0"
+              className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-[#F1F1EF] transition-colors shrink-0"
               aria-label="Toggle sidebar"
             >
               <PanelLeft className="h-4 w-4 text-[#888888]" />
@@ -199,19 +199,19 @@ export default function DashboardLayout({
           />
 
           {!isCollapsed && (
-            <div className="px-3 py-2 border-t border-[#E0E0E0] shrink-0">
+            <div className="px-3 py-2 border-t border-[#DEDEDA] shrink-0">
               <MetaAdsStatusBadge />
             </div>
           )}
 
-          <div className="border-t border-[#E0E0E0] p-2 space-y-0.5 shrink-0">
+          <div className="border-t border-[#DEDEDA] p-2 space-y-0.5 shrink-0">
             <button
               onClick={() => setLocation(appRoutes.accountProfile)}
               className={cn(
                 "flex items-center gap-2.5 w-full rounded-lg px-2.5 py-2 text-[13px] transition-colors duration-150 text-left",
                 location.startsWith("/app/account") || location.startsWith("/app/admin")
-                  ? "bg-[#F5C72C]/15 text-[#111111] font-semibold"
-                  : "text-[#888888] hover:bg-[#F5F5F5] hover:text-[#111111]"
+                  ? "bg-[#F2DD48]/15 text-[#222222] font-semibold"
+                  : "text-[#888888] hover:bg-[#F1F1EF] hover:text-[#222222]"
               )}
               title={isCollapsed ? "Settings" : undefined}
             >
@@ -221,15 +221,15 @@ export default function DashboardLayout({
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 hover:bg-[#F5F5F5] transition-colors w-full text-left focus:outline-none">
-                  <Avatar className="h-7 w-7 border border-[#E0E0E0] shrink-0">
-                    <AvatarFallback className="text-[11px] font-bold bg-[#F5C72C] text-[#111111]">
+                <button className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 hover:bg-[#F1F1EF] transition-colors w-full text-left focus:outline-none">
+                  <Avatar className="h-7 w-7 border border-[#DEDEDA] shrink-0">
+                    <AvatarFallback className="text-[11px] font-bold bg-[#F2DD48] text-[#222222]">
                       {user?.name?.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   {!isCollapsed && (
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-semibold text-[#111111] truncate leading-none">
+                      <p className="text-[13px] font-semibold text-[#222222] truncate leading-none">
                         {user?.name || "—"}
                       </p>
                       <p className="text-[11px] text-[#888888] truncate mt-0.5">
@@ -253,7 +253,7 @@ export default function DashboardLayout({
 
           {!isCollapsed && (
             <div
-              className="absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-[#F5C72C]/40 transition-colors"
+              className="absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-[#F2DD48]/40 transition-colors"
               onMouseDown={() => setIsResizing(true)}
               style={{ zIndex: 50 }}
             />
@@ -263,14 +263,14 @@ export default function DashboardLayout({
 
       {/* ── Mobile top bar ── */}
       {isMobile && (
-        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between bg-white border-b border-[#E0E0E0] h-14 px-4">
+        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between bg-white border-b border-[#DEDEDA] h-14 px-4">
           <button
             onClick={() => setMobileOpen(true)}
-            className="h-9 w-9 flex items-center justify-center rounded-lg hover:bg-[#F5F5F5]"
+            className="h-9 w-9 flex items-center justify-center rounded-lg hover:bg-[#F1F1EF]"
           >
             <PanelLeft className="h-4 w-4 text-[#888888]" />
           </button>
-          <span className="text-sm font-semibold text-[#111111]">{activeLabel}</span>
+          <span className="text-sm font-semibold text-[#222222]">{activeLabel}</span>
           <div className="w-9" />
         </div>
       )}
@@ -282,10 +282,10 @@ export default function DashboardLayout({
           onClick={() => setMobileOpen(false)}
         >
           <div
-            className="absolute left-0 top-0 bottom-0 w-72 bg-white border-r border-[#E0E0E0] flex flex-col"
+            className="absolute left-0 top-0 bottom-0 w-72 bg-white border-r border-[#DEDEDA] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-2.5 px-3 h-14 border-b border-[#E0E0E0]">
+            <div className="flex items-center gap-2.5 px-3 h-14 border-b border-[#DEDEDA]">
               <img
                 src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663329642625/LwjZZbOogTHBMDfo.png"
                 alt="Golf VX"
@@ -298,7 +298,7 @@ export default function DashboardLayout({
               setLocation={setLocation}
               onNavigate={() => setMobileOpen(false)}
             />
-            <div className="border-t border-[#E0E0E0] p-3">
+            <div className="border-t border-[#DEDEDA] p-3">
               <button
                 onClick={() => {
                   logout();

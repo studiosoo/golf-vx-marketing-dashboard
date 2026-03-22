@@ -29,7 +29,7 @@ export default function Leagues() {
                 <div className="flex items-start justify-between">
                   <div>
                     <div className="font-semibold text-foreground flex items-center gap-2">
-                      <Trophy size={16} className="text-[#F5C72C]" />
+                      <Trophy size={16} className="text-[#F2DD48]" />
                       {league.name}
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">{league.description}</div>
@@ -72,7 +72,7 @@ export default function Leagues() {
       <div className="space-y-4">
         <div>
           <h2 className="text-lg font-semibold flex items-center gap-2">
-            <span className="text-[#F5C72C]">✦</span> AI Marketing Intelligence
+            <span className="text-[#F2DD48]">✦</span> AI Marketing Intelligence
           </h2>
           <p className="text-sm text-muted-foreground mt-1">AI-generated multi-channel marketing strategy for Golf VX Leagues.</p>
         </div>

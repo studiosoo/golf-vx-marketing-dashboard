@@ -21,20 +21,20 @@ export function VisitHistoryModal({ open, visitHistory, onOpenChange }: VisitHis
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-[#111111]">
-            <UserCheck className="h-5 w-5 text-[#F5C72C]" /> Visit History
+          <DialogTitle className="flex items-center gap-2 text-[#222222]">
+            <UserCheck className="h-5 w-5 text-[#F2DD48]" /> Visit History
           </DialogTitle>
         </DialogHeader>
         {visitHistory ? (
           <div className="space-y-4">
-            <div className="flex items-center gap-3 p-4 rounded-lg border border-[#E0E0E0]">
+            <div className="flex items-center gap-3 p-4 rounded-lg border border-[#DEDEDA]">
               {visitHistory.hasVisited ? (
-                <UserCheck className="h-8 w-8 text-[#3DB855]" />
+                <UserCheck className="h-8 w-8 text-[#72B84A]" />
               ) : (
                 <UserX className="h-8 w-8 text-[#AAAAAA]" />
               )}
               <div>
-                <p className="font-semibold text-[#111111]">
+                <p className="font-semibold text-[#222222]">
                   {visitHistory.hasVisited ? "Has visited Golf VX" : "New to Golf VX"}
                 </p>
                 {visitHistory.visitCount > 0 && (
@@ -48,8 +48,8 @@ export function VisitHistoryModal({ open, visitHistory, onOpenChange }: VisitHis
             </div>
             {visitHistory.memberStatus && (
               <div className="p-3 bg-[#F0FAF3] rounded-lg">
-                <p className="text-sm font-medium text-[#3DB855]">Active Member</p>
-                <p className="text-xs text-[#3DB855]">{visitHistory.memberTier}</p>
+                <p className="text-sm font-medium text-[#72B84A]">Active Member</p>
+                <p className="text-xs text-[#72B84A]">{visitHistory.memberTier}</p>
               </div>
             )}
           </div>

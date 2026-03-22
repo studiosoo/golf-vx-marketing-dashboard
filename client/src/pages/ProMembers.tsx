@@ -67,7 +67,7 @@ export default function ProMembers() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs text-muted-foreground">Monthly Revenue</span>
-              <DollarSign size={16} className="text-[#3DB855]" />
+              <DollarSign size={16} className="text-[#72B84A]" />
             </div>
             <div className="text-3xl font-black text-foreground">
               {kpiLoading ? "—" : formatCurrency(proKpi?.mrr ?? 0)}
@@ -115,7 +115,7 @@ export default function ProMembers() {
             </div>
           </div>
           <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-            <p className="text-xs text-yellow-700 dark:text-[#F5C72C] font-medium">
+            <p className="text-xs text-yellow-700 dark:text-[#F2DD48] font-medium">
               Note: Chuck Lynch (PBGA Lead Coach) has a customized arrangement. Toast POS = non-member/overage bay usage. Stripe = membership fees.
             </p>
           </div>
@@ -179,7 +179,7 @@ export default function ProMembers() {
                     </div>
                     <Badge
                       variant={m.status === "active" ? "default" : "secondary"}
-                      className={`text-xs ${m.status === "active" ? "bg-[#3DB855]/20 text-[#3DB855] border-[#3DB855]/30" : ""}`}
+                      className={`text-xs ${m.status === "active" ? "bg-[#72B84A]/20 text-[#72B84A] border-[#72B84A]/30" : ""}`}
                     >
                       {m.status || "unknown"}
                     </Badge>

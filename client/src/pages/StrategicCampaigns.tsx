@@ -18,10 +18,10 @@ const CAMPAIGN_COLORS: Record<string, string> = {
 };
 
 const CAMPAIGN_BG_COLORS: Record<string, string> = {
-  emerald: "bg-[#3DB855]/10 text-[#3DB855]",
+  emerald: "bg-[#72B84A]/10 text-[#72B84A]",
   pink: "bg-[#E8453C]/10 text-[#E8453C]",
   blue: "bg-[#888888]/10 text-[#888888]",
-  amber: "bg-[#F5C72C]/10 text-[#111111]",
+  amber: "bg-[#F2DD48]/10 text-[#222222]",
 };
 
 function getProgramRoute(program: { id: number; name: string }, venueSlug: string): string {
@@ -77,7 +77,7 @@ export default function StrategicCampaigns() {
             <MetaAdsStatusBadge />
           </div>
         </div>
-        <div className="flex items-center gap-1 p-1 bg-[#F5F5F5] rounded-xl border border-[#E0E0E0] self-start sm:self-auto">
+        <div className="flex items-center gap-1 p-1 bg-[#F1F1EF] rounded-xl border border-[#DEDEDA] self-start sm:self-auto">
           <button
             onClick={() => setActiveTab("campaigns")}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeTab === "campaigns" ? "bg-white text-[#111] shadow-sm" : "text-[#666] hover:text-[#333]"}`}
@@ -198,8 +198,8 @@ export default function StrategicCampaigns() {
                     <div className="flex items-end justify-between mb-2">
                       <span className={`text-4xl font-black ${
                         kpiData.trialConversion.current >= kpiData.trialConversion.target
-                          ? 'text-[#3DB855]'
-                          : kpiData.trialConversion.current > 0 ? 'text-[#F5C72C]' : 'text-muted-foreground'
+                          ? 'text-[#72B84A]'
+                          : kpiData.trialConversion.current > 0 ? 'text-[#F2DD48]' : 'text-muted-foreground'
                       }`}>
                         {kpiData.trialConversion.current}
                       </span>
@@ -217,8 +217,8 @@ export default function StrategicCampaigns() {
                     <div className="flex items-end justify-between mb-2">
                       <span className={`text-4xl font-black ${
                         kpiData.memberRetention.current >= kpiData.memberRetention.target
-                          ? 'text-[#3DB855]'
-                          : kpiData.memberRetention.current > 0 ? 'text-[#F5C72C]' : 'text-muted-foreground'
+                          ? 'text-[#72B84A]'
+                          : kpiData.memberRetention.current > 0 ? 'text-[#F2DD48]' : 'text-muted-foreground'
                       }`}>
                         {kpiData.memberRetention.current.toFixed(1)}%
                       </span>
@@ -279,7 +279,7 @@ export default function StrategicCampaigns() {
                   {/* ROI — kept as supplementary */}
                   <div className="p-3 rounded-lg bg-muted/40">
                     <p className="text-xs text-muted-foreground">Financial ROI</p>
-                    <p className={`text-base font-bold mt-0.5 ${campaign.roi >= 0 ? 'text-[#3DB855]' : 'text-[#E8453C]'}`}>
+                    <p className={`text-base font-bold mt-0.5 ${campaign.roi >= 0 ? 'text-[#72B84A]' : 'text-[#E8453C]'}`}>
                       {campaign.roi >= 0 ? '+' : ''}{campaign.roi.toFixed(1)}%
                     </p>
                   </div>
@@ -329,7 +329,7 @@ export default function StrategicCampaigns() {
                             </div>
                           </div>
                           <div className="flex items-center gap-2 ml-4">
-                            <span className={`text-sm font-semibold ${programRoi >= 0 ? "text-[#3DB855]" : "text-[#E8453C]"}`}>
+                            <span className={`text-sm font-semibold ${programRoi >= 0 ? "text-[#72B84A]" : "text-[#E8453C]"}`}>
                               {programRoi >= 0 ? "+" : ""}{programRoi.toFixed(0)}%
                             </span>
                             <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />

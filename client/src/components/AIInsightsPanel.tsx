@@ -21,7 +21,7 @@ interface AIInsightsPanelProps {
 const PRIORITY_STYLES: Record<string, string> = {
   high: "bg-[#111] text-white",
   medium: "bg-[#545A60] text-white",
-  low: "bg-[#F2F2F7] text-[#888888]",
+  low: "bg-[#F1F1EF] text-[#888888]",
 };
 
 const CHANNEL_ICON: Record<string, string> = {
@@ -52,15 +52,15 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-white border border-[#E0E0E0] rounded-xl overflow-hidden">
+    <div className="bg-white border border-[#DEDEDA] rounded-xl overflow-hidden">
       <button
         className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-[#FAFAFA] transition-colors"
         onClick={() => onToggle(sectionKey)}
       >
-        <span className="text-sm font-semibold text-[#111111]">{title}</span>
+        <span className="text-sm font-semibold text-[#222222]">{title}</span>
         {expanded ? <ChevronUp size={16} className="text-[#AAAAAA]" /> : <ChevronDown size={16} className="text-[#AAAAAA]" />}
       </button>
-      {expanded && <div className="px-4 pb-4 border-t border-[#F5F5F5]">{children}</div>}
+      {expanded && <div className="px-4 pb-4 border-t border-[#F1F1EF]">{children}</div>}
     </div>
   );
 }
@@ -87,22 +87,22 @@ export function AIInsightsPanel({
     setExpandedSection((prev) => (prev === key ? null : key));
 
   return (
-    <div className="bg-white border border-[#E0E0E0] rounded-xl overflow-hidden">
+    <div className="bg-white border border-[#DEDEDA] rounded-xl overflow-hidden">
       {/* Panel Header */}
       <button
         className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-[#FAFAFA] transition-colors"
         onClick={() => setPanelOpen((o) => !o)}
       >
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-[#F5C72C]/10 flex items-center justify-center">
+          <div className="w-7 h-7 rounded-lg bg-[#F2DD48]/10 flex items-center justify-center">
             <Sparkles size={14} className="text-[#8B6E00]" />
           </div>
           <div>
-            <span className="text-sm font-semibold text-[#111111]">AI Insights</span>
+            <span className="text-sm font-semibold text-[#222222]">AI Insights</span>
             <span className="ml-2 text-xs text-[#AAAAAA]">— {programName}</span>
           </div>
           {insights && (
-            <span className="text-[10px] font-semibold bg-[#F5C72C]/20 text-[#8B6E00] px-2 py-0.5 rounded-full">
+            <span className="text-[10px] font-semibold bg-[#F2DD48]/20 text-[#8B6E00] px-2 py-0.5 rounded-full">
               Generated
             </span>
           )}
@@ -111,22 +111,22 @@ export function AIInsightsPanel({
       </button>
 
       {panelOpen && (
-        <div className="border-t border-[#F5F5F5] p-5 space-y-4">
+        <div className="border-t border-[#F1F1EF] p-5 space-y-4">
           {/* Empty state */}
           {!insights && !generateMutation.isPending && (
             <div className="flex flex-col items-center justify-center py-10 space-y-3 text-center">
-              <div className="w-12 h-12 rounded-full bg-[#F2F2F7] flex items-center justify-center">
+              <div className="w-12 h-12 rounded-full bg-[#F1F1EF] flex items-center justify-center">
                 <Sparkles className="h-6 w-6 text-[#AAAAAA]" />
               </div>
               <div>
-                <p className="font-semibold text-[#111111] text-sm">AI Marketing Intelligence</p>
+                <p className="font-semibold text-[#222222] text-sm">AI Marketing Intelligence</p>
                 <p className="text-xs text-[#888888] mt-1 max-w-xs">
                   {contextHint || `Analyze ${programName} performance and generate targeted marketing recommendations.`}
                 </p>
               </div>
               <Button
                 onClick={() => generateMutation.mutate({ campaignId })}
-                className="bg-[#F5C72C] hover:bg-[#E6B800] text-[#111111] font-semibold text-sm px-5 py-2 rounded-lg border-0"
+                className="bg-[#F2DD48] hover:bg-[#E6B800] text-[#222222] font-semibold text-sm px-5 py-2 rounded-lg border-0"
               >
                 <Sparkles className="w-4 h-4 mr-2" />
                 Generate Insights
@@ -137,8 +137,8 @@ export function AIInsightsPanel({
           {/* Loading */}
           {generateMutation.isPending && (
             <div className="flex flex-col items-center justify-center py-10 space-y-2 text-center">
-              <Loader2 className="w-7 h-7 animate-spin text-[#F5C72C]" />
-              <p className="text-sm font-medium text-[#111111]">Analyzing program data…</p>
+              <Loader2 className="w-7 h-7 animate-spin text-[#F2DD48]" />
+              <p className="text-sm font-medium text-[#222222]">Analyzing program data…</p>
               <p className="text-xs text-[#AAAAAA]">This may take 10–20 seconds</p>
             </div>
           )}
@@ -160,7 +160,7 @@ export function AIInsightsPanel({
                   size="sm"
                   onClick={() => generateMutation.mutate({ campaignId })}
                   disabled={generateMutation.isPending}
-                  className="border-[#E0E0E0] text-[#545A60] hover:bg-[#F2F2F7] text-xs h-7"
+                  className="border-[#DEDEDA] text-[#545A60] hover:bg-[#F1F1EF] text-xs h-7"
                 >
                   <RefreshCw className="h-3 w-3 mr-1" />
                   Refresh
@@ -169,7 +169,7 @@ export function AIInsightsPanel({
 
               {/* Executive Summary */}
               {insights.insights?.executiveSummary && (
-                <div className="bg-[#F5C72C]/5 border border-[#F5C72C]/20 rounded-xl p-4">
+                <div className="bg-[#F2DD48]/5 border border-[#F2DD48]/20 rounded-xl p-4">
                   <div className="flex items-start gap-2">
                     <TrendingUp className="w-4 h-4 text-[#8B6E00] shrink-0 mt-0.5" />
                     <p className="text-sm text-[#444] leading-relaxed">{insights.insights.executiveSummary}</p>
@@ -205,7 +205,7 @@ export function AIInsightsPanel({
                           {item.priority}
                         </span>
                         <div>
-                          <p className="text-xs font-semibold text-[#111111]">{item.insight}</p>
+                          <p className="text-xs font-semibold text-[#222222]">{item.insight}</p>
                           <p className="text-xs text-[#888888] mt-0.5">{item.implication}</p>
                         </div>
                       </div>
@@ -228,7 +228,7 @@ export function AIInsightsPanel({
                         <ul className="space-y-1.5">
                           {(items || []).map((item: string, i: number) => (
                             <li key={i} className="flex gap-2 text-xs text-[#545A60]">
-                              <span className="text-[#F5C72C] shrink-0">•</span>
+                              <span className="text-[#F2DD48] shrink-0">•</span>
                               <span>{item}</span>
                             </li>
                           ))}
@@ -244,11 +244,11 @@ export function AIInsightsPanel({
                 <Section title="📣 Multi-Channel Strategy" sectionKey="multiChannel" expanded={expandedSection === "multiChannel"} onToggle={toggle}>
                   <div className="space-y-3 pt-3">
                     {insights.insights.multiChannelStrategy.map((ch: any, i: number) => (
-                      <div key={i} className="border border-[#E0E0E0] rounded-lg p-3">
+                      <div key={i} className="border border-[#DEDEDA] rounded-lg p-3">
                         <div className="flex items-center justify-between mb-1.5">
                           <div className="flex items-center gap-1.5">
                             <span className="text-sm">{channelIcon(ch.channel)}</span>
-                            <span className="text-xs font-semibold text-[#111111]">{ch.channel}</span>
+                            <span className="text-xs font-semibold text-[#222222]">{ch.channel}</span>
                           </div>
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${PRIORITY_STYLES[ch.priority] || PRIORITY_STYLES.low}`}>
                             {ch.priority}
@@ -281,7 +281,7 @@ export function AIInsightsPanel({
                         <ul className="space-y-1 flex-1">
                           {(day.actions || []).map((a: string, j: number) => (
                             <li key={j} className="flex gap-2 text-xs text-[#545A60]">
-                              <span className="text-[#F5C72C] shrink-0">✓</span>
+                              <span className="text-[#F2DD48] shrink-0">✓</span>
                               <span>{a}</span>
                             </li>
                           ))}

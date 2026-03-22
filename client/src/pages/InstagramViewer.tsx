@@ -101,8 +101,8 @@ export default function InstagramViewer() {
           {([
             { label: "Followers", value: latestInsight?.followersCount?.toLocaleString() ?? "—", Icon: Users, color: "text-[#888888]" },
             { label: "Reach (28d)", value: latestInsight?.reach?.toLocaleString() ?? "—", Icon: Eye, color: "text-pink-400" },
-            { label: "Impressions (28d)", value: latestInsight?.impressions?.toLocaleString() ?? "—", Icon: BarChart2, color: "text-[#F5C72C]" },
-            { label: "Profile Views (28d)", value: latestInsight?.profileViews?.toLocaleString() ?? "—", Icon: MousePointer, color: "text-[#F5C72C]" },
+            { label: "Impressions (28d)", value: latestInsight?.impressions?.toLocaleString() ?? "—", Icon: BarChart2, color: "text-[#F2DD48]" },
+            { label: "Profile Views (28d)", value: latestInsight?.profileViews?.toLocaleString() ?? "—", Icon: MousePointer, color: "text-[#F2DD48]" },
           ] as const).map((kpi) => (
             <Card key={kpi.label}>
               <CardContent className="pt-5 pb-4">

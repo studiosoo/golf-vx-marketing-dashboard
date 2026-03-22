@@ -37,13 +37,13 @@ function fmtTime(dt: string) {
 // Type badge colors
 // ─────────────────────────────────────────────
 const TYPE_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  "$25 Off-Peak Trial": { bg: "#F0FAF3", text: "#3DB855", border: "#3DB855" },
-  "$35 Peak Trial": { bg: "#1A1A1A", text: "#F5C72C", border: "#F5C72C" },
-  "$9 Anniversary Off-Peak Trial": { bg: "#F5F5F5", text: "#888888", border: "#E0E0E0" },
+  "$25 Off-Peak Trial": { bg: "#F0FAF3", text: "#72B84A", border: "#72B84A" },
+  "$35 Peak Trial": { bg: "#1A1A1A", text: "#F2DD48", border: "#F2DD48" },
+  "$9 Anniversary Off-Peak Trial": { bg: "#F1F1EF", text: "#888888", border: "#DEDEDA" },
   "$18 Anniversary Peak Trial": { bg: "#1A1A1A", text: "#E8453C", border: "#E8453C" },
 };
 function getTypeColor(priceLabel: string) {
-  return TYPE_COLORS[priceLabel] || { bg: "#F5F5F5", text: "#888888", border: "#E0E0E0" };
+  return TYPE_COLORS[priceLabel] || { bg: "#F1F1EF", text: "#888888", border: "#DEDEDA" };
 }
 
 // ─────────────────────────────────────────────
@@ -54,7 +54,7 @@ function KpiCard({
   label,
   value,
   sub,
-  color = "#111111",
+  color = "#222222",
 }: {
   icon: React.ElementType;
   label: string;
@@ -63,7 +63,7 @@ function KpiCard({
   color?: string;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-[#E0E0E0] p-4 flex flex-col gap-1">
+    <div className="bg-white rounded-xl border border-[#DEDEDA] p-4 flex flex-col gap-1">
       <div className="flex items-center gap-2 text-[#AAAAAA]">
         <Icon className="h-4 w-4" />
         <span className="text-[12px] font-medium">{label}</span>
@@ -101,7 +101,7 @@ function TypeGroupCard({
   const avgPrice = count > 0 ? safeRevenue / count : 0;
 
   return (
-    <div className="bg-white rounded-xl border border-[#E0E0E0] p-4 flex flex-col gap-3">
+    <div className="bg-white rounded-xl border border-[#DEDEDA] p-4 flex flex-col gap-3">
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div>
@@ -111,10 +111,10 @@ function TypeGroupCard({
           >
             {safePriceLabel}
           </div>
-          <h3 className="text-[13px] font-semibold text-[#111111] leading-tight">{typeName}</h3>
+          <h3 className="text-[13px] font-semibold text-[#222222] leading-tight">{typeName}</h3>
         </div>
         <div className="text-right shrink-0">
-          <p className="text-[20px] font-bold text-[#111111] leading-none">{count}</p>
+          <p className="text-[20px] font-bold text-[#222222] leading-none">{count}</p>
           <p className="text-[10px] text-[#AAAAAA]">bookings</p>
         </div>
       </div>
@@ -122,11 +122,11 @@ function TypeGroupCard({
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 pt-2 border-t border-[#F0F0F0]">
         <div>
-          <p className="text-[13px] font-bold text-[#111111]">{fmtCurrency(safeRevenue)}</p>
+          <p className="text-[13px] font-bold text-[#222222]">{fmtCurrency(safeRevenue)}</p>
           <p className="text-[10px] text-[#AAAAAA]">Revenue</p>
         </div>
         <div>
-          <p className="text-[13px] font-bold text-[#3DB855]">{safePaidCount}</p>
+          <p className="text-[13px] font-bold text-[#72B84A]">{safePaidCount}</p>
           <p className="text-[10px] text-[#AAAAAA]">Paid</p>
         </div>
         <div>
@@ -156,7 +156,7 @@ export default function TrialSessionDetail() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 rounded-full border-2 border-[#F5C72C] border-t-transparent animate-spin" />
+          <div className="h-8 w-8 rounded-full border-2 border-[#F2DD48] border-t-transparent animate-spin" />
           <p className="text-[13px] text-[#AAAAAA]">Loading trial session data…</p>
         </div>
       </div>
@@ -170,7 +170,7 @@ export default function TrialSessionDetail() {
           <p className="text-[14px] text-[#888888]">Failed to load trial session data.</p>
           <button
             onClick={() => setLocation("/programs")}
-            className="mt-3 text-[12px] text-[#F5C72C] font-semibold hover:underline"
+            className="mt-3 text-[12px] text-[#F2DD48] font-semibold hover:underline"
           >
             ← Back to Programs
           </button>
@@ -190,7 +190,7 @@ export default function TrialSessionDetail() {
       <div className="flex items-center gap-3">
         <button
           onClick={() => setLocation("/programs")}
-          className="flex items-center gap-1.5 text-[13px] text-[#888888] hover:text-[#111111] transition-colors"
+          className="flex items-center gap-1.5 text-[13px] text-[#888888] hover:text-[#222222] transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           Programs
@@ -198,7 +198,7 @@ export default function TrialSessionDetail() {
       </div>
 
       <div>
-        <h1 className="text-[22px] font-bold text-[#111111]">1-Hour Trial Session</h1>
+        <h1 className="text-[22px] font-bold text-[#222222]">1-Hour Trial Session</h1>
         <p className="text-[13px] text-[#888888] mt-1">
           Booking breakdown by appointment type — sourced from Acuity Scheduling
         </p>
@@ -217,7 +217,7 @@ export default function TrialSessionDetail() {
           label="Total Revenue"
           value={fmtCurrency(totalRevenue)}
           sub={`${totalPaid} paid · ${totalUnpaid} unpaid`}
-          color="#3DB855"
+          color="#72B84A"
         />
         <KpiCard
           icon={TrendingUp}
@@ -230,20 +230,20 @@ export default function TrialSessionDetail() {
           label="Paid Rate"
           value={totalBookings > 0 ? `${Math.round((totalPaid / totalBookings) * 100)}%` : "—"}
           sub={`${totalPaid} of ${totalBookings} paid`}
-          color={totalBookings > 0 && totalPaid / totalBookings >= 0.8 ? "#3DB855" : "#F5A623"}
+          color={totalBookings > 0 && totalPaid / totalBookings >= 0.8 ? "#72B84A" : "#F5A623"}
         />
       </div>
 
       {/* Type Breakdown */}
       <div>
-        <h2 className="text-[15px] font-bold text-[#111111] mb-3">Breakdown by Appointment Type</h2>
+        <h2 className="text-[15px] font-bold text-[#222222] mb-3">Breakdown by Appointment Type</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {types.map((t: any, i: number) => (
             <TypeGroupCard key={t.typeId ?? t.name ?? i} {...t} />
           ))}
           {/* Placeholder for $18 Anniversary Peak when added */}
           {types.length < 4 && (
-            <div className="bg-[#FAFAFA] rounded-xl border border-dashed border-[#E0E0E0] p-4 flex flex-col items-center justify-center gap-2 text-center">
+            <div className="bg-[#FAFAFA] rounded-xl border border-dashed border-[#DEDEDA] p-4 flex flex-col items-center justify-center gap-2 text-center">
               <Clock className="h-6 w-6 text-[#CCCCCC]" />
               <p className="text-[12px] font-semibold text-[#AAAAAA]">$18 Anniversary Peak</p>
               <p className="text-[11px] text-[#CCCCCC]">Appointment type not yet created in Acuity</p>
@@ -254,13 +254,13 @@ export default function TrialSessionDetail() {
 
       {/* All Bookings Table */}
       <div>
-        <h2 className="text-[15px] font-bold text-[#111111] mb-3">
+        <h2 className="text-[15px] font-bold text-[#222222] mb-3">
           All Bookings
           <span className="ml-2 text-[12px] font-normal text-[#AAAAAA]">({allBookings.length})</span>
         </h2>
-        <div className="bg-white rounded-xl border border-[#E0E0E0] overflow-hidden">
+        <div className="bg-white rounded-xl border border-[#DEDEDA] overflow-hidden">
           {/* Table header */}
-          <div className="grid grid-cols-[1fr_1fr_1fr_80px_80px_1fr] gap-3 px-4 py-2.5 bg-[#F8F8F8] border-b border-[#E0E0E0]">
+          <div className="grid grid-cols-[1fr_1fr_1fr_80px_80px_1fr] gap-3 px-4 py-2.5 bg-[#F8F8F8] border-b border-[#DEDEDA]">
             <span className="text-[11px] font-semibold text-[#888888] uppercase tracking-wide">Customer</span>
             <span className="text-[11px] font-semibold text-[#888888] uppercase tracking-wide">Date</span>
             <span className="text-[11px] font-semibold text-[#888888] uppercase tracking-wide">Type</span>
@@ -288,7 +288,7 @@ export default function TrialSessionDetail() {
                 >
                   {/* Customer name */}
                   <div>
-                    <p className="text-[13px] font-semibold text-[#111111] leading-tight">
+                    <p className="text-[13px] font-semibold text-[#222222] leading-tight">
                       {booking.firstName} {booking.lastName}
                     </p>
                     {booking.email && (
@@ -318,7 +318,7 @@ export default function TrialSessionDetail() {
 
                   {/* Price */}
                   <div className="text-right">
-                    <p className="text-[13px] font-semibold text-[#111111]">
+                    <p className="text-[13px] font-semibold text-[#222222]">
                       {price > 0 ? fmtCurrency(price) : "—"}
                     </p>
                   </div>
@@ -326,12 +326,12 @@ export default function TrialSessionDetail() {
                   {/* Paid status */}
                   <div className="flex justify-center">
                     {paid ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#F0FAF3] text-[#3DB855] text-[10px] font-bold">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#F0FAF3] text-[#72B84A] text-[10px] font-bold">
                         <CheckCircle className="h-3 w-3" />
                         Paid
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#F5F5F5] text-[#888888] text-[10px] font-bold">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#F1F1EF] text-[#888888] text-[10px] font-bold">
                         <Clock className="h-3 w-3" />
                         Unpaid
                       </span>

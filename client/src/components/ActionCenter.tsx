@@ -260,7 +260,7 @@ export function ActionCenter() {
                     </Badge>
                     <span className="text-sm text-muted-foreground">{alert.campaignName}</span>
                     {allCompleted && (
-                      <Badge variant="outline" className="bg-green-50 text-[#3DB855] border-green-200">
+                      <Badge variant="outline" className="bg-green-50 text-[#72B84A] border-green-200">
                         ✓ All actions completed
                       </Badge>
                     )}

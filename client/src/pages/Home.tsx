@@ -47,7 +47,7 @@ function HealthDots({ score }: { score: number }) {
         <div
           key={i}
           className="w-2 h-2 rounded-full"
-          style={{ background: i <= score ? "#F5C72C" : "#E0E0E0" }}
+          style={{ background: i <= score ? "#F2DD48" : "#DEDEDA" }}
         />
       ))}
       <span className="text-[10px] text-[#888888] ml-1">{score}/5</span>
@@ -87,37 +87,37 @@ function MemberListModal({ open, onClose }: { open: boolean; onClose: () => void
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/30" onClick={onClose} />
       <div className="relative bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg sm:mx-4 max-h-[80vh] flex flex-col shadow-2xl">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#E0E0E0]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#DEDEDA]">
           <div>
-            <h2 className="text-[15px] font-bold text-[#111111]">Active Members</h2>
+            <h2 className="text-[15px] font-bold text-[#222222]">Active Members</h2>
             {memberList && <p className="text-[12px] text-[#888888]">{memberList.length} members</p>}
           </div>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-[#F5F5F5] transition-colors">
+          <button onClick={onClose} className="p-2 rounded-lg hover:bg-[#F1F1EF] transition-colors">
             <X className="h-4 w-4 text-[#888888]" />
           </button>
         </div>
         <div className="overflow-y-auto flex-1">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-6 w-6 border-2 border-[#F5C72C] border-t-transparent" />
+              <div className="animate-spin rounded-full h-6 w-6 border-2 border-[#F2DD48] border-t-transparent" />
             </div>
           ) : (
             <div className="divide-y divide-[#F0F0F0]">
               {(memberList ?? []).map((m: any) => (
                 <div key={m.id} className="flex items-center justify-between px-5 py-3 hover:bg-[#FAFAFA] transition-colors">
                   <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-[#F5C72C]/20 flex items-center justify-center shrink-0">
-                      <span className="text-[12px] font-bold text-[#111111]">
+                    <div className="h-8 w-8 rounded-full bg-[#F2DD48]/20 flex items-center justify-center shrink-0">
+                      <span className="text-[12px] font-bold text-[#222222]">
                         {m.name?.charAt(0)?.toUpperCase() ?? "?"}
                       </span>
                     </div>
                     <div>
-                      <p className="text-[13px] font-semibold text-[#111111]">{m.name}</p>
+                      <p className="text-[13px] font-semibold text-[#222222]">{m.name}</p>
                       <p className="text-[11px] text-[#888888]">{m.email}</p>
                     </div>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-[12px] font-medium text-[#111111]">
+                    <p className="text-[12px] font-medium text-[#222222]">
                       {PLAN_LABEL[m.membershipTier] ?? m.membershipTier ?? "—"}
                     </p>
                     {m.monthlyAmount && parseFloat(String(m.monthlyAmount)) > 0 && (
@@ -135,10 +135,10 @@ function MemberListModal({ open, onClose }: { open: boolean; onClose: () => void
 }
 
 const CAMPAIGN_META: Record<string, { label: string; color: string; bg: string; icon: React.ElementType; kpiLabel: string }> = {
-  trial_conversion: { label: "Trial Conversion", color: "#3DB855", bg: "#F0FAF3", icon: Target, kpiLabel: "Conversion Rate" },
+  trial_conversion: { label: "Trial Conversion", color: "#72B84A", bg: "#F0FAF3", icon: Target, kpiLabel: "Conversion Rate" },
   membership_acquisition: { label: "Membership Acquisition", color: "#007AFF", bg: "#EBF4FF", icon: UserCheck, kpiLabel: "Members Acquired" },
-  member_retention: { label: "Member Retention", color: "#111111", bg: "#F5F5F5", icon: Users, kpiLabel: "Retention Rate" },
-  corporate_events: { label: "B2B Sales", color: "#888888", bg: "#F5F5F5", icon: Flag, kpiLabel: "Events Closed" },
+  member_retention: { label: "Member Retention", color: "#222222", bg: "#F1F1EF", icon: Users, kpiLabel: "Retention Rate" },
+  corporate_events: { label: "B2B Sales", color: "#888888", bg: "#F1F1EF", icon: Flag, kpiLabel: "Events Closed" },
 };
 
 export default function Home() {
@@ -214,7 +214,7 @@ export default function Home() {
   if (authLoading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#F5C72C] border-t-transparent" />
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#F2DD48] border-t-transparent" />
       </div>
     );
   }
@@ -246,11 +246,11 @@ export default function Home() {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center space-y-5 max-w-sm px-6 w-full">
-          <div className="h-14 w-14 bg-[#F5C72C]/20 rounded-2xl flex items-center justify-center mx-auto">
-            <BarChart3 className="h-7 w-7 text-[#111111]" />
+          <div className="h-14 w-14 bg-[#F2DD48]/20 rounded-2xl flex items-center justify-center mx-auto">
+            <BarChart3 className="h-7 w-7 text-[#222222]" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-[#111111]">Golf VX Dashboard</h1>
+            <h1 className="text-xl font-bold text-[#222222]">Golf VX Dashboard</h1>
             <p className="text-sm text-[#888888] mt-1">Arlington Heights — Marketing Dashboard</p>
           </div>
           <form onSubmit={handlePasswordLogin} className="space-y-3">
@@ -261,7 +261,7 @@ export default function Home() {
                 placeholder="Enter dashboard password"
                 value={loginPassword}
                 onChange={e => setLoginPassword(e.target.value)}
-                className="pl-9 border-[#E0E0E0] focus:border-[#F5C72C] focus:ring-[#F5C72C]"
+                className="pl-9 border-[#DEDEDA] focus:border-[#F2DD48] focus:ring-[#F2DD48]"
                 autoFocus
               />
             </div>
@@ -271,7 +271,7 @@ export default function Home() {
             <Button
               type="submit"
               disabled={loginLoading || !loginPassword}
-              className="bg-[#F5C72C] text-[#111111] font-semibold hover:brightness-95 active:scale-95 transition-all w-full"
+              className="bg-[#F2DD48] text-[#222222] font-semibold hover:brightness-95 active:scale-95 transition-all w-full"
             >
               {loginLoading ? "Signing in..." : "Sign In"}
             </Button>
@@ -418,7 +418,7 @@ export default function Home() {
       goal: ANNUAL_REVENUE_GOAL,
       display: hasAnyRevenue ? fmtCurrency(annualRunRate) : "—",
       goalDisplay: "$2M",
-      color: "#F5C72C",
+      color: "#F2DD48",
       statusNote: hasAnyRevenue ? "MRR + Toast run rate · Acuity reported separately" : null,
       statusColor: "#888888",
     },
@@ -429,7 +429,7 @@ export default function Home() {
       goal: memberGoal,
       display: fmt(memberTotal),
       goalDisplay: "300",
-      color: "#3DB855",
+      color: "#72B84A",
       statusNote: stripeSnap ? `Stripe · as of ${stripeSnap.asOf}` : null,
       statusColor: "#888888",
     },
@@ -442,7 +442,7 @@ export default function Home() {
       goalDisplay: "2,000",
       color: "#007AFF",
       statusNote: igTokenNote,
-      statusColor: igTokenNote && !tokenStatus?.warning ? "#FF3B30" : "#F5C72C",
+      statusColor: igTokenNote && !tokenStatus?.warning ? "#FF3B30" : "#F2DD48",
     },
     {
       label: "Email Subscribers",
@@ -451,7 +451,7 @@ export default function Home() {
       goal: 5000,
       display: fmt(emailSubscribers),
       goalDisplay: "5,000",
-      color: "#111111",
+      color: "#222222",
       statusNote: emailSubscribersIsLive ? "Encharge · AHTIL tag · live" : "Encharge · AHTIL tag · CSV 2026-03-18",
       statusColor: "#888888",
     },
@@ -462,11 +462,11 @@ export default function Home() {
   type DataSource = { label: string; status: DataSourceStatus; detail: string; note?: string };
 
   const STATUS_DOT: Record<DataSourceStatus, string> = {
-    live: "#3DB855",
-    warning: "#F5C72C",
+    live: "#72B84A",
+    warning: "#F2DD48",
     error: "#FF3B30",
-    offline: "#E0E0E0",
-    loading: "#E0E0E0",
+    offline: "#DEDEDA",
+    loading: "#DEDEDA",
   };
   const STATUS_LABEL: Record<DataSourceStatus, string> = {
     live: "Live",
@@ -476,8 +476,8 @@ export default function Home() {
     loading: "Loading…",
   };
   const STATUS_TEXT: Record<DataSourceStatus, string> = {
-    live: "#3DB855",
-    warning: "#F5C72C",
+    live: "#72B84A",
+    warning: "#F2DD48",
     error: "#FF3B30",
     offline: "#888888",
     loading: "#888888",
@@ -552,7 +552,7 @@ export default function Home() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-[22px] font-bold text-[#111111] leading-tight">{greeting}, {firstName}</h1>
+          <h1 className="text-[22px] font-bold text-[#222222] leading-tight">{greeting}, {firstName}</h1>
           <div className="flex items-center gap-2 mt-0.5">
             <p className="text-[13px] text-[#888888]">
               Golf VX Arlington Heights · {now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
@@ -563,7 +563,7 @@ export default function Home() {
         <button
           onClick={handleRefresh}
           disabled={refreshing}
-          className="flex items-center gap-1.5 text-[12px] text-[#888888] hover:text-[#111111] border border-[#E0E0E0] rounded-lg px-3 py-1.5 hover:bg-[#F5F5F5] transition-colors"
+          className="flex items-center gap-1.5 text-[12px] text-[#888888] hover:text-[#222222] border border-[#DEDEDA] rounded-lg px-3 py-1.5 hover:bg-[#F1F1EF] transition-colors"
         >
           <RefreshCw className={cn("h-3.5 w-3.5", refreshing && "animate-spin")} />
           Refresh
@@ -574,8 +574,8 @@ export default function Home() {
       <div className="bg-white rounded-xl border border-[#E8E8E8] p-5">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Target className="h-4 w-4 text-[#F5C72C]" />
-            <h2 className="text-[14px] font-semibold text-[#111111]">2026 Key Goals</h2>
+            <Target className="h-4 w-4 text-[#F2DD48]" />
+            <h2 className="text-[14px] font-semibold text-[#222222]">2026 Key Goals</h2>
           </div>
           <span className="text-[11px] text-[#AAAAAA]">Year-end targets</span>
         </div>
@@ -592,7 +592,7 @@ export default function Home() {
                   <span className="text-[11px] text-[#888888] font-medium truncate">{g.label}</span>
                 </div>
                 <div className="flex items-end gap-1 mb-1.5">
-                  <span className="text-[22px] font-bold text-[#111111] leading-none tracking-tight">{g.display}</span>
+                  <span className="text-[22px] font-bold text-[#222222] leading-none tracking-tight">{g.display}</span>
                   <span className="text-[11px] text-[#AAAAAA] mb-0.5">/ {g.goalDisplay}</span>
                 </div>
                 {pct != null ? (
@@ -620,10 +620,10 @@ export default function Home() {
       <div className="bg-white rounded-xl border border-[#E8E8E8] p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-[#111111]" />
-            <h2 className="text-[14px] font-semibold text-[#111111]">Members</h2>
+            <Users className="h-4 w-4 text-[#222222]" />
+            <h2 className="text-[14px] font-semibold text-[#222222]">Members</h2>
           </div>
-          <button onClick={() => setLocation("/list/members")} className="flex items-center gap-1 text-[12px] text-[#888888] hover:text-[#111111] transition-colors">
+          <button onClick={() => setLocation("/list/members")} className="flex items-center gap-1 text-[12px] text-[#888888] hover:text-[#222222] transition-colors">
             View all <ArrowRight className="h-3 w-3" />
           </button>
         </div>
@@ -632,13 +632,13 @@ export default function Home() {
             <div className="flex items-end gap-3 mb-2">
               <button
                 onClick={() => setMemberListOpen(true)}
-                className="text-[42px] font-bold text-[#111111] leading-none tracking-tight hover:text-[#F5C72C] transition-colors cursor-pointer"
+                className="text-[42px] font-bold text-[#222222] leading-none tracking-tight hover:text-[#F2DD48] transition-colors cursor-pointer"
                 title="View member list"
               >
                 {fmt(memberTotal)}
               </button>
               {members?.newThisMonth !== undefined && members.newThisMonth !== 0 && (
-                <span className={cn("text-[13px] font-semibold mb-1.5", members.newThisMonth > 0 ? "text-[#3DB855]" : "text-[#FF3B30]")}>
+                <span className={cn("text-[13px] font-semibold mb-1.5", members.newThisMonth > 0 ? "text-[#72B84A]" : "text-[#FF3B30]")}>
                   {members.newThisMonth > 0 ? "+" : ""}{members.newThisMonth} this month
                 </span>
               )}
@@ -660,22 +660,22 @@ export default function Home() {
                 {stripeSnap.tiers.map(t => (
                   <div key={t.name} className="flex items-center justify-between">
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-[12px] font-medium text-[#111111] truncate">{t.name}</span>
+                      <span className="text-[12px] font-medium text-[#222222] truncate">{t.name}</span>
                       <span className="text-[11px] text-[#AAAAAA] shrink-0">{t.count}</span>
                     </div>
-                    <span className="text-[12px] font-semibold text-[#111111] shrink-0">
+                    <span className="text-[12px] font-semibold text-[#222222] shrink-0">
                       {t.mrr > 0 ? fmtCurrency(t.mrr) : "—"}
                     </span>
                   </div>
                 ))}
                 <div className="pt-1.5 mt-1.5 border-t border-[#F0F0F0] flex items-center justify-between">
                   <span className="text-[11px] font-semibold text-[#888888]">Total MRR</span>
-                  <span className="text-[13px] font-bold text-[#111111]">{fmtCurrency(stripeSnap.totalMRR)}</span>
+                  <span className="text-[13px] font-bold text-[#222222]">{fmtCurrency(stripeSnap.totalMRR)}</span>
                 </div>
               </div>
             ) : (
               <div className="flex flex-col justify-center space-y-2">
-                <p className="text-[12px] text-[#888888]">Goal progress is tracked in the <strong className="text-[#111111]">2026 Key Goals</strong> section above.</p>
+                <p className="text-[12px] text-[#888888]">Goal progress is tracked in the <strong className="text-[#222222]">2026 Key Goals</strong> section above.</p>
               </div>
             )}
           </div>
@@ -686,10 +686,10 @@ export default function Home() {
       <div className="bg-white rounded-xl border border-[#E8E8E8] p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4 text-[#111111]" />
-            <h2 className="text-[14px] font-semibold text-[#111111]">Revenue</h2>
+            <DollarSign className="h-4 w-4 text-[#222222]" />
+            <h2 className="text-[14px] font-semibold text-[#222222]">Revenue</h2>
           </div>
-          <button onClick={() => setLocation("/intelligence/reports")} className="flex items-center gap-1 text-[12px] text-[#888888] hover:text-[#111111] transition-colors">
+          <button onClick={() => setLocation("/intelligence/reports")} className="flex items-center gap-1 text-[12px] text-[#888888] hover:text-[#222222] transition-colors">
             Full Report <ArrowRight className="h-3 w-3" />
           </button>
         </div>
@@ -700,13 +700,13 @@ export default function Home() {
             <div className="p-3 rounded-lg bg-[#FAFAFA] border border-[#F0F0F0]">
               <div className="flex items-center gap-1.5 mb-1">
                 {revenue?.mom !== undefined && revenue.mom !== 0 && (
-                  <span className={cn("flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full", revenue.mom > 0 ? "text-[#3DB855] bg-[#F0FAF3]" : "text-[#FF3B30] bg-red-50")}>
+                  <span className={cn("flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full", revenue.mom > 0 ? "text-[#72B84A] bg-[#F0FAF3]" : "text-[#FF3B30] bg-red-50")}>
                     {revenue.mom > 0 ? <TrendingUp className="h-2.5 w-2.5" /> : <TrendingDown className="h-2.5 w-2.5" />}
                     {Math.abs(revenue.mom).toFixed(1)}%
                   </span>
                 )}
               </div>
-              <p className="text-[24px] font-bold text-[#111111] leading-none tracking-tight">{snapLoading ? "—" : fmtCurrency(mrr)}</p>
+              <p className="text-[24px] font-bold text-[#222222] leading-none tracking-tight">{snapLoading ? "—" : fmtCurrency(mrr)}</p>
               <p className="text-[11px] text-[#888888] mt-1">Monthly Recurring</p>
               {memberBreakdown.length > 0 && (
                 <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1.5">
@@ -723,7 +723,7 @@ export default function Home() {
                 <ShoppingBag className="h-3 w-3 text-[#AAAAAA]" />
                 <span className="text-[10px] text-[#AAAAAA]">Toast POS · MTD</span>
               </div>
-              <p className="text-[24px] font-bold text-[#111111] leading-none tracking-tight">{fmtCurrency(toastMTD)}</p>
+              <p className="text-[24px] font-bold text-[#222222] leading-none tracking-tight">{fmtCurrency(toastMTD)}</p>
               <p className="text-[11px] text-[#888888] mt-1">{now.toLocaleDateString("en-US", { month: "long" })} · {toastOrders > 0 ? `${toastOrders} orders` : "No orders yet"}</p>
               {toastLastMonth > 0 && <p className="text-[10px] text-[#AAAAAA] mt-0.5">Last month: {fmtCurrency(toastLastMonth)}</p>}
             </div>
@@ -734,17 +734,17 @@ export default function Home() {
                 <CreditCard className="h-3 w-3 text-[#AAAAAA]" />
                 <span className="text-[10px] text-[#AAAAAA]">Programs · Acuity</span>
               </div>
-              <p className="text-[24px] font-bold text-[#111111] leading-none tracking-tight">{fmtCurrency(acuityTotal)}</p>
+              <p className="text-[24px] font-bold text-[#222222] leading-none tracking-tight">{fmtCurrency(acuityTotal)}</p>
               <p className="text-[11px] text-[#888888] mt-1">All sessions · {acuityBookings > 0 ? `${acuityBookings} bookings` : "No bookings"}</p>
             </div>
           )}
           {hasAnyRevenue && (
-            <div className="p-3 rounded-lg bg-[#F5C72C]/5 border border-[#F5C72C]/20">
+            <div className="p-3 rounded-lg bg-[#F2DD48]/5 border border-[#F2DD48]/20">
               <div className="flex items-center gap-1.5 mb-1">
-                <Award className="h-3 w-3 text-[#111111]" />
+                <Award className="h-3 w-3 text-[#222222]" />
                 <span className="text-[10px] text-[#888888]">Combined MTD + MRR</span>
               </div>
-              <p className="text-[24px] font-bold text-[#111111] leading-none tracking-tight">{fmtCurrency(mrr + toastMTD)}</p>
+              <p className="text-[24px] font-bold text-[#222222] leading-none tracking-tight">{fmtCurrency(mrr + toastMTD)}</p>
               <p className="text-[11px] text-[#888888] mt-1">MRR + Toast this month</p>
               <p className="text-[10px] text-[#AAAAAA] mt-0.5">Acuity reported separately above</p>
             </div>
@@ -753,8 +753,8 @@ export default function Home() {
 
         {/* $0 empty state — APIs not yet connected */}
         {!snapLoading && !hasAnyRevenue && (
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-[#FAFAFA] border border-dashed border-[#E0E0E0]">
-            <div className="h-7 w-7 rounded-lg bg-[#F5F5F5] flex items-center justify-center shrink-0">
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-[#FAFAFA] border border-dashed border-[#DEDEDA]">
+            <div className="h-7 w-7 rounded-lg bg-[#F1F1EF] flex items-center justify-center shrink-0">
               <DollarSign className="h-3.5 w-3.5 text-[#AAAAAA]" />
             </div>
             <div>
@@ -768,16 +768,16 @@ export default function Home() {
         {hasAnyRevenue && <div className="mt-4 pt-4 border-t border-[#F0F0F0]">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-1.5">
-              <TrendingUp className="h-3.5 w-3.5 text-[#111111]" />
-              <span className="text-[13px] font-semibold text-[#111111]">Annual Revenue Goal</span>
+              <TrendingUp className="h-3.5 w-3.5 text-[#222222]" />
+              <span className="text-[13px] font-semibold text-[#222222]">Annual Revenue Goal</span>
             </div>
             <div className="text-right">
-              <span className="text-[18px] font-bold text-[#F5C72C]">{annualGoalPct.toFixed(1)}%</span>
+              <span className="text-[18px] font-bold text-[#F2DD48]">{annualGoalPct.toFixed(1)}%</span>
               <span className="text-[11px] text-[#AAAAAA] ml-1">run rate</span>
             </div>
           </div>
-          <div className="h-2 bg-[#F2F2F7] rounded-full overflow-hidden">
-            <div className="h-full rounded-full bg-[#F5C72C] transition-all" style={{ width: `${annualGoalPct}%` }} />
+          <div className="h-2 bg-[#F1F1EF] rounded-full overflow-hidden">
+            <div className="h-full rounded-full bg-[#F2DD48] transition-all" style={{ width: `${annualGoalPct}%` }} />
           </div>
           <div className="flex justify-between mt-1.5">
             <span className="text-[11px] text-[#AAAAAA]">{fmtCurrency(annualRunRate)} projected / {fmtCurrency(ANNUAL_REVENUE_GOAL)} goal</span>
@@ -794,38 +794,38 @@ export default function Home() {
         <div className="bg-white rounded-xl border border-[#E8E8E8] p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Crosshair className="h-4 w-4 text-[#111111]" />
-              <h2 className="text-[14px] font-semibold text-[#111111]">Campaigns</h2>
+              <Crosshair className="h-4 w-4 text-[#222222]" />
+              <h2 className="text-[14px] font-semibold text-[#222222]">Campaigns</h2>
             </div>
-            <button onClick={() => setLocation("/campaigns/strategic")} className="flex items-center gap-1 text-[12px] text-[#888888] hover:text-[#111111] transition-colors">
+            <button onClick={() => setLocation("/campaigns/strategic")} className="flex items-center gap-1 text-[12px] text-[#888888] hover:text-[#222222] transition-colors">
               Details <ArrowRight className="h-3 w-3" />
             </button>
           </div>
           {stratLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              {[0,1,2,3].map(i => <div key={i} className="h-28 bg-[#F5F5F5] rounded-xl animate-pulse" />)}
+              {[0,1,2,3].map(i => <div key={i} className="h-28 bg-[#F1F1EF] rounded-xl animate-pulse" />)}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {activeCampaigns.map((c: any) => {
-                const meta = CAMPAIGN_META[c.id] || { label: c.name, color: "#888888", bg: "#F5F5F5", icon: BarChart3, kpiLabel: "KPI" };
+                const meta = CAMPAIGN_META[c.id] || { label: c.name, color: "#888888", bg: "#F1F1EF", icon: BarChart3, kpiLabel: "KPI" };
                 const Icon = meta.icon;
                 const kpi = c.primaryKpi;
                 const kpiPct = kpi?.target > 0 ? Math.min((kpi.current / kpi.target) * 100, 100) : 0;
                 return (
                   <button key={c.id} onClick={() => setLocation("/campaigns/strategic")}
-                    className="text-left w-full bg-[#FAFAFA] rounded-xl border border-[#F0F0F0] p-4 hover:shadow-sm hover:border-[#E0E0E0] transition-all group"
+                    className="text-left w-full bg-[#FAFAFA] rounded-xl border border-[#F0F0F0] p-4 hover:shadow-sm hover:border-[#DEDEDA] transition-all group"
                   >
                     <div className="flex items-center gap-2 mb-3">
                       <div className="h-6 w-6 rounded-md flex items-center justify-center shrink-0" style={{ background: meta.bg }}>
                         <Icon className="h-3 w-3" style={{ color: meta.color }} />
                       </div>
-                      <span className="text-[12px] font-semibold text-[#111111] leading-tight">{meta.label}</span>
+                      <span className="text-[12px] font-semibold text-[#222222] leading-tight">{meta.label}</span>
                     </div>
                     {kpi && (
                       <>
                         <div className="flex items-end gap-1 mb-1">
-                          <span className="text-[20px] font-bold text-[#111111] leading-none">
+                          <span className="text-[20px] font-bold text-[#222222] leading-none">
                             {typeof kpi.current === 'number' && kpi.current % 1 !== 0
                               ? kpi.current.toFixed(1) + (kpi.unit || '')
                               : fmt(kpi.current) + (kpi.unit || '')}
@@ -861,11 +861,11 @@ export default function Home() {
         <div className="bg-white rounded-xl border border-[#E8E8E8] p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Flag className="h-4 w-4 text-[#111111]" />
-              <h2 className="text-[14px] font-semibold text-[#111111]">Active Programs</h2>
-              <span className="text-[10px] font-bold bg-[#F5F5F5] rounded-full px-1.5 py-0.5 text-[#888888]">{activePrograms.length}</span>
+              <Flag className="h-4 w-4 text-[#222222]" />
+              <h2 className="text-[14px] font-semibold text-[#222222]">Active Programs</h2>
+              <span className="text-[10px] font-bold bg-[#F1F1EF] rounded-full px-1.5 py-0.5 text-[#888888]">{activePrograms.length}</span>
             </div>
-            <button onClick={() => setLocation("/programs")} className="flex items-center gap-1 text-[12px] text-[#888888] hover:text-[#111111] transition-colors">
+            <button onClick={() => setLocation("/programs")} className="flex items-center gap-1 text-[12px] text-[#888888] hover:text-[#222222] transition-colors">
               All programs <ArrowRight className="h-3 w-3" />
             </button>
           </div>
@@ -878,17 +878,17 @@ export default function Home() {
                 <button
                   key={p.id}
                   onClick={() => setLocation("/programs")}
-                  className="flex flex-col gap-2 p-3 rounded-xl bg-[#F9F9F9] hover:bg-[#F0F0F0] transition-colors text-left group border border-transparent hover:border-[#E0E0E0]"
+                  className="flex flex-col gap-2 p-3 rounded-xl bg-[#F9F9F9] hover:bg-[#F0F0F0] transition-colors text-left group border border-transparent hover:border-[#DEDEDA]"
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <p className="text-[12px] font-semibold text-[#111111] leading-tight">{p.name}</p>
-                    <div className={cn("h-2 w-2 rounded-full shrink-0 mt-1", isOnTrack ? "bg-[#3DB855]" : "bg-[#E0E0E0]")} />
+                    <p className="text-[12px] font-semibold text-[#222222] leading-tight">{p.name}</p>
+                    <div className={cn("h-2 w-2 rounded-full shrink-0 mt-1", isOnTrack ? "bg-[#72B84A]" : "bg-[#DEDEDA]")} />
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex-1 h-1.5 bg-[#E8E8E8] rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all"
-                        style={{ width: `${progress}%`, background: isOnTrack ? "#3DB855" : "#E0E0E0" }}
+                        style={{ width: `${progress}%`, background: isOnTrack ? "#72B84A" : "#DEDEDA" }}
                       />
                     </div>
                     <span className="text-[10px] text-[#AAAAAA] shrink-0">{progress.toFixed(0)}%</span>
@@ -905,23 +905,23 @@ export default function Home() {
       <div className="bg-white rounded-xl border border-[#E8E8E8] p-5">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Activity className="h-4 w-4 text-[#111111]" />
-            <h2 className="text-[14px] font-semibold text-[#111111]">Data Health</h2>
+            <Activity className="h-4 w-4 text-[#222222]" />
+            <h2 className="text-[14px] font-semibold text-[#222222]">Data Health</h2>
           </div>
           <span className="text-[11px] text-[#AAAAAA]">Integration status</span>
         </div>
-        <div className="divide-y divide-[#F5F5F5]">
+        <div className="divide-y divide-[#F1F1EF]">
           {DATA_SOURCES.map((src) => (
             <div key={src.label} className="py-2.5 first:pt-0 last:pb-0">
               <div className="flex items-start justify-between gap-3">
-                <span className="text-[13px] text-[#111111] min-w-0">{src.label}</span>
+                <span className="text-[13px] text-[#222222] min-w-0">{src.label}</span>
                 <div className="text-right shrink-0 flex flex-col items-end gap-0.5">
                   <span className={cn(
                     "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium border",
-                    src.status === "live" && "bg-[#3DB855]/10 text-[#2A9040] border-[#3DB855]/20",
+                    src.status === "live" && "bg-[#72B84A]/10 text-[#2A9040] border-[#72B84A]/20",
                     src.status === "warning" && "bg-[#F59E0B]/10 text-[#B45309] border-[#F59E0B]/20",
                     src.status === "error" && "bg-[#FF3B30]/10 text-[#FF3B30] border-[#FF3B30]/20",
-                    (src.status === "offline" || src.status === "loading") && "bg-[#F2F2F7] text-[#AAAAAA] border-[#E0E0E0]"
+                    (src.status === "offline" || src.status === "loading") && "bg-[#F1F1EF] text-[#AAAAAA] border-[#DEDEDA]"
                   )}>
                     {STATUS_LABEL[src.status]}
                   </span>

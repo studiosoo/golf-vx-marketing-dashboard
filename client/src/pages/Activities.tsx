@@ -12,7 +12,7 @@ export interface ContentAsset {
   period?: string;
   format?: string;
   notes?: string;
-  imageUrl?: string;      // set when uploaded to CDN
+  imageUrl?: string;
   status?: "available" | "planned" | "in_production";
 }
 
@@ -25,7 +25,7 @@ export interface ActivityItem {
   status: ActivityStatus;
   color: string;
   description?: string;
-  group?: string;          // Groups cards under a header in Programs tab
+  group?: string;
   startDate?: string;
   endDate?: string;
   note?: string;
@@ -33,8 +33,8 @@ export interface ActivityItem {
   acuityCategory?: string;
   isSocialMedia?: boolean;
   contentAssets?: ContentAsset[];
-  analyticsNote?: string;  // displayed verbatim in Analytics tab
-  strategicNote?: string;  // displayed as pinned insight in Overview tab
+  analyticsNote?: string;
+  strategicNote?: string;
   staticKpis?: { label: string; value: string; unit?: string; warning?: string; }[];
 }
 
@@ -191,6 +191,7 @@ export const ACTIVITY_ITEMS: ActivityItem[] = [
     id: "venue-printouts",
     name: "Venue Printouts & Display",
     tab: "local",
+    group: "In-Venue",
     description: "In-venue print materials and Optisign displays",
     asanaGid: "1211917285471271",
     projectName: "Venue Display / Local Media",
@@ -198,62 +199,25 @@ export const ACTIVITY_ITEMS: ActivityItem[] = [
     color: "#D89A3C",
   },
   {
-    id: "stroll-magazine",
-    name: "Stroll Arlington Heights",
+    id: "venue-experience-materials",
+    name: "Venue Experience Materials",
     tab: "local",
-    description: "Sponsor spotlight · Print media · Local community magazine",
-    asanaGid: "1211912937095581",
-    projectName: "Stroll Magazine",
-    status: "completed",
-    color: "#D89A3C",
-    note: "Spotlight article submitted. Word document delivered.",
-  },
-  {
-    id: "corporate-b2b",
-    name: "Corporate Events & B2B",
-    tab: "local",
-    asanaGid: "1212077289242724",
-    projectName: "Corporate Events & B2B",
+    group: "In-Venue",
+    description: "In-venue educational materials · Club Distance Chart · Google Review incentive card",
+    asanaGid: "1211917285471271",
+    projectName: "Venue Display / Local Media",
     status: "active",
     color: "#D89A3C",
-  },
-  {
-    id: "cha-fundraiser",
-    name: "CHA Fundraiser Night",
-    tab: "local",
-    description: "05/02/26 · Community Fundraiser",
-    asanaGid: "1212077289242724",
-    projectName: "Corporate Events & B2B",
-    status: "upcoming",
-    color: "#D89A3C",
-    startDate: "2026-05-02",
-  },
-  {
-    id: "chicago-golf-show",
-    name: "Chicago Golf Show 2026",
-    tab: "local",
-    description: "HQ-led event · Feb 27–Mar 1 · AH: 30 free-trial coupons distributed",
-    asanaGid: "1212077289242724",
-    projectName: "Corporate Events & B2B",
-    status: "completed",
-    color: "#D89A3C",
-    startDate: "2026-02-27",
-    endDate: "2026-03-01",
-    note: "HQ-led event. Studio Soo not present. AH print cost: $150. HQ fee ($1,500) excluded from AH ROI.",
-  },
-  {
-    id: "social-media-content",
-    name: "AH Social Media Content",
-    tab: "local",
-    asanaGid: "1211673464711096",
-    projectName: "AH Social Media Content",
-    status: "active",
-    color: "#A87FBE",
+    contentAssets: [
+      { label: "Club Distance Chart", format: "Print (Laminated Card)", status: "available", notes: "Displayed at each bay" },
+      { label: "Google Review Card", format: "Print (Business Card)", status: "available", notes: "\"Fries on Us\" incentive. Distributed at counter." },
+    ],
   },
   {
     id: "monthly-happenings",
     name: "Monthly Happenings",
     tab: "local",
+    group: "In-Venue",
     description: "Monthly member newsletter posts · Seasonal events, leagues & promotions",
     asanaGid: "1211917285471271",
     projectName: "Venue Display / Local Media",
@@ -267,9 +231,58 @@ export const ACTIVITY_ITEMS: ActivityItem[] = [
     analyticsNote: "Monthly engagement tracked via Instagram insights + Optisign impressions.",
   },
   {
+    id: "stroll-magazine",
+    name: "Stroll Arlington Heights",
+    tab: "local",
+    group: "Community & Outreach",
+    description: "Sponsor spotlight · Print media · Local community magazine",
+    asanaGid: "1211912937095581",
+    projectName: "Stroll Magazine",
+    status: "completed",
+    color: "#D89A3C",
+    note: "Spotlight article submitted. Word document delivered.",
+  },
+  {
+    id: "corporate-b2b",
+    name: "Corporate Events & B2B",
+    tab: "local",
+    group: "Community & Outreach",
+    asanaGid: "1212077289242724",
+    projectName: "Corporate Events & B2B",
+    status: "active",
+    color: "#D89A3C",
+  },
+  {
+    id: "cha-fundraiser",
+    name: "CHA Fundraiser Night",
+    tab: "local",
+    group: "Community & Outreach",
+    description: "05/02/26 · Community Fundraiser",
+    asanaGid: "1212077289242724",
+    projectName: "Corporate Events & B2B",
+    status: "upcoming",
+    color: "#D89A3C",
+    startDate: "2026-05-02",
+  },
+  {
+    id: "chicago-golf-show",
+    name: "Chicago Golf Show 2026",
+    tab: "local",
+    group: "Community & Outreach",
+    description: "HQ-led event · Feb 27–Mar 1 · AH: 30 free-trial coupons distributed",
+    asanaGid: "1212077289242724",
+    projectName: "Corporate Events & B2B",
+    status: "completed",
+    color: "#D89A3C",
+    startDate: "2026-02-27",
+    endDate: "2026-03-01",
+    note: "HQ-led event. Studio Soo not present. AH print cost: $150. HQ fee ($1,500) excluded from AH ROI.",
+  },
+  {
     id: "monthly-tournaments",
     name: "Monthly Tournaments",
     tab: "local",
+    group: "Member Events",
     description: "Monthly member tournaments · Leaderboard tracking · Social media promotion",
     asanaGid: "1212077289242724",
     projectName: "Corporate Events & B2B",
@@ -285,6 +298,7 @@ export const ACTIVITY_ITEMS: ActivityItem[] = [
     id: "winter-leagues",
     name: "Winter Leagues",
     tab: "local",
+    group: "Member Events",
     description: "6-Week competitive league · Member engagement · Indoor simulator",
     asanaGid: "1212077289242724",
     projectName: "Corporate Events & B2B",
@@ -301,6 +315,7 @@ export const ACTIVITY_ITEMS: ActivityItem[] = [
     id: "watch-party-events",
     name: "Watch Party Events",
     tab: "local",
+    group: "Member Events",
     description: "Member watch parties · Go Bears (Feb) + Super Bowl (Feb 9, 2026)",
     asanaGid: "1212077289242724",
     projectName: "Corporate Events & B2B",
@@ -316,18 +331,14 @@ export const ACTIVITY_ITEMS: ActivityItem[] = [
     analyticsNote: "Attendance tracked manually. No scheduling integration used.",
   },
   {
-    id: "venue-experience-materials",
-    name: "Venue Experience Materials",
+    id: "social-media-content",
+    name: "AH Social Media Content",
     tab: "local",
-    description: "In-venue educational materials · Club Distance Chart · Google Review incentive card",
-    asanaGid: "1211917285471271",
-    projectName: "Venue Display / Local Media",
+    group: "Social Media",
+    asanaGid: "1211673464711096",
+    projectName: "AH Social Media Content",
     status: "active",
-    color: "#D89A3C",
-    contentAssets: [
-      { label: "Club Distance Chart", format: "Print (Laminated Card)", status: "available", notes: "Displayed at each bay" },
-      { label: "Google Review Card", format: "Print (Business Card)", status: "available", notes: "\"Fries on Us\" incentive. Distributed at counter." },
-    ],
+    color: "#A87FBE",
   },
 ];
 
@@ -365,7 +376,7 @@ function StatusBadge({ status }: { status: ActivityStatus }) {
   };
   const s = map[status];
   return (
-    <span style={{ background: s.bg, color: s.color, fontSize: "11px", fontWeight: 500, padding: "2px 8px", borderRadius: "4px", whiteSpace: "nowrap" }}>
+    <span style={{ background: s.bg, color: s.color, fontSize: "11px", fontWeight: 500, padding: "2px 8px", borderRadius: "4px", whiteSpace: "nowrap" as const }}>
       {s.label}
     </span>
   );
@@ -373,16 +384,26 @@ function StatusBadge({ status }: { status: ActivityStatus }) {
 
 // ─── KPI Bar ──────────────────────────────────────────────────
 
-function KpiBar({ items }: { items: ActivityItem[] }) {
+const TAB_KPI_HINT: Record<ActivityTab, string | null> = {
+  programs:   "Acuity-tracked registrations",
+  promotions: "Active offer windows",
+  local:      "Community touchpoints",
+  all:        null,
+};
+
+function KpiBar({ items, activeTab }: { items: ActivityItem[]; activeTab: ActivityTab }) {
   const activeCount    = items.filter(i => i.status === "active").length;
   const upcomingCount  = items.filter(i => i.status === "upcoming").length;
   const completedCount = items.filter(i => i.status === "completed").length;
+  const hint = TAB_KPI_HINT[activeTab];
+
   return (
     <div style={{
       background: "#F1F1EF",
       borderRadius: "10px",
       padding: "14px 24px",
       display: "flex",
+      alignItems: "center",
       gap: "32px",
       marginBottom: "20px",
     }}>
@@ -400,6 +421,11 @@ function KpiBar({ items }: { items: ActivityItem[] }) {
           </div>
         </div>
       ))}
+      {hint && (
+        <div style={{ marginLeft: "auto", fontSize: "11px", color: "#A8A8A3", fontStyle: "italic" }}>
+          {hint}
+        </div>
+      )}
     </div>
   );
 }
@@ -424,6 +450,7 @@ const TAB_COLOR: Record<ActivityTab, string> = {
 
 function ActivityCard({ item, onClick, showType }: { item: ActivityItem; onClick: () => void; showType?: boolean }) {
   const dateRange = fmtDateRange(item.startDate, item.endDate);
+  const hasMeta = dateRange || item.note;
   return (
     <div
       onClick={onClick}
@@ -434,7 +461,7 @@ function ActivityCard({ item, onClick, showType }: { item: ActivityItem; onClick
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0 }}>
           <span style={{ width: 8, height: 8, borderRadius: "50%", background: item.color, flexShrink: 0, display: "inline-block" }} />
-          <span style={{ fontSize: "15px", fontWeight: 600, color: "#222222", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <span style={{ fontSize: "15px", fontWeight: 600, color: "#222222", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>
             {item.name}
           </span>
           {showType && item.tab !== "all" && (
@@ -451,10 +478,12 @@ function ActivityCard({ item, onClick, showType }: { item: ActivityItem; onClick
           {item.description}
         </div>
       )}
-      {/* Row 3: dates or note */}
-      {(dateRange || item.note) && (
-        <div style={{ fontSize: "12px", color: "#A8A8A3", marginTop: "4px", marginLeft: "16px" }}>
-          {dateRange || item.note}
+      {/* Row 3: dates AND note (both shown when available) */}
+      {hasMeta && (
+        <div style={{ fontSize: "12px", color: "#A8A8A3", marginTop: "4px", marginLeft: "16px", display: "flex", gap: "8px", flexWrap: "wrap" as const }}>
+          {dateRange && <span>{dateRange}</span>}
+          {dateRange && item.note && <span style={{ color: "#DEDEDA" }}>·</span>}
+          {item.note && <span>{item.note}</span>}
         </div>
       )}
     </div>
@@ -514,10 +543,8 @@ function SubFilterBar({
     all: "All", active: "Active", upcoming: "Upcoming", planned: "Planned", completed: "Completed",
   };
 
-  // Only show statuses that have items (except "all")
   const visible = statuses.filter(s => s === "all" || counts[s] > 0);
-
-  if (visible.length <= 2) return null; // Don't show if no real filtering available
+  if (visible.length <= 2) return null;
 
   return (
     <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" as const, marginBottom: "16px" }}>
@@ -564,25 +591,22 @@ export default function Activities() {
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
-  // Reset status filter when primary tab changes
   const handlePrimaryTabChange = (path: string, newTab: ActivityTab) => {
     if (newTab !== activeTab) setStatusFilter("all");
     navigate(path);
   };
 
   const PRIMARY_TABS: { id: ActivityTab; label: string; path: string }[] = [
-    { id: "all",        label: "All",           path: routes.studioSoo.activityPrograms.replace(/\/programs$/, "/all") },
-    { id: "programs",   label: "Programs",      path: routes.studioSoo.activityPrograms },
-    { id: "promotions", label: "Promotions",    path: routes.studioSoo.activityPromotions },
+    { id: "all",        label: "All",            path: routes.studioSoo.activityPrograms.replace(/\/programs$/, "/all") },
+    { id: "programs",   label: "Programs",       path: routes.studioSoo.activityPrograms },
+    { id: "promotions", label: "Promotions",     path: routes.studioSoo.activityPromotions },
     { id: "local",      label: "Local & Events", path: routes.studioSoo.activityLocal },
   ];
 
-  // Items for the current primary tab (before status filter)
   const primaryItems = activeTab === "all"
     ? ACTIVITY_ITEMS
     : ACTIVITY_ITEMS.filter(i => i.tab === activeTab);
 
-  // Apply status filter
   const tabItems = statusFilter === "all"
     ? primaryItems
     : primaryItems.filter(i => i.status === statusFilter);
@@ -593,7 +617,7 @@ export default function Activities() {
     return routes.studioSoo.activityLocalDetail(item.id);
   }
 
-  // Group programs by their group field (only in programs tab)
+  // Group programs by their group field (programs tab)
   const programGroups = activeTab === "programs"
     ? tabItems.reduce<Record<string, ActivityItem[]>>((acc, item) => {
         const g = item.group ?? "Other";
@@ -601,13 +625,30 @@ export default function Activities() {
       }, {})
     : {};
 
+  // Group local items by their group field (local tab)
+  const LOCAL_GROUP_ORDER = ["In-Venue", "Community & Outreach", "Member Events", "Social Media"];
+  const localGroups = activeTab === "local"
+    ? tabItems.reduce<Record<string, ActivityItem[]>>((acc, item) => {
+        const g = item.group ?? "Other";
+        return { ...acc, [g]: [...(acc[g] ?? []), item] };
+      }, {})
+    : {};
+
+  // Subtitle: contextual per tab
+  const SUBTITLE: Record<ActivityTab, string> = {
+    all:        "All programs, promotions, and local events — linked to campaigns and Asana",
+    programs:   "PBGA-led clinics and programs tracked via Acuity",
+    promotions: "Active and upcoming promotional offers tied to membership campaigns",
+    local:      "In-venue displays, community outreach, member events, and social content",
+  };
+
   return (
     <div className="p-8 space-y-6">
       {/* Header */}
       <div>
         <h1 style={{ fontSize: "20px", fontWeight: 600, color: "#222222" }}>Activities</h1>
         <p style={{ fontSize: "13px", color: "#6F6F6B", marginTop: "4px" }}>
-          Programs · Promotions · Local & Events
+          {SUBTITLE[activeTab]}
         </p>
       </div>
 
@@ -635,10 +676,10 @@ export default function Activities() {
         ))}
       </div>
 
-      {/* KPI bar (not shown for "All" tab) */}
-      {activeTab !== "all" && <KpiBar items={primaryItems} />}
+      {/* KPI bar (shown for all tabs except "all") */}
+      {activeTab !== "all" && <KpiBar items={primaryItems} activeTab={activeTab} />}
 
-      {/* Status sub-filter (not shown for "All" tab) */}
+      {/* Status sub-filter */}
       {activeTab !== "all" && (
         <SubFilterBar items={primaryItems} value={statusFilter} onChange={setStatusFilter} />
       )}
@@ -646,7 +687,7 @@ export default function Activities() {
       {/* Card list */}
       <div className="space-y-3">
 
-        {/* "All" tab: flat list with type indicator */}
+        {/* "All" tab: type summary chips + flat list */}
         {activeTab === "all" && (
           <>
             <div style={{ display: "flex", gap: "8px", marginBottom: "16px", flexWrap: "wrap" as const }}>
@@ -681,7 +722,6 @@ export default function Activities() {
                 </div>
               </div>
             ))}
-            {/* Past Programs (only when no status filter active) */}
             {statusFilter === "all" && PAST_PROGRAMS.length > 0 && (
               <div style={{ marginTop: "24px" }}>
                 <GroupHeader label="Past Programs" />
@@ -693,23 +733,49 @@ export default function Activities() {
           </>
         )}
 
-        {/* Promotions tab */}
+        {/* Promotions tab: flat list */}
         {activeTab === "promotions" && (
           tabItems.map(item => (
             <ActivityCard key={item.id} item={item} onClick={() => navigate(getDetailPath(item))} />
           ))
         )}
 
-        {/* Local & Events tab */}
+        {/* Local & Events tab: grouped by category */}
         {activeTab === "local" && (
-          tabItems.map(item => (
-            <ActivityCard key={item.id} item={item} onClick={() => navigate(getDetailPath(item))} />
-          ))
+          <>
+            {LOCAL_GROUP_ORDER
+              .filter(g => localGroups[g]?.length > 0)
+              .map(group => (
+                <div key={group}>
+                  <GroupHeader label={group} />
+                  <div className="space-y-3">
+                    {localGroups[group].map(item => (
+                      <ActivityCard key={item.id} item={item} onClick={() => navigate(getDetailPath(item))} />
+                    ))}
+                  </div>
+                </div>
+              ))
+            }
+            {/* Ungrouped items */}
+            {Object.keys(localGroups)
+              .filter(g => !LOCAL_GROUP_ORDER.includes(g))
+              .map(group => (
+                <div key={group}>
+                  <GroupHeader label={group} />
+                  <div className="space-y-3">
+                    {localGroups[group].map(item => (
+                      <ActivityCard key={item.id} item={item} onClick={() => navigate(getDetailPath(item))} />
+                    ))}
+                  </div>
+                </div>
+              ))
+            }
+          </>
         )}
 
-        {/* Empty state when filter yields no results */}
+        {/* Empty state */}
         {activeTab !== "all" && tabItems.length === 0 && (
-          <div style={{ textAlign: "center", padding: "32px 16px", color: "#A8A8A3", fontSize: "14px" }}>
+          <div style={{ textAlign: "center" as const, padding: "32px 16px", color: "#A8A8A3", fontSize: "14px" }}>
             No items match the selected filter.
           </div>
         )}
