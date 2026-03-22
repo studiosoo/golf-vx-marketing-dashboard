@@ -581,12 +581,14 @@ export default function Activities() {
   const params = useParams<{ venueSlug?: string; tab?: string }>();
   const venueSlug = params.venueSlug ?? getVenueSlugFromPath(location) ?? "arlington-heights";
   const routes = appRoutes.venue(venueSlug);
-  const tab = params.tab;
+  // Derive tab from URL path segment — useParams :tab is undefined when routes are
+  // registered as separate fixed paths (/activities/promotions, /activities/local, etc.)
+  const pathSegment = location.split("/").pop();
 
   const activeTab: ActivityTab =
-    tab === "all"        ? "all"        :
-    tab === "promotions" ? "promotions" :
-    tab === "local"      ? "local"      :
+    pathSegment === "all"        ? "all"        :
+    pathSegment === "promotions" ? "promotions" :
+    pathSegment === "local"      ? "local"      :
     "programs";
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
