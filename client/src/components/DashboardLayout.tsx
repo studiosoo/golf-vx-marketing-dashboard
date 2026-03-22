@@ -185,9 +185,6 @@ export default function DashboardLayout({
                   alt="Golf VX"
                   className="h-7 w-auto object-contain"
                 />
-                <p className="text-[10px] uppercase tracking-[0.18em] text-[#AAAAAA] mt-0.5 truncate">
-                  {currentVenueSlug.replace(/-/g, " ")}
-                </p>
               </div>
             )}
           </div>
