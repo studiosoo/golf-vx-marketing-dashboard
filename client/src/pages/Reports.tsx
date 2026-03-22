@@ -11,7 +11,7 @@
  * Section map:
  *  [A] Executive Summary      — expanded
  *  [B] Revenue & Operations   — expanded
- *  [C] Marketing Performance Highlights — expanded (activity cards, Jan–Mar 2026)
+ *  [C] Marketing Performance Highlights — expanded (activity cards, Jan–Apr 2026)
  *  [D] Marketing Timeline     — always visible
  *  [E] Campaign Performance   — expanded (4 campaign rows)
  *  [F] Studio Soo Execution   — collapsed by default
@@ -20,6 +20,8 @@
  *  [I] Local SEO              — collapsed by default
  */
 import { useState } from "react";
+import { useLocation } from "wouter";
+import { getVenueSlugFromPath, DEFAULT_VENUE_SLUG } from "@/lib/routes";
 import { trpc } from "@/lib/trpc";
 import {
   ChevronDown,
@@ -78,7 +80,7 @@ const MONTHLY_REVENUE = [
 ];
 
 const REVENUE_MIX = [
-  { category: "Bay Usage", value: 193608.98, pct: 70.1, color: "#F5C72C" },
+  { category: "Bay Usage", value: 193608.98, pct: 70.1, color: "#F2DD48" },
   { category: "F&B",       value: 80444.43,  pct: 29.2, color: "#72B84A" },
   { category: "Other",     value: 1922.58,   pct: 0.7,  color: "#E0E0E0" },
 ];
@@ -366,7 +368,7 @@ const CAMPAIGN_ROWS: Array<{
     bg: "#EAF2FF",
     asanaGid: "1212077289242708",
     kpiLabel: "Members",
-    kpiNote: "127 / 300 (42.3%)",
+    kpiNote: "102 / 300 (34.0%)",
     statusBadge: "Active · On Track",
     goal: "300 members by Dec 2026",
     insight: "Annual Membership Giveaway (deadline Apr 4) and Meta Ads (588% ROI) driving Q2 opportunity.",
@@ -393,9 +395,9 @@ const CAMPAIGN_ROWS: Array<{
     asanaGid: "1212077289242724",
     kpiLabel: "Events/mo",
     kpiNote: "~2/mo est.",
-    statusBadge: "Below Target",
-    goal: "4 corporate events/month",
-    insight: "50% of target. CHA Fundraiser Night (May 2) and private bay watch party model are near-term levers.",
+    statusBadge: "Active · On Track",
+    goal: "2 group events/month",
+    insight: "On track. CHA Fundraiser Night (May 2) and private bay watch party model are near-term levers.",
   },
 ];
 
@@ -946,6 +948,9 @@ function LocalSEOBlock() {
 function MarketingPerformanceHighlights() {
   const [open, setOpen] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [location] = useLocation();
+  const venueSlug = getVenueSlugFromPath(location) ?? DEFAULT_VENUE_SLUG;
+  const venuePath = `/app/${venueSlug}/studio-soo`;
 
   type CardStatus = "active" | "completed" | "planned";
 
@@ -972,7 +977,7 @@ function MarketingPerformanceHighlights() {
       name:   "PBGA Winter Clinic",
       type:   "Program",
       status: "completed",
-      period: "Jan–Mar 2026",
+      period: "Jan–Apr 2026",
       kpis:   [
         { label: "Participants", value: "—", awaiting: true },
         { label: "Revenue",      value: "—", awaiting: true },
@@ -981,9 +986,9 @@ function MarketingPerformanceHighlights() {
       detail: {
         strategy:    "Studio Soo partnered with PBGA coaches Amy Welch and Romy Hayashi to run a weekly indoor clinic series targeting junior and beginner golfers during peak winter demand. Revenue target: $15,000.",
         channels:    "PBGA organic · Meta Ads (warm audience) · in-venue signage",
-        keyDates:    "Jan 2026 launch → Mar 2026 final session. Series fully completed.",
+        keyDates:    "Jan 2026 launch → Apr 2026 final session. Series fully completed.",
         dataNote:    "Participant count and revenue pending Acuity API integration. Raw appointment data is available — dashboard pull is in progress.",
-        activityPath: "/app/arlington-heights/studio-soo/activities/programs/winter-camp",
+        activityPath: `${venuePath}/activities/programs/winter-camp`,
       },
     },
     {
@@ -1003,7 +1008,7 @@ function MarketingPerformanceHighlights() {
         channels:    "Email list · in-venue physical displays · social media (organic)",
         keyDates:    "Nov 2025 launch (Black Friday) → Feb 2026 close (Year-End extended). Now closed.",
         dataNote:    "3 units sold and $4,500 revenue are self-reported estimates. Stripe integration will enable verified tracking for future cycles.",
-        activityPath: "/app/arlington-heights/studio-soo/activities/promotions/swing-saver-promo",
+        activityPath: `${venuePath}/activities/promotions/swing-saver-promo`,
       },
     },
     {
@@ -1019,7 +1024,7 @@ function MarketingPerformanceHighlights() {
         channels:    "Meta Ads ($1,225 total spend across 3 ad sets) · organic Instagram · landing page at ah.playgolfvx.com/giveaway",
         keyDates:    "Jan 2026 launch → April 4, 2026 deadline. Winner announced April 2026.",
         dataNote:    "~90 applicants as of Mar 2026 (estimated). Meta Ads: ~50,000 impressions, 588% blended ROI on paid portion.",
-        activityPath: "/app/arlington-heights/studio-soo/activities/promotions/annual-giveaway",
+        activityPath: `${venuePath}/activities/promotions/annual-giveaway`,
       },
     },
     {
@@ -1036,7 +1041,7 @@ function MarketingPerformanceHighlights() {
         channels:    "Meta Ads (parent targeting, 5-mi radius) · PBGA organic network · email to existing member parents",
         keyDates:    "Session 1: June 9 · Session 2: June 23 · Session 3: July 7 · Session 4: July 21 · Session 5: Aug 4 · Session 6: Aug 18. Pre-registration open now.",
         dataNote:    "Enrollment tracking will be via Acuity once sessions open. Budget: $350 for early-bird Meta Ads phase.",
-        activityPath: "/app/arlington-heights/studio-soo/activities/programs/junior-summer-camp",
+        activityPath: `${venuePath}/activities/programs/junior-summer-camp`,
       },
     },
     {
@@ -1055,7 +1060,7 @@ function MarketingPerformanceHighlights() {
         channels:    "Meta Ads ($441 Feb spend · 1,922% ROI) · Chicago Golf Show vouchers · in-venue referral",
         keyDates:    "No end date. Gift Card Promo (companion offer) expires March 31, 2026.",
         dataNote:    "Trial-to-member conversion tracked via Sunday Clinic (~31% conversion rate observed). Chicago Golf Show estimate is self-reported (30 vouchers distributed).",
-        activityPath: "/app/arlington-heights/studio-soo/activities/promotions/trial-session",
+        activityPath: `${venuePath}/activities/promotions/trial-session`,
       },
     },
     {
@@ -1072,7 +1077,7 @@ function MarketingPerformanceHighlights() {
         channels:    "Organic · word of mouth · in-venue signage · email to active member list",
         keyDates:    "Weekly Sundays (year-round). Drive Day: March 29, 2026 inaugural session.",
         dataNote:    "~50 total participants is a cumulative estimate from Acuity appointments. Sunday Clinic is the highest-conversion trial channel identified to date.",
-        activityPath: "/app/arlington-heights/studio-soo/activities/programs/sunday-clinic",
+        activityPath: `${venuePath}/activities/programs/sunday-clinic`,
       },
     },
   ];
@@ -1094,7 +1099,7 @@ function MarketingPerformanceHighlights() {
       >
         <div>
           <h2 className="text-[15px] font-semibold text-left" style={{ color: TEXT_P }}>
-            Marketing Performance Highlights · Jan–Mar 2026
+            Marketing Performance Highlights · Jan–Apr 2026
           </h2>
           <p className="text-xs mt-0.5 text-left" style={{ color: TEXT_S }}>
             6 active programs and promotions — click any card to see strategy, channels, and key dates
@@ -1276,7 +1281,7 @@ export default function Reports() {
       {/* 2 — Revenue & Operations (expanded) */}
       <RevenueOperations snapshot={snapshot} toastSummary={toastSummary} />
 
-      {/* 3 — Marketing Performance Highlights · Jan–Mar 2026 */}
+      {/* 3 — Marketing Performance Highlights · Jan–Apr 2026 */}
       <MarketingPerformanceHighlights />
 
       {/* D — Marketing Timeline */}

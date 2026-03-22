@@ -230,8 +230,8 @@ export const intelligenceRouter = router({
       },
       corporateEvents: {
         current: eventsThisMonth,
-        target: 1,
-        progress: Math.min((eventsThisMonth / 1) * 100, 100),
+        target: 2,
+        progress: Math.min((eventsThisMonth / 2) * 100, 100),
       },
     };
   }),
