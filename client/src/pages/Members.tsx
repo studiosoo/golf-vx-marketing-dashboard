@@ -48,18 +48,18 @@ const TIER_COLORS: Record<MembershipTier, string> = {
   all_access_aces: "bg-primary/10 text-primary border-primary/20",
   swing_savers: "bg-[#888888]/100/10 text-[#888888] border-blue-500/20",
   golf_vx_pro: "bg-[#888888]/100/10 text-[#888888] border-purple-500/20",
-  trial: "bg-yellow-500/10 text-[#F5C72C] border-yellow-500/20",
-  monthly: "bg-green-500/10 text-[#3DB855] border-green-500/20",
-  annual: "bg-green-500/10 text-[#3DB855] border-green-500/20",
+  trial: "bg-[#F2DD48]/10 text-[#B8A000] border-[#F2DD48]/20",
+  monthly: "bg-[#72B84A]/10 text-[#4C882A] border-[#72B84A]/20",
+  annual: "bg-[#72B84A]/10 text-[#4C882A] border-[#72B84A]/20",
   corporate: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
   none: "bg-muted text-muted-foreground border-border",
 };
 
 const STATUS_COLORS: Record<MemberStatus, string> = {
-  active: "bg-green-500/10 text-[#3DB855]",
+  active: "bg-[#72B84A]/10 text-[#4C882A]",
   inactive: "bg-muted text-muted-foreground",
   cancelled: "bg-[#E8453C]/10 text-[#E8453C]",
-  trial: "bg-yellow-500/10 text-[#F5C72C]",
+  trial: "bg-[#F2DD48]/10 text-[#B8A000]",
 };
 
 function MemberRow({ member }: { member: Member }) {
@@ -152,7 +152,7 @@ export default function Members() {
         </div>
         <div className="bg-card border border-border rounded-lg p-4">
           <div className="text-sm text-muted-foreground mb-1">Active</div>
-          <div className="text-3xl font-bold text-[#3DB855]">{activeMembers.length}</div>
+          <div className="text-3xl font-bold text-[#4C882A]">{activeMembers.length}</div>
         </div>
         <div className="bg-card border border-border rounded-lg p-4">
           <div className="text-sm text-muted-foreground mb-1">All Access Ace</div>
