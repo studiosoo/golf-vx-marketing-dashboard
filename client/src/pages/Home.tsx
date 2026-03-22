@@ -372,11 +372,19 @@ export default function Home() {
         primaryKpi: { current: Math.round(retentionRate * 10) / 10, target, unit: "%" },
       };
     }
+    if (c.id === "corporate_events" && strategicKPIs?.corporateEvents != null) {
+      const { current, target } = strategicKPIs.corporateEvents;
+      return {
+        ...c,
+        primaryKpi: { current, target, unit: "/mo" },
+        signal: `${current} events est. · target: ${target}/mo`,
+      };
+    }
     return c;
   });
   // Show all 4 campaign categories — include even those with no spend (KPI-only cards)
   const activeCampaigns = enrichedCampaigns.filter((c: any) =>
-    c.totalSpend > 0 || c.totalRevenue > 0 || (c.primaryKpi?.current ?? 0) > 0
+    c.totalSpend > 0 || c.totalRevenue > 0 || (c.primaryKpi?.current ?? 0) > 0 || c.id === "corporate_events"
   );
 
   // 2026 Key Goals data
