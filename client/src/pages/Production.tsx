@@ -1,5 +1,18 @@
 import { useState, useMemo } from "react";
-import { Plus, X, ChevronDown, ChevronRight, AlertTriangle } from "lucide-react";
+import { Plus, X, ChevronDown, ChevronRight, AlertTriangle, RefreshCw, ExternalLink, CheckCircle2, Circle } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+
+// ─── Production-linked Asana project names (mirrors server/routers/asana.ts) ───────────
+const PRODUCTION_PROJECTS: Record<string, string> = {
+  "PBGA Programs":               "1212078499567959",
+  "Trial Conversion Campaign":   "1212077269419925",
+  "Membership Acquisition":      "1212077289242708",
+  "Member Retention":            "1211736985531595",
+  "Corporate Events & B2B":      "1212077289242724",
+  "Venue Display / Local Media": "1211917285471271",
+  "AH Social Media Content":     "1211673464711096",
+  "Stroll Magazine":             "1211912937095581",
+};
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const TEXT_P  = "#222222";
@@ -168,7 +181,7 @@ function AddEffortForm({ onAdd }: { onAdd: (e: EffortEntry) => void }) {
             </label>
             <label className="flex flex-col gap-1">
               <span className="text-[11px] font-medium text-[#A8A8A3] uppercase tracking-wide">Asana Task ID</span>
-              <input type="text" placeholder="Optional — Phase 2" {...F("asanaTaskId")} className="input-field" />
+              <input type="text" placeholder="Paste Asana task GID (optional)" {...F("asanaTaskId")} className="input-field" />
             </label>
             <label className="flex flex-col gap-1 md:col-span-2">
               <span className="text-[11px] font-medium text-[#A8A8A3] uppercase tracking-wide">Notes</span>
@@ -251,7 +264,7 @@ function AddDeliverableForm({ onAdd }: { onAdd: (d: DeliverableEntry) => void })
             </label>
             <label className="flex flex-col gap-1">
               <span className="text-[11px] font-medium text-[#A8A8A3] uppercase tracking-wide">Asana Project ID</span>
-              <input type="text" placeholder="Optional — Phase 2" {...F("asanaProjectId")} className="input-field" />
+              <input type="text" placeholder="Paste Asana project GID (optional)" {...F("asanaProjectId")} className="input-field" />
             </label>
             <label className="flex flex-col gap-1 md:col-span-2">
               <span className="text-[11px] font-medium text-[#A8A8A3] uppercase tracking-wide">Notes</span>
@@ -280,7 +293,7 @@ function AddDeliverableForm({ onAdd }: { onAdd: (d: DeliverableEntry) => void })
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function Production() {
-  const [tab, setTab] = useState<"effort" | "deliverables" | "ratecard">("effort");
+  const [tab, setTab] = useState<"effort" | "deliverables" | "asana" | "ratecard">("effort");
   const [effortEntries, setEffortEntries] = useState<EffortEntry[]>([]);
   const [deliverableEntries, setDeliverableEntries] = useState<DeliverableEntry[]>([]);
 
@@ -296,10 +309,27 @@ export default function Production() {
   function removeEffort(id: string) { setEffortEntries(prev => prev.filter(e => e.id !== id)); }
   function removeDeliverable(id: string) { setDeliverableEntries(prev => prev.filter(d => d.id !== id)); }
 
+  const [asanaProjectFilter, setAsanaProjectFilter] = useState<string>("all");
+  const [newTaskName, setNewTaskName] = useState("");
+  const [newTaskProject, setNewTaskProject] = useState(Object.keys(PRODUCTION_PROJECTS)[0]);
+  const [newTaskDue, setNewTaskDue] = useState("");
+  const [createOpen, setCreateOpen] = useState(false);
+
+  const { data: asanaData, isLoading: asanaLoading, refetch: asanaRefetch } =
+    trpc.asana.getProductionTasks.useQuery(
+      { projectName: asanaProjectFilter === "all" ? undefined : asanaProjectFilter },
+      { enabled: tab === "asana", staleTime: 60_000 },
+    );
+
+  const createTask = trpc.asana.createProductionTask.useMutation({
+    onSuccess: () => { setNewTaskName(""); setNewTaskDue(""); setCreateOpen(false); asanaRefetch(); },
+  });
+
   const tabs = [
-    { id: "effort" as const,      label: "Effort Log" },
-    { id: "deliverables" as const, label: "Deliverables" },
-    { id: "ratecard" as const,    label: "Rate Card" },
+    { id: "effort" as const,       label: "Effort Log" },
+    { id: "deliverables" as const,  label: "Deliverables" },
+    { id: "asana" as const,         label: "Asana Tasks" },
+    { id: "ratecard" as const,      label: "Rate Card" },
   ];
 
   return (
@@ -488,6 +518,180 @@ export default function Production() {
         </div>
       )}
 
+      {/* ── Asana Tasks Tab ── */}
+      {tab === "asana" && (
+        <div className="space-y-4">
+          {/* Controls bar */}
+          <div className="flex flex-wrap items-center gap-3">
+            <select
+              value={asanaProjectFilter}
+              onChange={e => setAsanaProjectFilter(e.target.value)}
+              className="input-field"
+              style={{ maxWidth: 260 }}
+            >
+              <option value="all">All Projects</option>
+              {Object.keys(PRODUCTION_PROJECTS).map(p => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+            <button
+              onClick={() => asanaRefetch()}
+              className="flex items-center gap-1.5 text-[13px] px-3 py-1.5 rounded-lg border transition-colors hover:bg-[#F1F1EF]"
+              style={{ borderColor: BORDER, color: TEXT_S }}
+            >
+              <RefreshCw size={13} />
+              Refresh
+            </button>
+            <button
+              onClick={() => setCreateOpen(v => !v)}
+              className="flex items-center gap-1.5 text-[13px] font-medium px-3 py-1.5 rounded-lg border transition-colors hover:brightness-95 ml-auto"
+              style={{ background: YELLOW, borderColor: YELLOW, color: TEXT_P }}
+            >
+              <Plus size={14} />
+              New Task
+            </button>
+          </div>
+
+          {/* Create task form */}
+          {createOpen && (
+            <div className="p-4 rounded-xl border" style={{ borderColor: BORDER, background: BG_S }}>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <label className="flex flex-col gap-1 md:col-span-2">
+                  <span className="text-[11px] font-medium text-[#A8A8A3] uppercase tracking-wide">Task Name</span>
+                  <input
+                    type="text"
+                    placeholder="e.g. Design Junior Camp email header"
+                    value={newTaskName}
+                    onChange={e => setNewTaskName(e.target.value)}
+                    className="input-field"
+                  />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className="text-[11px] font-medium text-[#A8A8A3] uppercase tracking-wide">Due Date</span>
+                  <input
+                    type="date"
+                    value={newTaskDue}
+                    onChange={e => setNewTaskDue(e.target.value)}
+                    className="input-field"
+                  />
+                </label>
+                <label className="flex flex-col gap-1 md:col-span-2">
+                  <span className="text-[11px] font-medium text-[#A8A8A3] uppercase tracking-wide">Project</span>
+                  <select
+                    value={newTaskProject}
+                    onChange={e => setNewTaskProject(e.target.value)}
+                    className="input-field"
+                  >
+                    {Object.keys(PRODUCTION_PROJECTS).map(p => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              <div className="flex gap-2 mt-3 justify-end">
+                <button
+                  onClick={() => setCreateOpen(false)}
+                  className="text-[13px] px-3 py-1.5 rounded-lg border hover:bg-white transition-colors"
+                  style={{ borderColor: BORDER, color: TEXT_S }}
+                >Cancel</button>
+                <button
+                  onClick={() => {
+                    if (!newTaskName.trim()) return;
+                    createTask.mutate({
+                      name: newTaskName.trim(),
+                      projectName: newTaskProject,
+                      due_on: newTaskDue || undefined,
+                    });
+                  }}
+                  disabled={createTask.isPending || !newTaskName.trim()}
+                  className="text-[13px] px-3 py-1.5 rounded-lg font-medium transition-colors hover:brightness-95 disabled:opacity-50"
+                  style={{ background: YELLOW, color: TEXT_P }}
+                >
+                  {createTask.isPending ? "Creating…" : "Create in Asana"}
+                </button>
+              </div>
+              {createTask.isError && (
+                <p className="text-[12px] mt-2" style={{ color: "#D05A3A" }}>
+                  Error: {createTask.error?.message}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Task list */}
+          {asanaLoading ? (
+            <div className="text-center py-12 text-[13px]" style={{ color: TEXT_M }}>Loading Asana tasks…</div>
+          ) : !asanaData || asanaData.projects.every(p => p.tasks.length === 0) ? (
+            <div className="text-center py-12 text-[13px]" style={{ color: TEXT_M }}>
+              No tasks found. Check that ASANA_PAT is set and projects are accessible.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {asanaData.projects
+                .filter(p => p.tasks.length > 0)
+                .map(proj => (
+                  <div key={proj.projectGid} className="bg-white rounded-xl border overflow-hidden" style={{ borderColor: BORDER, boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
+                    <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: BORDER }}>
+                      <div>
+                        <h3 className="text-[14px] font-semibold" style={{ color: TEXT_P }}>{proj.projectName}</h3>
+                        <p className="text-[11px] mt-0.5" style={{ color: TEXT_M }}>
+                          {proj.tasks.filter(t => !t.completed).length} open · {proj.tasks.filter(t => t.completed).length} completed
+                        </p>
+                      </div>
+                      <a
+                        href={`https://app.asana.com/0/${proj.projectGid}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-[12px] hover:underline"
+                        style={{ color: TEXT_S }}
+                      >
+                        Open in Asana <ExternalLink size={11} />
+                      </a>
+                    </div>
+                    <table className="w-full text-[13px]">
+                      <thead>
+                        <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
+                          {["Status", "Task", "Assignee", "Due"].map(h => (
+                            <th key={h} className="px-4 py-2 text-left font-medium" style={{ color: TEXT_M, fontSize: "11px" }}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {proj.tasks.map(t => (
+                          <tr key={t.gid} className="border-b hover:bg-[#F6F6F4] transition-colors" style={{ borderColor: BORDER }}>
+                            <td className="px-4 py-2.5">
+                              {t.completed
+                                ? <CheckCircle2 size={15} style={{ color: GRN }} />
+                                : <Circle size={15} style={{ color: TEXT_M }} />}
+                            </td>
+                            <td className="px-4 py-2.5 font-medium" style={{ color: t.completed ? TEXT_M : TEXT_P }}>
+                              <a
+                                href={`https://app.asana.com/0/${proj.projectGid}/${t.gid}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:underline"
+                              >
+                                {t.name}
+                              </a>
+                            </td>
+                            <td className="px-4 py-2.5" style={{ color: TEXT_S }}>{t.assignee ?? "—"}</td>
+                            <td className="px-4 py-2.5" style={{ color: t.due_on && new Date(t.due_on) < new Date() && !t.completed ? "#D05A3A" : TEXT_S }}>
+                              {t.due_on ?? "—"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ))}
+              <p className="text-[11px] text-right" style={{ color: TEXT_M }}>
+                Last fetched: {asanaData.fetchedAt ? new Date(asanaData.fetchedAt).toLocaleTimeString() : "—"}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── Rate Card Tab ── */}
       {tab === "ratecard" && (
         <div className="space-y-4">
@@ -524,8 +728,8 @@ export default function Production() {
               <p>· Monthly retainer: <strong style={{ color: TEXT_P }}>{fmtCurrency(RETAINER_MONTHLY)}</strong></p>
               <p>· Approx. capacity at avg $100/hr: <strong style={{ color: TEXT_P }}>60 hrs/month</strong></p>
               <p>· Over-capacity threshold: labor value exceeds {fmtCurrency(RETAINER_MONTHLY)}</p>
-              <p>· Phase 2: entries sync to Asana via Task ID / Project ID fields</p>
-              <p>· Phase 3: MCP / API integration for automated time tracking</p>
+              <p>· Asana Tasks tab: live read/write to all production projects via API</p>
+              <p>· Next: link effort log entries to Asana task GIDs for two-way sync</p>
             </div>
           </div>
         </div>
