@@ -622,3 +622,61 @@ scripts/                  # One-off ops scripts (import-toast-authoritative.cjs,
 - Return structured reports in the format the task spec defines — no improvised formats.
 - Flag uncertainty explicitly rather than guessing. Use "UNCLEAR — needs verification" when a fact cannot be confirmed from the codebase alone.
 - Never claim an import or fix is complete without showing evidence (query result, dry-run output, or test pass).
+
+---
+
+## Manus Operating Rulebook
+
+> Full rulebook: `docs/foundation/06_manus_operating_rulebook.md`
+
+### Core operating principle
+Never solve a local request by causing a global regression. Speed is secondary. Correctness, scope control, and regression prevention come first.
+
+### Required operating modes
+
+Before any coding task, declare the mode explicitly:
+
+| Mode | When to use | Allowed |
+|------|-------------|---------|
+| **A — Audit only** | Mixed requirements, unclear ownership, active regressions, external integrations | Inspect code/routes/data paths, produce change plan. No code changes. |
+| **B — Plan only** | After audit, before coding | Return scope split, file impact map, regression risks, validation plan. No coding yet. |
+| **C — PR ready** | After scope is approved | Scoped code changes, validation, open/update PR. No merge. |
+| **D — Ship approved** | Scope validated, diff small and isolated | Merge sequentially, verify deployment, run smoke tests. |
+
+### Non-negotiable rules
+
+**Rule 1 — No wholesale page rewrites without explicit approval.** Do not rewrite `Home.tsx`, `Reports.tsx`, `App.tsx`, or any large page wholesale unless explicitly approved. If a request can be done with a scoped change, do not perform a page rebuild.
+
+**Rule 2 — No mixed-scope implementation.** Do not combine UI cleanup, data source repair, route fixes, external account integration, AI data coverage, and design-system rollout into one coding pass. Split them.
+
+**Rule 3 — External integrations are separate projects.** Instagram, Google Business Profile, Meta, Anthropic, Twilio, Asana, Encharge, Acuity must be treated as separate integration tasks. Never bundle with page redesign. Never use plaintext credentials from chat.
+
+**Rule 4 — No secret handling from chat text.** Do not use plaintext passwords or credentials from chat messages. Ask user to log in manually in browser, or request secure env/secret setup.
+
+**Rule 5 — No regressions accepted.** Every change must include local validation, adjacent-page regression check, route check, and design-system compliance check.
+
+### Mandatory pre-code checklist
+
+Before writing any code, return:
+
+1. Task classification (UI cleanup / route fix / data repair / design-system alignment / integration audit / AI coverage audit / icon cleanup)
+2. Scope split — which requests belong together, which must be separated
+3. File impact map — files likely touched, files that must not be touched
+4. Regression risk map — adjacent pages at risk, shared route/config/data files at risk
+5. Validation plan — local commands, route smoke tests, design-system checks
+
+### PR sizing rule
+
+| Size | Scope |
+|------|-------|
+| **Small** | One route fix, one page section fix, one icon/data label cleanup, one design-system alignment pass on one page |
+| **Medium** | One page + adjacent route/data file, one self-contained regression fix |
+| **Too large — must split** | Overview + Reports + Campaigns + Activities in one PR; UI + integration + auth + data-source refactor together |
+
+### Stop conditions
+
+Stop and ask before: changing Railway variables, using credentials or logging into accounts, changing database schema, writing to production DB, changing auth strategy, introducing a new external integration path, or deleting large sections without ownership confirmation.
+
+### Mixed-request rule
+
+If a user message contains 4 or more separate concerns, split the work into named tracks before coding. Do not start coding all of them at once.
