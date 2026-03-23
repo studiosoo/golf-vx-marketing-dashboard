@@ -6,6 +6,7 @@ import {
   getJuniorCampData,
   getAppointmentTypes,
   getAppointments,
+  filterNonCashAppointments,
 } from "../acuity";
 import { getAllCampaignsWithInsights } from "../metaAds";
 
@@ -46,8 +47,10 @@ export const activitiesRouter = router({
         // ── Sunday Clinic / Drive Day ──────────────────────────────────────
         if (activityId === "sunday-clinic") {
           const data = await getSundayClinicData();
-          const sorted = data.events
-            .flatMap(e => e.appointments)
+          const allApts = data.events.flatMap(e => e.appointments);
+          // Filter out cash payments (system entry errors — not real revenue)
+          const nonCashApts = await filterNonCashAppointments(allApts);
+          const sorted = nonCashApts
             .sort((a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime());
 
           const revenue = sorted.reduce(
@@ -158,7 +161,9 @@ export const activitiesRouter = router({
 
         const matchedIds = new Set(matchedTypes.map(t => t.id));
         const allApts    = await getAppointments({ canceled: false });
-        const filtered   = allApts.filter(a => matchedIds.has(a.appointmentTypeID));
+        const rawFiltered = allApts.filter(a => matchedIds.has(a.appointmentTypeID));
+        // Filter out cash payments (system entry errors — not real revenue)
+        const filtered   = await filterNonCashAppointments(rawFiltered);
         const revenue    = filtered.reduce((sum, a) => sum + parseFloat(a.amountPaid || a.priceSold || a.price || "0"), 0);
         const unique     = new Set(filtered.map(a => a.email.toLowerCase()));
         const recent: RecentApt[] = [...filtered]

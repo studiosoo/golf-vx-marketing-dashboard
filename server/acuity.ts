@@ -153,6 +153,63 @@ export async function getAppointmentPayments(appointmentId: number): Promise<Acu
 }
 
 /**
+ * Batch-fetch payment processor for a list of appointments.
+ * Returns a Map<appointmentId, processor> where processor is 'stripe', 'square', 'cash', etc.
+ * Cash appointments are those recorded as 'cash' by Acuity (system entry errors).
+ * Fetches in parallel chunks of 20 to respect rate limits.
+ */
+export async function getPaymentProcessors(
+  appointments: AcuityAppointment[]
+): Promise<Map<number, string>> {
+  const client = createAcuityClient();
+  const processorMap = new Map<number, string>();
+  const CHUNK_SIZE = 20;
+
+  for (let i = 0; i < appointments.length; i += CHUNK_SIZE) {
+    const chunk = appointments.slice(i, i + CHUNK_SIZE);
+    const results = await Promise.allSettled(
+      chunk.map(apt =>
+        client
+          .get<AcuityPayment[]>(`/appointments/${apt.id}/payments`)
+          .then(r => ({ id: apt.id, processor: r.data?.[0]?.processor?.toLowerCase() || 'unknown' }))
+          .catch(() => ({ id: apt.id, processor: 'unknown' }))
+      )
+    );
+    for (const result of results) {
+      if (result.status === 'fulfilled') {
+        processorMap.set(result.value.id, result.value.processor);
+      }
+    }
+    // Small delay between chunks to avoid rate limiting
+    if (i + CHUNK_SIZE < appointments.length) {
+      await new Promise(resolve => setTimeout(resolve, 300));
+    }
+  }
+  return processorMap;
+}
+
+/**
+ * Filter out cash appointments from a list.
+ * Only keeps appointments paid via Stripe, Square, or other non-cash processors.
+ * Also filters for paid=yes to exclude unpaid/deposit-only records.
+ */
+export async function filterNonCashAppointments(
+  appointments: AcuityAppointment[]
+): Promise<AcuityAppointment[]> {
+  // Only check paid appointments
+  const paidApts = appointments.filter(a => a.paid === 'yes');
+  if (paidApts.length === 0) return [];
+
+  const processorMap = await getPaymentProcessors(paidApts);
+
+  return paidApts.filter(apt => {
+    const proc = processorMap.get(apt.id) || 'unknown';
+    // Exclude cash and unknown (system entry errors)
+    return proc !== 'cash';
+  });
+}
+
+/**
  * Get revenue data for a specific appointment type
  */
 export async function getAppointmentTypeRevenue(
@@ -181,13 +238,16 @@ export async function getAppointmentTypeRevenue(
 
 /**
  * Get all revenue data grouped by appointment type
+ * Only includes Stripe/Square payments — Cash entries are excluded (system recording errors).
  */
 export async function getAllRevenueByType(minDate?: string, maxDate?: string) {
   // Single API call + in-memory grouping (avoids 80+ parallel requests that cause rate limiting)
-  const [appointments, appointmentTypes] = await Promise.all([
+  const [rawAppointments, appointmentTypes] = await Promise.all([
     getAppointments({ minDate, maxDate, canceled: false }),
     getAppointmentTypes(),
   ]);
+  // Filter out cash payments (system entry errors — not real revenue)
+  const appointments = await filterNonCashAppointments(rawAppointments);
   // Build a map of typeId -> type info
   const typeMap: Record<number, AcuityAppointmentType> = {};
   for (const t of appointmentTypes) typeMap[t.id] = t;
@@ -510,17 +570,20 @@ export function categorizeClinicType(typeName: string): {
 
 /**
  * Get PBGA Winter Clinic data with lesson-by-lesson breakdown
+ * Revenue only includes Stripe/Square payments — Cash entries excluded (system errors).
  */
 export async function getWinterClinicData(params?: {
   minDate?: string;
   maxDate?: string;
 }) {
   // Get all appointments for the date range
-  const appointments = await getAppointments({
+  const rawAppointments = await getAppointments({
     minDate: params?.minDate || '2026-01-01',
-    maxDate: params?.maxDate || '2026-03-31',
+    maxDate: params?.maxDate || '2026-04-30',
     canceled: false,
   });
+  // Filter out cash payments (system entry errors — not real revenue)
+  const appointments = await filterNonCashAppointments(rawAppointments);
 
   // Filter for Winter Clinic appointments (PBGA Winter Clinics category)
   const clinicAppointments = appointments.filter(apt => {
@@ -653,11 +716,13 @@ export async function getJuniorCampData(params?: {
   minDate?: string;
   maxDate?: string;
 }) {
-  const appointments = await getAppointments({
+  const rawAppointments = await getAppointments({
     minDate: params?.minDate || '2026-06-01',
     maxDate: params?.maxDate || '2026-08-31',
     canceled: false,
   });
+  // Filter out cash payments (system entry errors — not real revenue)
+  const appointments = await filterNonCashAppointments(rawAppointments);
 
   // Filter for Junior Summer Camp appointments
   const campAppointments = appointments.filter(apt => {
