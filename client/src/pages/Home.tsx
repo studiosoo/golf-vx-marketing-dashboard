@@ -8,25 +8,19 @@ import {
   Users,
   DollarSign,
   Target,
-  TrendingUp,
-  TrendingDown,
   ArrowRight,
   RefreshCw,
   BarChart3,
   Flag,
   UserCheck,
-  ShoppingBag,
-  CreditCard,
-  Award,
   Crosshair,
   X,
   Instagram,
   Mail,
-  Activity,
   Lock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { MetaAdsStatusBadge } from "@/components/MetaAdsStatusBadge";
 
 function fmt(n: number, opts?: Intl.NumberFormatOptions) {
@@ -136,9 +130,9 @@ function MemberListModal({ open, onClose }: { open: boolean; onClose: () => void
 
 const CAMPAIGN_META: Record<string, { label: string; color: string; bg: string; icon: React.ElementType; kpiLabel: string }> = {
   trial_conversion: { label: "Trial Conversion", color: "#72B84A", bg: "#F0FAF3", icon: Target, kpiLabel: "Conversion Rate" },
-  membership_acquisition: { label: "Membership Acquisition", color: "#007AFF", bg: "#EBF4FF", icon: UserCheck, kpiLabel: "Members Acquired" },
+  membership_acquisition: { label: "Membership Acquisition", color: "#1A56DB", bg: "#EBF4FF", icon: UserCheck, kpiLabel: "Members Acquired" },
   member_retention: { label: "Member Retention", color: "#222222", bg: "#F1F1EF", icon: Users, kpiLabel: "Retention Rate" },
-  corporate_events: { label: "B2B Sales", color: "#888888", bg: "#F1F1EF", icon: Flag, kpiLabel: "Events Closed" },
+  corporate_events: { label: "B2B Sales", color: "#6F6F6B", bg: "#F1F1EF", icon: Flag, kpiLabel: "Events Closed" },
 };
 
 export default function Home() {
@@ -440,9 +434,9 @@ export default function Home() {
       goal: 2000,
       display: igFollowers != null ? fmt(igFollowers) : "—",
       goalDisplay: "2,000",
-      color: "#007AFF",
+      color: "#1A56DB",
       statusNote: igTokenNote,
-      statusColor: igTokenNote && !tokenStatus?.warning ? "#FF3B30" : "#F2DD48",
+      statusColor: igTokenNote && !tokenStatus?.warning ? "#D32F2F" : "#F2DD48",
     },
     {
       label: "Email Subscribers",
@@ -457,95 +451,6 @@ export default function Home() {
     },
   ];
 
-  // ── Data Health ──────────────────────────────────────────────────────────
-  type DataSourceStatus = "live" | "warning" | "error" | "offline" | "loading";
-  type DataSource = { label: string; status: DataSourceStatus; detail: string; note?: string };
-
-  const STATUS_DOT: Record<DataSourceStatus, string> = {
-    live: "#72B84A",
-    warning: "#F2DD48",
-    error: "#FF3B30",
-    offline: "#DEDEDA",
-    loading: "#DEDEDA",
-  };
-  const STATUS_LABEL: Record<DataSourceStatus, string> = {
-    live: "Live",
-    warning: "Renew soon",
-    error: "Action needed",
-    offline: "No data",
-    loading: "Loading…",
-  };
-  const STATUS_TEXT: Record<DataSourceStatus, string> = {
-    live: "#72B84A",
-    warning: "#F2DD48",
-    error: "#FF3B30",
-    offline: "#888888",
-    loading: "#888888",
-  };
-
-  const igDataSource = (): DataSource => {
-    if (!tokenStatus) return { label: "Instagram", status: "loading", detail: "Checking token…" };
-    if (!tokenValid) return {
-      label: "Instagram",
-      status: "error",
-      detail: "Follower count unavailable — token expired",
-      note: "Renew via Meta Graph API Explorer and update INSTAGRAM_ACCESS_TOKEN",
-    };
-    if (tokenStatus.warning) return {
-      label: "Instagram",
-      status: "warning",
-      detail: igFollowers != null ? `${fmt(igFollowers)} followers` : "Followers loading…",
-      note: `Token expires in ${tokenStatus.daysRemaining} day${tokenStatus.daysRemaining === 1 ? "" : "s"} — renew before it lapses`,
-    };
-    return {
-      label: "Instagram",
-      status: "live",
-      detail: igFollowers != null ? `${fmt(igFollowers)} followers` : "Followers loading…",
-    };
-  };
-
-  const DATA_SOURCES: DataSource[] = [
-    {
-      label: "Members · Stripe",
-      status: stripeSnap ? "live" : snapLoading ? "loading" : memberTotal > 0 ? "live" : "offline",
-      detail: stripeSnap
-        ? `${fmt(memberTotal)} paying · ${fmtCurrency(mrr)} MRR · as of ${stripeSnap.asOf}`
-        : snapLoading ? "Syncing…" : memberTotal > 0 ? `${fmt(memberTotal)} active` : "No members synced yet",
-      note: stripeSnap ? "Static snapshot — update server/data/stripe-snapshot.ts on new export" : undefined,
-    },
-    {
-      label: "Revenue · Toast POS",
-      status: toastMTD > 0 ? "live" : "offline",
-      detail: toastMTD > 0
-        ? `${fmtCurrency(toastMTD)} MTD · ${toastOrders} orders`
-        : "No orders recorded this month",
-    },
-    {
-      label: "Revenue · Acuity",
-      status: acuityTotal > 0 ? "live" : "offline",
-      detail: acuityTotal > 0
-        ? `${fmtCurrency(acuityTotal)} · ${acuityBookings} sessions`
-        : "No sessions this month",
-    },
-    igDataSource(),
-    {
-      label: "Email · Encharge",
-      status: emailSubscribersIsLive ? "live" : "warning",
-      detail: `${fmt(emailSubscribers)} AHTIL contacts`,
-      note: emailSubscribersIsLive ? undefined : "Encharge API not responding — showing CSV snapshot (2026-03-18)",
-    },
-    {
-      label: "Meta Ads",
-      status: metaAdsLoading ? "loading" : metaAdsError ? "error" : (metaAdsCampaigns && metaAdsCampaigns.length > 0) ? "live" : "offline",
-      detail: metaAdsLoading
-        ? "Connecting…"
-        : metaAdsError
-        ? "API connection failed — check META_ADS_ACCESS_TOKEN"
-        : metaAdsCampaigns && metaAdsCampaigns.length > 0
-        ? `${metaAdsCampaigns.length} campaigns live`
-        : "No campaigns returned",
-    },
-  ];
 
   return (
     <div className="max-w-6xl mx-auto space-y-5">
@@ -572,221 +477,63 @@ export default function Home() {
 
       {/* ── 2026 Key Goals ── */}
       <div className="bg-white rounded-xl border border-[#E8E8E8] p-5">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Target className="h-4 w-4 text-[#F2DD48]" />
-            <h2 className="text-[14px] font-semibold text-[#222222]">2026 Key Goals</h2>
+            <Crosshair className="h-4 w-4 text-[#F2DD48]" />
+            <h2 className="text-[15px] font-bold text-[#222222]">2026 Key Goals</h2>
           </div>
-          <span className="text-[11px] text-[#AAAAAA]">Year-end targets</span>
+          <span className="text-[11px] text-[#A8A8A3]">Year-end targets</span>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-4">
           {KEY_GOALS.map((g) => {
             const pct = g.current != null && g.goal > 0 ? Math.min((g.current / g.goal) * 100, 100) : null;
             const Icon = g.icon;
             return (
-              <div key={g.label} className="rounded-xl border border-[#F0F0F0] bg-[#FAFAFA] p-3">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <div className="h-5 w-5 rounded-md flex items-center justify-center" style={{ background: `${g.color}18` }}>
-                    <Icon className="h-3 w-3" style={{ color: g.color }} />
+              <div key={g.id} className="rounded-xl border border-[#F0F0F0] bg-[#F8F9FA] p-4">
+                {/* Card header */}
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="h-6 w-6 rounded-md flex items-center justify-center shrink-0" style={{ background: `${g.color}18` }}>
+                    <Icon className="h-3.5 w-3.5" style={{ color: g.color }} />
                   </div>
-                  <span className="text-[11px] text-[#888888] font-medium truncate">{g.label}</span>
+                  <span className="text-[12px] font-semibold text-[#6F6F6B]">{g.label}</span>
                 </div>
-                <div className="flex items-end gap-1 mb-1.5">
-                  <span className="text-[22px] font-bold text-[#222222] leading-none tracking-tight">{g.display}</span>
-                  <span className="text-[11px] text-[#AAAAAA] mb-0.5">/ {g.goalDisplay}</span>
+                {/* KPI number */}
+                <div className="flex items-end gap-1.5 mb-2">
+                  <button
+                    onClick={g.id === "members" ? () => setMemberListOpen(true) : undefined}
+                    className={cn(
+                      "text-[28px] font-bold text-[#222222] leading-none tracking-tight",
+                      g.id === "members" && "hover:text-[#F2DD48] transition-colors cursor-pointer"
+                    )}
+                  >
+                    {g.display}
+                  </button>
+                  <span className="text-[12px] text-[#A8A8A3] mb-0.5">/ {g.goalDisplay}</span>
                 </div>
+                {/* Progress bar */}
                 {pct != null ? (
                   <>
-                    <div className="h-1.5 bg-[#EEEEEE] rounded-full overflow-hidden mb-1">
+                    <div className="h-1.5 bg-[#EEEEEE] rounded-full overflow-hidden mb-1.5">
                       <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: g.color }} />
                     </div>
-                    <span className="text-[10px]" style={{ color: g.color }}>{pct.toFixed(1)}%</span>
-                    {g.statusNote && (
-                      <p className="text-[10px] mt-0.5" style={{ color: g.statusColor ?? "#888888" }}>{g.statusNote}</p>
-                    )}
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-semibold" style={{ color: g.color }}>{pct.toFixed(1)}%</span>
+                      {g.statusNote && (
+                        <span className="text-[10px]" style={{ color: g.statusColor ?? "#A8A8A3" }}>{g.statusNote}</span>
+                      )}
+                    </div>
                   </>
                 ) : (
-                  <span className="text-[10px]" style={{ color: g.statusNote ? (g.statusColor ?? "#888888") : "#AAAAAA" }}>
+                  <span className="text-[11px]" style={{ color: g.statusColor ?? "#A8A8A3" }}>
                     {g.statusNote ?? "Connecting…"}
                   </span>
                 )}
+                {/* Detail breakdown */}
+                {g.detail}
               </div>
             );
           })}
         </div>
-      </div>
-
-      {/* ── Section 1: Members + Goal Progress ── */}
-      <div className="bg-white rounded-xl border border-[#E8E8E8] p-5">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-[#222222]" />
-            <h2 className="text-[14px] font-semibold text-[#222222]">Members</h2>
-          </div>
-          <button onClick={() => setLocation("/list/members")} className="flex items-center gap-1 text-[12px] text-[#888888] hover:text-[#222222] transition-colors">
-            View all <ArrowRight className="h-3 w-3" />
-          </button>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div>
-            <div className="flex items-end gap-3 mb-2">
-              <button
-                onClick={() => setMemberListOpen(true)}
-                className="text-[42px] font-bold text-[#222222] leading-none tracking-tight hover:text-[#F2DD48] transition-colors cursor-pointer"
-                title="View member list"
-              >
-                {fmt(memberTotal)}
-              </button>
-              {members?.newThisMonth !== undefined && members.newThisMonth !== 0 && (
-                <span className={cn("text-[13px] font-semibold mb-1.5", members.newThisMonth > 0 ? "text-[#72B84A]" : "text-[#FF3B30]")}>
-                  {members.newThisMonth > 0 ? "+" : ""}{members.newThisMonth} this month
-                </span>
-              )}
-            </div>
-            <p className="text-[13px] text-[#888888]">
-              Paying Members
-              {stripeSnap && (
-                <span className="ml-2 text-[10px] text-[#AAAAAA]">· Stripe · {stripeSnap.asOf}</span>
-              )}
-            </p>
-            {stripeSnap && (
-              <p className="text-[11px] text-[#AAAAAA] mt-0.5">{stripeSnap.totalContacts} total contacts · {stripeSnap.billingBreakdown.monthly} monthly · {stripeSnap.billingBreakdown.annual} annual</p>
-            )}
-          </div>
-          {/* Stripe tier table */}
-          <div>
-            {stripeSnap ? (
-              <div className="space-y-1.5">
-                {stripeSnap.tiers.map(t => (
-                  <div key={t.name} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-[12px] font-medium text-[#222222] truncate">{t.name}</span>
-                      <span className="text-[11px] text-[#AAAAAA] shrink-0">{t.count}</span>
-                    </div>
-                    <span className="text-[12px] font-semibold text-[#222222] shrink-0">
-                      {t.mrr > 0 ? fmtCurrency(t.mrr) : "—"}
-                    </span>
-                  </div>
-                ))}
-                <div className="pt-1.5 mt-1.5 border-t border-[#F0F0F0] flex items-center justify-between">
-                  <span className="text-[11px] font-semibold text-[#888888]">Total MRR</span>
-                  <span className="text-[13px] font-bold text-[#222222]">{fmtCurrency(stripeSnap.totalMRR)}</span>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col justify-center space-y-2">
-                <p className="text-[12px] text-[#888888]">Goal progress is tracked in the <strong className="text-[#222222]">2026 Key Goals</strong> section above.</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* ── Section 2: Revenue (merged MRR + Toast + Acuity + Budget) ── */}
-      <div className="bg-white rounded-xl border border-[#E8E8E8] p-5">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4 text-[#222222]" />
-            <h2 className="text-[14px] font-semibold text-[#222222]">Revenue</h2>
-          </div>
-          <button onClick={() => setLocation("/intelligence/reports")} className="flex items-center gap-1 text-[12px] text-[#888888] hover:text-[#222222] transition-colors">
-            Full Report <ArrowRight className="h-3 w-3" />
-          </button>
-        </div>
-
-        {/* Top row: MRR + Toast MTD + Programs */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
-          {mrr > 0 && (
-            <div className="p-3 rounded-lg bg-[#FAFAFA] border border-[#F0F0F0]">
-              <div className="flex items-center gap-1.5 mb-1">
-                {revenue?.mom !== undefined && revenue.mom !== 0 && (
-                  <span className={cn("flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full", revenue.mom > 0 ? "text-[#72B84A] bg-[#F0FAF3]" : "text-[#FF3B30] bg-red-50")}>
-                    {revenue.mom > 0 ? <TrendingUp className="h-2.5 w-2.5" /> : <TrendingDown className="h-2.5 w-2.5" />}
-                    {Math.abs(revenue.mom).toFixed(1)}%
-                  </span>
-                )}
-              </div>
-              <p className="text-[24px] font-bold text-[#222222] leading-none tracking-tight">{snapLoading ? "—" : fmtCurrency(mrr)}</p>
-              <p className="text-[11px] text-[#888888] mt-1">Monthly Recurring</p>
-              {memberBreakdown.length > 0 && (
-                <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1.5">
-                  {memberBreakdown.map(t => (
-                    <span key={t.label} className="text-[10px] text-[#AAAAAA] whitespace-nowrap">{t.count} {t.label}</span>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-          {toastMTD > 0 && (
-            <div className="p-3 rounded-lg bg-[#FAFAFA] border border-[#F0F0F0]">
-              <div className="flex items-center gap-1.5 mb-1">
-                <ShoppingBag className="h-3 w-3 text-[#AAAAAA]" />
-                <span className="text-[10px] text-[#AAAAAA]">Toast POS · MTD</span>
-              </div>
-              <p className="text-[24px] font-bold text-[#222222] leading-none tracking-tight">{fmtCurrency(toastMTD)}</p>
-              <p className="text-[11px] text-[#888888] mt-1">{now.toLocaleDateString("en-US", { month: "long" })} · {toastOrders > 0 ? `${toastOrders} orders` : "No orders yet"}</p>
-              {toastLastMonth > 0 && <p className="text-[10px] text-[#AAAAAA] mt-0.5">Last month: {fmtCurrency(toastLastMonth)}</p>}
-            </div>
-          )}
-          {acuityTotal > 0 && (
-            <div className="p-3 rounded-lg bg-[#FAFAFA] border border-[#F0F0F0]">
-              <div className="flex items-center gap-1.5 mb-1">
-                <CreditCard className="h-3 w-3 text-[#AAAAAA]" />
-                <span className="text-[10px] text-[#AAAAAA]">Programs · Acuity</span>
-              </div>
-              <p className="text-[24px] font-bold text-[#222222] leading-none tracking-tight">{fmtCurrency(acuityTotal)}</p>
-              <p className="text-[11px] text-[#888888] mt-1">All sessions · {acuityBookings > 0 ? `${acuityBookings} bookings` : "No bookings"}</p>
-            </div>
-          )}
-          {hasAnyRevenue && (
-            <div className="p-3 rounded-lg bg-[#F2DD48]/5 border border-[#F2DD48]/20">
-              <div className="flex items-center gap-1.5 mb-1">
-                <Award className="h-3 w-3 text-[#222222]" />
-                <span className="text-[10px] text-[#888888]">Combined MTD + MRR</span>
-              </div>
-              <p className="text-[24px] font-bold text-[#222222] leading-none tracking-tight">{fmtCurrency(mrr + toastMTD)}</p>
-              <p className="text-[11px] text-[#888888] mt-1">MRR + Toast this month</p>
-              <p className="text-[10px] text-[#AAAAAA] mt-0.5">Acuity reported separately above</p>
-            </div>
-          )}
-        </div>
-
-        {/* $0 empty state — APIs not yet connected */}
-        {!snapLoading && !hasAnyRevenue && (
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-[#FAFAFA] border border-dashed border-[#DEDEDA]">
-            <div className="h-7 w-7 rounded-lg bg-[#F1F1EF] flex items-center justify-center shrink-0">
-              <DollarSign className="h-3.5 w-3.5 text-[#AAAAAA]" />
-            </div>
-            <div>
-              <p className="text-[12px] font-semibold text-[#888888]">Revenue data not yet connected</p>
-              <p className="text-[11px] text-[#AAAAAA]">Toast POS and Acuity API connections pending. MRR available once Boomerang syncs.</p>
-            </div>
-          </div>
-        )}
-
-        {/* Annual Revenue Goal — $2M (only shown when revenue data is live) */}
-        {hasAnyRevenue && <div className="mt-4 pt-4 border-t border-[#F0F0F0]">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-1.5">
-              <TrendingUp className="h-3.5 w-3.5 text-[#222222]" />
-              <span className="text-[13px] font-semibold text-[#222222]">Annual Revenue Goal</span>
-            </div>
-            <div className="text-right">
-              <span className="text-[18px] font-bold text-[#F2DD48]">{annualGoalPct.toFixed(1)}%</span>
-              <span className="text-[11px] text-[#AAAAAA] ml-1">run rate</span>
-            </div>
-          </div>
-          <div className="h-2 bg-[#F1F1EF] rounded-full overflow-hidden">
-            <div className="h-full rounded-full bg-[#F2DD48] transition-all" style={{ width: `${annualGoalPct}%` }} />
-          </div>
-          <div className="flex justify-between mt-1.5">
-            <span className="text-[11px] text-[#AAAAAA]">{fmtCurrency(annualRunRate)} projected / {fmtCurrency(ANNUAL_REVENUE_GOAL)} goal</span>
-            {annualRunRate < ANNUAL_REVENUE_GOAL && (
-              <span className="text-[11px] text-[#AAAAAA]">{fmtCurrency(ANNUAL_REVENUE_GOAL - annualRunRate)} gap</span>
-            )}
-          </div>
-        </div>}
-
       </div>
 
       {/* ── Section 3: Campaigns (merged from sidebar, no ROI) ── */}
@@ -901,47 +648,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* ── Section 5: Data Health ── */}
-      <div className="bg-white rounded-xl border border-[#E8E8E8] p-5">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Activity className="h-4 w-4 text-[#222222]" />
-            <h2 className="text-[14px] font-semibold text-[#222222]">Data Health</h2>
-          </div>
-          <span className="text-[11px] text-[#AAAAAA]">Integration status</span>
-        </div>
-        <div className="divide-y divide-[#F1F1EF]">
-          {DATA_SOURCES.map((src) => (
-            <div key={src.label} className="py-2.5 first:pt-0 last:pb-0">
-              <div className="flex items-start justify-between gap-3">
-                <span className="text-[13px] text-[#222222] min-w-0">{src.label}</span>
-                <div className="text-right shrink-0 flex flex-col items-end gap-0.5">
-                  <span className={cn(
-                    "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium border",
-                    src.status === "live" && "bg-[#72B84A]/10 text-[#2A9040] border-[#72B84A]/20",
-                    src.status === "warning" && "bg-[#F59E0B]/10 text-[#B45309] border-[#F59E0B]/20",
-                    src.status === "error" && "bg-[#FF3B30]/10 text-[#FF3B30] border-[#FF3B30]/20",
-                    (src.status === "offline" || src.status === "loading") && "bg-[#F1F1EF] text-[#AAAAAA] border-[#DEDEDA]"
-                  )}>
-                    {STATUS_LABEL[src.status]}
-                  </span>
-                  <p className="text-[11px] text-[#888888]">{src.detail}</p>
-                </div>
-              </div>
-              {src.note && (
-                <p className={cn(
-                  "text-[11px] mt-1",
-                  src.status === "error" && "text-[#FF3B30]/80",
-                  src.status === "warning" && "text-[#B45309]/80",
-                  (src.status === "live" || src.status === "offline" || src.status === "loading") && "text-[#888888]"
-                )}>
-                  {src.note}
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
 
       <MemberListModal open={memberListOpen} onClose={() => setMemberListOpen(false)} />
     </div>

@@ -104,6 +104,7 @@ function DashboardAppRoutes() {
         <Route path="/app/:venueSlug/campaigns/:id" component={CampaignDetail} />
 
         <Route path="/app/:venueSlug/activities">{params => <Redirect to={appRoutes.venue(params.venueSlug).activities.programs} />}</Route>
+        <Route path="/app/:venueSlug/activities/all" component={StudioSooActivitiesWrapper} />
         <Route path="/app/:venueSlug/activities/programs" component={StudioSooActivitiesWrapper} />
         <Route path="/app/:venueSlug/activities/promotions" component={StudioSooActivitiesWrapper} />
         <Route path="/app/:venueSlug/activities/local-events" component={StudioSooActivitiesWrapper} />

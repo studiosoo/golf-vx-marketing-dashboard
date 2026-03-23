@@ -1,8 +1,9 @@
-import { Database, RefreshCw, CheckCircle2, AlertCircle, Clock, Instagram } from "lucide-react";
+import { Database, RefreshCw, CheckCircle2, AlertCircle, Clock } from "lucide-react";
 
 // ── Design-system compliant brand icons ─────────────────────────────────────
-// Rule: Always use simpleicons CDN <img> for external brand logos.
-// Never substitute with emoji or colored boxes.
+// Rule: Use simpleicons CDN <img> for brands that have a slug.
+// For brands without a simpleicons slug, use a branded letter badge.
+// Never use emoji or generic placeholder boxes.
 
 type DataSource = {
   name: string;
@@ -11,8 +12,6 @@ type DataSource = {
   lastSync: string;
   iconNode: React.ReactNode;
 };
-
-const INSTAGRAM_GRADIENT = "linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4)";
 
 const DATA_SOURCES: DataSource[] = [
   {
@@ -34,11 +33,12 @@ const DATA_SOURCES: DataSource[] = [
     status: "live",
     lastSync: "Real-time",
     iconNode: (
+      // Acuity is owned by Squarespace — use Squarespace icon as brand proxy
       <img
-        src="https://cdn.simpleicons.org/acuityscheduling/003B5C"
+        src="https://cdn.simpleicons.org/squarespace/000000"
         className="h-5 w-5 flex-shrink-0"
         alt="Acuity Scheduler"
-        onError={(e) => { (e.target as HTMLImageElement).style.opacity = "0"; }}
+        title="Acuity Scheduling (by Squarespace)"
       />
     ),
   },
@@ -56,16 +56,32 @@ const DATA_SOURCES: DataSource[] = [
     ),
   },
   {
+    name: "Instagram",
+    description: "Feed posts, follower count, engagement metrics, and reach",
+    status: "live",
+    lastSync: "Real-time",
+    iconNode: (
+      <img
+        src="https://cdn.simpleicons.org/instagram/E1306C"
+        className="h-5 w-5 flex-shrink-0"
+        alt="Instagram"
+      />
+    ),
+  },
+  {
     name: "Encharge (AHTIL)",
     description: "Email subscriber list, automation sequences, and engagement",
     status: "live",
     lastSync: "Real-time",
     iconNode: (
-      <img
-        src="https://cdn.simpleicons.org/encharge/6C47FF"
-        className="h-5 w-5 flex-shrink-0"
-        alt="Encharge"
-      />
+      // Encharge does not have a simpleicons slug — use branded letter badge
+      <div
+        className="h-5 w-5 rounded flex items-center justify-center flex-shrink-0 text-white font-bold"
+        style={{ background: "#6C47FF", fontSize: "11px", lineHeight: 1 }}
+        title="Encharge"
+      >
+        E
+      </div>
     ),
   },
   {
@@ -87,25 +103,27 @@ const DATA_SOURCES: DataSource[] = [
     status: "scheduled",
     lastSync: "Daily 5 AM EST",
     iconNode: (
-      <img
-        src="https://cdn.simpleicons.org/toast/FF4C00"
-        className="h-5 w-5 flex-shrink-0"
-        alt="Toast POS"
-      />
+      // Toast does not have a simpleicons slug — use branded letter badge
+      <div
+        className="h-5 w-5 rounded flex items-center justify-center flex-shrink-0 text-white font-bold"
+        style={{ background: "#FF4C00", fontSize: "11px", lineHeight: 1 }}
+        title="Toast POS"
+      >
+        T
+      </div>
     ),
   },
   {
-    name: "Instagram",
-    description: "Feed posts, engagement metrics, and follower data",
+    name: "Google Business",
+    description: "Local SEO, Google Maps reviews, and search visibility",
     status: "coming_soon",
     lastSync: "—",
     iconNode: (
-      <div
-        className="h-5 w-5 rounded-md flex items-center justify-center flex-shrink-0"
-        style={{ background: INSTAGRAM_GRADIENT }}
-      >
-        <Instagram className="h-3 w-3 text-white" />
-      </div>
+      <img
+        src="https://cdn.simpleicons.org/google/4285F4"
+        className="h-5 w-5 flex-shrink-0"
+        alt="Google Business"
+      />
     ),
   },
 ];
@@ -125,7 +143,7 @@ const STATUS_CONFIG = {
   },
   coming_soon: {
     label: "Coming Soon",
-    color: "#888888",
+    color: "#6F6F6B",
     bg: "#F1F1EF",
     icon: AlertCircle,
   },
@@ -151,7 +169,7 @@ export default function DataHealthPlaceholder() {
         {[
           { label: "Live Sources",      value: DATA_SOURCES.filter(d => d.status === "live").length,        color: "#4C882A" },
           { label: "Scheduled Sources", value: DATA_SOURCES.filter(d => d.status === "scheduled").length,   color: "#B46A0B" },
-          { label: "Coming Soon",       value: DATA_SOURCES.filter(d => d.status === "coming_soon").length, color: "#888888" },
+          { label: "Coming Soon",       value: DATA_SOURCES.filter(d => d.status === "coming_soon").length, color: "#6F6F6B" },
         ].map(stat => (
           <div key={stat.label} className="bg-white border border-[#DEDEDA] rounded-xl px-5 py-4">
             <div className="text-[22px] font-bold" style={{ color: stat.color }}>{stat.value}</div>

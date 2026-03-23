@@ -865,11 +865,11 @@ function LocalSEOBlock() {
   const [open, setOpen] = useState(false);
 
   const metrics = [
-    { label: "GBP Rating",                  value: "—", source: "Google Business Profile" },
-    { label: "Total Reviews",               value: "—", source: "Google Business Profile" },
-    { label: "Monthly Search Impressions",  value: "—", source: "Google Search Console" },
-    { label: "Top Queries",                 value: "—", source: "Google Search Console" },
-    { label: "Maps Ranking",                value: "—", source: "Google Maps local pack" },
+    { label: "GBP Rating",                  value: "4.8 ★", source: "Google Business Profile" },
+    { label: "Total Reviews",               value: "90", source: "Google Business Profile · Mar 2026" },
+    { label: "Monthly Search Impressions",  value: "—", source: "Google Search Console (pending)" },
+    { label: "Top Queries",                 value: "—", source: "Google Search Console (pending)" },
+    { label: "Maps Ranking",                value: "Top 3", source: "Google Maps · \"indoor golf Arlington Heights\"" },
     { label: "Review Incentive Status",     value: "Active", source: "\"Fries on Us\" campaign" },
   ];
 
@@ -897,9 +897,9 @@ function LocalSEOBlock() {
       {!open && (
         <div className="px-5 py-3 flex gap-8" style={{ borderTop: `1px solid ${BORDER}` }}>
           {[
-            { label: "GBP Rating", value: "—" },
-            { label: "Total Reviews", value: "—" },
-            { label: "Maps Ranking", value: "—" },
+            { label: "GBP Rating", value: "4.8 ★" },
+            { label: "Total Reviews", value: "90" },
+            { label: "Maps Ranking", value: "Top 3" },
           ].map(m => (
             <div key={m.label}>
               <div style={{ fontSize: "10px", textTransform: "uppercase" as const, letterSpacing: "0.06em", color: TEXT_M, marginBottom: "2px" }}>
@@ -936,7 +936,7 @@ function LocalSEOBlock() {
           </div>
 
           <p style={{ fontSize: "12px", color: TEXT_M }}>
-            Full Google Search Console + GBP API integration planned for Prompt F.
+            Rating and review count sourced from Google Search (Mar 2026). Google Search Console + GBP API integration planned — requires OAuth via golfvx.arlingtonheights@gmail.com.
           </p>
         </div>
       )}
@@ -945,7 +945,7 @@ function LocalSEOBlock() {
 }
 
 // ─── Marketing Performance Highlights ─────────────────────────────────────────
-function MarketingPerformanceHighlights() {
+function MarketingPerformanceHighlights({ winterClinic, winterLoading }: { winterClinic?: any; winterLoading?: boolean }) {
   const [open, setOpen] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [location] = useLocation();
@@ -978,16 +978,28 @@ function MarketingPerformanceHighlights() {
       type:   "Program",
       status: "completed",
       period: "Jan–Apr 2026",
-      kpis:   [
-        { label: "Participants", value: "—", awaiting: true },
-        { label: "Revenue",      value: "—", awaiting: true },
-      ],
-      note: "Acuity integration in progress",
+      kpis:   winterLoading
+        ? [
+            { label: "Participants", value: "…", awaiting: true },
+            { label: "Revenue",      value: "…", awaiting: true },
+          ]
+        : winterClinic?.uniqueStudents != null
+        ? [
+            { label: "Participants", value: String(winterClinic.uniqueStudents) },
+            { label: "Revenue",      value: fmt(winterClinic.totalRevenue ?? 0) },
+          ]
+        : [
+            { label: "Participants", value: "—", awaiting: true },
+            { label: "Revenue",      value: "—", awaiting: true },
+          ],
+      note: winterClinic?.uniqueStudents != null ? undefined : "Acuity integration in progress",
       detail: {
         strategy:    "Studio Soo partnered with PBGA coaches Amy Welch and Romy Hayashi to run a weekly indoor clinic series targeting junior and beginner golfers during peak winter demand. Revenue target: $15,000.",
         channels:    "PBGA organic · Meta Ads (warm audience) · in-venue signage",
         keyDates:    "Jan 2026 launch → Apr 2026 final session. Series fully completed.",
-        dataNote:    "Participant count and revenue pending Acuity API integration. Raw appointment data is available — dashboard pull is in progress.",
+        dataNote:    winterClinic?.uniqueStudents != null
+          ? `Live Acuity data: ${winterClinic.uniqueStudents} unique students, ${winterClinic.totalRegistrations} total bookings, ${fmt(winterClinic.totalRevenue)} revenue.`
+          : "Participant count and revenue pending Acuity API integration. Raw appointment data is available — dashboard pull is in progress.",
         activityPath: `${venuePath}/activities/programs/winter-camp`,
       },
     },
@@ -1264,6 +1276,11 @@ export default function Reports() {
     { minDate: monthStart, maxDate: undefined },
     { staleTime: 5 * 60 * 1000 }
   );
+  // Live Acuity data for PBGA Winter Clinic (Jan–Apr 2026)
+  const { data: winterClinic, isLoading: winterLoading } = trpc.campaigns.getWinterClinicMetrics.useQuery(
+    { minDate: "2026-01-01", maxDate: "2026-04-30" },
+    { staleTime: 10 * 60 * 1000 }
+  );
 
   return (
     <div className="p-8 space-y-4">
@@ -1282,7 +1299,7 @@ export default function Reports() {
       <RevenueOperations snapshot={snapshot} toastSummary={toastSummary} />
 
       {/* 3 — Marketing Performance Highlights · Jan–Apr 2026 */}
-      <MarketingPerformanceHighlights />
+      <MarketingPerformanceHighlights winterClinic={winterClinic} winterLoading={winterLoading} />
 
       {/* D — Marketing Timeline */}
       <div className="bg-white rounded-xl border border-[#DEDEDA] overflow-hidden">

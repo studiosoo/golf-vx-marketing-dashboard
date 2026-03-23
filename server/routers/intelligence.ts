@@ -664,15 +664,47 @@ export const workspaceRouter = router({
             const rev = (revenueResult as any)[0];
             contextData += `\n- Monthly Recurring Revenue (MRR): $${Number(rev?.totalMrr || 0).toFixed(0)}`;
           } else if (context === "meta_ads") {
-            const adsResult = await database.execute(
-              `SELECT name, actualSpend, impressions, clicks FROM campaigns WHERE metaAdsCampaignId IS NOT NULL AND status='active' ORDER BY actualSpend DESC LIMIT 6`
-            );
-            const ads = (adsResult as any[]).map((a: any) => {
-              const ctr = a.impressions > 0 ? ((a.clicks / a.impressions) * 100).toFixed(2) : "0.00";
-              return `${a.name}: spend=$${Number(a.actualSpend || 0).toFixed(0)} CTR=${ctr}%`;
-            }).join("\n  ");
-            contextData += `\n- Active Meta Ads campaigns:\n  ${ads || "No active Meta campaigns"}`;
+            // Try live Meta API first, fall back to DB cache
+            try {
+              const { getAllCampaignsWithInsights } = await import("../metaAds");
+              const liveCampaigns = await getAllCampaignsWithInsights("last_30d");
+              if (liveCampaigns && liveCampaigns.length > 0) {
+                const adsLines = liveCampaigns
+                  .filter((c: any) => c.status === "ACTIVE")
+                  .slice(0, 8)
+                  .map((c: any) => {
+                    const ins = c.insights?.[0] || {};
+                    const spend = Number(ins.spend || 0).toFixed(0);
+                    const impr  = Number(ins.impressions || 0).toLocaleString();
+                    const clicks = Number(ins.clicks || 0);
+                    const ctr   = ins.impressions > 0 ? ((clicks / ins.impressions) * 100).toFixed(2) : "0.00";
+                    const cpc   = clicks > 0 ? (Number(ins.spend || 0) / clicks).toFixed(2) : "—";
+                    return `${c.name}: spend=$${spend} impressions=${impr} CTR=${ctr}% CPC=$${cpc}`;
+                  });
+                const totalSpend = liveCampaigns.reduce((s: number, c: any) => s + Number(c.insights?.[0]?.spend || 0), 0);
+                const totalImpr  = liveCampaigns.reduce((s: number, c: any) => s + Number(c.insights?.[0]?.impressions || 0), 0);
+                contextData += `\n- Live Meta Ads (last 30d): total spend=$${totalSpend.toFixed(0)} total impressions=${totalImpr.toLocaleString()}\n  Campaigns:\n  ${adsLines.join("\n  ") || "No active campaigns"}`;
+              }
+            } catch (_metaErr) {
+              // Fall back to DB cache
+              const adsResult = await database.execute(
+                `SELECT name, actualSpend, impressions, clicks FROM campaigns WHERE metaAdsCampaignId IS NOT NULL AND status='active' ORDER BY actualSpend DESC LIMIT 6`
+              );
+              const ads = (adsResult as any[]).map((a: any) => {
+                const ctr = a.impressions > 0 ? ((a.clicks / a.impressions) * 100).toFixed(2) : "0.00";
+                return `${a.name}: spend=$${Number(a.actualSpend || 0).toFixed(0)} CTR=${ctr}%`;
+              }).join("\n  ");
+              contextData += `\n- Active Meta Ads campaigns (cached):\n  ${ads || "No active Meta campaigns"}`;
+            }
           }
+          // Always enrich with Instagram follower data
+          try {
+            const { fetchAccountStats } = await import("../instagramFeed");
+            const igStats = await fetchAccountStats();
+            if (igStats) {
+              contextData += `\n- Instagram: ${igStats.followers_count} followers (goal: 2,000) · ${igStats.media_count} posts · @${igStats.username}`;
+            }
+          } catch (_igErr) {}
         }
       } catch (_) {}
 

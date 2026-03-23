@@ -119,7 +119,7 @@ export default function StrategicCampaigns() {
         <div>
           <h1 className="text-[22px] font-bold text-[#222222] leading-tight">Strategic Campaigns</h1>
           <div className="flex items-center gap-2 mt-1">
-            <p className="text-[13px] text-[#888888]">
+            <p className="text-[13px] text-[#6F6F6B]">
               High-level strategic objectives with aggregated program performance
             </p>
             <MetaAdsStatusBadge />
@@ -133,7 +133,7 @@ export default function StrategicCampaigns() {
               "flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium rounded-lg transition-all",
               activeTab === "campaigns"
                 ? "bg-white text-[#222222] shadow-sm"
-                : "text-[#888888] hover:text-[#222222]"
+                : "text-[#6F6F6B] hover:text-[#222222]"
             )}
           >
             <LayoutGrid className="w-3.5 h-3.5" />
@@ -145,7 +145,7 @@ export default function StrategicCampaigns() {
               "flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium rounded-lg transition-all",
               activeTab === "timeline"
                 ? "bg-white text-[#222222] shadow-sm"
-                : "text-[#888888] hover:text-[#222222]"
+                : "text-[#6F6F6B] hover:text-[#222222]"
             )}
           >
             <CalendarRange className="w-3.5 h-3.5" />
@@ -170,11 +170,11 @@ export default function StrategicCampaigns() {
               return (
                 <div key={stat.label} className="bg-white rounded-xl border border-[#DEDEDA] p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-medium text-[#888888]">{stat.label}</span>
-                    <Icon className="h-3.5 w-3.5 text-[#AAAAAA]" />
+                    <span className="text-[11px] font-medium text-[#6F6F6B]">{stat.label}</span>
+                    <Icon className="h-3.5 w-3.5 text-[#A8A8A3]" />
                   </div>
                   <p className="text-[22px] font-bold text-[#222222] leading-none">{stat.value}</p>
-                  <p className="text-[11px] text-[#AAAAAA] mt-1">{stat.note}</p>
+                  <p className="text-[11px] text-[#A8A8A3] mt-1">{stat.note}</p>
                 </div>
               );
             })}
@@ -185,7 +185,7 @@ export default function StrategicCampaigns() {
             {(campaigns ?? []).map(campaign => {
               const style = CAMPAIGN_STYLE[campaign.id] ?? {
                 label: campaign.name,
-                color: "#888888",
+                color: "#A8A8A3",
                 bg: "#F1F1EF",
                 icon: BarChart3,
                 kpiLabel: "KPI",
@@ -198,17 +198,17 @@ export default function StrategicCampaigns() {
                 const { current, target, progress } = kpiData.membershipAcquisition;
                 kpiBlock = (
                   <div className="p-3 rounded-lg border border-[#DEDEDA] bg-[#FAFAFA] mb-3">
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#888888] mb-1">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#6F6F6B] mb-1">
                       Primary KPI — Membership Goal
                     </p>
                     <div className="flex items-end justify-between mb-1.5">
                       <span className="text-[28px] font-bold text-[#222222] leading-none">{current}</span>
-                      <span className="text-[12px] text-[#888888] mb-0.5">/ {target} members</span>
+                      <span className="text-[12px] text-[#6F6F6B] mb-0.5">/ {target} members</span>
                     </div>
                     <div className="h-1.5 bg-[#EEEEEE] rounded-full overflow-hidden mb-1">
                       <div className="h-full rounded-full bg-[#4E8DF4]" style={{ width: `${Math.min(progress, 100)}%` }} />
                     </div>
-                    <p className="text-[11px] text-[#888888]">
+                    <p className="text-[11px] text-[#6F6F6B]">
                       {progress.toFixed(1)}% to year-end target · Need {target - current} more members
                     </p>
                   </div>
@@ -217,7 +217,7 @@ export default function StrategicCampaigns() {
                 const { current, target, progress, note } = kpiData.trialConversion;
                 kpiBlock = (
                   <div className="p-3 rounded-lg border border-[#DEDEDA] bg-[#FAFAFA] mb-3">
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#888888] mb-1">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#6F6F6B] mb-1">
                       Primary KPI — New Paying Members (90d)
                     </p>
                     <div className="flex items-end justify-between mb-1.5">
@@ -229,19 +229,19 @@ export default function StrategicCampaigns() {
                       >
                         {current}
                       </span>
-                      <span className="text-[12px] text-[#888888] mb-0.5">goal: {target} members</span>
+                      <span className="text-[12px] text-[#6F6F6B] mb-0.5">goal: {target} members</span>
                     </div>
                     <div className="h-1.5 bg-[#EEEEEE] rounded-full overflow-hidden mb-1">
                       <div className="h-full rounded-full bg-[#72B84A]" style={{ width: `${Math.min(progress, 100)}%` }} />
                     </div>
-                    <p className="text-[11px] text-[#888888]">{note}</p>
+                    <p className="text-[11px] text-[#6F6F6B]">{note}</p>
                   </div>
                 );
               } else if (campaign.id === "member_retention" && kpiData) {
                 const { current, target, progress } = kpiData.memberRetention;
                 kpiBlock = (
                   <div className="p-3 rounded-lg border border-[#DEDEDA] bg-[#FAFAFA] mb-3">
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#888888] mb-1">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#6F6F6B] mb-1">
                       Primary KPI — Retention Rate
                     </p>
                     <div className="flex items-end justify-between mb-1.5">
@@ -251,12 +251,12 @@ export default function StrategicCampaigns() {
                       >
                         {current.toFixed(1)}%
                       </span>
-                      <span className="text-[12px] text-[#888888] mb-0.5">target: {target}%</span>
+                      <span className="text-[12px] text-[#6F6F6B] mb-0.5">target: {target}%</span>
                     </div>
                     <div className="h-1.5 bg-[#EEEEEE] rounded-full overflow-hidden mb-1">
                       <div className="h-full rounded-full bg-[#A87FBE]" style={{ width: `${Math.min(progress, 100)}%` }} />
                     </div>
-                    <p className="text-[11px] text-[#888888]">
+                    <p className="text-[11px] text-[#6F6F6B]">
                       {current >= target
                         ? `Exceeding goal by ${(current - target).toFixed(1)}%`
                         : `${(target - current).toFixed(1)}% below target`}
@@ -267,17 +267,17 @@ export default function StrategicCampaigns() {
                 const { current, target, progress } = kpiData.corporateEvents;
                 kpiBlock = (
                   <div className="p-3 rounded-lg border border-[#DEDEDA] bg-[#FAFAFA] mb-3">
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#888888] mb-1">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#6F6F6B] mb-1">
                       Primary KPI — B2B Events This Month
                     </p>
                     <div className="flex items-end justify-between mb-1.5">
                       <span className="text-[28px] font-bold text-[#222222] leading-none">{current}</span>
-                      <span className="text-[12px] text-[#888888] mb-0.5">/ {target} events</span>
+                      <span className="text-[12px] text-[#6F6F6B] mb-0.5">/ {target} events</span>
                     </div>
                     <div className="h-1.5 bg-[#EEEEEE] rounded-full overflow-hidden mb-1">
                       <div className="h-full rounded-full bg-[#D89A3C]" style={{ width: `${Math.min(progress, 100)}%` }} />
                     </div>
-                    <p className="text-[11px] text-[#888888]">
+                    <p className="text-[11px] text-[#6F6F6B]">
                       Target: {target} events/mo ·{" "}
                       {current >= target ? "On track" : `Need ${target - current} more events`}
                     </p>
@@ -301,7 +301,7 @@ export default function StrategicCampaigns() {
                       </div>
                       <div>
                         <h2 className="text-[15px] font-bold text-[#222222] leading-tight">{style.label}</h2>
-                        <p className="text-[11px] text-[#888888] mt-0.5">{campaign.description}</p>
+                        <p className="text-[11px] text-[#6F6F6B] mt-0.5">{campaign.description}</p>
                       </div>
                     </div>
                     {campaign.totalPrograms > 0 && (
@@ -325,7 +325,7 @@ export default function StrategicCampaigns() {
                       { label: "Revenue", value: fmtCurrency(campaign.totalRevenue) },
                     ].map(m => (
                       <div key={m.label} className="p-2.5 rounded-lg bg-[#FAFAFA] border border-[#F0F0F0]">
-                        <p className="text-[10px] text-[#888888]">{m.label}</p>
+                        <p className="text-[10px] text-[#6F6F6B]">{m.label}</p>
                         <p className="text-[13px] font-bold text-[#222222] mt-0.5">{m.value}</p>
                       </div>
                     ))}
@@ -334,7 +334,7 @@ export default function StrategicCampaigns() {
                   {/* Secondary metrics */}
                   <div className="grid grid-cols-2 gap-2">
                     <div className="p-2.5 rounded-lg bg-[#FAFAFA] border border-[#F0F0F0]">
-                      <p className="text-[10px] text-[#888888]">Cost per Acquisition</p>
+                      <p className="text-[10px] text-[#6F6F6B]">Cost per Acquisition</p>
                       <p className="text-[13px] font-bold text-[#222222] mt-0.5">
                         {campaign.totalSpend > 0 && campaign.programs.length > 0
                           ? fmtCurrency(campaign.totalSpend / Math.max(1, campaign.programs.filter(p => p.revenue > 0).length))
@@ -344,7 +344,7 @@ export default function StrategicCampaigns() {
                       </p>
                     </div>
                     <div className="p-2.5 rounded-lg bg-[#FAFAFA] border border-[#F0F0F0]">
-                      <p className="text-[10px] text-[#888888]">Financial ROI</p>
+                      <p className="text-[10px] text-[#6F6F6B]">Financial ROI</p>
                       <p
                         className="text-[13px] font-bold mt-0.5"
                         style={{ color: campaign.roi >= 0 ? "#72B84A" : "#C81E1E" }}
@@ -369,7 +369,7 @@ export default function StrategicCampaigns() {
                   {/* Supporting programs */}
                   {campaign.programs.length > 0 && (
                     <div className="pt-2 border-t border-[#F0F0F0]">
-                      <p className="text-[11px] font-semibold text-[#888888] uppercase tracking-widest mb-2">
+                      <p className="text-[11px] font-semibold text-[#6F6F6B] uppercase tracking-widest mb-2">
                         Supporting Programs
                       </p>
                       <div className="space-y-1">
@@ -387,10 +387,10 @@ export default function StrategicCampaigns() {
                               <div className="flex-1 min-w-0">
                                 <p className="text-[12px] font-semibold text-[#222222] truncate">{program.name}</p>
                                 <div className="flex items-center gap-2 mt-0.5">
-                                  <span className="text-[11px] text-[#888888]">
+                                  <span className="text-[11px] text-[#6F6F6B]">
                                     {fmtCurrency(program.spend)} spend
                                   </span>
-                                  <span className="text-[11px] text-[#888888]">
+                                  <span className="text-[11px] text-[#6F6F6B]">
                                     {fmtCurrency(program.revenue)} revenue
                                   </span>
                                   <span
@@ -411,7 +411,7 @@ export default function StrategicCampaigns() {
                                 >
                                   {programRoi >= 0 ? "+" : ""}{programRoi.toFixed(0)}%
                                 </span>
-                                <ChevronRight className="h-3.5 w-3.5 text-[#AAAAAA] group-hover:text-[#222222] transition-colors" />
+                                <ChevronRight className="h-3.5 w-3.5 text-[#A8A8A3] group-hover:text-[#222222] transition-colors" />
                               </div>
                             </button>
                           );
@@ -424,7 +424,7 @@ export default function StrategicCampaigns() {
                   {campaign.programs.length === 0 && (
                     <div className="flex items-center gap-2 p-3 rounded-lg bg-[#FAFAFA] border border-dashed border-[#DEDEDA]">
                       <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: style.color }} />
-                      <p className="text-[11px] text-[#888888]">No programs linked yet — add programs in the Activities section</p>
+                      <p className="text-[11px] text-[#6F6F6B]">No programs linked yet — add programs in the Activities section</p>
                     </div>
                   )}
                 </div>
