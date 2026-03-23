@@ -108,7 +108,9 @@ function DashboardAppRoutes() {
         <Route path="/app/:venueSlug/activities/programs" component={StudioSooActivitiesWrapper} />
         <Route path="/app/:venueSlug/activities/promotions" component={StudioSooActivitiesWrapper} />
         <Route path="/app/:venueSlug/activities/local-events" component={StudioSooActivitiesWrapper} />
+        <Route path="/app/:venueSlug/activities/advertising" component={StudioSooActivitiesWrapper} />
         <Route path="/app/:venueSlug/activities/archive" component={StudioSooActivitiesWrapper} />
+        <Route path="/app/:venueSlug/activities/promotions/annual-giveaway">{(params: any) => <Redirect to={`/app/${params.venueSlug}/operations/programs/annual-giveaway`} />}</Route>
         <Route path="/app/:venueSlug/activities/:tab/:id" component={ActivityDetail} />
 
         <Route path="/app/:venueSlug/data-health" component={DataHealthPlaceholder} />

@@ -4,7 +4,7 @@ import { appRoutes, getVenueSlugFromPath } from "@/lib/routes";
 
 // ─── Types ────────────────────────────────────────────────────
 
-export type ActivityTab    = "programs" | "promotions" | "local" | "all";
+export type ActivityTab    = "programs" | "promotions" | "local" | "advertising" | "all";
 export type ActivityStatus = "active" | "completed" | "upcoming" | "planned";
 
 export interface ContentAsset {
@@ -132,15 +132,15 @@ export const ACTIVITY_ITEMS: ActivityItem[] = [
     startDate: "2026-02-18",
     endDate: "2026-03-16",
     staticKpis: [
-      { label: "Unique Applicants",   value: "116",     unit: "long-form completed" },
-      { label: "Goal Attainment",     value: "116%",    unit: "vs 100-applicant goal" },
+      { label: "Unique Applicants",   value: "115",     unit: "long-form completed (deduped, excl. test entries)" },
+      { label: "Goal Attainment",     value: "115%",    unit: "vs 100-applicant goal" },
       { label: "Meta Ad Spend",       value: "$467.59", unit: "of $3,000 budget" },
-      { label: "Cost per Applicant",  value: "$4.03",   unit: "blended CPL" },
+      { label: "Cost per Applicant",  value: "$4.07",   unit: "blended CPL ($467.59 / 115)" },
       { label: "Meta Reach",          value: "18,297",  unit: "unique people" },
-      { label: "Click → Apply Rate",  value: "15.9%",   unit: "731 clicks → 116 completions" },
+      { label: "Click → Apply Rate",  value: "15.7%",   unit: "731 clicks → 115 completions" },
     ],
-    strategicNote: "Goal of 100 long-form applicants met and exceeded at 116 (+16%). Excellent $4.03 CPL. Key learning: 41% of applicants are existing GVX members — next campaign should tighten exclusion targeting to reach more net-new prospects.",
-    analyticsNote: "Campaign ran Feb 18 – Mar 16, 2026. Two Meta ads: A1 ($342.64 · 38,651 impressions · 13,833 reach · 448 clicks · 1.16% CTR) and A2 ($124.95 · 8,825 impressions · 4,464 reach · 283 clicks · 3.21% CTR). 116 unique real applicants after dedup and test-entry removal. 33% of respondents were non-IL residents — recommend tighter geo-targeting in the next run. Source: GOLFVX AH | Anniversary Applications 2026.xlsx (verified March 2026).",
+    strategicNote: "Goal of 100 long-form applicants met and exceeded at 115 (+15%). Excellent $4.07 CPL. Key learning: 41% of applicants are existing GVX members — next campaign should tighten exclusion targeting to reach more net-new prospects. 33% of respondents were non-IL residents — recommend tighter geo-targeting.",
+    analyticsNote: "Campaign ran Feb 18 – Mar 16, 2026. Two Meta ads: A1 ($342.64 · 38,651 impressions · 13,833 reach · 448 clicks · 1.16% CTR) and A2 ($124.95 · 8,825 impressions · 4,464 reach · 283 clicks · 3.21% CTR). 137 total form submissions, 117 unique emails, 2 test entries removed = 115 verified real applicants. Source: GOLFVX AH Anniversary Applications 2026 + Encharge AHTIL CSV (verified Mar 23 2026).",
   },
   {
     id: "instagram-giveaway",
@@ -340,6 +340,95 @@ export const ACTIVITY_ITEMS: ActivityItem[] = [
     status: "active",
     color: "#A87FBE",
   },
+
+  // ── Advertising ───────────────────────────────────────────
+  {
+    id: "meta-ads-trial-conversion",
+    name: "Meta Ads — Trial Conversion",
+    tab: "advertising",
+    group: "Paid Media",
+    description: "Facebook & Instagram paid ads targeting local golfers · Drive Day + $9 Trial offer",
+    asanaGid: "1212077269419925",
+    projectName: "Trial Conversion Campaign",
+    status: "active",
+    color: "#1877F2",
+    strategicNote: "Primary paid acquisition channel. Targeting: 25–55 male golfers, 15mi radius from AH. Objective: lead gen → trial booking → membership conversion.",
+    staticKpis: [
+      { label: "Active Campaigns", value: "2",        unit: "Meta Ads Manager" },
+      { label: "Budget (Monthly)",  value: "~$1,500",  unit: "estimated" },
+    ],
+  },
+  {
+    id: "meta-ads-membership-acquisition",
+    name: "Meta Ads — Membership Acquisition",
+    tab: "advertising",
+    group: "Paid Media",
+    description: "Facebook & Instagram paid ads for direct membership sign-ups · All Access Ace + Swing Saver",
+    asanaGid: "1212077289242708",
+    projectName: "Membership Acquisition",
+    status: "active",
+    color: "#1877F2",
+    strategicNote: "Retargeting warm audiences from trial conversion funnel. Goal: reduce CPL below $5 and increase direct membership sign-ups.",
+  },
+  {
+    id: "stroll-magazine-ad",
+    name: "Stroll Arlington Heights — Ad",
+    tab: "advertising",
+    group: "Print & Local Media",
+    description: "Monthly print ad in Stroll AH community magazine · Distributed to ~8,000 households",
+    asanaGid: "1211912937095581",
+    projectName: "Stroll Magazine",
+    status: "active",
+    color: "#D89A3C",
+    strategicNote: "Targets affluent homeowners in Arlington Heights. Good brand awareness channel for the 45–65 demographic. Measure: QR code scans + coupon redemptions.",
+    staticKpis: [
+      { label: "Distribution", value: "~8,000",   unit: "households/month" },
+      { label: "Ad Format",    value: "Full Page", unit: "print" },
+    ],
+  },
+  {
+    id: "chicago-golf-show-ad",
+    name: "Chicago Golf Show 2026",
+    tab: "advertising",
+    group: "Events & Sponsorships",
+    description: "HQ-led event · Feb 27–Mar 1 · AH: 30 free-trial coupons distributed",
+    asanaGid: "1212077289242724",
+    projectName: "Corporate Events & B2B",
+    status: "completed",
+    color: "#D89A3C",
+    startDate: "2026-02-27",
+    endDate: "2026-03-01",
+    note: "HQ-led event. Studio Soo not present. AH print cost: $150. HQ fee ($1,500) excluded from AH ROI.",
+    staticKpis: [
+      { label: "Coupons Distributed", value: "30",   unit: "free trial coupons" },
+      { label: "AH Print Cost",       value: "$150", unit: "(HQ fee excluded)" },
+    ],
+    strategicNote: "Low-cost brand awareness play. Track coupon redemption rate to measure ROI. Consider booth presence in 2027 if redemption rate exceeds 10%.",
+  },
+  {
+    id: "local-influencer-collabs",
+    name: "Local Influencer Collaborations",
+    tab: "advertising",
+    group: "Influencer & Community",
+    description: "Instagram Reels & Stories with local golf influencers and community figures",
+    asanaGid: "1211673464711096",
+    projectName: "AH Social Media Content",
+    status: "active",
+    color: "#E1306C",
+    strategicNote: "Micro-influencer strategy: target local AH/Chicago golf accounts with 1K–50K followers. Offer: complimentary bay time in exchange for authentic content. Track: follower growth, reach, and trial bookings from promo codes.",
+  },
+  {
+    id: "sponsorships-donations",
+    name: "Sponsorships & Donations",
+    tab: "advertising",
+    group: "Influencer & Community",
+    description: "Local school and community event sponsorships · Donation requests tracking",
+    asanaGid: "1212077289242724",
+    projectName: "Corporate Events & B2B",
+    status: "active",
+    color: "#D89A3C",
+    strategicNote: "Community goodwill channel. Track: number of sponsorships, estimated reach, and any direct member referrals. Rejected requests should still be logged for future relationship-building.",
+  },
 ];
 
 // Past programs — no detail page, shown as read-only memo cards
@@ -385,10 +474,11 @@ function StatusBadge({ status }: { status: ActivityStatus }) {
 // ─── KPI Bar ──────────────────────────────────────────────────
 
 const TAB_KPI_HINT: Record<ActivityTab, string | null> = {
-  programs:   "Acuity-tracked registrations",
-  promotions: "Active offer windows",
-  local:      "Community touchpoints",
-  all:        null,
+  programs:    "Acuity-tracked registrations",
+  promotions:  "Active offer windows",
+  local:       "Community touchpoints",
+  advertising: "Paid media + community channels",
+  all:         null,
 };
 
 function KpiBar({ items, activeTab }: { items: ActivityItem[]; activeTab: ActivityTab }) {
@@ -433,17 +523,19 @@ function KpiBar({ items, activeTab }: { items: ActivityItem[]; activeTab: Activi
 // ─── Type Badge (for "All" tab) ───────────────────────────────
 
 const TAB_LABEL: Record<ActivityTab, string> = {
-  programs:   "Program",
-  promotions: "Promo",
-  local:      "Local",
-  all:        "All",
+  programs:    "Program",
+  promotions:  "Promo",
+  local:       "Local",
+  advertising: "Ad",
+  all:         "All",
 };
 
 const TAB_COLOR: Record<ActivityTab, string> = {
-  programs:   "#72B84A",
-  promotions: "#4E8DF4",
-  local:      "#D89A3C",
-  all:        "#A8A8A3",
+  programs:    "#72B84A",
+  promotions:  "#4E8DF4",
+  local:       "#D89A3C",
+  advertising: "#1877F2",
+  all:         "#A8A8A3",
 };
 
 // ─── Activity Card ────────────────────────────────────────────
@@ -590,6 +682,7 @@ export default function Activities() {
     pathSegment === "promotions"   ? "promotions" :
     pathSegment === "local-events" ? "local"      :
     pathSegment === "local"        ? "local"      :
+    pathSegment === "advertising"  ? "advertising" :
     "programs";
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -600,10 +693,11 @@ export default function Activities() {
   };
 
   const PRIMARY_TABS: { id: ActivityTab; label: string; path: string }[] = [
-    { id: "all",        label: "All",            path: routes.activities.programs.replace(/\/programs$/, "/all") },
-    { id: "programs",   label: "Programs",       path: routes.activities.programs },
-    { id: "promotions", label: "Promotions",     path: routes.activities.promotions },
-    { id: "local",      label: "Local & Events", path: routes.activities.localEvents },
+    { id: "all",         label: "All",            path: routes.activities.programs.replace(/\/programs$/, "/all") },
+    { id: "programs",    label: "Programs",       path: routes.activities.programs },
+    { id: "promotions",  label: "Promotions",     path: routes.activities.promotions },
+    { id: "local",       label: "Local & Events", path: routes.activities.localEvents },
+    { id: "advertising", label: "Advertising",    path: routes.activities.advertising },
   ];
 
   const primaryItems = activeTab === "all"
@@ -615,8 +709,9 @@ export default function Activities() {
     : primaryItems.filter(i => i.status === statusFilter);
 
   function getDetailPath(item: ActivityItem): string {
-    if (item.tab === "programs")   return routes.activities.programDetail(item.id);
-    if (item.tab === "promotions") return routes.activities.promotionDetail(item.id);
+    if (item.tab === "programs")    return routes.activities.programDetail(item.id);
+    if (item.tab === "promotions")  return routes.activities.promotionDetail(item.id);
+    if (item.tab === "advertising") return routes.activities.advertisingDetail(item.id);
     return routes.activities.localDetail(item.id);
   }
 
@@ -637,12 +732,22 @@ export default function Activities() {
       }, {})
     : {};
 
+  // Group advertising items by their group field
+  const ADVERTISING_GROUP_ORDER = ["Paid Media", "Print & Local Media", "Events & Sponsorships", "Influencer & Community"];
+  const advertisingGroups = activeTab === "advertising"
+    ? tabItems.reduce<Record<string, ActivityItem[]>>((acc, item) => {
+        const g = item.group ?? "Other";
+        return { ...acc, [g]: [...(acc[g] ?? []), item] };
+      }, {})
+    : {};
+
   // Subtitle: contextual per tab
   const SUBTITLE: Record<ActivityTab, string> = {
-    all:        "All programs, promotions, and local events — linked to campaigns and Asana",
-    programs:   "PBGA-led clinics and programs tracked via Acuity",
-    promotions: "Active and upcoming promotional offers tied to membership campaigns",
-    local:      "In-venue displays, community outreach, member events, and social content",
+    all:         "All programs, promotions, local events, and advertising — linked to campaigns and Asana",
+    programs:    "PBGA-led clinics and programs tracked via Acuity",
+    promotions:  "Active and upcoming promotional offers tied to membership campaigns",
+    local:       "In-venue displays, community outreach, member events, and social content",
+    advertising: "Paid media, print ads, influencer collaborations, and sponsorships",
   };
 
   return (
@@ -757,8 +862,7 @@ export default function Activities() {
                     ))}
                   </div>
                 </div>
-              ))
-            }
+              ))}
             {/* Ungrouped items */}
             {Object.keys(localGroups)
               .filter(g => !LOCAL_GROUP_ORDER.includes(g))
@@ -771,8 +875,38 @@ export default function Activities() {
                     ))}
                   </div>
                 </div>
-              ))
-            }
+              ))}
+          </>
+        )}
+
+        {/* Advertising tab: grouped by channel type */}
+        {activeTab === "advertising" && (
+          <>
+            {ADVERTISING_GROUP_ORDER
+              .filter(g => advertisingGroups[g]?.length > 0)
+              .map(group => (
+                <div key={group}>
+                  <GroupHeader label={group} />
+                  <div className="space-y-3">
+                    {advertisingGroups[group].map(item => (
+                      <ActivityCard key={item.id} item={item} onClick={() => navigate(getDetailPath(item))} />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            {/* Ungrouped items */}
+            {Object.keys(advertisingGroups)
+              .filter(g => !ADVERTISING_GROUP_ORDER.includes(g))
+              .map(group => (
+                <div key={group}>
+                  <GroupHeader label={group} />
+                  <div className="space-y-3">
+                    {advertisingGroups[group].map(item => (
+                      <ActivityCard key={item.id} item={item} onClick={() => navigate(getDetailPath(item))} />
+                    ))}
+                  </div>
+                </div>
+              ))}
           </>
         )}
 

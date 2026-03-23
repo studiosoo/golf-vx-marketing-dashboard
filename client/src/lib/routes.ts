@@ -64,11 +64,13 @@ export const appRoutes = {
         programs: `${base}/activities/programs`,
         promotions: `${base}/activities/promotions`,
         localEvents: `${base}/activities/local-events`,
+        advertising: `${base}/activities/advertising`,
         archive: `${base}/activities/archive`,
         detail: (tab: string, id: string) => `${base}/activities/${tab}/${id}`,
         programDetail: (id: string) => `${base}/activities/programs/${id}`,
         promotionDetail: (id: string) => `${base}/activities/promotions/${id}`,
         localDetail: (id: string) => `${base}/activities/local-events/${id}`,
+        advertisingDetail: (id: string) => `${base}/activities/advertising/${id}`,
       },
 
       audience: {

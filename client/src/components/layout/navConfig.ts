@@ -77,6 +77,7 @@ function buildNav(venueSlug: string) {
         venue.activities.programs,
         venue.activities.promotions,
         venue.activities.localEvents,
+        venue.activities.advertising,
         venue.activities.archive,
         // Legacy aliases
         venue.studioSoo.activityPrograms,
@@ -92,6 +93,7 @@ function buildNav(venueSlug: string) {
         { label: "Programs",       path: venue.activities.programs,    icon: BarChart2 },
         { label: "Promotions",     path: venue.activities.promotions,  icon: Flag },
         { label: "Local & Events", path: venue.activities.localEvents, icon: Activity },
+        { label: "Advertising",    path: venue.activities.advertising, icon: Flag },
         { label: "Production",     path: venue.studioSoo.production,   icon: Layers },
       ],
     },

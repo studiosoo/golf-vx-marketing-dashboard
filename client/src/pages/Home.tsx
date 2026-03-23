@@ -390,8 +390,8 @@ export default function Home() {
 
   // 2026 Key Goals data
   const igFollowers = (igStats as any)?.followers ?? (igStats as any)?.followers_count ?? null;
-  // Email Subscribers: live Encharge API (AHTIL tag count); static fallback = 1000 (user-confirmed 2026-03-23)
-  const AHTIL_FALLBACK = 1000;
+  // Email Subscribers: live Encharge API (AHTIL tag count); static fallback = 100 (CSV snapshot Mar 23 2026 — 100 unique AHTIL contacts)
+  const AHTIL_FALLBACK = 100;
   const emailSubscribers = ahtilData?.count != null ? ahtilData.count : AHTIL_FALLBACK;
   const emailSubscribersIsLive = ahtilData?.count != null;
 
@@ -478,7 +478,7 @@ export default function Home() {
       goal: 2000,
       display: igFollowers != null ? fmt(igFollowers) : "—",
       goalDisplay: "2,000",
-      color: "#1A56DB",
+      color: "#E1306C",
       statusNote: igTokenNote,
       statusColor: igTokenNote && !tokenStatus?.warning ? "#D32F2F" : "#F2DD48",
     },
@@ -491,7 +491,7 @@ export default function Home() {
       display: fmt(emailSubscribers),
       goalDisplay: "5,000",
       color: "#222222",
-      statusNote: emailSubscribersIsLive ? "Encharge · AHTIL tag · live" : "Encharge · AHTIL tag · CSV 2026-03-18",
+      statusNote: emailSubscribersIsLive ? "Encharge · AHTIL tag · live" : "Encharge · AHTIL tag · CSV snapshot Mar 23 2026",
       statusColor: "#888888",
     },
   ];
