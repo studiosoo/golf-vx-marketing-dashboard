@@ -3,11 +3,15 @@ export const DEFAULT_VENUE_SLUG = "arlington-heights";
 export type VenueScopedSection =
   | "dashboard"
   | "reports"
+  | "campaigns"
+  | "activities"
+  | "audience"
+  | "insights"
+  | "dataHealth"
+  // Legacy (kept for backward compat)
   | "studioSoo"
   | "performance"
-  | "operations"
-  | "audience"
-  | "insights";
+  | "operations";
 
 export function withDefaultVenueSlug(venueSlug?: string | null): string {
   return venueSlug?.trim() || DEFAULT_VENUE_SLUG;
@@ -34,6 +38,7 @@ export const appRoutes = {
     return {
       base,
       dashboard: `${base}/dashboard`,
+
       reports: {
         home: `${base}/reports`,
         templates: `${base}/reports/templates`,
@@ -42,7 +47,59 @@ export const appRoutes = {
         briefs: `${base}/reports/briefs`,
         detail: (reportId: string | number) => `${base}/reports/${reportId}`,
       },
+
+      // ── Canonical top-level routes (IA Redefinition Directive) ──────────────
+
+      campaigns: {
+        home: `${base}/campaigns`,
+        detail: (id: string | number) => `${base}/campaigns/${id}`,
+        trialConversion: `${base}/campaigns/trial-conversion`,
+        membershipAcquisition: `${base}/campaigns/membership-acquisition`,
+        memberRetention: `${base}/campaigns/member-retention`,
+        b2bEvents: `${base}/campaigns/b2b-events`,
+      },
+
+      activities: {
+        home: `${base}/activities`,
+        programs: `${base}/activities/programs`,
+        promotions: `${base}/activities/promotions`,
+        localEvents: `${base}/activities/local-events`,
+        archive: `${base}/activities/archive`,
+        detail: (tab: string, id: string) => `${base}/activities/${tab}/${id}`,
+        programDetail: (id: string) => `${base}/activities/programs/${id}`,
+        promotionDetail: (id: string) => `${base}/activities/promotions/${id}`,
+        localDetail: (id: string) => `${base}/activities/local-events/${id}`,
+      },
+
+      audience: {
+        home: `${base}/audience`,
+        members: `${base}/audience/members`,
+        subscribers: `${base}/audience/subscribers`,
+        participants: `${base}/audience/participants`,
+        unified: `${base}/audience/unified`,
+        // Legacy aliases
+        people: `${base}/audience/people`,
+        segments: `${base}/audience/segments`,
+        duplicates: `${base}/audience/duplicates`,
+        profile: (profileId: string | number) => `${base}/audience/${profileId}`,
+      },
+
+      insights: {
+        home: `${base}/insights`,
+        ask: `${base}/insights/ask`,
+        research: `${base}/insights/research`,
+        strategy: `${base}/insights/strategy`,
+        // Legacy aliases
+        alerts: `${base}/insights/alerts`,
+        recommendations: `${base}/insights/recommendations`,
+      },
+
+      dataHealth: `${base}/data-health`,
+
+      // ── Legacy paths (kept for redirects, do not add new links here) ────────
+
       performance: `${base}/performance`,
+
       operations: {
         home: `${base}/operations`,
         thisWeek: `${base}/operations/this-week`,
@@ -63,6 +120,7 @@ export const appRoutes = {
         content: `${base}/operations/content`,
         localMarketing: `${base}/operations/local-marketing`,
       },
+
       studioSoo: {
         home: `${base}/studio-soo`,
         autopilot: `${base}/studio-soo/autopilot`,
@@ -77,21 +135,6 @@ export const appRoutes = {
         activityProgramDetail: (id: string) => `${base}/studio-soo/activities/programs/${id}`,
         activityPromotionDetail: (id: string) => `${base}/studio-soo/activities/promotions/${id}`,
         activityLocalDetail: (id: string) => `${base}/studio-soo/activities/local/${id}`,
-      },
-      audience: {
-        home: `${base}/audience`,
-        people: `${base}/audience/people`,
-        segments: `${base}/audience/segments`,
-        duplicates: `${base}/audience/duplicates`,
-        profile: (profileId: string | number) => `${base}/audience/${profileId}`,
-      },
-      insights: {
-        home: `${base}/insights`,
-        alerts: `${base}/insights/alerts`,
-        recommendations: `${base}/insights/recommendations`,
-        ask: `${base}/insights/ask`,
-        research: `${base}/insights/research`,
-        strategy: `${base}/insights/strategy`,
       },
     };
   },
@@ -127,16 +170,23 @@ export function getDefaultVenueRoute(section: VenueScopedSection = "dashboard"):
   switch (section) {
     case "reports":
       return venue.reports.home;
+    case "campaigns":
+      return venue.campaigns.home;
+    case "activities":
+      return venue.activities.programs;
+    case "audience":
+      return venue.audience.members;
+    case "insights":
+      return venue.insights.ask;
+    case "dataHealth":
+      return venue.dataHealth;
+    // Legacy
     case "studioSoo":
       return venue.studioSoo.autopilot;
     case "performance":
       return venue.performance;
     case "operations":
       return venue.operations.thisWeek;
-    case "audience":
-      return venue.audience.people;
-    case "insights":
-      return venue.insights.ask;
     case "dashboard":
     default:
       return venue.dashboard;

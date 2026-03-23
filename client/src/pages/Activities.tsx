@@ -599,10 +599,10 @@ export default function Activities() {
   };
 
   const PRIMARY_TABS: { id: ActivityTab; label: string; path: string }[] = [
-    { id: "all",        label: "All",            path: routes.studioSoo.activityPrograms.replace(/\/programs$/, "/all") },
-    { id: "programs",   label: "Programs",       path: routes.studioSoo.activityPrograms },
-    { id: "promotions", label: "Promotions",     path: routes.studioSoo.activityPromotions },
-    { id: "local",      label: "Local & Events", path: routes.studioSoo.activityLocal },
+    { id: "all",        label: "All",            path: routes.activities.programs.replace(/\/programs$/, "/all") },
+    { id: "programs",   label: "Programs",       path: routes.activities.programs },
+    { id: "promotions", label: "Promotions",     path: routes.activities.promotions },
+    { id: "local",      label: "Local & Events", path: routes.activities.localEvents },
   ];
 
   const primaryItems = activeTab === "all"
@@ -614,9 +614,9 @@ export default function Activities() {
     : primaryItems.filter(i => i.status === statusFilter);
 
   function getDetailPath(item: ActivityItem): string {
-    if (item.tab === "programs")   return routes.studioSoo.activityProgramDetail(item.id);
-    if (item.tab === "promotions") return routes.studioSoo.activityPromotionDetail(item.id);
-    return routes.studioSoo.activityLocalDetail(item.id);
+    if (item.tab === "programs")   return routes.activities.programDetail(item.id);
+    if (item.tab === "promotions") return routes.activities.promotionDetail(item.id);
+    return routes.activities.localDetail(item.id);
   }
 
   // Group programs by their group field (programs tab)

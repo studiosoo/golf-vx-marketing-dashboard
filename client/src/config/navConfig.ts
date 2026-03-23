@@ -5,7 +5,6 @@ import {
   Database,
   FileText,
   Flag,
-  Layers,
   LayoutDashboard,
   MessageSquare,
   Search,
@@ -54,20 +53,20 @@ function buildNav(venueSlug: string) {
       matchPaths: [venue.reports.home],
     },
 
-    // 3. Campaigns (canonical)
+    // 3. Campaigns (canonical — was studio-soo/campaigns)
     {
       label: "Campaigns",
       path: venue.campaigns.home,
       icon: Flag,
       matchPaths: [
         venue.campaigns.home,
-        // Legacy aliases
+        // Legacy aliases for backward compat
         venue.studioSoo.campaigns,
         venue.operations.campaigns,
       ],
     },
 
-    // 4. Activities (canonical — was studio-soo/activities + production)
+    // 4. Activities (canonical — was studio-soo/activities)
     {
       label: "Activities",
       path: venue.activities.programs,
@@ -92,7 +91,6 @@ function buildNav(venueSlug: string) {
         { label: "Programs",       path: venue.activities.programs,    icon: BarChart2 },
         { label: "Promotions",     path: venue.activities.promotions,  icon: Flag },
         { label: "Local & Events", path: venue.activities.localEvents, icon: Activity },
-        { label: "Production",     path: venue.studioSoo.production,   icon: Layers },
       ],
     },
 
@@ -104,10 +102,11 @@ function buildNav(venueSlug: string) {
       matchPaths: [
         venue.audience.home,
         venue.audience.members,
-        venue.audience.people,
         venue.audience.subscribers,
         venue.audience.participants,
         venue.audience.unified,
+        // Legacy aliases
+        venue.audience.people,
         venue.audience.duplicates,
       ],
     },
@@ -167,7 +166,6 @@ function matchesPath(location: string, candidate: string): boolean {
 
 export function getActiveLabel(location: string): string {
   const navStructure = getNavStructure(location);
-
   for (const item of navStructure) {
     if ("heading" in item) {
       for (const sub of item.items) {
@@ -189,7 +187,6 @@ export function getActiveLabel(location: string): string {
       }
     }
   }
-
   if (location.startsWith("/public/")) return "Public";
   if (location.startsWith("/r/")) return "Shared Report";
   return "Overview";

@@ -15,6 +15,7 @@ import ActivityDetail from "./pages/ActivityDetail";
 import MetaAdsCampaignDetail from "./pages/MetaAdsCampaignDetail";
 import ProgramDetailRouter from "./pages/ProgramDetailRouter";
 import MemberProfile from "./pages/MemberProfile";
+import DataHealthPlaceholder from "./pages/DataHealthPlaceholder";
 import {
   AccountProfilePlaceholder,
   AdminAuditLogPlaceholder,
@@ -95,7 +96,21 @@ function DashboardAppRoutes() {
         <Route path="/app/:venueSlug/reports/archive" component={ReportsArchivePlaceholder} />
         <Route path="/app/:venueSlug/reports/briefs" component={ReportsBriefsPlaceholder} />
 
-        <Route path="/app/:venueSlug/performance" component={PerformancePageWrapper} />
+        <Route path="/app/:venueSlug/performance">{params => <Redirect to={appRoutes.venue(params.venueSlug).reports.home} />}</Route>
+
+        {/* ── Canonical top-level routes (IA Redefinition Directive) ─────── */}
+        <Route path="/app/:venueSlug/campaigns">{params => <Redirect to={appRoutes.venue(params.venueSlug).campaigns.home + "/all"} />}</Route>
+        <Route path="/app/:venueSlug/campaigns/all" component={OperationsCampaignsWrapper} />
+        <Route path="/app/:venueSlug/campaigns/:id" component={CampaignDetail} />
+
+        <Route path="/app/:venueSlug/activities">{params => <Redirect to={appRoutes.venue(params.venueSlug).activities.programs} />}</Route>
+        <Route path="/app/:venueSlug/activities/programs" component={StudioSooActivitiesWrapper} />
+        <Route path="/app/:venueSlug/activities/promotions" component={StudioSooActivitiesWrapper} />
+        <Route path="/app/:venueSlug/activities/local-events" component={StudioSooActivitiesWrapper} />
+        <Route path="/app/:venueSlug/activities/archive" component={StudioSooActivitiesWrapper} />
+        <Route path="/app/:venueSlug/activities/:tab/:id" component={ActivityDetail} />
+
+        <Route path="/app/:venueSlug/data-health" component={DataHealthPlaceholder} />
 
         <Route path="/app/:venueSlug/operations">{params => <Redirect to={appRoutes.venue(params.venueSlug).operations.thisWeek} />}</Route>
         <Route path="/app/:venueSlug/operations/this-week" component={OperationsThisWeekPlaceholder} />
@@ -113,21 +128,22 @@ function DashboardAppRoutes() {
         <Route path="/app/:venueSlug/operations/communications" component={OperationsCommunicationsWrapper} />
         <Route path="/app/:venueSlug/operations/content" component={OperationsContentWrapper} />
 
-        {/* Studio Soo routes — map to existing working components */}
-        <Route path="/app/:venueSlug/studio-soo">{params => <Redirect to={appRoutes.venue(params.venueSlug).studioSoo.autopilot} />}</Route>
-        <Route path="/app/:venueSlug/studio-soo/autopilot" component={InsightsRecommendationsWrapper} />
-        <Route path="/app/:venueSlug/studio-soo/campaigns" component={OperationsCampaignsWrapper} />
-        <Route path="/app/:venueSlug/studio-soo/campaigns/:id" component={CampaignDetail} />
+        {/* Studio Soo legacy routes — redirect to canonical paths */}
+        <Route path="/app/:venueSlug/studio-soo">{params => <Redirect to={appRoutes.venue(params.venueSlug).insights.strategy} />}</Route>
+        <Route path="/app/:venueSlug/studio-soo/autopilot">{params => <Redirect to={appRoutes.venue(params.venueSlug).insights.strategy} />}</Route>
+        <Route path="/app/:venueSlug/studio-soo/campaigns">{params => <Redirect to={appRoutes.venue(params.venueSlug).campaigns.home + "/all"} />}</Route>
+        <Route path="/app/:venueSlug/studio-soo/campaigns/:id">{params => <Redirect to={appRoutes.venue(params.venueSlug).campaigns.detail(params.id)} />}</Route>
         <Route path="/app/:venueSlug/studio-soo/production" component={StudioSooProductionWrapper} />
-        <Route path="/app/:venueSlug/studio-soo/activities/all" component={StudioSooActivitiesWrapper} />
-        <Route path="/app/:venueSlug/studio-soo/activities/programs" component={StudioSooActivitiesWrapper} />
-        <Route path="/app/:venueSlug/studio-soo/activities/promotions" component={StudioSooActivitiesWrapper} />
-        <Route path="/app/:venueSlug/studio-soo/activities/local" component={StudioSooActivitiesWrapper} />
-        <Route path="/app/:venueSlug/studio-soo/activities/:tab/:id" component={ActivityDetail} />
-        <Route path="/app/:venueSlug/studio-soo/activities">{params => <Redirect to={appRoutes.venue(params.venueSlug).studioSoo.activityPrograms} />}</Route>
+        <Route path="/app/:venueSlug/studio-soo/activities/all">{params => <Redirect to={appRoutes.venue(params.venueSlug).activities.programs} />}</Route>
+        <Route path="/app/:venueSlug/studio-soo/activities/programs">{params => <Redirect to={appRoutes.venue(params.venueSlug).activities.programs} />}</Route>
+        <Route path="/app/:venueSlug/studio-soo/activities/promotions">{params => <Redirect to={appRoutes.venue(params.venueSlug).activities.promotions} />}</Route>
+        <Route path="/app/:venueSlug/studio-soo/activities/local">{params => <Redirect to={appRoutes.venue(params.venueSlug).activities.localEvents} />}</Route>
+        <Route path="/app/:venueSlug/studio-soo/activities/:tab/:id">{params => <Redirect to={appRoutes.venue(params.venueSlug).activities.detail(params.tab, params.id)} />}</Route>
+        <Route path="/app/:venueSlug/studio-soo/activities">{params => <Redirect to={appRoutes.venue(params.venueSlug).activities.programs} />}</Route>
 
-        <Route path="/app/:venueSlug/audience">{params => <Redirect to={appRoutes.venue(params.venueSlug).audience.people} />}</Route>
-        <Route path="/app/:venueSlug/audience/people" component={AudiencePeopleWrapper} />
+        <Route path="/app/:venueSlug/audience">{params => <Redirect to={appRoutes.venue(params.venueSlug).audience.members} />}</Route>
+        <Route path="/app/:venueSlug/audience/members" component={AudiencePeopleWrapper} />
+        <Route path="/app/:venueSlug/audience/people">{params => <Redirect to={appRoutes.venue(params.venueSlug).audience.members} />}</Route>
         <Route path="/app/:venueSlug/audience/segments" component={AudienceSegmentsPlaceholder} />
         <Route path="/app/:venueSlug/audience/duplicates" component={AudienceDuplicatesWrapper} />
         <Route path="/app/:venueSlug/audience/:id" component={MemberProfile} />
