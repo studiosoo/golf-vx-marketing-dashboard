@@ -602,7 +602,24 @@ export const strategicCampaignsRouter = router({
       group.roi = group.totalSpend > 0 ? ((group.totalRevenue - group.totalSpend) / group.totalSpend) * 100 : 0;
     }
     const order = ['membership_acquisition', 'trial_conversion', 'member_retention', 'corporate_events'];
-    return order.filter(k => grouped[k]).map(k => grouped[k]);
+    // Always include all 4 strategic categories even if no DB programs exist yet
+    return order.map(k => {
+      if (grouped[k]) return grouped[k];
+      const config = categoryConfig[k] || { name: k, description: '', color: 'gray' };
+      return {
+        id: k,
+        name: config.name,
+        description: config.description,
+        color: config.color,
+        landingPageUrl: (config as any).landingPageUrl,
+        totalBudget: 0,
+        totalSpend: 0,
+        totalRevenue: 0,
+        totalPrograms: 0,
+        roi: 0,
+        programs: [] as Array<{ id: number; name: string; spend: number; revenue: number; status: string }>,
+      };
+    });
   }),
 });
 

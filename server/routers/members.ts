@@ -163,10 +163,17 @@ export const enchargeRouter = router({
   }),
 
   getAHTILCount: protectedProcedure.query(async () => {
+    // Return null (not 0) when ENCHARGE_API_KEY is not configured so the
+    // client-side fallback value is used instead of showing 0.
+    const enchargeApiKey = process.env.ENCHARGE_API_KEY;
+    if (!enchargeApiKey) return { count: null as number | null };
     try {
-      return { count: await encharge.getAHTILTagCount() };
+      const count = await encharge.getAHTILTagCount();
+      // Return null if count is 0 (may indicate API key issue or empty list)
+      // so the client shows the CSV fallback instead of 0
+      return { count: count > 0 ? count : (null as number | null) };
     } catch (err) {
-      return { count: null };
+      return { count: null as number | null };
     }
   }),
 });

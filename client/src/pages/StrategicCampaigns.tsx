@@ -1,350 +1,438 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { TrendingUp, Target, DollarSign, BarChart3, ChevronRight, TrendingDown, CalendarRange, LayoutGrid } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import {
+  TrendingUp,
+  Target,
+  DollarSign,
+  BarChart3,
+  ChevronRight,
+  CalendarRange,
+  LayoutGrid,
+  UserCheck,
+  Users,
+  Flag,
+} from "lucide-react";
 import { useLocation } from "wouter";
 import { DEFAULT_VENUE_SLUG } from "@/lib/routes";
 import AsanaTimeline from "@/components/AsanaTimeline";
 import { MetaAdsStatusBadge } from "@/components/MetaAdsStatusBadge";
+import { cn } from "@/lib/utils";
 
-const CAMPAIGN_COLORS: Record<string, string> = {
-  trial_conversion: "emerald",
-  membership_acquisition: "pink",
-  member_retention: "blue",
-  corporate_events: "amber",
+// ── Design-system campaign palette ─────────────────────────────────────────
+const CAMPAIGN_STYLE: Record<string, {
+  label: string;
+  color: string;
+  bg: string;
+  icon: React.ElementType;
+  kpiLabel: string;
+}> = {
+  trial_conversion: {
+    label: "Trial Conversion",
+    color: "#72B84A",
+    bg: "#E6F0DC",
+    icon: Target,
+    kpiLabel: "Conversion Rate",
+  },
+  membership_acquisition: {
+    label: "Membership Acquisition",
+    color: "#4E8DF4",
+    bg: "#EAF2FF",
+    icon: UserCheck,
+    kpiLabel: "Members Acquired",
+  },
+  member_retention: {
+    label: "Member Retention",
+    color: "#A87FBE",
+    bg: "#F3EDF8",
+    icon: Users,
+    kpiLabel: "Retention Rate",
+  },
+  corporate_events: {
+    label: "B2B & Events",
+    color: "#D89A3C",
+    bg: "#F6E5CF",
+    icon: Flag,
+    kpiLabel: "Events / Month",
+  },
 };
 
-const CAMPAIGN_BG_COLORS: Record<string, string> = {
-  emerald: "bg-[#72B84A]/10 text-[#72B84A]",
-  pink: "bg-[#E8453C]/10 text-[#E8453C]",
-  blue: "bg-[#888888]/10 text-[#888888]",
-  amber: "bg-[#F2DD48]/10 text-[#222222]",
-};
+function fmt(n: number) {
+  return n.toLocaleString("en-US");
+}
+function fmtCurrency(n: number) {
+  return "$" + fmt(Math.round(n));
+}
 
 function getProgramRoute(program: { id: number; name: string }, venueSlug: string): string {
   const name = program.name.toLowerCase();
   if (name.includes("winter clinic") || name.includes("pbga winter")) {
-    return `/app/${venueSlug}/studio-soo/activities/programs/winter-camp`;
+    return `/app/${venueSlug}/activities/programs/winter-camp`;
   }
   if (name.includes("summer camp") || name.includes("junior")) {
-    return `/app/${venueSlug}/studio-soo/activities/programs/junior-summer-camp`;
+    return `/app/${venueSlug}/activities/programs/junior-summer-camp`;
   }
-  if (name.includes("sunday clinic")) {
-    return `/app/${venueSlug}/studio-soo/activities/programs/sunday-clinic`;
+  if (name.includes("sunday clinic") || name.includes("drive day")) {
+    return `/app/${venueSlug}/activities/programs/sunday-clinic`;
   }
   if (name.includes("trial")) {
-    return `/app/${venueSlug}/studio-soo/activities/promotions/trial-session`;
+    return `/app/${venueSlug}/activities/promotions/trial-session`;
   }
-  return `/app/${venueSlug}/operations/campaigns/${program.id}`;
+  return `/app/${venueSlug}/activities/programs/${program.id}`;
 }
 
 export default function StrategicCampaigns() {
   const [location, setLocation] = useLocation();
   const venueSlugMatch = location.match(/\/app\/([^/]+)\//);
   const venueSlug = venueSlugMatch?.[1] || DEFAULT_VENUE_SLUG;
+
   const { data: campaigns, isLoading } = trpc.strategicCampaigns.getOverview.useQuery();
   const { data: kpiData } = trpc.intelligence.getStrategicKPIs.useQuery();
   const [activeTab, setActiveTab] = useState<"campaigns" | "timeline">("campaigns");
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div>
-          <Skeleton className="h-10 w-96 mb-2" />
-          <Skeleton className="h-5 w-full max-w-2xl" />
+      <div className="max-w-6xl mx-auto space-y-5">
+        <div className="h-8 w-64 bg-[#F1F1EF] rounded-lg animate-pulse" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[0, 1, 2, 3].map(i => (
+            <div key={i} className="h-24 bg-[#F1F1EF] rounded-xl animate-pulse" />
+          ))}
         </div>
-        <div className="grid gap-6 md:grid-cols-2">
-          {[1, 2, 3, 4].map(i => (
-            <Skeleton key={i} className="h-96" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[0, 1, 2, 3].map(i => (
+            <div key={i} className="h-72 bg-[#F1F1EF] rounded-xl animate-pulse" />
           ))}
         </div>
       </div>
     );
   }
 
+  const totalCampaigns = campaigns?.length ?? 0;
+  const totalPrograms = campaigns?.reduce((s, c) => s + c.totalPrograms, 0) ?? 0;
+  const totalSpend = campaigns?.reduce((s, c) => s + c.totalSpend, 0) ?? 0;
+  const totalRevenue = campaigns?.reduce((s, c) => s + c.totalRevenue, 0) ?? 0;
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+    <div className="max-w-6xl mx-auto space-y-5">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Strategic Campaigns</h1>
-          <div className="flex items-center gap-2 mt-2">
-            <p className="text-muted-foreground">
+          <h1 className="text-[22px] font-bold text-[#222222] leading-tight">Strategic Campaigns</h1>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-[13px] text-[#888888]">
               High-level strategic objectives with aggregated program performance
             </p>
             <MetaAdsStatusBadge />
           </div>
         </div>
-        <div className="flex items-center gap-1 p-1 bg-[#F1F1EF] rounded-xl border border-[#DEDEDA] self-start sm:self-auto">
+        {/* Tab switcher */}
+        <div className="flex items-center gap-1 p-1 bg-[#F1F1EF] rounded-xl border border-[#DEDEDA] self-start sm:self-auto shrink-0">
           <button
             onClick={() => setActiveTab("campaigns")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeTab === "campaigns" ? "bg-white text-[#111] shadow-sm" : "text-[#666] hover:text-[#333]"}`}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium rounded-lg transition-all",
+              activeTab === "campaigns"
+                ? "bg-white text-[#222222] shadow-sm"
+                : "text-[#888888] hover:text-[#222222]"
+            )}
           >
-            <LayoutGrid className="w-3.5 h-3.5" />Campaigns
+            <LayoutGrid className="w-3.5 h-3.5" />
+            Campaigns
           </button>
           <button
             onClick={() => setActiveTab("timeline")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeTab === "timeline" ? "bg-white text-[#111] shadow-sm" : "text-[#666] hover:text-[#333]"}`}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium rounded-lg transition-all",
+              activeTab === "timeline"
+                ? "bg-white text-[#222222] shadow-sm"
+                : "text-[#888888] hover:text-[#222222]"
+            )}
           >
-            <CalendarRange className="w-3.5 h-3.5" />Asana Timeline
+            <CalendarRange className="w-3.5 h-3.5" />
+            Asana Timeline
           </button>
         </div>
       </div>
 
       {activeTab === "timeline" && <AsanaTimeline />}
 
-      {activeTab === "campaigns" && (<>
-
-      {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Campaigns</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{campaigns?.length || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Strategic objectives
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Programs</CardTitle>
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {campaigns?.reduce((sum, c) => sum + c.totalPrograms, 0) || 0}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Tactical programs
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Spend</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              ${campaigns?.reduce((sum, c) => sum + c.totalSpend, 0).toFixed(2) || "0.00"}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Across all programs
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              ${campaigns?.reduce((sum, c) => sum + c.totalRevenue, 0).toFixed(2) || "0.00"}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Generated revenue
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Campaign Cards */}
-      <div className="grid gap-6 md:grid-cols-2">
-        {campaigns?.map(campaign => {
-          const colorClass = CAMPAIGN_BG_COLORS[campaign.color] || CAMPAIGN_BG_COLORS.blue;
-          
-          return (
-            <Card key={campaign.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1 flex-1">
-                    <CardTitle className="text-xl">{campaign.name}</CardTitle>
-                    <CardDescription>{campaign.description}</CardDescription>
+      {activeTab === "campaigns" && (
+        <>
+          {/* Summary row */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {[
+              { label: "Total Campaigns", value: fmt(totalCampaigns), icon: Target, note: "Strategic objectives" },
+              { label: "Total Programs", value: fmt(totalPrograms), icon: BarChart3, note: "Tactical programs" },
+              { label: "Total Spend", value: fmtCurrency(totalSpend), icon: DollarSign, note: "Across all programs" },
+              { label: "Total Revenue", value: fmtCurrency(totalRevenue), icon: TrendingUp, note: "Generated revenue" },
+            ].map(stat => {
+              const Icon = stat.icon;
+              return (
+                <div key={stat.label} className="bg-white rounded-xl border border-[#DEDEDA] p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[11px] font-medium text-[#888888]">{stat.label}</span>
+                    <Icon className="h-3.5 w-3.5 text-[#AAAAAA]" />
                   </div>
-                  <Badge className={colorClass}>
-                    {campaign.totalPrograms} {campaign.totalPrograms === 1 ? "program" : "programs"}
-                  </Badge>
+                  <p className="text-[22px] font-bold text-[#222222] leading-none">{stat.value}</p>
+                  <p className="text-[11px] text-[#AAAAAA] mt-1">{stat.note}</p>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* PRIMARY KPI — headline metric */}
-                {campaign.id === 'membership_acquisition' && kpiData && (
-                  <div className="p-4 rounded-lg border-2 border-primary/20 bg-primary/5">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Primary KPI — Membership Goal</p>
-                    <div className="flex items-end justify-between mb-2">
-                      <span className="text-4xl font-black">{kpiData.membershipAcquisition.current}</span>
-                      <span className="text-sm text-muted-foreground mb-1">/ {kpiData.membershipAcquisition.target} members</span>
+              );
+            })}
+          </div>
+
+          {/* Campaign cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {(campaigns ?? []).map(campaign => {
+              const style = CAMPAIGN_STYLE[campaign.id] ?? {
+                label: campaign.name,
+                color: "#888888",
+                bg: "#F1F1EF",
+                icon: BarChart3,
+                kpiLabel: "KPI",
+              };
+              const Icon = style.icon;
+
+              // Enrich primary KPI from live data
+              let kpiBlock: React.ReactNode = null;
+              if (campaign.id === "membership_acquisition" && kpiData) {
+                const { current, target, progress } = kpiData.membershipAcquisition;
+                kpiBlock = (
+                  <div className="p-3 rounded-lg border border-[#DEDEDA] bg-[#FAFAFA] mb-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#888888] mb-1">
+                      Primary KPI — Membership Goal
+                    </p>
+                    <div className="flex items-end justify-between mb-1.5">
+                      <span className="text-[28px] font-bold text-[#222222] leading-none">{current}</span>
+                      <span className="text-[12px] text-[#888888] mb-0.5">/ {target} members</span>
                     </div>
-                    <Progress value={kpiData.membershipAcquisition.progress} className="h-2.5" />
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {kpiData.membershipAcquisition.progress.toFixed(1)}% to year-end target • Need{' '}
-                      {kpiData.membershipAcquisition.target - kpiData.membershipAcquisition.current} more members
+                    <div className="h-1.5 bg-[#EEEEEE] rounded-full overflow-hidden mb-1">
+                      <div className="h-full rounded-full bg-[#4E8DF4]" style={{ width: `${Math.min(progress, 100)}%` }} />
+                    </div>
+                    <p className="text-[11px] text-[#888888]">
+                      {progress.toFixed(1)}% to year-end target · Need {target - current} more members
                     </p>
                   </div>
-                )}
-                {campaign.id === 'trial_conversion' && kpiData && (
-                  <div className="p-4 rounded-lg border-2 border-primary/20 bg-primary/5">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Primary KPI — New Paying Members (90d)</p>
-                    <div className="flex items-end justify-between mb-2">
-                      <span className={`text-4xl font-black ${
-                        kpiData.trialConversion.current >= kpiData.trialConversion.target
-                          ? 'text-[#72B84A]'
-                          : kpiData.trialConversion.current > 0 ? 'text-[#F2DD48]' : 'text-muted-foreground'
-                      }`}>
-                        {kpiData.trialConversion.current}
+                );
+              } else if (campaign.id === "trial_conversion" && kpiData) {
+                const { current, target, progress, note } = kpiData.trialConversion;
+                kpiBlock = (
+                  <div className="p-3 rounded-lg border border-[#DEDEDA] bg-[#FAFAFA] mb-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#888888] mb-1">
+                      Primary KPI — New Paying Members (90d)
+                    </p>
+                    <div className="flex items-end justify-between mb-1.5">
+                      <span
+                        className="text-[28px] font-bold leading-none"
+                        style={{
+                          color: current >= target ? "#72B84A" : current > 0 ? "#D89A3C" : "#888888",
+                        }}
+                      >
+                        {current}
                       </span>
-                      <span className="text-sm text-muted-foreground mb-1">goal: {kpiData.trialConversion.target} members</span>
+                      <span className="text-[12px] text-[#888888] mb-0.5">goal: {target} members</span>
                     </div>
-                    <Progress value={kpiData.trialConversion.progress} className="h-2.5" />
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {kpiData.trialConversion.note}
-                    </p>
+                    <div className="h-1.5 bg-[#EEEEEE] rounded-full overflow-hidden mb-1">
+                      <div className="h-full rounded-full bg-[#72B84A]" style={{ width: `${Math.min(progress, 100)}%` }} />
+                    </div>
+                    <p className="text-[11px] text-[#888888]">{note}</p>
                   </div>
-                )}
-                {campaign.id === 'member_retention' && kpiData && (
-                  <div className="p-4 rounded-lg border-2 border-primary/20 bg-primary/5">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Primary KPI — Retention Rate</p>
-                    <div className="flex items-end justify-between mb-2">
-                      <span className={`text-4xl font-black ${
-                        kpiData.memberRetention.current >= kpiData.memberRetention.target
-                          ? 'text-[#72B84A]'
-                          : kpiData.memberRetention.current > 0 ? 'text-[#F2DD48]' : 'text-muted-foreground'
-                      }`}>
-                        {kpiData.memberRetention.current.toFixed(1)}%
+                );
+              } else if (campaign.id === "member_retention" && kpiData) {
+                const { current, target, progress } = kpiData.memberRetention;
+                kpiBlock = (
+                  <div className="p-3 rounded-lg border border-[#DEDEDA] bg-[#FAFAFA] mb-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#888888] mb-1">
+                      Primary KPI — Retention Rate
+                    </p>
+                    <div className="flex items-end justify-between mb-1.5">
+                      <span
+                        className="text-[28px] font-bold leading-none"
+                        style={{ color: current >= target ? "#72B84A" : "#D89A3C" }}
+                      >
+                        {current.toFixed(1)}%
                       </span>
-                      <span className="text-sm text-muted-foreground mb-1">target: {kpiData.memberRetention.target}%</span>
+                      <span className="text-[12px] text-[#888888] mb-0.5">target: {target}%</span>
                     </div>
-                    <Progress value={kpiData.memberRetention.progress} className="h-2.5" />
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {kpiData.memberRetention.current >= kpiData.memberRetention.target
-                        ? `Exceeding goal by ${(kpiData.memberRetention.current - kpiData.memberRetention.target).toFixed(1)}%`
-                        : `${(kpiData.memberRetention.target - kpiData.memberRetention.current).toFixed(1)}% below target`}
-                    </p>
-                  </div>
-                )}
-                {campaign.id === 'corporate_events' && kpiData && (
-                  <div className="p-4 rounded-lg border-2 border-primary/20 bg-primary/5">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Primary KPI — B2B Events This Month</p>
-                    <div className="flex items-end justify-between mb-2">
-                      <span className="text-4xl font-black">{kpiData.corporateEvents.current}</span>
-                      <span className="text-sm text-muted-foreground mb-1">/ {kpiData.corporateEvents.target} events</span>
+                    <div className="h-1.5 bg-[#EEEEEE] rounded-full overflow-hidden mb-1">
+                      <div className="h-full rounded-full bg-[#A87FBE]" style={{ width: `${Math.min(progress, 100)}%` }} />
                     </div>
-                    <Progress value={kpiData.corporateEvents.progress} className="h-2.5" />
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Target: 1 event/week •{' '}
-                      {kpiData.corporateEvents.current >= kpiData.corporateEvents.target
-                        ? 'On track'
-                        : `Need ${kpiData.corporateEvents.target - kpiData.corporateEvents.current} more events`}
+                    <p className="text-[11px] text-[#888888]">
+                      {current >= target
+                        ? `Exceeding goal by ${(current - target).toFixed(1)}%`
+                        : `${(target - current).toFixed(1)}% below target`}
                     </p>
                   </div>
-                )}
-
-                {/* Metrics Grid — Spend / Revenue */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-                  <div className="p-3 rounded-lg bg-muted/40">
-                    <p className="text-xs text-muted-foreground">Budget</p>
-                    <p className="text-base font-bold mt-0.5">${campaign.totalBudget.toFixed(0)}</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-muted/40">
-                    <p className="text-xs text-muted-foreground">Spend</p>
-                    <p className="text-base font-bold mt-0.5">${campaign.totalSpend.toFixed(0)}</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-muted/40">
-                    <p className="text-xs text-muted-foreground">Revenue</p>
-                    <p className="text-base font-bold mt-0.5">${campaign.totalRevenue.toFixed(0)}</p>
-                  </div>
-                </div>
-
-                {/* KPI Secondary Metrics */}
-                <div className="grid grid-cols-2 gap-3">
-                  {/* Cost per Acquisition / Efficiency KPI */}
-                  <div className="p-3 rounded-lg bg-muted/40">
-                    <p className="text-xs text-muted-foreground">Cost per Acquisition</p>
-                    <p className="text-base font-bold mt-0.5">
-                      {campaign.totalSpend > 0 && campaign.totalRevenue > 0
-                        ? `$${(campaign.totalSpend / Math.max(1, campaign.programs.reduce((s, p) => s + (p.revenue > 0 ? 1 : 0), 0))).toFixed(0)}`
-                        : campaign.totalSpend > 0 ? `$${campaign.totalSpend.toFixed(0)} total` : '—'}
+                );
+              } else if (campaign.id === "corporate_events" && kpiData) {
+                const { current, target, progress } = kpiData.corporateEvents;
+                kpiBlock = (
+                  <div className="p-3 rounded-lg border border-[#DEDEDA] bg-[#FAFAFA] mb-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#888888] mb-1">
+                      Primary KPI — B2B Events This Month
+                    </p>
+                    <div className="flex items-end justify-between mb-1.5">
+                      <span className="text-[28px] font-bold text-[#222222] leading-none">{current}</span>
+                      <span className="text-[12px] text-[#888888] mb-0.5">/ {target} events</span>
+                    </div>
+                    <div className="h-1.5 bg-[#EEEEEE] rounded-full overflow-hidden mb-1">
+                      <div className="h-full rounded-full bg-[#D89A3C]" style={{ width: `${Math.min(progress, 100)}%` }} />
+                    </div>
+                    <p className="text-[11px] text-[#888888]">
+                      Target: {target} events/mo ·{" "}
+                      {current >= target ? "On track" : `Need ${target - current} more events`}
                     </p>
                   </div>
-                  {/* ROI — kept as supplementary */}
-                  <div className="p-3 rounded-lg bg-muted/40">
-                    <p className="text-xs text-muted-foreground">Financial ROI</p>
-                    <p className={`text-base font-bold mt-0.5 ${campaign.roi >= 0 ? 'text-[#72B84A]' : 'text-[#E8453C]'}`}>
-                      {campaign.roi >= 0 ? '+' : ''}{campaign.roi.toFixed(1)}%
-                    </p>
-                  </div>
-                </div>
+                );
+              }
 
-                {/* View Landing Page Button */}
-                {campaign.landingPageUrl && (
-                  <div className="pt-4">
+              return (
+                <div
+                  key={campaign.id}
+                  className="bg-white rounded-xl border border-[#DEDEDA] p-5 flex flex-col gap-3"
+                >
+                  {/* Campaign header */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="h-7 w-7 rounded-lg flex items-center justify-center shrink-0"
+                        style={{ background: style.bg }}
+                      >
+                        <Icon className="h-3.5 w-3.5" style={{ color: style.color }} />
+                      </div>
+                      <div>
+                        <h2 className="text-[15px] font-bold text-[#222222] leading-tight">{style.label}</h2>
+                        <p className="text-[11px] text-[#888888] mt-0.5">{campaign.description}</p>
+                      </div>
+                    </div>
+                    {campaign.totalPrograms > 0 && (
+                      <span
+                        className="shrink-0 text-[11px] font-medium px-2 py-0.5 rounded-full"
+                        style={{ color: style.color, background: style.bg }}
+                      >
+                        {campaign.totalPrograms} {campaign.totalPrograms === 1 ? "program" : "programs"}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Primary KPI block */}
+                  {kpiBlock}
+
+                  {/* Metrics grid */}
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { label: "Budget", value: fmtCurrency(campaign.totalBudget) },
+                      { label: "Spend", value: fmtCurrency(campaign.totalSpend) },
+                      { label: "Revenue", value: fmtCurrency(campaign.totalRevenue) },
+                    ].map(m => (
+                      <div key={m.label} className="p-2.5 rounded-lg bg-[#FAFAFA] border border-[#F0F0F0]">
+                        <p className="text-[10px] text-[#888888]">{m.label}</p>
+                        <p className="text-[13px] font-bold text-[#222222] mt-0.5">{m.value}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Secondary metrics */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="p-2.5 rounded-lg bg-[#FAFAFA] border border-[#F0F0F0]">
+                      <p className="text-[10px] text-[#888888]">Cost per Acquisition</p>
+                      <p className="text-[13px] font-bold text-[#222222] mt-0.5">
+                        {campaign.totalSpend > 0 && campaign.programs.length > 0
+                          ? fmtCurrency(campaign.totalSpend / Math.max(1, campaign.programs.filter(p => p.revenue > 0).length))
+                          : campaign.totalSpend > 0
+                          ? fmtCurrency(campaign.totalSpend) + " total"
+                          : "—"}
+                      </p>
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-[#FAFAFA] border border-[#F0F0F0]">
+                      <p className="text-[10px] text-[#888888]">Financial ROI</p>
+                      <p
+                        className="text-[13px] font-bold mt-0.5"
+                        style={{ color: campaign.roi >= 0 ? "#72B84A" : "#C81E1E" }}
+                      >
+                        {campaign.roi >= 0 ? "+" : ""}{campaign.roi.toFixed(1)}%
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Landing page CTA */}
+                  {campaign.landingPageUrl && (
                     <a
                       href={campaign.landingPageUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors"
+                      className="flex items-center justify-center w-full px-4 py-2 text-[13px] font-semibold text-[#222222] bg-[#F2DD48] hover:brightness-95 active:scale-95 rounded-lg transition-all"
                     >
                       View Landing Page
                     </a>
-                  </div>
-                )}
+                  )}
 
-                {/* Programs List */}
-                {campaign.programs.length > 0 && (
-                  <div className="pt-4 border-t space-y-2">
-                    <p className="text-sm font-medium text-muted-foreground mb-3">Supporting Programs</p>
-                    {campaign.programs.map(program => {
-                      const programRoi = program.spend > 0 
-                        ? ((program.revenue - program.spend) / program.spend) * 100 
-                        : 0;
-                      
-                      return (
-                        <button
-                          key={program.id}
-                          onClick={() => setLocation(getProgramRoute(program, venueSlug))}
-                          className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-accent transition-colors text-left group"
-                        >
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium truncate">{program.name}</p>
-                            <div className="flex items-center gap-3 mt-1">
-                              <span className="text-xs text-muted-foreground">
-                                ${program.spend.toFixed(2)} spend
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                ${program.revenue.toFixed(2)} revenue
-                              </span>
-                              <Badge variant="outline" className="text-xs">
-                                {program.status}
-                              </Badge>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 ml-4">
-                            <span className={`text-sm font-semibold ${programRoi >= 0 ? "text-[#72B84A]" : "text-[#E8453C]"}`}>
-                              {programRoi >= 0 ? "+" : ""}{programRoi.toFixed(0)}%
-                            </span>
-                            <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-      </>)}
+                  {/* Supporting programs */}
+                  {campaign.programs.length > 0 && (
+                    <div className="pt-2 border-t border-[#F0F0F0]">
+                      <p className="text-[11px] font-semibold text-[#888888] uppercase tracking-widest mb-2">
+                        Supporting Programs
+                      </p>
+                      <div className="space-y-1">
+                        {campaign.programs.map(program => {
+                          const programRoi =
+                            program.spend > 0
+                              ? ((program.revenue - program.spend) / program.spend) * 100
+                              : 0;
+                          return (
+                            <button
+                              key={program.id}
+                              onClick={() => setLocation(getProgramRoute(program, venueSlug))}
+                              className="w-full flex items-center justify-between p-2.5 rounded-lg hover:bg-[#F1F1EF] transition-colors text-left group"
+                            >
+                              <div className="flex-1 min-w-0">
+                                <p className="text-[12px] font-semibold text-[#222222] truncate">{program.name}</p>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <span className="text-[11px] text-[#888888]">
+                                    {fmtCurrency(program.spend)} spend
+                                  </span>
+                                  <span className="text-[11px] text-[#888888]">
+                                    {fmtCurrency(program.revenue)} revenue
+                                  </span>
+                                  <span
+                                    className="text-[10px] font-medium px-1.5 py-0.5 rounded-full"
+                                    style={{
+                                      color: program.status === "active" ? "#4C882A" : program.status === "completed" ? "#B46A0B" : "#888888",
+                                      background: program.status === "active" ? "#E6F0DC" : program.status === "completed" ? "#F6E5CF" : "#F1F1EF",
+                                    }}
+                                  >
+                                    {program.status}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1.5 ml-3 shrink-0">
+                                <span
+                                  className="text-[12px] font-semibold"
+                                  style={{ color: programRoi >= 0 ? "#72B84A" : "#C81E1E" }}
+                                >
+                                  {programRoi >= 0 ? "+" : ""}{programRoi.toFixed(0)}%
+                                </span>
+                                <ChevronRight className="h-3.5 w-3.5 text-[#AAAAAA] group-hover:text-[#222222] transition-colors" />
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Empty state for campaigns with no programs yet */}
+                  {campaign.programs.length === 0 && (
+                    <div className="flex items-center gap-2 p-3 rounded-lg bg-[#FAFAFA] border border-dashed border-[#DEDEDA]">
+                      <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: style.color }} />
+                      <p className="text-[11px] text-[#888888]">No programs linked yet — add programs in the Activities section</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
     </div>
   );
 }

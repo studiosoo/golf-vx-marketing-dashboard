@@ -586,9 +586,10 @@ export default function Activities() {
   const pathSegment = location.split("/").pop();
 
   const activeTab: ActivityTab =
-    pathSegment === "all"        ? "all"        :
-    pathSegment === "promotions" ? "promotions" :
-    pathSegment === "local"      ? "local"      :
+    pathSegment === "all"          ? "all"        :
+    pathSegment === "promotions"   ? "promotions" :
+    pathSegment === "local-events" ? "local"      :
+    pathSegment === "local"        ? "local"      :
     "programs";
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
