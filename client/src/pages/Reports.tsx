@@ -275,58 +275,76 @@ function RevenueOperations({ snapshot, toastSummary }: { snapshot: any; toastSum
             </p>
           </div>
 
-          {/* R-3c — Recurring Revenue Visibility Panel */}
-          <div className="rounded-xl border overflow-hidden" style={{ borderColor: BORDER }}>
-            <div className="px-5 py-3 flex items-center justify-between" style={{ borderBottom: `1px solid ${BORDER}` }}>
-              <span className="text-[13px] font-semibold" style={{ color: TEXT_P }}>Recurring Revenue Visibility</span>
-              <span className="text-[12px] text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">ESTIMATED</span>
-            </div>
-            <table className="w-full">
-              <thead>
-                <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
-                  <th className="text-left px-5 py-2 text-[11px] font-normal" style={{ color: TEXT_M }}>Tier</th>
-                  <th className="text-right px-5 py-2 text-[11px] font-normal" style={{ color: TEXT_M }}>Members</th>
-                  <th className="text-right px-5 py-2 text-[11px] font-normal" style={{ color: TEXT_M }}>Rate</th>
-                  <th className="text-right px-5 py-2 text-[11px] font-normal" style={{ color: TEXT_M }}>Monthly</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
-                  <td className="px-5 py-2.5 text-[13px]" style={{ color: TEXT_P }}>Aces</td>
-                  <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_P }}>54</td>
-                  <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_S }}>$325/mo</td>
-                  <td className="px-5 py-2.5 text-[13px] font-semibold text-right" style={{ color: TEXT_P }}>$17,550</td>
-                </tr>
-                <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
-                  <td className="px-5 py-2.5 text-[13px]" style={{ color: TEXT_P }}>Savers</td>
-                  <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_P }}>33</td>
-                  <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_S }}>$225/mo</td>
-                  <td className="px-5 py-2.5 text-[13px] font-semibold text-right" style={{ color: TEXT_P }}>$7,425</td>
-                </tr>
-                <tr style={{ borderBottom: `1px solid ${BORDER}`, borderLeft: "4px solid #F2DD48", background: "#FFFDE7" }}>
-                  <td className="px-5 py-2.5 text-[13px] font-bold" style={{ color: TEXT_P }}>MRR Floor</td>
-                  <td className="px-5 py-2.5 text-[13px] font-bold text-right" style={{ color: TEXT_P }}>87</td>
-                  <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_S }}>—</td>
-                  <td className="px-5 py-2.5 text-[13px] font-bold text-right" style={{ color: TEXT_P }}>$24,975</td>
-                </tr>
-                <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
-                  <td className="px-5 py-2.5 text-[13px]" style={{ color: TEXT_M }}>Pro</td>
-                  <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_M }}>4</td>
-                  <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_M }}>—</td>
-                  <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_M }}>Revenue unconfirmed</td>
-                </tr>
-                <tr>
-                  <td className="px-5 py-2.5 text-[13px]" style={{ color: TEXT_M }}>General / No Tier</td>
-                  <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_M }}>188</td>
-                  <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_M }}>—</td>
-                  <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_M }}>Billing unmapped — excluded</td>
-                </tr>
-              </tbody>
-            </table>
-            <div className="px-5 py-3 text-[13px] text-amber-600 bg-amber-50" style={{ borderTop: `1px solid ${BORDER}` }}>
-              This panel shows a known recurring revenue floor, not total recurring revenue. Stripe API integration will unlock full visibility.
-            </div>
-          </div>
+          {/* R-3c — Recurring Revenue Visibility Panel (live data from snapshot) */}
+          {(() => {
+            const acesCount = snapshot?.members?.allAccessAce ?? 54;
+            const saversCount = snapshot?.members?.swingSaver ?? 33;
+            const proCount = snapshot?.members?.pro ?? 4;
+            const totalMRR = snapshot?.members?.mrr ?? 0;
+            const acesMRR = acesCount * 325;
+            const saversMRR = saversCount * 225;
+            const mrrFloor = acesMRR + saversMRR;
+            const isLive = snapshot?.members != null;
+            return (
+              <div className="rounded-xl border overflow-hidden" style={{ borderColor: BORDER }}>
+                <div className="px-5 py-3 flex items-center justify-between" style={{ borderBottom: `1px solid ${BORDER}` }}>
+                  <span className="text-[13px] font-semibold" style={{ color: TEXT_P }}>Recurring Revenue Visibility</span>
+                  <span className={`text-[12px] px-2 py-0.5 rounded-full ${isLive ? "text-green-700 bg-green-50" : "text-amber-600 bg-amber-50"}`}>
+                    {isLive ? "LIVE" : "ESTIMATED"}
+                  </span>
+                </div>
+                <table className="w-full">
+                  <thead>
+                    <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
+                      <th className="text-left px-5 py-2 text-[11px] font-normal" style={{ color: TEXT_M }}>Tier</th>
+                      <th className="text-right px-5 py-2 text-[11px] font-normal" style={{ color: TEXT_M }}>Members</th>
+                      <th className="text-right px-5 py-2 text-[11px] font-normal" style={{ color: TEXT_M }}>Rate</th>
+                      <th className="text-right px-5 py-2 text-[11px] font-normal" style={{ color: TEXT_M }}>Monthly</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
+                      <td className="px-5 py-2.5 text-[13px]" style={{ color: TEXT_P }}>All Access Aces</td>
+                      <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_P }}>{acesCount}</td>
+                      <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_S }}>$325/mo</td>
+                      <td className="px-5 py-2.5 text-[13px] font-semibold text-right" style={{ color: TEXT_P }}>{fmt(acesMRR)}</td>
+                    </tr>
+                    <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
+                      <td className="px-5 py-2.5 text-[13px]" style={{ color: TEXT_P }}>Swing Savers</td>
+                      <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_P }}>{saversCount}</td>
+                      <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_S }}>$225/mo</td>
+                      <td className="px-5 py-2.5 text-[13px] font-semibold text-right" style={{ color: TEXT_P }}>{fmt(saversMRR)}</td>
+                    </tr>
+                    <tr style={{ borderBottom: `1px solid ${BORDER}`, borderLeft: "4px solid #F2DD48", background: "#FFFDE7" }}>
+                      <td className="px-5 py-2.5 text-[13px] font-bold" style={{ color: TEXT_P }}>MRR Floor</td>
+                      <td className="px-5 py-2.5 text-[13px] font-bold text-right" style={{ color: TEXT_P }}>{acesCount + saversCount}</td>
+                      <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_S }}>—</td>
+                      <td className="px-5 py-2.5 text-[13px] font-bold text-right" style={{ color: TEXT_P }}>{fmt(mrrFloor)}</td>
+                    </tr>
+                    {proCount > 0 && (
+                      <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
+                        <td className="px-5 py-2.5 text-[13px]" style={{ color: TEXT_M }}>Golf VX Pro</td>
+                        <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_M }}>{proCount}</td>
+                        <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_M }}>—</td>
+                        <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: TEXT_M }}>Revenue unconfirmed</td>
+                      </tr>
+                    )}
+                    {totalMRR > mrrFloor && (
+                      <tr>
+                        <td className="px-5 py-2.5 text-[13px] font-semibold" style={{ color: GRN_TXT }}>Total MRR (DB)</td>
+                        <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: GRN_TXT }}>—</td>
+                        <td className="px-5 py-2.5 text-[13px] text-right" style={{ color: GRN_TXT }}>—</td>
+                        <td className="px-5 py-2.5 text-[13px] font-bold text-right" style={{ color: GRN_TXT }}>{fmt(totalMRR)}</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+                <div className="px-5 py-3 text-[13px] text-amber-600 bg-amber-50" style={{ borderTop: `1px solid ${BORDER}` }}>
+                  MRR floor calculated at standard rates ($325 Aces, $225 Savers). Stripe API integration will unlock exact billing amounts.
+                </div>
+              </div>
+            );
+          })()}
 
         </div>
       )}

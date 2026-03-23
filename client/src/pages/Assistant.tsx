@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { AIChatBox, type Message } from "@/components/AIChatBox";
-import { Bot, Calendar, Users, TrendingUp, DollarSign } from "lucide-react";
+import { Bot, Calendar, Users, TrendingUp, DollarSign, Image, RotateCcw } from "lucide-react";
 
 // ─── Context Options ──────────────────────────────────────────────────────────
 
@@ -12,16 +12,18 @@ const CONTEXT_OPTIONS = [
   { value: "members",   label: "Members",   icon: Users,       description: "Member management" },
   { value: "meta_ads",  label: "Meta Ads",  icon: TrendingUp,  description: "Ad performance" },
   { value: "revenue",   label: "Revenue",   icon: DollarSign,  description: "Revenue & goals" },
+  { value: "content",   label: "Content",   icon: Image,       description: "Instagram & social" },
 ] as const;
 
 type Context = typeof CONTEXT_OPTIONS[number]["value"];
 
 const QUICK_ACTIONS = [
-  "Log Drive Day attendance",
-  "Generate Junior Camp email",
-  "Giveaway status update",
-  "This week's top priority",
-  "Draft Instagram caption",
+  "What's my top marketing priority this week?",
+  "How are our Meta Ads performing?",
+  "Draft an Instagram caption for Drive Day",
+  "What should we do to hit 300 members?",
+  "Generate a follow-up email for trial members",
+  "Analyze our Junior Summer Camp campaign",
 ] as const;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -47,6 +49,7 @@ interface LeftPanelProps {
   context: Context;
   onContextChange: (ctx: Context) => void;
   onQuickAction: (action: string) => void;
+  onNewChat: () => void;
   suggestedPrompts: string[];
   onSuggestedPrompt: (prompt: string) => void;
   hasMessages: boolean;
@@ -56,17 +59,28 @@ function LeftPanel({
   context,
   onContextChange,
   onQuickAction,
+  onNewChat,
   suggestedPrompts,
   onSuggestedPrompt,
   hasMessages,
 }: LeftPanelProps) {
   return (
     <aside className="w-[280px] shrink-0 flex flex-col bg-[#F9F9F9] border-r border-[#DEDEDA] overflow-y-auto">
+      {/* Header with New Chat */}
+      <div className="px-4 pt-5 pb-3 flex items-center justify-between">
+        <p className="text-[11px] font-semibold text-[#AAAAAA] uppercase tracking-wider">Context</p>
+        {hasMessages && (
+          <button
+            onClick={onNewChat}
+            className="flex items-center gap-1 text-[11px] text-[#888888] hover:text-[#222222] transition-colors"
+          >
+            <RotateCcw size={11} />
+            New Chat
+          </button>
+        )}
+      </div>
       {/* Context */}
-      <div className="px-4 pt-5 pb-2">
-        <p className="text-[11px] font-semibold text-[#AAAAAA] uppercase tracking-wider mb-3">
-          Context
-        </p>
+      <div className="px-4 pb-2">
         <div className="flex flex-col gap-1.5">
           {CONTEXT_OPTIONS.map((opt) => {
             const Icon = opt.icon;
@@ -98,13 +112,20 @@ function LeftPanel({
 
       <div className="mx-4 my-4 border-t border-[#DEDEDA]" />
 
-      {/* Quick Actions */}
+      {/* Context-specific quick actions */}
       <div className="px-4 pb-2">
         <p className="text-[11px] font-semibold text-[#AAAAAA] uppercase tracking-wider mb-3">
-          Quick Actions
+          {context === "content" ? "Content Ideas" : "Quick Actions"}
         </p>
         <div className="flex flex-col gap-1.5">
-          {QUICK_ACTIONS.map((action) => (
+          {(context === "content" ? [
+            "Draft 3 Instagram captions for Drive Day",
+            "Create a Reel script for simulator highlights",
+            "Write a caption for a member milestone post",
+            "Suggest this week's content calendar",
+            "What hashtags should we use for Junior Camp?",
+            "Write a caption for a behind-the-scenes video",
+          ] : QUICK_ACTIONS).map((action) => (
             <button
               key={action}
               onClick={() => onQuickAction(action)}
@@ -144,7 +165,7 @@ function LeftPanel({
       {/* Footer */}
       <div className="mt-auto px-4 py-4">
         <p className="text-[11px] text-[#AAAAAA] text-center">
-          Powered by Gemini Flash Lite
+          Powered by Claude Sonnet · Golf VX AI
         </p>
       </div>
     </aside>
@@ -221,6 +242,7 @@ export default function Assistant() {
           context={context}
           onContextChange={setContext}
           onQuickAction={handleSendMessage}
+          onNewChat={() => setMessages([])}
           suggestedPrompts={suggestedPrompts}
           onSuggestedPrompt={handleSendMessage}
           hasMessages={messages.length > 0}

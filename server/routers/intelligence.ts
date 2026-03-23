@@ -607,7 +607,7 @@ export const workspaceRouter = router({
         role: z.enum(["user", "assistant", "system"]),
         content: z.string(),
       })),
-      context: z.enum(["general", "programs", "members", "meta_ads", "revenue"]).optional().default("general"),
+      context: z.enum(["general", "programs", "members", "meta_ads", "revenue", "content"]).optional().default("general"),
       // Optional file attachment for the latest user message
       fileDataUrl: z.string().optional(),    // image base64 data URL
       fileUri: z.string().optional(),        // Gemini File API URI
@@ -663,6 +663,29 @@ export const workspaceRouter = router({
             );
             const rev = (revenueResult as any)[0];
             contextData += `\n- Monthly Recurring Revenue (MRR): $${Number(rev?.totalMrr || 0).toFixed(0)}`;
+          } else if (context === "content") {
+            // Content studio context — enrich with Instagram recent posts and content strategy
+            try {
+              const { fetchAccountStats, fetchMediaFeed } = await import("../instagramFeed");
+              const [igStats, recentMedia] = await Promise.all([
+                fetchAccountStats().catch(() => null),
+                fetchMediaFeed(6).catch(() => []),
+              ]);
+              if (igStats) {
+                contextData += `\n- Instagram account: ${igStats.followers_count} followers · ${igStats.media_count} total posts · @${igStats.username}`;
+              }
+              if (recentMedia && recentMedia.length > 0) {
+                const mediaSummary = recentMedia.slice(0, 5).map((m: any) => {
+                  const likes = m.like_count ?? 0;
+                  const comments = m.comments_count ?? 0;
+                  const type = m.media_type ?? 'POST';
+                  const caption = (m.caption ?? '').slice(0, 60);
+                  return `[${type}] likes=${likes} comments=${comments} caption="${caption}..."` ;
+                }).join('\n  ');
+                contextData += `\n- Recent Instagram posts:\n  ${mediaSummary}`;
+              }
+            } catch (_contentErr) {}
+            contextData += `\n- Content strategy context: You are helping create Instagram content for Golf VX Arlington Heights. Focus on: Reel ideas, caption writing (casual/exciting tone), hashtag strategy (#GolfVX #IndoorGolf #ArlingtonHeights), posting schedule (Tue/Thu/Sat 6-8 PM), and content pillars (member stories, simulator tech, events/programs, behind-the-scenes).`;
           } else if (context === "meta_ads") {
             // Try live Meta API first, fall back to DB cache
             try {
@@ -725,7 +748,9 @@ export const workspaceRouter = router({
 Active strategic focus areas: Trial Conversion, Membership Acquisition (goal: 300 members), Member Retention, B2B/Corporate Sales.
 Studio Soo's primary channels: Meta Ads → ClickFunnels landing pages → Acuity bookings. Toast POS for revenue. Encharge for email.
 
-When the user provides data (e.g., "Drive Day had 12 attendees"), acknowledge it, suggest a follow-up action, and offer to draft content. Be concise and specific. Use numbers. Keep responses under 400 words unless more depth is explicitly requested.`;
+When the user provides data (e.g., "Drive Day had 12 attendees"), acknowledge it, suggest a follow-up action, and offer to draft content. Be concise and specific. Use numbers. Keep responses under 400 words unless more depth is explicitly requested.
+
+${context === "content" ? "CONTENT STUDIO MODE: Your primary job is to help create Instagram content. When asked for captions, provide 3 distinct options (casual, exciting, and professional tones). Always include 8-12 relevant hashtags. Suggest the best posting time (Tue/Thu/Sat 6-8 PM CST). If the user shares a photo or video description, focus on making the caption authentic and engaging for a golf/lifestyle audience. Core hashtags to always include: #GolfVX #IndoorGolf #ArlingtonHeights #ChicagoGolf #GolfSimulator" : ""}`;
 
       // Claude is preferred for chat when ANTHROPIC_API_KEY is set (text-only; image path requires invokeLLM)
       const useClaudeForChat = Boolean(ENV.anthropicApiKey);

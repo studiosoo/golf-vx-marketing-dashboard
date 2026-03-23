@@ -18,6 +18,9 @@ import {
   Instagram,
   Mail,
   Lock,
+  Zap,
+  AlertCircle,
+  Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -192,6 +195,10 @@ export default function Home() {
       { datePreset: "last_7d" },
       { enabled: isAuthenticated, staleTime: 5 * 60 * 1000, retry: 1 }
     );
+  const { data: priorityItems } = trpc.priorities.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 2 * 60 * 1000,
+  });
 
   const [refreshing, setRefreshing] = useState(false);
   const [memberListOpen, setMemberListOpen] = useState(false);
@@ -641,7 +648,49 @@ export default function Home() {
         </div>
       )}
 
-      {/* ── Section 4: Active Programs with Health Scores (moved down) ── */}
+      {/* ── Section 4: Today's Priority Actions ── */}
+      {priorityItems && priorityItems.filter((p: any) => !p.completedAt).length > 0 && (
+        <div className="bg-white rounded-xl border border-[#E8E8E8] p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Zap className="h-4 w-4 text-[#F2DD48]" />
+              <h2 className="text-[14px] font-semibold text-[#222222]">Priority Actions</h2>
+              <span className="text-[10px] font-bold bg-[#FFF9D6] rounded-full px-1.5 py-0.5 text-[#888888]">
+                {priorityItems.filter((p: any) => !p.completedAt).length}
+              </span>
+            </div>
+            <button onClick={() => setLocation("/ask")} className="flex items-center gap-1 text-[12px] text-[#888888] hover:text-[#222222] transition-colors">
+              Ask AI <ArrowRight className="h-3 w-3" />
+            </button>
+          </div>
+          <div className="flex flex-col gap-2">
+            {priorityItems.filter((p: any) => !p.completedAt).slice(0, 5).map((p: any) => {
+              const urgencyColor = p.urgency === "URGENT" ? "#EF4444" : p.urgency === "TODAY" ? "#F2DD48" : "#4E8DF4";
+              const UrgencyIcon = p.urgency === "URGENT" ? AlertCircle : p.urgency === "TODAY" ? Zap : Clock;
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => p.path ? setLocation(p.path) : undefined}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-[#F9F9F9] hover:bg-[#F0F0F0] transition-colors text-left"
+                >
+                  <div className="h-7 w-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: urgencyColor + "20" }}>
+                    <UrgencyIcon className="h-3.5 w-3.5" style={{ color: urgencyColor }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-medium text-[#222222] leading-tight truncate">{p.title}</p>
+                    <p className="text-[11px] text-[#888888] mt-0.5">{p.category} · Added by {p.createdBy || "Team"}</p>
+                  </div>
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0" style={{ background: urgencyColor + "20", color: urgencyColor }}>
+                    {p.urgency}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Section 5: Active Programs with Health Scores (moved down) ── */}
       {activePrograms.length > 0 && (
         <div className="bg-white rounded-xl border border-[#E8E8E8] p-5">
           <div className="flex items-center justify-between mb-4">

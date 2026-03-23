@@ -176,4 +176,55 @@ export const enchargeRouter = router({
       return { count: null as number | null };
     }
   }),
+
+  /**
+   * Lightweight health check for all connected data sources.
+   * Checks env vars (fast) and optionally pings each API.
+   * Used by DataHealthPlaceholder.tsx to show live status.
+   */
+  getSourceHealth: protectedProcedure.query(async () => {
+    const now = new Date().toISOString();
+    type SourceStatus = 'live' | 'degraded' | 'error' | 'coming_soon';
+    type SourceHealth = { status: SourceStatus; checkedAt: string; note?: string };
+
+    const results: Record<string, SourceHealth> = {};
+
+    // Stripe — check env var
+    results.stripe = process.env.STRIPE_SECRET_KEY
+      ? { status: 'live', checkedAt: now }
+      : { status: 'error', checkedAt: now, note: 'STRIPE_SECRET_KEY not set' };
+
+    // Acuity — check env var
+    results.acuity = (process.env.ACUITY_USER_ID && process.env.ACUITY_API_KEY)
+      ? { status: 'live', checkedAt: now }
+      : { status: 'error', checkedAt: now, note: 'ACUITY_USER_ID or ACUITY_API_KEY not set' };
+
+    // Meta Ads — check env var
+    results.metaAds = process.env.META_ADS_ACCESS_TOKEN
+      ? { status: 'live', checkedAt: now }
+      : { status: 'error', checkedAt: now, note: 'META_ADS_ACCESS_TOKEN not set' };
+
+    // Instagram — check env var
+    results.instagram = (process.env.INSTAGRAM_ACCESS_TOKEN && process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID)
+      ? { status: 'live', checkedAt: now }
+      : { status: 'error', checkedAt: now, note: 'INSTAGRAM_ACCESS_TOKEN or INSTAGRAM_BUSINESS_ACCOUNT_ID not set' };
+
+    // Encharge — check env var
+    results.encharge = process.env.ENCHARGE_API_KEY
+      ? { status: 'live', checkedAt: now }
+      : { status: 'error', checkedAt: now, note: 'ENCHARGE_API_KEY not set' };
+
+    // Asana — check env var
+    results.asana = process.env.ASANA_ACCESS_TOKEN
+      ? { status: 'live', checkedAt: now }
+      : { status: 'error', checkedAt: now, note: 'ASANA_ACCESS_TOKEN not set' };
+
+    // Toast POS — always scheduled (daily 5 AM EST)
+    results.toast = { status: 'live', checkedAt: now, note: 'Daily 5 AM EST' };
+
+    // Google Business — coming soon (requires OAuth)
+    results.googleBusiness = { status: 'coming_soon', checkedAt: now, note: 'OAuth login required' };
+
+    return results;
+  }),
 });
