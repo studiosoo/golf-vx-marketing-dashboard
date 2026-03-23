@@ -53,8 +53,9 @@ export const activitiesRouter = router({
           const sorted = nonCashApts
             .sort((a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime());
 
+          // Use _actualAmount (real charged amount from /payments) not amountPaid (listed price)
           const revenue = sorted.reduce(
-            (sum, a) => sum + parseFloat(a.amountPaid || a.priceSold || a.price || "0"), 0
+            (sum, a) => sum + ((a as typeof a & { _actualAmount?: number })._actualAmount ?? 0), 0
           );
 
           const recent: RecentApt[] = sorted.slice(0, 5).map(a => ({
@@ -164,7 +165,8 @@ export const activitiesRouter = router({
         const rawFiltered = allApts.filter(a => matchedIds.has(a.appointmentTypeID));
         // Filter out cash payments (system entry errors — not real revenue)
         const filtered   = await filterNonCashAppointments(rawFiltered);
-        const revenue    = filtered.reduce((sum, a) => sum + parseFloat(a.amountPaid || a.priceSold || a.price || "0"), 0);
+        // Use _actualAmount (real charged amount from /payments) not amountPaid (listed price)
+        const revenue    = filtered.reduce((sum, a) => sum + (a._actualAmount ?? 0), 0);
         const unique     = new Set(filtered.map(a => a.email.toLowerCase()));
         const recent: RecentApt[] = [...filtered]
           .sort((a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime())

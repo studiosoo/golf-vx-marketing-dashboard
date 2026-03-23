@@ -153,16 +153,20 @@ export async function getAppointmentPayments(appointmentId: number): Promise<Acu
 }
 
 /**
- * Batch-fetch payment processor for a list of appointments.
- * Returns a Map<appointmentId, processor> where processor is 'stripe', 'square', 'cash', etc.
- * Cash appointments are those recorded as 'cash' by Acuity (system entry errors).
- * Fetches in parallel chunks of 20 to respect rate limits.
+ * Batch-fetch payment data (processor + actual charged amount) for a list of appointments.
+ * Returns a Map<appointmentId, { processor, amount }>
+ * - processor: 'stripe', 'square', 'cash', etc.
+ * - amount: the actual amount charged via the payment processor (matches Acuity Revenue report)
+ *
+ * IMPORTANT: apt.amountPaid is the listed price, NOT the actual charged amount.
+ * The /payments endpoint returns the real transaction amount (e.g. after discounts/packages).
+ * Cash appointments are system recording errors and should be excluded from revenue.
  */
-export async function getPaymentProcessors(
+export async function getPaymentData(
   appointments: AcuityAppointment[]
-): Promise<Map<number, string>> {
+): Promise<Map<number, { processor: string; amount: number }>> {
   const client = createAcuityClient();
-  const processorMap = new Map<number, string>();
+  const paymentMap = new Map<number, { processor: string; amount: number }>();
   const CHUNK_SIZE = 20;
 
   for (let i = 0; i < appointments.length; i += CHUNK_SIZE) {
@@ -171,13 +175,20 @@ export async function getPaymentProcessors(
       chunk.map(apt =>
         client
           .get<AcuityPayment[]>(`/appointments/${apt.id}/payments`)
-          .then(r => ({ id: apt.id, processor: r.data?.[0]?.processor?.toLowerCase() || 'unknown' }))
-          .catch(() => ({ id: apt.id, processor: 'unknown' }))
+          .then(r => ({
+            id: apt.id,
+            processor: r.data?.[0]?.processor?.toLowerCase() || 'unknown',
+            amount: parseFloat(r.data?.[0]?.amount || '0'),
+          }))
+          .catch(() => ({ id: apt.id, processor: 'unknown', amount: 0 }))
       )
     );
     for (const result of results) {
       if (result.status === 'fulfilled') {
-        processorMap.set(result.value.id, result.value.processor);
+        paymentMap.set(result.value.id, {
+          processor: result.value.processor,
+          amount: result.value.amount,
+        });
       }
     }
     // Small delay between chunks to avoid rate limiting
@@ -185,28 +196,41 @@ export async function getPaymentProcessors(
       await new Promise(resolve => setTimeout(resolve, 300));
     }
   }
-  return processorMap;
+  return paymentMap;
+}
+
+/** @deprecated Use getPaymentData instead */
+export async function getPaymentProcessors(
+  appointments: AcuityAppointment[]
+): Promise<Map<number, string>> {
+  const data = await getPaymentData(appointments);
+  const map = new Map<number, string>();
+  data.forEach((v, k) => map.set(k, v.processor));
+  return map;
 }
 
 /**
- * Filter out cash appointments from a list.
- * Only keeps appointments paid via Stripe, Square, or other non-cash processors.
- * Also filters for paid=yes to exclude unpaid/deposit-only records.
+ * Filter out cash appointments and attach the real charged amount.
+ * Returns only Stripe/Square paid appointments, with `_actualAmount` set to the
+ * amount from the /payments endpoint (matches Acuity Revenue report).
+ * Use `apt._actualAmount` instead of `apt.amountPaid` for revenue calculations.
  */
 export async function filterNonCashAppointments(
   appointments: AcuityAppointment[]
-): Promise<AcuityAppointment[]> {
+): Promise<(AcuityAppointment & { _actualAmount: number })[]> {
   // Only check paid appointments
   const paidApts = appointments.filter(a => a.paid === 'yes');
   if (paidApts.length === 0) return [];
 
-  const processorMap = await getPaymentProcessors(paidApts);
+  const paymentMap = await getPaymentData(paidApts);
 
-  return paidApts.filter(apt => {
-    const proc = processorMap.get(apt.id) || 'unknown';
-    // Exclude cash and unknown (system entry errors)
-    return proc !== 'cash';
-  });
+  const result: (AcuityAppointment & { _actualAmount: number })[] = [];
+  for (const apt of paidApts) {
+    const payment = paymentMap.get(apt.id);
+    if (!payment || payment.processor === 'cash') continue; // Exclude cash (system errors)
+    result.push({ ...apt, _actualAmount: payment.amount });
+  }
+  return result;
 }
 
 /**
@@ -246,7 +270,8 @@ export async function getAllRevenueByType(minDate?: string, maxDate?: string) {
     getAppointments({ minDate, maxDate, canceled: false }),
     getAppointmentTypes(),
   ]);
-  // Filter out cash payments (system entry errors — not real revenue)
+  // Filter out cash payments and get real transaction amounts from /payments endpoint
+  // _actualAmount matches Acuity Revenue report (not amountPaid which is the listed price)
   const appointments = await filterNonCashAppointments(rawAppointments);
   // Build a map of typeId -> type info
   const typeMap: Record<number, AcuityAppointmentType> = {};
@@ -256,7 +281,8 @@ export async function getAllRevenueByType(minDate?: string, maxDate?: string) {
   for (const apt of appointments) {
     const typeId = apt.appointmentTypeID;
     if (!grouped[typeId]) grouped[typeId] = { totalRevenue: 0, bookingCount: 0, appointments: [] };
-    const rev = parseFloat(apt.amountPaid || apt.priceSold || apt.price || '0');
+    // Use _actualAmount (real charged amount from /payments) not amountPaid (listed price)
+    const rev = (apt as AcuityAppointment & { _actualAmount?: number })._actualAmount ?? 0;
     grouped[typeId].totalRevenue += rev;
     grouped[typeId].bookingCount++;
     grouped[typeId].appointments.push(apt);
@@ -633,7 +659,8 @@ export async function getWinterClinicData(params?: {
     }
     
     clinicTypeMap[key].appointments.push(apt);
-    clinicTypeMap[key].totalRevenue += parseFloat(apt.amountPaid || apt.priceSold || apt.price || '0');
+    // Use _actualAmount (real charged amount from /payments) not amountPaid (listed price)
+    clinicTypeMap[key].totalRevenue += (apt as AcuityAppointment & { _actualAmount?: number })._actualAmount ?? 0;
     
     // Track acquisition source
     const source = extractWinterClinicSource(apt);
@@ -692,8 +719,9 @@ export async function getWinterClinicData(params?: {
     family: clinics.filter(c => c.category === 'family'),
   };
 
+  // Use _actualAmount (real charged amount from /payments) not amountPaid (listed price)
   const totalRevenue = clinicAppointments.reduce((sum, apt) => 
-    sum + parseFloat(apt.amountPaid || apt.priceSold || apt.price || '0'), 0);
+    sum + ((apt as AcuityAppointment & { _actualAmount?: number })._actualAmount ?? 0), 0);
 
   const allEmails = new Set(clinicAppointments.map(a => a.email.toLowerCase()));
 
@@ -771,7 +799,8 @@ export async function getJuniorCampData(params?: {
       weekMap[key] = { week, track, label, ageGroup, registrations: 0, revenue: 0, participants: [], howHeard: {} };
     }
     weekMap[key].registrations++;
-    weekMap[key].revenue += parseFloat(apt.amountPaid || apt.priceSold || apt.price || '0');
+    // Use _actualAmount (real charged amount from /payments) not amountPaid (listed price)
+    weekMap[key].revenue += (apt as AcuityAppointment & { _actualAmount?: number })._actualAmount ?? 0;
     weekMap[key].participants.push(`${apt.firstName} ${apt.lastName}`);
     const source = extractFormField(apt, 'heard') || extractFormField(apt, 'source') || 'Unknown';
     weekMap[key].howHeard[source] = (weekMap[key].howHeard[source] || 0) + 1;
@@ -785,8 +814,9 @@ export async function getJuniorCampData(params?: {
     overallHowHeard[source] = (overallHowHeard[source] || 0) + 1;
   });
 
+  // Use _actualAmount (real charged amount from /payments) not amountPaid (listed price)
   const totalRevenue = campAppointments.reduce((sum, apt) =>
-    sum + parseFloat(apt.amountPaid || apt.priceSold || apt.price || '0'), 0);
+    sum + ((apt as AcuityAppointment & { _actualAmount?: number })._actualAmount ?? 0), 0);
 
   const allEmails = new Set(campAppointments.map(a => a.email.toLowerCase()));
 
@@ -797,9 +827,9 @@ export async function getJuniorCampData(params?: {
   return {
     weeks,
     trackSummary: {
-      full_day: { count: fullDay.length, revenue: fullDay.reduce((s, a) => s + parseFloat(a.amountPaid || a.priceSold || a.price || '0'), 0) },
-      half_day: { count: halfDay.length, revenue: halfDay.reduce((s, a) => s + parseFloat(a.amountPaid || a.priceSold || a.price || '0'), 0) },
-      tots: { count: tots.length, revenue: tots.reduce((s, a) => s + parseFloat(a.amountPaid || a.priceSold || a.price || '0'), 0) },
+      full_day: { count: fullDay.length, revenue: fullDay.reduce((s, a) => s + ((a as AcuityAppointment & { _actualAmount?: number })._actualAmount ?? 0), 0) },
+      half_day: { count: halfDay.length, revenue: halfDay.reduce((s, a) => s + ((a as AcuityAppointment & { _actualAmount?: number })._actualAmount ?? 0), 0) },
+      tots: { count: tots.length, revenue: tots.reduce((s, a) => s + ((a as AcuityAppointment & { _actualAmount?: number })._actualAmount ?? 0), 0) },
     },
     totalRegistrations: campAppointments.length,
     uniqueParticipants: allEmails.size,
