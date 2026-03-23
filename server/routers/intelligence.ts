@@ -702,9 +702,21 @@ export const workspaceRouter = router({
             const { fetchAccountStats } = await import("../instagramFeed");
             const igStats = await fetchAccountStats();
             if (igStats) {
-              contextData += `\n- Instagram: ${igStats.followers_count} followers (goal: 2,000) · ${igStats.media_count} posts · @${igStats.username}`;
+              contextData += `\n- Instagram: ${igStats.followers_count} followers (goal: 2,000) \u00b7 ${igStats.media_count} posts \u00b7 @${igStats.username}`;
             }
           } catch (_igErr) {}
+          // Always enrich with AHTIL email subscriber count
+          try {
+            const { getAHTILTagCount } = await import("../encharge");
+            const ahtilCount = await getAHTILTagCount();
+            if (ahtilCount !== null && ahtilCount > 0) {
+              contextData += `\n- Email subscribers (AHTIL tag): ${ahtilCount.toLocaleString()} (goal: grow list)`;
+            } else {
+              contextData += `\n- Email subscribers (AHTIL tag): ~1,000+ (Encharge API pending live sync)`;
+            }
+          } catch (_ahtilErr) {
+            contextData += `\n- Email subscribers (AHTIL tag): ~1,000+ (Encharge API pending live sync)`;
+          }
         }
       } catch (_) {}
 

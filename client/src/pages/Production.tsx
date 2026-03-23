@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { Plus, X, ChevronDown, ChevronRight, AlertTriangle, RefreshCw, ExternalLink, CheckCircle2, Circle } from "lucide-react";
+import { useState, useMemo, useRef, useCallback } from "react";
+import { Plus, X, ChevronDown, ChevronRight, AlertTriangle, RefreshCw, ExternalLink, CheckCircle2, Circle, Sparkles, Upload, Copy, Check, Wand2 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
 // ─── Production-linked Asana project names (mirrors server/routers/asana.ts) ───────────
@@ -291,9 +291,248 @@ function AddDeliverableForm({ onAdd }: { onAdd: (d: DeliverableEntry) => void })
   );
 }
 
+// ─── Content Studio ─────────────────────────────────────────────────────────
+type CaptionOption = { caption: string; hashtags: string; angle: string; bestFor: string };
+type CaptionStrategy = { bestTime: string; contentType: string; engagementTip: string; callToAction: string } | null;
+
+function CaptionCard({ opt, index, onRefine }: { opt: CaptionOption; index: number; onRefine: (caption: string) => void }) {
+  const [copied, setCopied] = useState(false);
+  const [copiedHash, setCopiedHash] = useState(false);
+  const full = opt.caption + (opt.hashtags ? "\n\n" + opt.hashtags : "");
+  function copy(text: string, setter: (v: boolean) => void) {
+    navigator.clipboard.writeText(text).then(() => { setter(true); setTimeout(() => setter(false), 1800); });
+  }
+  return (
+    <div className="rounded-xl border p-4 space-y-3" style={{ borderColor: BORDER, background: "white", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
+      <div className="flex items-start justify-between gap-2">
+        <span className="text-[11px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full" style={{ background: YELLOW + "33", color: TEXT_P }}>Option {index + 1} · {opt.angle}</span>
+        <div className="flex gap-1.5">
+          <button onClick={() => copy(full, setCopied)} className="flex items-center gap-1 text-[11px] px-2 py-1 rounded-lg border transition-colors hover:bg-[#F1F1EF]" style={{ borderColor: BORDER, color: copied ? "#72B84A" : TEXT_S }}>
+            {copied ? <Check size={11} /> : <Copy size={11} />} {copied ? "Copied" : "Copy all"}
+          </button>
+          <button onClick={() => onRefine(opt.caption)} className="flex items-center gap-1 text-[11px] px-2 py-1 rounded-lg border transition-colors hover:bg-[#F1F1EF]" style={{ borderColor: BORDER, color: TEXT_S }}>
+            <Wand2 size={11} /> Refine
+          </button>
+        </div>
+      </div>
+      <p className="text-[13px] leading-relaxed whitespace-pre-wrap" style={{ color: TEXT_P }}>{opt.caption}</p>
+      {opt.hashtags && (
+        <div className="flex items-start gap-2 pt-2 border-t" style={{ borderColor: BORDER }}>
+          <p className="text-[12px] leading-relaxed flex-1" style={{ color: "#1A56DB" }}>{opt.hashtags}</p>
+          <button onClick={() => copy(opt.hashtags, setCopiedHash)} className="shrink-0 flex items-center gap-1 text-[11px] px-2 py-1 rounded-lg border transition-colors hover:bg-[#F1F1EF]" style={{ borderColor: BORDER, color: copiedHash ? "#72B84A" : TEXT_S }}>
+            {copiedHash ? <Check size={11} /> : <Copy size={11} />}
+          </button>
+        </div>
+      )}
+      {opt.bestFor && <p className="text-[11px] italic" style={{ color: TEXT_M }}>{opt.bestFor}</p>}
+    </div>
+  );
+}
+
+function ContentStudio() {
+  const [topic, setTopic] = useState("");
+  const [tone, setTone] = useState<"professional" | "casual" | "exciting" | "educational">("casual");
+  const [contentType, setContentType] = useState<"feed_post" | "reel" | "story" | "carousel">("feed_post");
+  const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
+  const [options, setOptions] = useState<CaptionOption[]>([]);
+  const [strategy, setStrategy] = useState<CaptionStrategy>(null);
+  const [refineTarget, setRefineTarget] = useState<string | null>(null);
+  const [refineText, setRefineText] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const generate = trpc.instagram.generateCaption.useMutation({
+    onSuccess: (data) => {
+      setOptions(data.options ?? []);
+      setStrategy(data.strategy ?? null);
+      setRefineTarget(null);
+      setRefineText("");
+    },
+  });
+
+  const refine = trpc.instagram.generateCaption.useMutation({
+    onSuccess: (data) => {
+      setOptions(data.options ?? []);
+      setRefineTarget(null);
+      setRefineText("");
+    },
+  });
+
+  function handleImage(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => setImageDataUrl(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  function handleGenerate() {
+    if (!topic.trim() && !imageDataUrl) return;
+    generate.mutate({ topic: topic || "(see image)", tone, contentType, imageDataUrl: imageDataUrl ?? undefined, count: 3 });
+  }
+
+  function handleRefine() {
+    if (!refineTarget || !refineText.trim()) return;
+    refine.mutate({ topic, tone, contentType, count: 1, refineRequest: refineText, previousCaption: refineTarget });
+  }
+
+  const isLoading = generate.isPending || refine.isPending;
+
+  return (
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex items-center gap-2">
+        <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)" }}>
+          <Sparkles size={14} color="white" />
+        </div>
+        <div>
+          <h2 className="text-[15px] font-semibold" style={{ color: TEXT_P }}>Instagram Content Studio</h2>
+          <p className="text-[12px]" style={{ color: TEXT_S }}>Describe a moment, upload a photo, and get 3 caption options with hashtags — powered by Claude Sonnet</p>
+        </div>
+      </div>
+
+      {/* Input Panel */}
+      <div className="bg-white rounded-xl border p-5 space-y-4" style={{ borderColor: BORDER, boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
+        {/* Image Upload */}
+        <div>
+          <p className="text-[11px] font-medium uppercase tracking-wide mb-2" style={{ color: TEXT_M }}>Photo / Video Thumbnail (optional)</p>
+          <div
+            onClick={() => fileRef.current?.click()}
+            className="relative flex items-center justify-center rounded-xl border-2 border-dashed cursor-pointer transition-colors hover:border-[#F2DD48]"
+            style={{ borderColor: imageDataUrl ? "#72B84A" : BORDER, minHeight: "100px", background: imageDataUrl ? "#F8FFF4" : "#FAFAF9" }}
+          >
+            {imageDataUrl ? (
+              <div className="flex items-center gap-3 p-3">
+                <img src={imageDataUrl} alt="preview" className="w-16 h-16 rounded-lg object-cover" />
+                <div>
+                  <p className="text-[13px] font-medium" style={{ color: "#72B84A" }}>Image ready</p>
+                  <button onClick={(e) => { e.stopPropagation(); setImageDataUrl(null); }} className="text-[11px] mt-1" style={{ color: TEXT_M }}>Remove</button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-1.5 py-4">
+                <Upload size={18} style={{ color: TEXT_M }} />
+                <p className="text-[12px]" style={{ color: TEXT_M }}>Click to upload a photo or video thumbnail</p>
+                <p className="text-[11px]" style={{ color: TEXT_M }}>Claude will analyze the image and tailor the caption</p>
+              </div>
+            )}
+            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImage} />
+          </div>
+        </div>
+
+        {/* Topic */}
+        <div>
+          <p className="text-[11px] font-medium uppercase tracking-wide mb-1.5" style={{ color: TEXT_M }}>What happened? Describe the moment or content</p>
+          <textarea
+            value={topic}
+            onChange={e => setTopic(e.target.value)}
+            placeholder="e.g. We ran a Drive Day event last Saturday with 12 attendees — everyone was hitting 300+ yards by the end. Great energy, lots of laughs."
+            className="w-full rounded-xl border p-3 text-[13px] leading-relaxed resize-none"
+            style={{ borderColor: BORDER, color: TEXT_P, outline: "none", minHeight: "80px" }}
+            onFocus={e => (e.target.style.borderColor = YELLOW)}
+            onBlur={e => (e.target.style.borderColor = BORDER)}
+          />
+        </div>
+
+        {/* Options Row */}
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-wide mb-1.5" style={{ color: TEXT_M }}>Tone</p>
+            <select value={tone} onChange={e => setTone(e.target.value as any)} className="input-field">
+              <option value="casual">Casual & Friendly</option>
+              <option value="exciting">Exciting & Energetic</option>
+              <option value="professional">Professional</option>
+              <option value="educational">Educational</option>
+            </select>
+          </div>
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-wide mb-1.5" style={{ color: TEXT_M }}>Content Type</p>
+            <select value={contentType} onChange={e => setContentType(e.target.value as any)} className="input-field">
+              <option value="feed_post">Feed Post</option>
+              <option value="reel">Reel</option>
+              <option value="story">Story</option>
+              <option value="carousel">Carousel</option>
+            </select>
+          </div>
+        </div>
+
+        <button
+          onClick={handleGenerate}
+          disabled={isLoading || (!topic.trim() && !imageDataUrl)}
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-[14px] transition-all hover:brightness-95 disabled:opacity-40"
+          style={{ background: YELLOW, color: TEXT_P }}
+        >
+          {isLoading ? <RefreshCw size={15} className="animate-spin" /> : <Sparkles size={15} />}
+          {isLoading ? "Generating..." : "Generate 3 Caption Options"}
+        </button>
+      </div>
+
+      {/* Strategy Tip */}
+      {strategy && (
+        <div className="rounded-xl border p-4" style={{ borderColor: "#F2DD4866", background: "#FFFDF0" }}>
+          <p className="text-[11px] font-semibold uppercase tracking-wide mb-2" style={{ color: TEXT_S }}>Strategy Recommendation</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-[12px]">
+            <div><span style={{ color: TEXT_M }}>Best time to post</span><br /><strong style={{ color: TEXT_P }}>{strategy.bestTime}</strong></div>
+            <div><span style={{ color: TEXT_M }}>Format</span><br /><strong style={{ color: TEXT_P }}>{strategy.contentType}</strong></div>
+            <div><span style={{ color: TEXT_M }}>Engagement tip</span><br /><strong style={{ color: TEXT_P }}>{strategy.engagementTip}</strong></div>
+            <div><span style={{ color: TEXT_M }}>Call to action</span><br /><strong style={{ color: TEXT_P }}>{strategy.callToAction}</strong></div>
+          </div>
+        </div>
+      )}
+
+      {/* Caption Options */}
+      {options.length > 0 && (
+        <div className="space-y-3">
+          <p className="text-[12px] font-medium" style={{ color: TEXT_S }}>Choose an option, copy it, or click Refine to adjust with Claude</p>
+          {options.map((opt, i) => (
+            <CaptionCard key={i} opt={opt} index={i} onRefine={cap => { setRefineTarget(cap); setRefineText(""); }} />
+          ))}
+        </div>
+      )}
+
+      {/* Inline Refinement */}
+      {refineTarget && (
+        <div className="rounded-xl border p-4 space-y-3" style={{ borderColor: YELLOW, background: "#FFFDF0" }}>
+          <p className="text-[12px] font-semibold" style={{ color: TEXT_P }}>Refining selected caption with Claude</p>
+          <p className="text-[12px] line-clamp-2" style={{ color: TEXT_S }}>{refineTarget}</p>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={refineText}
+              onChange={e => setRefineText(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && handleRefine()}
+              placeholder='e.g. "Make it shorter", "Add a question at the end", "More energy"'
+              className="flex-1 rounded-lg border px-3 py-2 text-[13px]"
+              style={{ borderColor: BORDER, color: TEXT_P, outline: "none" }}
+            />
+            <button
+              onClick={handleRefine}
+              disabled={refine.isPending || !refineText.trim()}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg font-medium text-[13px] transition-all hover:brightness-95 disabled:opacity-40"
+              style={{ background: YELLOW, color: TEXT_P }}
+            >
+              {refine.isPending ? <RefreshCw size={13} className="animate-spin" /> : <Wand2 size={13} />}
+              Refine
+            </button>
+            <button onClick={() => setRefineTarget(null)} className="px-3 py-2 rounded-lg border text-[13px]" style={{ borderColor: BORDER, color: TEXT_S }}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {options.length === 0 && !isLoading && (
+        <div className="text-center py-10" style={{ color: TEXT_M }}>
+          <Sparkles size={28} className="mx-auto mb-3 opacity-30" />
+          <p className="text-[13px]">Describe a moment or upload a photo to generate Instagram captions</p>
+          <p className="text-[11px] mt-1">Claude Sonnet will create 3 distinct options with hashtags and posting strategy</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function Production() {
-  const [tab, setTab] = useState<"effort" | "deliverables" | "asana" | "ratecard">("effort");
+  const [tab, setTab] = useState<"effort" | "deliverables" | "asana" | "ratecard" | "content-studio">("effort");
   const [effortEntries, setEffortEntries] = useState<EffortEntry[]>([]);
   const [deliverableEntries, setDeliverableEntries] = useState<DeliverableEntry[]>([]);
 
@@ -326,10 +565,11 @@ export default function Production() {
   });
 
   const tabs = [
-    { id: "effort" as const,       label: "Effort Log" },
-    { id: "deliverables" as const,  label: "Deliverables" },
-    { id: "asana" as const,         label: "Asana Tasks" },
-    { id: "ratecard" as const,      label: "Rate Card" },
+    { id: "effort" as const,          label: "Effort Log" },
+    { id: "deliverables" as const,     label: "Deliverables" },
+    { id: "asana" as const,            label: "Asana Tasks" },
+    { id: "ratecard" as const,         label: "Rate Card" },
+    { id: "content-studio" as const,   label: "✦ Content Studio" },
   ];
 
   return (
@@ -734,6 +974,9 @@ export default function Production() {
           </div>
         </div>
       )}
+
+      {/* ── Content Studio Tab ── */}
+      {tab === "content-studio" && <ContentStudio />}
 
       <style>{`
         .input-field {

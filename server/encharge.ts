@@ -140,10 +140,44 @@ export async function updateEnchargePersonByEmail(
 
 /**
  * Count contacts in Encharge that have the AHTIL tag.
+ * Strategy 1: Use segments endpoint (has peopleCount field, most reliable)
+ * Strategy 2: Use tags endpoint
+ * Strategy 3: Paginate /people with tag filter
  */
 export async function getAHTILTagCount(): Promise<number> {
   if (!ENCHARGE_API_KEY) return 0;
   try {
+    // Strategy 1: segments endpoint — look for segment named AHTIL or containing AHTIL
+    const segRes = await fetch(`${ENCHARGE_API_BASE}/segments`, {
+      headers: { "X-Encharge-Token": ENCHARGE_API_KEY, "Content-Type": "application/json" },
+    });
+    if (segRes.ok) {
+      const segData = await segRes.json();
+      const segs: any[] = segData?.segments ?? segData?.data ?? (Array.isArray(segData) ? segData : []);
+      const ahtilSeg = segs.find((s: any) =>
+        (s.name ?? "").toUpperCase().includes("AHTIL")
+      );
+      if (ahtilSeg) {
+        const cnt = ahtilSeg.peopleCount ?? ahtilSeg.count ?? ahtilSeg.subscribersCount;
+        if (typeof cnt === "number" && cnt > 0) return cnt;
+      }
+    }
+    // Strategy 2: tags endpoint
+    const tagsRes = await fetch(`${ENCHARGE_API_BASE}/tags`, {
+      headers: { "X-Encharge-Token": ENCHARGE_API_KEY, "Content-Type": "application/json" },
+    });
+    if (tagsRes.ok) {
+      const tagsData = await tagsRes.json();
+      const tags: any[] = tagsData?.tags ?? tagsData?.data ?? (Array.isArray(tagsData) ? tagsData : []);
+      const ahtilTag = tags.find((t: any) =>
+        (t.name ?? t.tag ?? "").toUpperCase() === "AHTIL"
+      );
+      if (ahtilTag) {
+        const cnt = ahtilTag.count ?? ahtilTag.subscribersCount ?? ahtilTag.peopleCount;
+        if (typeof cnt === "number" && cnt > 0) return cnt;
+      }
+    }
+    // Strategy 3: paginate /people with tag filter
     const url = new URL(`${ENCHARGE_API_BASE}/people`);
     url.searchParams.set("tag", "AHTIL");
     url.searchParams.set("limit", "100");
@@ -153,12 +187,14 @@ export async function getAHTILTagCount(): Promise<number> {
     });
     if (!res.ok) return 0;
     const data = await res.json();
-    // Encharge may return total in meta
-    const metaTotal = data?.meta?.total ?? data?.totalCount ?? data?.total;
-    if (typeof metaTotal === "number") return metaTotal;
-    // Otherwise sum up paginated results
+    const metaTotal = data?.meta?.total ?? data?.meta?.count ?? data?.totalCount ?? data?.total ?? data?.count;
+    if (typeof metaTotal === "number" && metaTotal > 0) return metaTotal;
     const firstBatch: any[] = data?.data ?? data?.people ?? [];
-    let count = firstBatch.filter((p: any) => Array.isArray(p.tags) && p.tags.includes("AHTIL")).length;
+    let count = firstBatch.filter((p: any) =>
+      Array.isArray(p.tags) && p.tags.some((t: any) =>
+        (typeof t === "string" ? t : t?.name ?? "").toUpperCase() === "AHTIL"
+      )
+    ).length;
     if (firstBatch.length < 100) return count;
     let page = 2;
     while (page <= 50) {
@@ -169,7 +205,11 @@ export async function getAHTILTagCount(): Promise<number> {
       if (!r2.ok) break;
       const d2 = await r2.json();
       const batch: any[] = d2?.data ?? d2?.people ?? [];
-      count += batch.filter((p: any) => Array.isArray(p.tags) && p.tags.includes("AHTIL")).length;
+      count += batch.filter((p: any) =>
+        Array.isArray(p.tags) && p.tags.some((t: any) =>
+          (typeof t === "string" ? t : t?.name ?? "").toUpperCase() === "AHTIL"
+        )
+      ).length;
       if (batch.length < 100) break;
       page++;
     }

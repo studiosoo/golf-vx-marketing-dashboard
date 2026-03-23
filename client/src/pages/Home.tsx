@@ -383,8 +383,8 @@ export default function Home() {
 
   // 2026 Key Goals data
   const igFollowers = (igStats as any)?.followers ?? (igStats as any)?.followers_count ?? null;
-  // Email Subscribers: live Encharge API (AHTIL tag count); static fallback = 100 (CSV 2026-03-18)
-  const AHTIL_FALLBACK = 100;
+  // Email Subscribers: live Encharge API (AHTIL tag count); static fallback = 1000 (user-confirmed 2026-03-23)
+  const AHTIL_FALLBACK = 1000;
   const emailSubscribers = ahtilData?.count != null ? ahtilData.count : AHTIL_FALLBACK;
   const emailSubscribersIsLive = ahtilData?.count != null;
 
@@ -395,6 +395,7 @@ export default function Home() {
     : null;
 
   const KEY_GOALS: Array<{
+    id?: string;
     label: string;
     icon: React.ElementType;
     current: number | null;
@@ -404,8 +405,10 @@ export default function Home() {
     color: string;
     statusNote?: string | null;
     statusColor?: string;
+    detail?: React.ReactNode;
   }> = [
     {
+      id: "revenue",
       label: "Annual Revenue (Est.)",
       icon: DollarSign,
       current: hasAnyRevenue ? annualRunRate : null,
@@ -415,8 +418,31 @@ export default function Home() {
       color: "#F2DD48",
       statusNote: hasAnyRevenue ? "MRR + Toast run rate · Acuity reported separately" : null,
       statusColor: "#888888",
+      detail: hasAnyRevenue ? (
+        <div className="mt-2.5 pt-2.5 border-t border-[#F0F0F0] space-y-1">
+          {mrr > 0 && (
+            <div className="flex justify-between">
+              <span className="text-[11px] text-[#6F6F6B]">MRR</span>
+              <span className="text-[11px] font-semibold text-[#222222]">{fmtCurrency(mrr)}</span>
+            </div>
+          )}
+          {toastMTD > 0 && (
+            <div className="flex justify-between">
+              <span className="text-[11px] text-[#6F6F6B]">Toast MTD</span>
+              <span className="text-[11px] font-semibold text-[#222222]">{fmtCurrency(toastMTD)}</span>
+            </div>
+          )}
+          {acuityTotal > 0 && (
+            <div className="flex justify-between">
+              <span className="text-[11px] text-[#6F6F6B]">Acuity</span>
+              <span className="text-[11px] font-semibold text-[#222222]">{fmtCurrency(acuityTotal)}</span>
+            </div>
+          )}
+        </div>
+      ) : undefined,
     },
     {
+      id: "members",
       label: "Members",
       icon: UserCheck,
       current: memberTotal,
@@ -426,8 +452,19 @@ export default function Home() {
       color: "#72B84A",
       statusNote: stripeSnap ? `Stripe · as of ${stripeSnap.asOf}` : null,
       statusColor: "#888888",
+      detail: memberBreakdown.length > 0 ? (
+        <div className="mt-2.5 pt-2.5 border-t border-[#F0F0F0] space-y-1">
+          {memberBreakdown.map((t: { label: string; count: number }) => (
+            <div key={t.label} className="flex justify-between">
+              <span className="text-[11px] text-[#6F6F6B]">{t.label}</span>
+              <span className="text-[11px] font-semibold text-[#222222]">{t.count}</span>
+            </div>
+          ))}
+        </div>
+      ) : undefined,
     },
     {
+      id: "instagram",
       label: "Instagram Followers",
       icon: Instagram,
       current: igFollowers,
@@ -439,6 +476,7 @@ export default function Home() {
       statusColor: igTokenNote && !tokenStatus?.warning ? "#D32F2F" : "#F2DD48",
     },
     {
+      id: "email",
       label: "Email Subscribers",
       icon: Mail,
       current: emailSubscribers,

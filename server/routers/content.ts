@@ -103,22 +103,124 @@ export const instagramRouter = router({
       topic: z.string(),
       tone: z.enum(['professional', 'casual', 'exciting', 'educational']).default('casual'),
       includeHashtags: z.boolean().default(true),
+      contentType: z.enum(['feed_post', 'reel', 'story', 'carousel']).default('feed_post'),
+      imageDataUrl: z.string().optional(),
+      count: z.number().min(1).max(3).default(3),
+      refineRequest: z.string().optional(), // for inline refinement
+      previousCaption: z.string().optional(), // caption being refined
     }))
     .mutation(async ({ input }) => {
-      const { invokeLLM } = await import("../_core/llm");
-      const systemPrompt = `You are a social media expert for Golf VX Arlington Heights, a premium indoor golf simulator facility. Generate engaging Instagram captions that drive engagement and bookings.`;
-      const userPrompt = `Create an Instagram caption for: "${input.topic}"
+      const SYSTEM = `You are an expert Instagram content strategist for Golf VX Arlington Heights — a premium indoor golf simulator facility in Arlington Heights, IL.
+
+Brand voice: Energetic but approachable. We celebrate skill improvement, community, and the joy of golf year-round. We serve serious golfers, beginners, families, and corporate groups.
+Key CTAs: Book a session, join a league, try a free trial, share with a friend.
+Hashtag strategy: Mix brand (#GolfVX #GolfVXArlingtonHeights), local (#ArlingtonHeights #ChicagoGolf #NorthShoreGolf), and niche (#IndoorGolf #GolfSimulator #GolfLeague #IndoorGolfSimulator #GolfLife) tags.
+Account goal: Grow from 208 to 2,000 followers. Every post should invite engagement.`;
+
+      const contentTypeLabel: Record<string, string> = { feed_post: 'Feed Post', reel: 'Reel', story: 'Story', carousel: 'Carousel' };
+
+      let userPrompt: string;
+      if (input.refineRequest && input.previousCaption) {
+        userPrompt = `Here is an existing Instagram caption:
+
+"${input.previousCaption}"
+
+The user wants to refine it with this request: "${input.refineRequest}"
+
+Please provide ${input.count} refined version(s). Return as JSON:
+{
+  "options": [
+    { "caption": "...", "hashtags": "#tag1 #tag2", "angle": "brief angle description", "bestFor": "why this works" }
+  ],
+  "strategy": { "bestTime": "e.g. Tue 6-8pm", "contentType": "${input.contentType}", "engagementTip": "one tip", "callToAction": "recommended CTA" }
+}`;
+      } else {
+        userPrompt = `Generate ${input.count} distinct Instagram caption options for a ${contentTypeLabel[input.contentType] ?? 'Feed Post'}.
+
+Content description: "${input.topic}"
 Tone: ${input.tone}
-Business: Golf VX Arlington Heights - indoor golf simulators, lessons, leagues, events
-${input.includeHashtags ? 'Include 10-15 relevant hashtags at the end.' : 'No hashtags needed.'}
-Keep the caption under 300 words. Make it engaging and authentic.`;
-      const response = await invokeLLM({ messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }] });
-      const content = (response.choices[0]?.message?.content ?? '') as string;
-      // Split caption and hashtags
-      const hashtagMatch = content.match(/(#[\w]+[\s#]*)+$/);
+${input.includeHashtags ? 'Include 10-15 relevant hashtags after each caption.' : 'No hashtags.'}
+
+Return ONLY valid JSON (no markdown):
+{
+  "options": [
+    { "caption": "...", "hashtags": "#tag1 #tag2", "angle": "brief angle/hook", "bestFor": "why this option works" }
+  ],
+  "strategy": { "bestTime": "e.g. Tue 6-8pm", "contentType": "${input.contentType}", "engagementTip": "one specific tip", "callToAction": "recommended CTA" }
+}`;
+      }
+
+      let rawContent = '';
+      try {
+        const { ENV } = await import('../_core/env');
+        if (ENV.anthropicApiKey) {
+          if (input.imageDataUrl && !input.refineRequest) {
+            // Image analysis: use Anthropic fetch directly (multimodal)
+            const base64 = input.imageDataUrl.replace(/^data:image\/\w+;base64,/, '');
+            const mediaTypeMatch = input.imageDataUrl.match(/^data:(image\/\w+);base64,/);
+            const mediaType = (mediaTypeMatch?.[1] ?? 'image/jpeg') as 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp';
+            const res = await fetch('https://api.anthropic.com/v1/messages', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': ENV.anthropicApiKey,
+                'anthropic-version': '2023-06-01',
+              },
+              body: JSON.stringify({
+                model: 'claude-sonnet-4-6',
+                max_tokens: 2048,
+                system: SYSTEM,
+                messages: [{
+                  role: 'user',
+                  content: [
+                    { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+                    { type: 'text', text: `Analyze this image first, then: ${userPrompt}` },
+                  ],
+                }],
+              }),
+            });
+            const json = await res.json() as any;
+            rawContent = json.content?.[0]?.text ?? '';
+          } else {
+            const { invokeClaudeLLM } = await import('../_core/claude');
+            const result = await invokeClaudeLLM({
+              messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: userPrompt }],
+            }, 'claude-sonnet-4-6');
+            rawContent = (result.choices[0]?.message?.content ?? '') as string;
+          }
+        } else {
+          const { invokeLLM } = await import('../_core/llm');
+          const res = await invokeLLM({ messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: userPrompt }] });
+          rawContent = (res.choices[0]?.message?.content ?? '') as string;
+        }
+      } catch (_err) {
+        const { invokeLLM } = await import('../_core/llm');
+        const res = await invokeLLM({ messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: userPrompt }] });
+        rawContent = (res.choices[0]?.message?.content ?? '') as string;
+      }
+
+      try {
+        const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          return {
+            options: (parsed.options ?? []) as Array<{ caption: string; hashtags: string; angle: string; bestFor: string }>,
+            strategy: parsed.strategy ?? null,
+            caption: parsed.options?.[0]?.caption ?? rawContent,
+            hashtags: parsed.options?.[0]?.hashtags ?? '',
+          };
+        }
+      } catch (_) {}
+
+      const hashtagMatch = rawContent.match(/(#[\w]+[\s#]*)+$/);
       const hashtags = hashtagMatch ? hashtagMatch[0].trim() : '';
-      const caption = hashtags ? content.replace(hashtags, '').trim() : content.trim();
-      return { caption, hashtags };
+      const caption = hashtags ? rawContent.replace(hashtags, '').trim() : rawContent.trim();
+      return {
+        options: [{ caption, hashtags, angle: 'Standard', bestFor: 'General use' }],
+        strategy: null,
+        caption,
+        hashtags,
+      };
     }),
 
 
